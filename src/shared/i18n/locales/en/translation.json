@@ -1,0 +1,737 @@
+{
+    "common": {
+        "save": "Save",
+        "saving": "Saving...",
+        "invalidField": "Invalid field",
+        "loading": "Loading...",
+        "loadError": "Could not load the information",
+        "actions": "Actions",
+        "id": "ID",
+        "updatedAt": "Last updated",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "back": "Back",
+        "selectPlaceholder": "Select an option",
+        "searchPlaceholder": "Type to search...",
+        "noOptionsFound": "No results found",
+        "logout": "Log out",
+        "closeMenu": "Close menu",
+        "remove": "Remove",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "confirmDeactivate": "Are you sure you want to deactivate \"{{name}}\"? It will no longer be available until you activate it again.",
+        "uploadImage": "Upload image",
+        "changeImage": "Change image",
+        "imageUpload": {
+            "title": "Take or upload an image",
+            "takePhoto": "Take photo",
+            "uploadFile": "Upload image",
+            "retake": "Retake photo",
+            "cameraUnavailable": "Couldn't access the camera. Use the upload option instead.",
+            "invalidType": "Please select a valid image file",
+            "invalidSize": "The image is too large. Maximum 5MB"
+        },
+        "pagination": {
+            "page": "Page",
+            "of": "of",
+            "previous": "Previous",
+            "next": "Next",
+            "searchPlaceholder": "Search..."
+        }
+    },
+    "errors": {
+        "unexpected_response": "The server response does not have the expected format",
+        "zod": {
+            "invalid_type": "Invalid data type",
+            "too_small": "The value is too small",
+            "too_big": "The value is too big",
+            "invalid_format": "The format is invalid",
+            "invalid_value": "Value not allowed",
+            "custom": "Invalid value"
+        }
+    },
+    "auth": {
+        "adminLogin": {
+            "title": "Sign in",
+            "subtitle": "Enter your credentials to continue",
+            "brand": "Legumex Apps",
+            "brandSubtitle": "Admin panel",
+            "username": "Username",
+            "usernamePlaceholder": "Enter your username",
+            "password": "Password",
+            "passwordPlaceholder": "Enter your password",
+            "showPassword": "Show password",
+            "hidePassword": "Hide password",
+            "submit": "Sign in",
+            "submitting": "Signing in...",
+            "footer": "© {{year}} Legumex Apps. All rights reserved."
+        },
+        "customerLogin": {
+            "title": "Sign in",
+            "subtitle": "Sign in to see pricing and request quotes",
+            "brand": "Legumex",
+            "brandSubtitle": "Customer access",
+            "email": "Email",
+            "emailPlaceholder": "you@company.com",
+            "password": "Password",
+            "passwordPlaceholder": "Enter your password",
+            "showPassword": "Show password",
+            "hidePassword": "Hide password",
+            "submit": "Sign in",
+            "submitting": "Signing in...",
+            "noAccount": "Don't have an account? Contact our sales team to request access.",
+            "backHome": "Back to home"
+        }
+    },
+    "site": {
+        "announcementBar": {
+            "message": "Welcome to LEGUMEX. Discover our products and request a personalized quote.",
+            "dismiss": "Dismiss announcement"
+        },
+        "nav": {
+            "about": "About us",
+            "contact": "Contact"
+        },
+        "header": {
+            "search": "Search",
+            "request": "View request",
+            "cart": "View cart",
+            "cta": "Request a quote",
+            "openMenu": "Open menu",
+            "closeMenu": "Close menu"
+        },
+        "quoteRequest": {
+            "title": "Your quote request",
+            "description": "Hi {{name}}, build your quote by choosing a product, pallet quantity and destination.",
+            "form": {
+                "title": "Quote details",
+                "category": "Category",
+                "product": "Product",
+                "variant": "Presentation",
+                "requestedPallets": "Pallets requested",
+                "country": "Destination country",
+                "countryOptions": {
+                    "GT": "Guatemala",
+                    "US": "United States"
+                },
+                "destination": "Destination",
+                "noDestinationsForCountry": "There are no destinations configured for this country yet.",
+                "submit": "Calculate quote",
+                "modeFinished": "Ready-made product",
+                "modeCustomizable": "Customize my product",
+                "modeFinishedHint": "Choose from our ready-made presentations, with a fixed recipe.",
+                "modeCustomizableHint": "Build your own mix: pick the % of each ingredient until it adds up to 100%.",
+                "noProductsFinished": "There are no ready-made products available to quote yet.",
+                "noProductsCustomizable": "There are no customizable products available to quote yet.",
+                "organicBadge": "100% Organic",
+                "mixTitle": "Build your mix",
+                "mixTotal": "Total: {{total}}%",
+                "mixIncomplete": "The mix must total 100% before you can request a quote.",
+                "mixRange": "{{min}}% - {{max}}%",
+                "mixEmpty": "This product doesn't have any ingredients configured yet. Contact the administrator.",
+                "wizard": {
+                    "back": "Back",
+                    "steps": {
+                        "mode": "Type",
+                        "category": "Category",
+                        "product": "Product",
+                        "details": "Details"
+                    },
+                    "mode": {
+                        "title": "What do you want to quote?",
+                        "subtitle": "Choose the product type to see the available categories."
+                    },
+                    "category": {
+                        "title": "Choose a category",
+                        "subtitle": "Select the product category you want to quote."
+                    },
+                    "product": {
+                        "title": "Products in {{category}}",
+                        "subtitle": "Choose the product you want to quote."
+                    }
+                }
+            },
+            "result": {
+                "empty": "Fill out the form and calculate your quote to see the cost breakdown here.",
+                "destination": "Destination",
+                "total": "Total cost",
+                "pallets": "Pallets",
+                "units": "Units",
+                "perPallet": "Per pallet",
+                "rawMaterials": "Raw materials",
+                "unitPackaging": "Unit packaging",
+                "intermediatePackaging": "Intermediate packaging",
+                "palletMaterials": "Pallet materials",
+                "transport": "Transport",
+                "adjustment": "Additional adjustment",
+                "unitsQuantity": "{{count}} units",
+                "palletsQuantity": "{{count}} pallets",
+                "intermediatePackagesQuantity": "{{count}} intermediate packages",
+                "currencyGtq": "Quetzales",
+                "currencyUsd": "Dollars",
+                "exchangeRateError": "Could not fetch the exchange rate."
+            }
+        },
+        "footer": {
+            "tagline": "Fresh and IQF frozen vegetables for export, from the field to your cold chain.",
+            "catalog": {
+                "title": "Catalog",
+                "fresh": "Fresh line",
+                "iqf": "IQF line",
+                "compare": "Compare products"
+            },
+            "company": {
+                "title": "Company",
+                "aboutUs": "About us",
+                "quality": "Quality",
+                "blog": "Blog"
+            },
+            "support": {
+                "title": "Support",
+                "contact": "Contact",
+                "request": "My request",
+                "technicalSheets": "Technical sheets"
+            },
+            "newsletter": {
+                "title": "Newsletter",
+                "placeholder": "Your email address",
+                "submit": "Subscribe",
+                "success": "Thanks, we'll keep you posted"
+            },
+            "copyright": "© {{year}} Legumex. All rights reserved."
+        }
+    },
+    "home": {
+        "hero": {
+            "eyebrow": "Quote request space",
+            "titleLineOne": "Welcome to",
+            "titleLineTwo": "Legumex",
+            "description": "Request your quote for fresh and frozen export vegetables, quick and easy.",
+            "primaryAction": "Request a quote"
+        }
+    },
+    "notFound": {
+        "message": "The page you're looking for doesn't exist",
+        "backLink": "Back to home"
+    },
+    "accessDenied": {
+        "title": "Access restricted",
+        "message": "You don't have permission to view this section. If you think this is a mistake, contact an administrator.",
+        "backLink": "Back to dashboard"
+    },
+    "category": {
+        "form": {
+            "displayName": "Name",
+            "urlSlug": "URL slug",
+            "fullDescription": "Description",
+            "image": "Cover image",
+            "translationSectionTitle": "English translation",
+            "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name/description.",
+            "displayNameEn": "Name (English)",
+            "fullDescriptionEn": "Description (English)"
+        },
+        "list": {
+            "title": "Categories",
+            "createLink": "Create category"
+        },
+        "create": {
+            "title": "Create category"
+        },
+        "edit": {
+            "title": "Edit category"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No categories registered"
+        }
+    },
+    "productType": {
+        "form": {
+            "typeCode": "Code",
+            "displayName": "Name"
+        },
+        "list": {
+            "title": "Product types",
+            "createLink": "Create product type"
+        },
+        "create": {
+            "title": "Create product type"
+        },
+        "edit": {
+            "title": "Edit product type"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No product types registered"
+        }
+    },
+    "unit": {
+        "form": {
+            "unitCode": "Code",
+            "displayName": "Name",
+            "unitType": "Unit type",
+            "unitKey": "Unit",
+            "autoFillHint": "Type: {{unitType}} · Base factor: {{baseFactor}} (assigned automatically, cannot be edited)",
+            "unitTypeOptions": {
+                "weight": "Weight",
+                "volume": "Volume",
+                "count": "Count"
+            }
+        },
+        "list": {
+            "title": "Units",
+            "createLink": "Create unit"
+        },
+        "create": {
+            "title": "Create unit"
+        },
+        "edit": {
+            "title": "Edit unit"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No units registered"
+        }
+    },
+    "ingredient": {
+        "form": {
+            "displayName": "Name",
+            "ingredientType": "Ingredient type",
+            "costPerUnit": "Cost per unit",
+            "costUnitId": "Cost unit",
+            "isOrganic": "Is the organic variant",
+            "isOrganicHint": "Check this box if this specific row is the organic version (with its own cost) — not whether the ingredient \"can be\" organic. Conventional and organic are two separate ingredients in the catalog, e.g. \"Pineapple\" and \"Organic Pineapple\".",
+            "isMixable": "Mixable",
+            "ingredientTypeOptions": {
+                "fruit": "Fruit",
+                "vegetable": "Vegetable",
+                "pulp": "Pulp",
+                "other": "Other"
+            },
+            "translationSectionTitle": "English translation",
+            "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name.",
+            "displayNameEn": "Name (English)"
+        },
+        "organicTag": "Organic",
+        "conventionalTag": "Conventional",
+        "list": {
+            "title": "Ingredients",
+            "createLink": "Create ingredient"
+        },
+        "create": {
+            "title": "Create ingredient"
+        },
+        "edit": {
+            "title": "Edit ingredient"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No ingredients registered"
+        },
+        "bulkImport": {
+            "title": "Bulk import from Excel",
+            "description": "Download the template, fill it in with your ingredients, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again. \"Cost unit\" must be the exact name of a Unit that already exists in the catalog.",
+            "downloadTemplate": "Download template",
+            "importButton": "Import file",
+            "importing": "Importing...",
+            "rowErrorsTitle": "The file has {{count}} error(s). No ingredient was imported:",
+            "rowErrorItem": "Row {{row}}: {{message}}"
+        }
+    },
+    "subCategory": {
+        "form": {
+            "categoryId": "Category",
+            "displayName": "Name",
+            "fullDescription": "Description",
+            "translationSectionTitle": "English translation",
+            "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name/description.",
+            "displayNameEn": "Name (English)",
+            "fullDescriptionEn": "Description (English)"
+        },
+        "list": {
+            "title": "Subcategories",
+            "createLink": "Create subcategory"
+        },
+        "create": {
+            "title": "Create subcategory"
+        },
+        "edit": {
+            "title": "Edit subcategory"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No subcategories registered"
+        }
+    },
+    "packaging": {
+        "form": {
+            "displayName": "Name",
+            "packagingRole": "What is this material used for?",
+            "packagingRoleOptions": {
+                "unit": "Unit packaging",
+                "intermediate": "Intermediate packaging (large bag)",
+                "pallet": "Palletizing material."
+            },
+            "unitCost": "Cost per unit (Q)"
+        },
+        "list": {
+            "title": "Packagings",
+            "createLink": "Create packaging"
+        },
+        "create": {
+            "title": "Create packaging"
+        },
+        "edit": {
+            "title": "Edit packaging"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No packagings registered"
+        },
+        "bulkImport": {
+            "title": "Bulk import from Excel",
+            "description": "Download the template, fill it in with your materials, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again.",
+            "downloadTemplate": "Download template",
+            "importButton": "Import file",
+            "importing": "Importing...",
+            "rowErrorsTitle": "The file has {{count}} error(s). No material was imported:",
+            "rowErrorItem": "Row {{row}}: {{message}}"
+        }
+    },
+    "presentation": {
+        "form": {
+            "displayLabel": "Name",
+            "netWeightGrams": "Net weight (g)",
+            "categoryId": "Category"
+        },
+        "list": {
+            "title": "Presentations",
+            "createLink": "Create presentation"
+        },
+        "create": {
+            "title": "Create presentation"
+        },
+        "edit": {
+            "title": "Edit presentation"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No presentations registered"
+        }
+    },
+    "product": {
+        "form": {
+            "image": "Product photo",
+            "subCategoryId": "Subcategory",
+            "productTypeId": "Product type",
+            "displayName": "Name",
+            "urlSlug": "URL slug",
+            "isOrganic": "Organic",
+            "isOrganicHint": "If you check this box, the ingredient selector below will only offer organic variants (plus water/salt/sugar or other items with no variant). Customers will see a \"100% Organic\" badge when they pick this product.",
+            "isCustomizable": "Recipe type",
+            "isCustomizableFinished": "Ready-made (fixed recipe)",
+            "isCustomizableCustom": "Customizable (% mix)",
+            "isCustomizableHint": "Customizable: the customer builds the ingredient mix by percentage when requesting a quote, instead of a fixed recipe.",
+            "additionalCostPerUnit": "Additional cost per unit (optional)",
+            "additionalCostPerUnitHint": "For costs that aren't well defined yet. Added to the cost of each unit when quoting. Leave the field empty to remove it.",
+            "translationSectionTitle": "English translation",
+            "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name.",
+            "displayNameEn": "Name (English)"
+        },
+        "list": {
+            "title": "Products",
+            "createLink": "Create product"
+        },
+        "create": {
+            "title": "Create product"
+        },
+        "edit": {
+            "title": "Edit product"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No products registered"
+        }
+    },
+    "productVariant": {
+        "form": {
+            "presentationId": "Presentation",
+            "packagingId": "Packaging",
+            "skuCode": "SKU",
+            "unitsPerPallet": "Units per pallet",
+            "unitsPerBox": "Units per box",
+            "unitsPerBoxHint": "How many bags/pieces fit in one box. Doesn't affect cost, it's only used to work out how many boxes the pallet needs.",
+            "intermediatePackagingId": "Intermediate packaging (large bag)",
+            "unitsPerIntermediatePackage": "Units per intermediate package",
+            "unitsPerIntermediatePackageHint": "Only if this product uses nested packaging (e.g. several small bags inside one large bag, which then goes into the box). How many small units fit inside one large bag -- this DOES affect cost.",
+            "addButton": "Add variant"
+        },
+        "list": {
+            "title": "Variants"
+        },
+        "table": {
+            "empty": "No variants registered"
+        }
+    },
+    "productIngredient": {
+        "form": {
+            "ingredientId": "Ingredient",
+            "quantityValue": "Quantity",
+            "quantityUnitId": "Quantity unit",
+            "minPercentage": "Min %",
+            "maxPercentage": "Max %",
+            "percentageRange": "% Range",
+            "addButton": "Add ingredient",
+            "customizableHint": "This product is customizable: define here which ingredients the customer can choose and, optionally, an allowed % range for each one."
+        },
+        "list": {
+            "title": "Ingredients",
+            "titleCustomizable": "Allowed ingredients (% mix)"
+        },
+        "table": {
+            "empty": "No ingredients registered"
+        }
+    },
+    "productVariantPalletMaterial": {
+        "selectVariant": "Variant",
+        "noVariants": "Add a variant first so you can define its palletizing materials",
+        "boxesPerPalletHint": "With {{unitsPerBox}} units per box and {{unitsPerPallet}} units per pallet, this pallet needs {{boxesPerPallet}} boxes.",
+        "intermediatePackagesPerPalletHint": "With {{unitsPerIntermediatePackage}} units per intermediate package and {{unitsPerPallet}} units per pallet, this pallet needs {{intermediatePackagesPerPallet}} intermediate packages (not loaded here, their cost is already calculated automatically).",
+        "boxesPerPalletFromIntermediateHint": "With {{unitsPerBox}} intermediate packages per box, this pallet needs {{boxesPerPallet}} boxes.",
+        "form": {
+            "packagingId": "Pallet material",
+            "quantityValue": "Quantity",
+            "addButton": "Add material"
+        },
+        "list": {
+            "title": "Palletizing materials"
+        },
+        "table": {
+            "empty": "No palletizing materials registered"
+        }
+    },
+    "customer": {
+        "form": {
+            "name": "Name",
+            "companyName": "Company",
+            "email": "Email",
+            "password": "Password",
+            "newPassword": "New password",
+            "newPasswordPlaceholder": "Leave blank to keep it unchanged"
+        },
+        "list": {
+            "title": "Customers",
+            "createLink": "Create customer"
+        },
+        "create": {
+            "title": "Create customer"
+        },
+        "edit": {
+            "title": "Edit customer"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name or email...",
+            "empty": "No customers registered"
+        }
+    },
+    "user": {
+        "form": {
+            "name": "Name",
+            "username": "Username",
+            "roleId": "Role",
+            "password": "Password",
+            "newPassword": "New password",
+            "newPasswordPlaceholder": "Leave blank to keep it unchanged"
+        },
+        "list": {
+            "title": "Users",
+            "createLink": "Create user"
+        },
+        "create": {
+            "title": "Create user"
+        },
+        "edit": {
+            "title": "Edit user"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name or username...",
+            "empty": "No users registered"
+        }
+    },
+    "role": {
+        "form": {
+            "name": "Role name"
+        },
+        "list": {
+            "title": "Roles",
+            "createLink": "Create role"
+        },
+        "create": {
+            "title": "Create role"
+        },
+        "edit": {
+            "title": "Edit role"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No roles registered"
+        },
+        "permissions": {
+            "title": "Role permissions",
+            "saveButton": "Save permissions"
+        }
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Best-selling products, customers and ingredients for the selected date range.",
+        "filters": {
+            "startDate": "From",
+            "endDate": "To",
+            "presets": {
+                "last7": "Last 7 days",
+                "last30": "Last 30 days",
+                "last90": "Last 90 days",
+                "allTime": "All time"
+            }
+        },
+        "overview": {
+            "totalQuotes": "Saved quotes",
+            "totalRevenue": "Total quoted value",
+            "totalPallets": "Requested pallets",
+            "uniqueCustomers": "Active customers",
+            "averageQuoteValue": "Average quote value"
+        },
+        "trend": {
+            "title": "Quotes over time",
+            "subtitleDaily": "Quoted value per day, based on saved quotes.",
+            "subtitleWeekly": "Quoted value per week, based on saved quotes.",
+            "tooltipQuotes": "{{count}} quotes",
+            "empty": "No quotes in the selected range."
+        },
+        "topProducts": {
+            "title": "Best-selling products",
+            "subtitle": "Ranked by units quoted (based on saved quotes).",
+            "empty": "No product data for this range.",
+            "secondary": "{{count}} quotes · {{revenue}}",
+            "unitsLabel": "{{units}} units"
+        },
+        "productRevenueShare": {
+            "title": "Revenue share by product",
+            "subtitle": "Share of total quoted value, top products in this range.",
+            "empty": "No revenue data for this range.",
+            "other": "Other products"
+        },
+        "topCustomers": {
+            "title": "Top customers",
+            "subtitle": "Ranked by total quoted value.",
+            "empty": "No customer data for this range.",
+            "secondary": "{{count}} quotes · {{pallets}} pallets"
+        },
+        "topIngredients": {
+            "title": "Most used ingredients",
+            "subtitle": "Ranked by total cost consumed across quotes.",
+            "empty": "No ingredient data for this range.",
+            "secondary": "{{count}} quotes"
+        }
+    },
+    "adminQuote": {
+        "list": {
+            "title": "Quotes",
+            "description": "All quotes customers have saved, regardless of which customer.",
+            "searchPlaceholder": "Search by customer, company, email or product...",
+            "empty": "No quote has been saved yet.",
+            "noMatches": "No quote matches the search.",
+            "summary": "{{date}} · {{pallets}} pallets · {{destination}}"
+        }
+    },
+    "adminQuoteCalculator": {
+        "title": "Internal calculator",
+        "description": "Calculate quotes with the full cost breakdown (raw materials, packaging, pallet materials and transport). Nothing is saved -- it's just a lookup tool, it doesn't appear in \"Quotes\" and it doesn't affect the dashboard."
+    },
+    "quote": {
+        "orderSummary": {
+            "title": "Order in progress",
+            "itemCount": "{{count}} products quoted",
+            "total": "Order total",
+            "lineSummary": "{{destination}} · {{pallets}} pallets",
+            "quoteAnother": "Quote another product",
+            "clear": "Start a new order"
+        },
+        "pdf": {
+            "button": "Download quote PDF",
+            "modal": {
+                "title": "Download quote",
+                "description": "Enter the name and email of the client this quote is for to generate the PDF summary.",
+                "clientNameLabel": "Client name",
+                "clientNamePlaceholder": "E.g. El Campo Distributors Inc.",
+                "required": "Enter the client's name",
+                "clientEmailLabel": "Client email",
+                "clientEmailPlaceholder": "E.g. contact@distributors.com",
+                "emailRequired": "Enter the client's email",
+                "emailInvalid": "Enter a valid email",
+                "generate": "Generate PDF",
+                "generating": "Generating PDF...",
+                "ready": "Your PDF is ready.",
+                "open": "Open PDF",
+                "download": "Download PDF",
+                "sendEmail": "Send by email",
+                "sending": "Sending email...",
+                "sendSuccess": "Email sent to {{email}} with the PDF attached.",
+                "emailHint": "An email will be sent to {{email}} with this PDF already attached -- no need to attach it by hand.",
+                "emailSubject": "Legumex Quote – {{clientName}}",
+                "emailBody": "Hello,\n\nPlease find attached the quote requested for {{clientName}}.\n\nQuote date: {{quoteDate}}\nValid until: {{validUntil}}\nOrder total: {{total}}\n\nBest regards,\nLegumex",
+                "error": "The PDF could not be generated. Please try again."
+            },
+            "document": {
+                "title": "Legumex",
+                "subtitle": "Quote summary",
+                "client": "Client",
+                "quoteDate": "Quote date",
+                "validUntil": "Valid until",
+                "pallets": "Pallets",
+                "units": "Units",
+                "perPallet": "Per pallet",
+                "rawMaterials": "Raw materials",
+                "unitPackaging": "Unit packaging",
+                "intermediatePackaging": "Intermediate packaging",
+                "palletMaterials": "Pallet materials",
+                "transport": "Transport",
+                "adjustment": "Additional adjustment",
+                "lineTotal": "Line total",
+                "orderTotal": "Order total",
+                "restrictionsTitle": "Restrictions",
+                "restrictionsText": "This quote is valid for {{days}} days only from its issue date. After this period prices may change and a new quote must be requested.",
+                "generatedAt": "Document generated on {{date}}"
+            }
+        }
+    },
+    "destination": {
+        "form": {
+            "displayName": "Name",
+            "baseCost": "Transport cost",
+            "country": "Country",
+            "countryOptions": {
+                "GT": "Guatemala",
+                "US": "United States"
+            }
+        },
+        "list": {
+            "title": "Destinations",
+            "createLink": "Create destination"
+        },
+        "create": {
+            "title": "Create destination"
+        },
+        "edit": {
+            "title": "Edit destination"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No destinations registered"
+        }
+    }
+}

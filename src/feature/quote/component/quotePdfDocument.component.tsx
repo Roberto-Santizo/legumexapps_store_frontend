@@ -37,7 +37,16 @@ export function QuotePdfDocument({ clientName, quoteDate, lines, showCostBreakdo
             <Page size="LETTER" style={styles.page}>
                 {/* Encabezado */}
                 <View style={styles.headerRow}>
-                    <Image src={import.meta.env.VITE_IMAGE_LOGO} style={styles.logo} />
+                    {/* Logo servido como asset local (public/logo-legumex.png), NO desde
+                    VITE_IMAGE_LOGO (S3). A diferencia del <img> del login, que solo necesita
+                    mostrar la imagen, @react-pdf/renderer necesita descargar los bytes con
+                    fetch() para incrustarlos en el PDF -- eso lo generamos en el navegador del
+                    cliente (ver quotePdfButton.component.tsx), así que depender de un fetch
+                    cross-origin a S3 hace que el logo del PDF esté a merced de CORS, DNS y de
+                    que la variable de entorno esté bien configurada en cada deploy. Sirviéndolo
+                    desde el propio dominio del frontend, el fetch es same-origin y no depende
+                    de ninguna infraestructura externa. */}
+                    <Image src="/logo-legumex.png" style={styles.logo} />
                     <View style={styles.headerTitleBlock}>
                         <Text style={styles.headerTitle}>{t("quote.pdf.document.title")}</Text>
                         <Text style={styles.headerSubtitle}>{t("quote.pdf.document.subtitle")}</Text>

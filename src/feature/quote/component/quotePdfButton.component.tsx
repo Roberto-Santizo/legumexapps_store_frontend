@@ -3,13 +3,12 @@ import type { ChangeEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { BlobProvider } from "@react-pdf/renderer"
-import { Download, ExternalLink, FileDown, Mail, X } from "lucide-react"
+import { pdf } from "@react-pdf/renderer"
+import { Download, FileDown, Mail, X } from "lucide-react"
 import { Button } from "@/shared/component/button.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
 import { Input } from "@/shared/component/input.component"
 import { FormField } from "@/shared/component/formField.component"
-import { Spinner } from "@/shared/component/spinner.component"
 import { QuotePdfDocument } from "@/feature/quote/component/quotePdfDocument.component"
 import { calculateQuoteOrderTotal, calculateQuoteValidUntil, quotePdfDateFormatter } from "@/feature/quote/component/quotePdfSummary"
 import { formatCurrency } from "@/shared/format/currency"
@@ -26,9 +25,12 @@ type QuotePdfButtonProps = {
 
 // Pasos del modal: primero solo el nombre (obligatorio siempre), luego una elección entre
 // descargar o enviar por correo -- el correo solo se pide si el cliente elige esa segunda
-// opción, nunca antes (ver PR: pedirlo de entrada le hacía perder tiempo a quien solo quería
-// descargar el PDF).
-type PdfModalStep = "name" | "choice" | "email" | "result"
+// opción, nunca antes. Ninguno de los dos caminos pasa por una pantalla intermedia de
+// "PDF listo": descargar dispara la descarga de una vez, y enviar dispara el correo de una
+// vez -- ambos generan el PDF de forma imperativa con pdf(...).toBlob() en vez de montar un
+// <BlobProvider> visible, precisamente para no tener que enseñar un paso extra solo para
+// mostrar el resultado.
+type PdfModalStep = "name" | "choice" | "email"
 
 type ConfirmedPdfRequest = {
     clientName: string
@@ -46,6 +48,19 @@ function buildFileName(clientName: string, quoteDate: Date): string {
     return `Cotizacion_${safeName || "CLIENTE"}_${fileNameDateFormatter.format(quoteDate)}.pdf`
 }
 
+// Descarga un blob ya generado sin depender de un <a href> visible en el DOM -- se crea,
+// se hace click y se descarta en el mismo tick.
+function triggerBrowserDownload(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement("a")
+    anchor.href = url
+    anchor.download = fileName
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(url)
+}
+
 
 export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }: Readonly<QuotePdfButtonProps>) {
     const { t } = useTranslation()
@@ -56,6 +71,8 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
     const [nameError, setNameError] = useState<string | undefined>(undefined)
     const [emailError, setEmailError] = useState<string | undefined>(undefined)
     const [confirmed, setConfirmed] = useState<ConfirmedPdfRequest | null>(null)
+    const [isDownloading, setIsDownloading] = useState(false)
+    const [isBuildingPdfForEmail, setIsBuildingPdfForEmail] = useState(false)
     const [emailSent, setEmailSent] = useState(false)
 
     const sendEmailMutation = useMutation({
@@ -79,6 +96,8 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
         setNameError(undefined)
         setEmailError(undefined)
         setConfirmed(null)
+        setIsDownloading(false)
+        setIsBuildingPdfForEmail(false)
         setEmailSent(false)
         sendEmailMutation.reset()
         setIsModalOpen(true)
@@ -110,15 +129,6 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
         setStep("choice")
     }
 
-    // El cliente quiere solo el PDF -- se salta el correo por completo y pasa directo al
-    // resultado (Abrir/Descargar).
-    const handleChooseDownload = () => {
-        setClientEmail("")
-        setEmailError(undefined)
-        setStep("result")
-    }
-
-    // El cliente quiere enviarlo por correo -- ahí sí se pide el correo, no antes.
     const handleChooseEmail = () => {
         setStep("email")
     }
@@ -131,8 +141,37 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
         setStep("choice")
     }
 
-    // Paso "email" -> resultado: valida el correo antes de generar el PDF.
-    const handleEmailContinue = () => {
+    // Descargar: genera el PDF y dispara la descarga del navegador de una sola vez, sin
+    // pantalla intermedia de "Abrir/Descargar". Al terminar cierra el modal -- la descarga en
+    // sí la maneja el navegador, no hay nada más que hacer en el modal.
+    const handleDownload = async () => {
+        if (!confirmed) return
+
+        setIsDownloading(true)
+        try {
+            const blob = await pdf(
+                <QuotePdfDocument
+                    clientName={confirmed.clientName}
+                    quoteDate={confirmed.quoteDate}
+                    lines={lines}
+                    showCostBreakdown={showCostBreakdown}
+                />
+            ).toBlob()
+
+            triggerBrowserDownload(blob, buildFileName(confirmed.clientName, confirmed.quoteDate))
+            toast.success(t("quote.pdf.modal.downloadSuccess"))
+            handleClose()
+        } catch {
+            toast.error(t("quote.pdf.modal.error"))
+        } finally {
+            setIsDownloading(false)
+        }
+    }
+
+    // Enviar por correo: valida el correo y, en el mismo paso, genera el PDF y lo envía --
+    // ya no hay un "Continuar" que regrese a la pantalla de elección ni un segundo clic para
+    // disparar el envío.
+    const handleSendEmail = async () => {
         const trimmedEmail = clientEmail.trim()
         if (!trimmedEmail) {
             setEmailError(t("quote.pdf.modal.emailRequired"))
@@ -142,37 +181,45 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
             setEmailError(t("quote.pdf.modal.emailInvalid"))
             return
         }
-        setStep("result")
-    }
-
-    const handleSendEmail = (blob: Blob, fileName: string) => {
         if (!confirmed) return
 
-        const trimmedEmail = clientEmail.trim()
-        if (!trimmedEmail) return
+        setIsBuildingPdfForEmail(true)
+        let blob: Blob
+        try {
+            blob = await pdf(
+                <QuotePdfDocument
+                    clientName={confirmed.clientName}
+                    quoteDate={confirmed.quoteDate}
+                    lines={lines}
+                    showCostBreakdown={showCostBreakdown}
+                />
+            ).toBlob()
+        } catch {
+            toast.error(t("quote.pdf.modal.error"))
+            return
+        } finally {
+            setIsBuildingPdfForEmail(false)
+        }
 
         const total = calculateQuoteOrderTotal(lines)
         const validUntil = calculateQuoteValidUntil(confirmed.quoteDate)
-        const subject = t("quote.pdf.modal.emailSubject", { clientName: confirmed.clientName })
-        const body = t("quote.pdf.modal.emailBody", {
-            clientName: confirmed.clientName,
-            quoteDate: quotePdfDateFormatter.format(confirmed.quoteDate),
-            validUntil: quotePdfDateFormatter.format(validUntil),
-            total: formatCurrency(total),
-        })
+        const fileName = buildFileName(confirmed.clientName, confirmed.quoteDate)
 
         const formData = new FormData()
         formData.append("file", blob, fileName)
         formData.append("to", trimmedEmail)
-        formData.append("subject", subject)
-        formData.append("body", body)
+        formData.append("subject", t("quote.pdf.modal.emailSubject", { clientName: confirmed.clientName }))
+        formData.append("body", t("quote.pdf.modal.emailBody", {
+            clientName: confirmed.clientName,
+            quoteDate: quotePdfDateFormatter.format(confirmed.quoteDate),
+            validUntil: quotePdfDateFormatter.format(validUntil),
+            total: formatCurrency(total),
+        }))
 
         sendEmailMutation.mutate(formData)
     }
 
-    // El paso "result" se llega tanto desde "descargar" (sin correo) como desde "email" (con
-    // correo ya validado) -- si hay un correo cargado, se muestra también la sección de envío.
-    const hasEmail = clientEmail.trim() !== ""
+    const isSendingEmail = isBuildingPdfForEmail || sendEmailMutation.isPending
 
     return (
         <>
@@ -229,11 +276,21 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
                                 <p className="mb-1 text-sm font-medium text-verde-profundo">{t("quote.pdf.modal.chooseTitle")}</p>
                                 <p className="mb-4 text-sm text-texto-suave">{t("quote.pdf.modal.chooseDescription")}</p>
                                 <div className="flex flex-col gap-3">
-                                    <button type="button" onClick={handleChooseDownload} className={buttonClassName("primary")}>
+                                    <button
+                                        type="button"
+                                        onClick={handleDownload}
+                                        disabled={isDownloading}
+                                        className={buttonClassName("primary")}
+                                    >
                                         <Download size={16} />
-                                        {t("quote.pdf.modal.downloadOption")}
+                                        {isDownloading ? t("quote.pdf.modal.generating") : t("quote.pdf.modal.downloadOption")}
                                     </button>
-                                    <button type="button" onClick={handleChooseEmail} className={buttonClassName("secondary")}>
+                                    <button
+                                        type="button"
+                                        onClick={handleChooseEmail}
+                                        disabled={isDownloading}
+                                        className={buttonClassName("secondary")}
+                                    >
                                         <Mail size={16} />
                                         {t("quote.pdf.modal.emailOption")}
                                     </button>
@@ -247,102 +304,44 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
                         )}
 
                         {step === "email" && (
-                            <>
-                                <p className="mb-4 text-sm text-texto-suave">{t("quote.pdf.modal.emailStepDescription")}</p>
-                                <FormField
-                                    label={t("quote.pdf.modal.clientEmailLabel")}
-                                    htmlFor="quote-pdf-client-email"
-                                    error={emailError}
-                                >
-                                    <Input
-                                        id="quote-pdf-client-email"
-                                        type="email"
-                                        value={clientEmail}
-                                        onChange={handleEmailChange}
-                                        placeholder={t("quote.pdf.modal.clientEmailPlaceholder")}
-                                        hasError={!!emailError}
-                                        autoFocus
-                                    />
-                                </FormField>
-                                <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-                                    <Button type="button" variant="secondary" onClick={handleBackToChoice}>
-                                        {t("common.back")}
-                                    </Button>
-                                    <Button type="button" onClick={handleEmailContinue}>
-                                        {t("quote.pdf.modal.continue")}
+                            emailSent ? (
+                                <div className="flex flex-col gap-3 py-1">
+                                    <p className="rounded-lg bg-brote/15 px-3 py-2 text-center text-sm font-medium text-verde-profundo">
+                                        {t("quote.pdf.modal.sendSuccess", { email: clientEmail.trim() })}
+                                    </p>
+                                    <Button type="button" onClick={handleClose}>
+                                        {t("common.close")}
                                     </Button>
                                 </div>
-                            </>
-                        )}
-
-                        {step === "result" && confirmed && (
-                            <BlobProvider
-                                document={
-                                    <QuotePdfDocument
-                                        clientName={confirmed.clientName}
-                                        quoteDate={confirmed.quoteDate}
-                                        lines={lines}
-                                        showCostBreakdown={showCostBreakdown}
-                                    />
-                                }
-                            >
-                                {({ blob, url, loading, error }) => {
-                                    if (loading) {
-                                        return (
-                                            <div className="flex flex-col items-center gap-3 py-8">
-                                                <Spinner />
-                                                <p className="text-sm text-texto-suave">{t("quote.pdf.modal.generating")}</p>
-                                            </div>
-                                        )
-                                    }
-
-                                    if (error || !url || !blob) {
-                                        return <p className="py-6 text-center text-sm text-error-fg">{t("quote.pdf.modal.error")}</p>
-                                    }
-
-                                    const fileName = buildFileName(confirmed.clientName, confirmed.quoteDate)
-
-                                    return (
-                                        <div className="flex flex-col gap-3 py-1">
-                                            <p className="text-sm text-texto-suave">{t("quote.pdf.modal.ready")}</p>
-
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClassName("secondary")}>
-                                                <ExternalLink size={16} />
-                                                {t("quote.pdf.modal.open")}
-                                            </a>
-                                            <a href={url} download={fileName} className={buttonClassName("primary")}>
-                                                <Download size={16} />
-                                                {t("quote.pdf.modal.download")}
-                                            </a>
-
-                                            {hasEmail && (
-                                                emailSent ? (
-                                                    <p className="rounded-lg bg-brote/15 px-3 py-2 text-center text-sm font-medium text-verde-profundo">
-                                                        {t("quote.pdf.modal.sendSuccess", { email: clientEmail.trim() })}
-                                                    </p>
-                                                ) : (
-                                                    <>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleSendEmail(blob, fileName)}
-                                                            disabled={sendEmailMutation.isPending}
-                                                            className={buttonClassName("secondary")}
-                                                        >
-                                                            <Mail size={16} />
-                                                            {sendEmailMutation.isPending
-                                                                ? t("quote.pdf.modal.sending")
-                                                                : t("quote.pdf.modal.sendEmail")}
-                                                        </button>
-                                                        <p className="text-center text-xs text-texto-suave">
-                                                            {t("quote.pdf.modal.emailHint", { email: clientEmail.trim() })}
-                                                        </p>
-                                                    </>
-                                                )
-                                            )}
-                                        </div>
-                                    )
-                                }}
-                            </BlobProvider>
+                            ) : (
+                                <>
+                                    <p className="mb-4 text-sm text-texto-suave">{t("quote.pdf.modal.emailStepDescription")}</p>
+                                    <FormField
+                                        label={t("quote.pdf.modal.clientEmailLabel")}
+                                        htmlFor="quote-pdf-client-email"
+                                        error={emailError}
+                                    >
+                                        <Input
+                                            id="quote-pdf-client-email"
+                                            type="email"
+                                            value={clientEmail}
+                                            onChange={handleEmailChange}
+                                            placeholder={t("quote.pdf.modal.clientEmailPlaceholder")}
+                                            hasError={!!emailError}
+                                            autoFocus
+                                        />
+                                    </FormField>
+                                    <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                                        <Button type="button" variant="secondary" onClick={handleBackToChoice} disabled={isSendingEmail}>
+                                            {t("common.back")}
+                                        </Button>
+                                        <Button type="button" onClick={handleSendEmail} disabled={isSendingEmail}>
+                                            <Mail size={16} />
+                                            {isSendingEmail ? t("quote.pdf.modal.sending") : t("quote.pdf.modal.sendEmail")}
+                                        </Button>
+                                    </div>
+                                </>
+                            )
                         )}
                     </div>
                 </div>

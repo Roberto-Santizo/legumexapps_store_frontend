@@ -16,6 +16,7 @@
         "selectPlaceholder": "Selecciona una opción",
         "searchPlaceholder": "Escribe para buscar...",
         "noOptionsFound": "No se encontraron resultados",
+        "createOption": "Crear \"{{value}}\"",
         "logout": "Cerrar sesión",
         "closeMenu": "Cerrar menú",
         "remove": "Quitar",
@@ -507,6 +508,9 @@
             "packagingId": "Material de palet",
             "quantityValue": "Cantidad",
             "addButton": "Agregar material"
+        },
+        "createModal": {
+            "title": "Crear material de palet"
         },
         "list": {
             "title": "Materiales de paletización"

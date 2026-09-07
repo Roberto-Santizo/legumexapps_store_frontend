@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
@@ -56,6 +56,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
 
     const {
         register,
+        control,
         handleSubmit,
         reset,
         formState: { errors },
@@ -173,10 +174,17 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                     htmlFor="presentationId"
                     error={getFieldErrorMessage(t, errors.presentationId)}
                 >
-                    <PresentationSelect
-                        id="presentationId"
-                        hasError={!!errors.presentationId}
-                        {...register("presentationId", { setValueAs: toOptionalNumber })}
+                    <Controller
+                        name="presentationId"
+                        control={control}
+                        render={({ field }) => (
+                            <PresentationSelect
+                                inputId="presentationId"
+                                hasError={!!errors.presentationId}
+                                value={field.value}
+                                onChange={field.onChange}
+                            />
+                        )}
                     />
                 </FormField>
 

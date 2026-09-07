@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
@@ -67,8 +67,10 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
     const queryClient = useQueryClient()
     const [editingId, setEditingId] = useState<number | null>(null)
     // Fuerza a que el <form> se desmonte/remonte tras guardar -- reset({}) limpia el estado de
-    // react-hook-form, pero los <select> personalizados (IngredientSelect/UnitSelect) son no
-    // controlados; remontarlos garantiza que el DOM quede realmente en blanco.
+    // react-hook-form, pero UnitSelect es un <select> nativo no controlado (register/ref);
+    // remontarlo garantiza que el DOM quede realmente en blanco. IngredientSelect ya no lo
+    // necesita (es un componente controlado vía Controller/value-onChange), pero remontar no le
+    // hace daño.
     const [formResetKey, setFormResetKey] = useState(0)
 
     const productIngredientsQuery = useQuery({
@@ -84,6 +86,7 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
 
     const {
         register,
+        control,
         handleSubmit,
         reset,
         formState: { errors },
@@ -193,12 +196,19 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
                     htmlFor="ingredientId"
                     error={getFieldErrorMessage(t, errors.ingredientId)}
                 >
-                    <IngredientSelect
-                        id="ingredientId"
-                        hasError={!!errors.ingredientId}
-                        onlyMixable={isCustomizable}
-                        onlyOrganicCompatible={isOrganic}
-                        {...register("ingredientId", { setValueAs: toOptionalNumber })}
+                    <Controller
+                        name="ingredientId"
+                        control={control}
+                        render={({ field }) => (
+                            <IngredientSelect
+                                inputId="ingredientId"
+                                hasError={!!errors.ingredientId}
+                                onlyMixable={isCustomizable}
+                                onlyOrganicCompatible={isOrganic}
+                                value={field.value}
+                                onChange={field.onChange}
+                            />
+                        )}
                     />
                 </FormField>
 

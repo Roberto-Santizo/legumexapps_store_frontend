@@ -16,6 +16,7 @@
         "selectPlaceholder": "Select an option",
         "searchPlaceholder": "Type to search...",
         "noOptionsFound": "No results found",
+        "createOption": "Create \"{{value}}\"",
         "logout": "Log out",
         "closeMenu": "Close menu",
         "remove": "Remove",
@@ -507,6 +508,9 @@
             "packagingId": "Pallet material",
             "quantityValue": "Quantity",
             "addButton": "Add material"
+        },
+        "createModal": {
+            "title": "Create pallet material"
         },
         "list": {
             "title": "Palletizing materials"

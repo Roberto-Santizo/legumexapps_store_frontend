@@ -76,6 +76,16 @@ const EditDestinationPage = lazy(() =>
     import("@/feature/destination/page/editDestination.page").then((module) => ({ default: module.EditDestinationPage }))
 )
 
+const ProcessingCostListPage = lazy(() =>
+    import("@/feature/processingCost/page/processingCost.page").then((module) => ({ default: module.ProcessingCostListPage }))
+)
+const CreateProcessingCostPage = lazy(() =>
+    import("@/feature/processingCost/page/createProcessingCost.page").then((module) => ({ default: module.CreateProcessingCostPage }))
+)
+const EditProcessingCostPage = lazy(() =>
+    import("@/feature/processingCost/page/editProcessingCost.page").then((module) => ({ default: module.EditProcessingCostPage }))
+)
+
 const PresentationListPage = lazy(() =>
     import("@/feature/presentation/page/presentation.page").then((module) => ({ default: module.PresentationListPage }))
 )
@@ -162,6 +172,10 @@ const routes = [
     { path: "destinations", component: DestinationListPage, permission: "destinations:view" },
     { path: "destinations/create", component: CreateDestinationPage, permission: "destinations:create" },
     { path: "destinations/:destinationId/edit", component: EditDestinationPage, permission: "destinations:edit" },
+
+    { path: "processing-costs", component: ProcessingCostListPage, permission: "processingCosts:view" },
+    { path: "processing-costs/create", component: CreateProcessingCostPage, permission: "processingCosts:create" },
+    { path: "processing-costs/:processingCostId/edit", component: EditProcessingCostPage, permission: "processingCosts:edit" },
 
     { path: "presentations", component: PresentationListPage, permission: "presentations:view" },
     { path: "presentations/create", component: CreatePresentationPage, permission: "presentations:create" },

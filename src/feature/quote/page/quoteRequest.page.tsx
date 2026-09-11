@@ -7,7 +7,7 @@ import { ClipboardList, LogOut } from "lucide-react"
 import { useCustomerAuth } from "@/shared/auth/customer/useCustomerAuth"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { Spinner } from "@/shared/component/spinner.component"
-import { getQuoteProductsAPI, getQuoteDestinationsAPI, saveQuoteAPI, sendQuotePdfEmailAPI } from "@/feature/quote/api/quote.api"
+import { getQuoteProductsAPI, saveQuoteAPI, sendQuotePdfEmailAPI } from "@/feature/quote/api/quote.api"
 import { QuoteCalculatorForm } from "@/feature/quote/component/quoteCalculatorForm.component"
 import type { QuoteWizardStep } from "@/feature/quote/component/quoteCalculatorForm.component"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
@@ -26,8 +26,10 @@ export function QuoteRequestPage() {
     const [formResetKey, setFormResetKey] = useState(0)
 
     const productsQuery = useQuery({ queryKey: ["quoteProducts"], queryFn: getQuoteProductsAPI })
-    const destinationsQuery = useQuery({ queryKey: ["quoteDestinations"], queryFn: getQuoteDestinationsAPI })
-
+    // Transporte "apagado" temporalmente (2026-09-10): el cliente ya no elige destino (ver
+    // QuoteCalculatorForm showDestination={false} abajo), así que ya no hace falta traer el
+    // catálogo de destinos para este flujo -- se deja de llamar GET /quotes/destinations acá.
+    // El endpoint sigue existiendo intacto (lo sigue usando el cotizador interno del admin).
 
     const calculateMutation = useMutation({
         mutationFn: saveQuoteAPI,
@@ -44,9 +46,8 @@ export function QuoteRequestPage() {
     })
 
     const products = productsQuery.data?.data ?? []
-    const destinations = destinationsQuery.data?.data ?? []
-    const isLoadingCatalog = productsQuery.isLoading || destinationsQuery.isLoading
-    const hasCatalogError = productsQuery.isError || destinationsQuery.isError
+    const isLoadingCatalog = productsQuery.isLoading
+    const hasCatalogError = productsQuery.isError
 
 
     const handleSubmit = (formData: CalculateQuoteInput) => {
@@ -84,7 +85,8 @@ export function QuoteRequestPage() {
                 <QuoteCalculatorForm
                     key={formResetKey}
                     products={products}
-                    destinations={destinations}
+                    destinations={[]}
+                    showDestination={false}
                     onSubmit={handleSubmit}
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}
@@ -109,7 +111,8 @@ export function QuoteRequestPage() {
                 <QuoteCalculatorForm
                     key={formResetKey}
                     products={products}
-                    destinations={destinations}
+                    destinations={[]}
+                    showDestination={false}
                     onSubmit={handleSubmit}
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}

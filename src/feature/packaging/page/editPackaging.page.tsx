@@ -17,6 +17,7 @@ import { buttonClassName } from "@/shared/component/buttonClassName"
 
 function toFormValues(packaging: PackagingResponse): Partial<UpdatePackagingInput> {
     return {
+        code: packaging.code,
         displayName: packaging.displayName,
         packagingRole: packaging.packagingRole,
         unitCost: packaging.unitCost !== null ? Number(packaging.unitCost) : undefined,

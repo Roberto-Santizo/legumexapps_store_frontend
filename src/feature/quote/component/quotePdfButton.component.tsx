@@ -20,6 +20,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 type QuotePdfButtonProps = {
     lines: QuoteCalculation[]
     showCostBreakdown?: boolean
+    // Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- default false,
+    // solo se reenvía a QuotePdfDocument. Ver el mismo prop ahí.
+    showTransport?: boolean
     sendEmailAPI: (formData: FormData) => Promise<{ message: string } | undefined>
 }
 
@@ -62,7 +65,7 @@ function triggerBrowserDownload(blob: Blob, fileName: string): void {
 }
 
 
-export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }: Readonly<QuotePdfButtonProps>) {
+export function QuotePdfButton({ lines, showCostBreakdown = true, showTransport = false, sendEmailAPI }: Readonly<QuotePdfButtonProps>) {
     const { t } = useTranslation()
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [step, setStep] = useState<PdfModalStep>("name")
@@ -155,6 +158,7 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
                     quoteDate={confirmed.quoteDate}
                     lines={lines}
                     showCostBreakdown={showCostBreakdown}
+                    showTransport={showTransport}
                 />
             ).toBlob()
 
@@ -192,6 +196,7 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, sendEmailAPI }
                     quoteDate={confirmed.quoteDate}
                     lines={lines}
                     showCostBreakdown={showCostBreakdown}
+                    showTransport={showTransport}
                 />
             ).toBlob()
         } catch {

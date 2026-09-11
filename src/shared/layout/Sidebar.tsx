@@ -22,17 +22,22 @@ export function Sidebar({ isOpen, onClose }: Readonly<SidebarProps>) {
             )}
 
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-64 bg-verde-profundo transition-transform duration-200 lg:translate-x-0 ${
+                className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-verde-profundo transition-transform duration-200 lg:translate-x-0 ${
                     isOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >
-                <div className="flex h-16 items-center justify-between px-6">
+                <div className="flex h-16 shrink-0 items-center justify-between px-6">
                     <span className="text-lg font-semibold text-crema">Legumex</span>
                     <button onClick={onClose} aria-label={t("common.closeMenu")} className="text-crema lg:hidden" type="button">
                         <X size={20} />
                     </button>
                 </div>
-                <Navigation />
+                {/* min-h-0 es necesario para que un hijo flex con overflow-y-auto (Navigation)
+                    pueda encogerse por debajo de su altura de contenido -- sin esto, un flex item
+                    nunca se reduce más chico que su contenido y el scroll interno nunca activa. */}
+                <div className="flex min-h-0 flex-1 flex-col">
+                    <Navigation />
+                </div>
             </aside>
         </>
     )

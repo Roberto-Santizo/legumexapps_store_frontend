@@ -62,6 +62,26 @@ body {
     font-family: var(--font-sans);
 }
 
+/* Scrollbar delgado y discreto para contenedores internos con scroll (ej. el sidebar admin
+   cuando el menú agrupado no cabe completo en pantallas cortas) -- Tailwind no tiene utilidad
+   para los pseudo-elementos ::-webkit-scrollbar-*, así que vive acá como clase reusable en vez de
+   una propiedad arbitraria repetida. scrollbar-width/scrollbar-color cubren Firefox; los
+   pseudo-elementos cubren Chrome/Edge/Safari. */
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-verde-tinta) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-verde-tinta);
+    border-radius: 999px;
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

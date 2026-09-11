@@ -22,6 +22,7 @@ function toFormValues(ingredient: IngredientResponse): Partial<UpdateIngredientI
     // Ver el mismo comentario en editCategory.page.tsx::toFormValues.
     const englishTranslation = ingredient.translations.find((translation) => translation.language === "en")
     return {
+        code: ingredient.code,
         displayName: ingredient.displayName,
         ingredientType: ingredient.ingredientType,
         isOrganic: ingredient.isOrganic,

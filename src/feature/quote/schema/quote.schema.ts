@@ -46,7 +46,10 @@ const ingredientMixLineSchema = z.object({
 
 export const calculateQuoteSchema = z.object({
     productVariantId: z.number().int().positive(),
-    destinationId: z.number().int().positive(),
+    // Opcional (2026-09-10): transporte "apagado" temporalmente -- el cliente ya no elige
+    // destino en el wizard (ver quoteCalculatorForm.component.tsx, prop showDestination), mismo
+    // criterio que el schema espejo del backend.
+    destinationId: z.number().int().positive().optional(),
     requestedPallets: z.number().int().min(1),
     ingredientMix: z.array(ingredientMixLineSchema).optional(),
 })
@@ -79,6 +82,22 @@ const intermediatePackagingLineSchema = z.object({
     lineTotal: z.number(),
 })
 
+const processingCostLineSchema = z.object({
+    processingCostId: z.number().int(),
+    displayName: z.string(),
+    value: z.number(),
+    totalWeightPounds: z.number(),
+    lineTotal: z.number(),
+})
+
+const percentageCostLineSchema = z.object({
+    processingCostId: z.number().int(),
+    displayName: z.string(),
+    value: z.number(),
+    baseAmount: z.number(),
+    lineTotal: z.number(),
+})
+
 const palletMaterialLineSchema = z.object({
     packagingId: z.number().int(),
     displayName: z.string(),
@@ -89,7 +108,9 @@ const palletMaterialLineSchema = z.object({
 })
 
 const transportLineSchema = z.object({
-    destinationId: z.number().int(),
+    // null cuando la cotización se calculó sin destino (transporte apagado, ver
+    // calculateQuoteSchema.destinationId arriba) -- el backend refleja el mismo shape.
+    destinationId: z.number().int().nullable(),
     displayName: z.string(),
     baseCost: z.number(),
 })
@@ -102,7 +123,8 @@ const adjustmentLineSchema = z.object({
 
 export const quoteCalculationSchema = z.object({
     productVariantId: z.number().int(),
-    destinationId: z.number().int(),
+    // null cuando no se mandó destino -- ver transportLineSchema.destinationId arriba.
+    destinationId: z.number().int().nullable(),
     productDisplayName: z.string(),
     variantLabel: z.string().nullable(),
     requestedPallets: z.number().int(),
@@ -110,7 +132,12 @@ export const quoteCalculationSchema = z.object({
     rawMaterialCost: z.coerce.number(),
     unitPackagingCost: z.coerce.number(),
     intermediatePackagingCost: z.coerce.number(),
+    // Optional para no romper cotizaciones guardadas antes de este campo (mismo criterio que
+    // intermediatePackagingCost/intermediatePackaging cuando se agregaron).
+    processingCostTotal: z.coerce.number().optional(),
     palletMaterialCost: z.coerce.number(),
+    // Optional por el mismo motivo -- no rompe cotizaciones guardadas antes de esta feature.
+    percentageCostTotal: z.coerce.number().optional(),
     transportCost: z.coerce.number(),
     // Optional para no romper cotizaciones guardadas antes de este campo (mismo criterio que
     // intermediatePackagingCost/intermediatePackaging arriba).
@@ -120,7 +147,12 @@ export const quoteCalculationSchema = z.object({
         rawMaterials: z.array(rawMaterialLineSchema),
         unitPackaging: unitPackagingLineSchema.nullable(),
         intermediatePackaging: intermediatePackagingLineSchema.nullable().optional(),
+        // Optional para no romper cotizaciones guardadas antes de este campo -- mismo criterio
+        // que intermediatePackaging arriba.
+        processingCosts: z.array(processingCostLineSchema).optional(),
         palletMaterials: z.array(palletMaterialLineSchema),
+        // Optional por el mismo motivo -- no rompe cotizaciones guardadas antes de esta feature.
+        percentageCosts: z.array(percentageCostLineSchema).optional(),
         transport: transportLineSchema,
         adjustment: adjustmentLineSchema.nullable().optional(),
         language: z.enum(["es", "en"]).optional(),

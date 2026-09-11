@@ -17,6 +17,7 @@ export function PackagingTable() {
             emptyMessage={t("packaging.table.empty")}
             renderActions={(packaging) => <EditLink to={`/admin/packagings/${packaging.id}/edit`} permission="packagings:edit" />}
             columns={[
+                { key: "code", header: t("packaging.form.code"), render: (packaging) => packaging.code },
                 { key: "displayName", header: t("packaging.form.displayName"), render: (packaging) => packaging.displayName },
                 {
                     key: "packagingRole",

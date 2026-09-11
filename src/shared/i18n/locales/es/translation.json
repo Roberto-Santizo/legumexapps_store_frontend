@@ -45,6 +45,13 @@
             "searchPlaceholder": "Buscar..."
         }
     },
+    "nav": {
+        "groups": {
+            "quotes": "Cotizaciones",
+            "catalog": "Catálogo",
+            "administration": "Administración"
+        }
+    },
     "errors": {
         "unexpected_response": "La respuesta del servidor no tiene el formato esperado",
         "zod": {
@@ -176,12 +183,15 @@
                 "rawMaterials": "Materia prima",
                 "unitPackaging": "Empaque unitario",
                 "intermediatePackaging": "Empaque intermedio",
+                "processingCosts": "Costos adicionales",
                 "palletMaterials": "Materiales de palet",
+                "percentageCosts": "Cargos porcentuales",
                 "transport": "Transporte",
                 "adjustment": "Ajuste adicional",
                 "unitsQuantity": "{{count}} unidades",
                 "palletsQuantity": "{{count}} palets",
                 "intermediatePackagesQuantity": "{{count}} empaques intermedios",
+                "percentageOfBase": "{{value}}% del subtotal (sin transporte)",
                 "currencyGtq": "Quetzales",
                 "currencyUsd": "Dólares",
                 "exchangeRateError": "No se pudo obtener el tipo de cambio."
@@ -301,6 +311,7 @@
     },
     "ingredient": {
         "form": {
+            "code": "Código",
             "displayName": "Nombre",
             "ingredientType": "Tipo de ingrediente",
             "costPerUnit": "Costo por unidad",
@@ -336,7 +347,7 @@
         },
         "bulkImport": {
             "title": "Carga masiva desde Excel",
-            "description": "Descarga la plantilla, complétala con tus ingredientes y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se importa nada -- corrige el archivo y vuelve a subirlo. La \"Unidad de costo\" debe ser el nombre exacto de una Unidad que ya exista en el catálogo.",
+            "description": "Descarga la plantilla, complétala con tus ingredientes y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se importa nada -- corrige el archivo y vuelve a subirlo. El \"Código\" es la primera columna y debe ser único -- no puede repetirse entre ingredientes ni dentro del archivo. La \"Unidad de costo\" debe ser el nombre exacto de una Unidad que ya exista en el catálogo.",
             "downloadTemplate": "Descargar plantilla",
             "importButton": "Importar archivo",
             "importing": "Importando...",
@@ -371,6 +382,7 @@
     },
     "packaging": {
         "form": {
+            "code": "Código",
             "displayName": "Nombre",
             "packagingRole": "¿Para qué se usa este material?",
             "packagingRoleOptions": {
@@ -396,7 +408,7 @@
         },
         "bulkImport": {
             "title": "Carga masiva desde Excel",
-            "description": "Descarga la plantilla, complétala con tus materiales y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se importa nada -- corrige el archivo y vuelve a subirlo.",
+            "description": "Descarga la plantilla, complétala con tus materiales y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se importa nada -- corrige el archivo y vuelve a subirlo. El \"Código\" es la primera columna y debe ser único -- no puede repetirse entre materiales ni dentro del archivo.",
             "downloadTemplate": "Descargar plantilla",
             "importButton": "Importar archivo",
             "importing": "Importando...",
@@ -650,12 +662,13 @@
             "searchPlaceholder": "Buscar por cliente, empresa, correo o producto...",
             "empty": "Todavía no hay ninguna cotización guardada.",
             "noMatches": "Ninguna cotización coincide con la búsqueda.",
-            "summary": "{{date}} · {{pallets}} palets · {{destination}}"
+            "summary": "{{date}} · {{pallets}} palets · {{destination}}",
+            "summaryNoDestination": "{{date}} · {{pallets}} palets"
         }
     },
     "adminQuoteCalculator": {
         "title": "Cotizador interno",
-        "description": "Calcula cotizaciones con el desglose completo de costos (materia prima, empaque, materiales de palet y transporte). No se guarda ningún registro -- es solo una herramienta de consulta, no aparece en \"Cotizaciones\" ni afecta el panel de indicadores."
+        "description": "Calcula cotizaciones con el desglose completo de costos (materia prima, empaque y materiales de palet). No se guarda ningún registro -- es solo una herramienta de consulta, no aparece en \"Cotizaciones\" ni afecta el panel de indicadores."
     },
     "quote": {
         "orderSummary": {
@@ -663,6 +676,7 @@
             "itemCount": "{{count}} productos cotizados",
             "total": "Total del pedido",
             "lineSummary": "{{destination}} · {{pallets}} palets",
+            "lineSummaryNoDestination": "{{pallets}} palets",
             "quoteAnother": "Cotizar otro producto",
             "clear": "Empezar un pedido nuevo"
         },
@@ -705,7 +719,9 @@
                 "rawMaterials": "Materia prima",
                 "unitPackaging": "Empaque unitario",
                 "intermediatePackaging": "Empaque intermedio",
+                "processingCosts": "Costos adicionales",
                 "palletMaterials": "Materiales de palet",
+                "percentageCosts": "Cargos porcentuales",
                 "transport": "Transporte",
                 "adjustment": "Ajuste adicional",
                 "lineTotal": "Total de la línea",
@@ -739,6 +755,38 @@
         "table": {
             "searchPlaceholder": "Buscar por nombre...",
             "empty": "No hay destinos registrados"
+        }
+    },
+    "processingCost": {
+        "form": {
+            "displayName": "Nombre",
+            "value": "Valor",
+            "valueLabelPerWeight": "Valor (Q por libra)",
+            "valueLabelPercentage": "Valor (%)",
+            "valueHintPerWeight": "Se aplica sobre el peso total de materia prima de cada cotización (todas las unidades, sin importar el tipo de ingrediente).",
+            "valueHintPercentage": "Se aplica al final, sobre el subtotal completo del producto ya escalado a la cotización (materia prima, costos por peso, empaques y materiales de palet) -- el transporte NO forma parte de esa base. Ej. \"Imprevistos\" con valor 2 = 2%.",
+            "calculationType": "Tipo de cálculo",
+            "calculationTypeOptions": {
+                "per_weight": "Por peso",
+                "percentage": "Porcentaje"
+            },
+            "translationSectionTitle": "Traducción al inglés",
+            "translationSectionHint": "Opcional. Si se deja vacío, el sitio en inglés muestra el nombre en español.",
+            "displayNameEn": "Nombre (inglés)"
+        },
+        "list": {
+            "title": "Costos adicionales",
+            "createLink": "Crear costo adicional"
+        },
+        "create": {
+            "title": "Crear costo adicional"
+        },
+        "edit": {
+            "title": "Editar costo adicional"
+        },
+        "table": {
+            "searchPlaceholder": "Buscar por nombre...",
+            "empty": "No hay costos adicionales registrados"
         }
     }
 }

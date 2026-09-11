@@ -25,6 +25,13 @@ type QuoteCalculatorFormProps = {
     onSubmit: (formData: CalculateQuoteInput) => void
     isSubmitting: boolean
     onStepChange?: (step: QuoteWizardStep) => void
+    // Transporte "apagado" temporalmente para el cliente (2026-09-10): este mismo form lo reusa
+    // también el cotizador interno del admin (ver adminQuoteCalculator.page.tsx), que SÍ sigue
+    // pudiendo elegir destino -- por eso es un prop con default true (nada cambia para el admin)
+    // en vez de borrar los campos del form. quoteRequest.page.tsx (cliente) es el único
+    // consumidor que lo pasa en false. destinationId ya es opcional en calculateQuoteSchema, así
+    // que no enviarlo nunca no rompe la validación.
+    showDestination?: boolean
 }
 
 const MIX_PERCENTAGE_TOLERANCE = 0.5
@@ -43,7 +50,7 @@ function crumbClassName(isActive: boolean, enabled: boolean): string {
     return "cursor-not-allowed text-gris-campo"
 }
 
-export function QuoteCalculatorForm({ products, destinations, onSubmit, isSubmitting, onStepChange }: Readonly<QuoteCalculatorFormProps>) {
+export function QuoteCalculatorForm({ products, destinations, onSubmit, isSubmitting, onStepChange, showDestination = true }: Readonly<QuoteCalculatorFormProps>) {
     const { t } = useTranslation()
     const [step, setStep] = useState<QuoteWizardStep>("mode")
     const [mode, setMode] = useState<QuoteMode>("finished")
@@ -404,43 +411,47 @@ export function QuoteCalculatorForm({ products, destinations, onSubmit, isSubmit
                             />
                         </FormField>
 
-                        <FormField label={t("site.quoteRequest.form.country")} htmlFor="quoteCountry">
-                            <Select
-                                id="quoteCountry"
-                                value={selectedCountry}
-                                onChange={(event) => handleCountryChange(event.target.value as DestinationCountry)}
-                            >
-                                <option value="GT">{t("site.quoteRequest.form.countryOptions.GT")}</option>
-                                <option value="US">{t("site.quoteRequest.form.countryOptions.US")}</option>
-                            </Select>
-                        </FormField>
+                        {showDestination && (
+                            <>
+                                <FormField label={t("site.quoteRequest.form.country")} htmlFor="quoteCountry">
+                                    <Select
+                                        id="quoteCountry"
+                                        value={selectedCountry}
+                                        onChange={(event) => handleCountryChange(event.target.value as DestinationCountry)}
+                                    >
+                                        <option value="GT">{t("site.quoteRequest.form.countryOptions.GT")}</option>
+                                        <option value="US">{t("site.quoteRequest.form.countryOptions.US")}</option>
+                                    </Select>
+                                </FormField>
 
-                        <FormField
-                            label={t("site.quoteRequest.form.destination")}
-                            htmlFor="destinationId"
-                            error={getFieldErrorMessage(t, errors.destinationId)}
-                        >
-                            {destinationOptions.length === 0 ? (
-                                <p className="text-sm text-texto-suave">{t("site.quoteRequest.form.noDestinationsForCountry")}</p>
-                            ) : (
-                                <Controller
-                                    name="destinationId"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <SearchableSelect
-                                            inputId="destinationId"
-                                            hasError={!!errors.destinationId}
-                                            options={destinationOptions}
-                                            placeholder={t("common.searchPlaceholder")}
-                                            noOptionsMessage={() => t("common.noOptionsFound")}
-                                            isClearable
-                                            value={destinationOptions.find((option) => option.value === field.value) ?? null}
-                                            onChange={(selected) => field.onChange(selected?.value ?? undefined)}
+                                <FormField
+                                    label={t("site.quoteRequest.form.destination")}
+                                    htmlFor="destinationId"
+                                    error={getFieldErrorMessage(t, errors.destinationId)}
+                                >
+                                    {destinationOptions.length === 0 ? (
+                                        <p className="text-sm text-texto-suave">{t("site.quoteRequest.form.noDestinationsForCountry")}</p>
+                                    ) : (
+                                        <Controller
+                                            name="destinationId"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <SearchableSelect
+                                                    inputId="destinationId"
+                                                    hasError={!!errors.destinationId}
+                                                    options={destinationOptions}
+                                                    placeholder={t("common.searchPlaceholder")}
+                                                    noOptionsMessage={() => t("common.noOptionsFound")}
+                                                    isClearable
+                                                    value={destinationOptions.find((option) => option.value === field.value) ?? null}
+                                                    onChange={(selected) => field.onChange(selected?.value ?? undefined)}
+                                                />
+                                            )}
                                         />
                                     )}
-                                />
-                            )}
-                        </FormField>
+                                </FormField>
+                            </>
+                        )}
 
                         <Button
                             type="submit"

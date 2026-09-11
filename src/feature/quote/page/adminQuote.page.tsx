@@ -78,10 +78,12 @@ export function AdminQuoteListPage() {
                                         {` · ${quote.quotingCustomer.email}`}
                                     </p>
                                     <p className="mt-1 text-xs text-texto-suave">
-                                        {t("adminQuote.list.summary", {
+                                        {/* Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- ya no se
+                                        interpola el destino acá tampoco. Reversión futura: volver a
+                                        "adminQuote.list.summary" con el destination. */}
+                                        {t("adminQuote.list.summaryNoDestination", {
                                             date: quote.createdAt.toLocaleDateString("es-GT"),
                                             pallets: quote.requestedPallets,
-                                            destination: quote.breakdown.transport.displayName,
                                         })}
                                     </p>
                                 </div>

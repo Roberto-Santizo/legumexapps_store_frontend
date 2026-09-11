@@ -12,10 +12,15 @@ type QuotedOrderSummaryProps = {
     onQuoteAnother: () => void
     onClear: () => void
     showCostBreakdown?: boolean
+    // Transporte apagado para todos por ahora (2026-09-10, fase 2) -- default false,
+    // independiente de showCostBreakdown. Ver el mismo prop en quoteResultCard.component.tsx
+    // para el motivo de no reusar showCostBreakdown acá (admin sigue viendo el resto del
+    // desglose con showCostBreakdown=true, pero ya no debe ver transporte).
+    showTransport?: boolean
 }
 
 
-export function QuotedOrderSummary({ lines, onQuoteAnother, onClear, showCostBreakdown = true }: Readonly<QuotedOrderSummaryProps>) {
+export function QuotedOrderSummary({ lines, onQuoteAnother, onClear, showCostBreakdown = true, showTransport = false }: Readonly<QuotedOrderSummaryProps>) {
     const { t } = useTranslation()
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
     const total = lines.reduce((sum, line) => sum + line.totalCost, 0)
@@ -70,10 +75,14 @@ export function QuotedOrderSummary({ lines, onQuoteAnother, onClear, showCostBre
                                         )}
                                     </p>
                                     <p className="text-xs text-texto-suave">
-                                        {t("quote.orderSummary.lineSummary", {
-                                            destination: line.breakdown.transport.displayName,
-                                            pallets: line.requestedPallets,
-                                        })}
+                                        {/* Transporte apagado para todos por ahora (2026-09-10, fase 2) -- gateado
+                                        por showTransport (no showCostBreakdown, ver ese prop arriba). */}
+                                        {showTransport
+                                            ? t("quote.orderSummary.lineSummary", {
+                                                  destination: line.breakdown.transport.displayName,
+                                                  pallets: line.requestedPallets,
+                                              })
+                                            : t("quote.orderSummary.lineSummaryNoDestination", { pallets: line.requestedPallets })}
                                     </p>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-2">
@@ -87,7 +96,7 @@ export function QuotedOrderSummary({ lines, onQuoteAnother, onClear, showCostBre
                             </button>
                             {isExpanded && (
                                 <div className="pb-3">
-                                    <QuoteResultCard result={line} isPending={false} showCostBreakdown={showCostBreakdown} />
+                                    <QuoteResultCard result={line} isPending={false} showCostBreakdown={showCostBreakdown} showTransport={showTransport} />
                                 </div>
                             )}
                         </div>

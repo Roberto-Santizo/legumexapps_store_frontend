@@ -45,6 +45,13 @@
             "searchPlaceholder": "Search..."
         }
     },
+    "nav": {
+        "groups": {
+            "quotes": "Quotes",
+            "catalog": "Catalog",
+            "administration": "Administration"
+        }
+    },
     "errors": {
         "unexpected_response": "The server response does not have the expected format",
         "zod": {
@@ -167,12 +174,15 @@
                 "rawMaterials": "Raw materials",
                 "unitPackaging": "Unit packaging",
                 "intermediatePackaging": "Intermediate packaging",
+                "processingCosts": "Additional costs",
                 "palletMaterials": "Pallet materials",
+                "percentageCosts": "Percentage charges",
                 "transport": "Transport",
                 "adjustment": "Additional adjustment",
                 "unitsQuantity": "{{count}} units",
                 "palletsQuantity": "{{count}} pallets",
                 "intermediatePackagesQuantity": "{{count}} intermediate packages",
+                "percentageOfBase": "{{value}}% of subtotal (excluding transport)",
                 "currencyGtq": "Quetzales",
                 "currencyUsd": "Dollars",
                 "exchangeRateError": "Could not fetch the exchange rate."
@@ -301,6 +311,7 @@
     },
     "ingredient": {
         "form": {
+            "code": "Code",
             "displayName": "Name",
             "ingredientType": "Ingredient type",
             "costPerUnit": "Cost per unit",
@@ -336,7 +347,7 @@
         },
         "bulkImport": {
             "title": "Bulk import from Excel",
-            "description": "Download the template, fill it in with your ingredients, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again. \"Cost unit\" must be the exact name of a Unit that already exists in the catalog.",
+            "description": "Download the template, fill it in with your ingredients, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again. \"Code\" is the first column and must be unique -- it cannot repeat across ingredients or within the file. \"Cost unit\" must be the exact name of a Unit that already exists in the catalog.",
             "downloadTemplate": "Download template",
             "importButton": "Import file",
             "importing": "Importing...",
@@ -371,6 +382,7 @@
     },
     "packaging": {
         "form": {
+            "code": "Code",
             "displayName": "Name",
             "packagingRole": "What is this material used for?",
             "packagingRoleOptions": {
@@ -396,7 +408,7 @@
         },
         "bulkImport": {
             "title": "Bulk import from Excel",
-            "description": "Download the template, fill it in with your materials, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again.",
+            "description": "Download the template, fill it in with your materials, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again. \"Code\" is the first column and must be unique -- it cannot repeat across materials or within the file.",
             "downloadTemplate": "Download template",
             "importButton": "Import file",
             "importing": "Importing...",
@@ -650,12 +662,13 @@
             "searchPlaceholder": "Search by customer, company, email or product...",
             "empty": "No quote has been saved yet.",
             "noMatches": "No quote matches the search.",
-            "summary": "{{date}} · {{pallets}} pallets · {{destination}}"
+            "summary": "{{date}} · {{pallets}} pallets · {{destination}}",
+            "summaryNoDestination": "{{date}} · {{pallets}} pallets"
         }
     },
     "adminQuoteCalculator": {
         "title": "Internal calculator",
-        "description": "Calculate quotes with the full cost breakdown (raw materials, packaging, pallet materials and transport). Nothing is saved -- it's just a lookup tool, it doesn't appear in \"Quotes\" and it doesn't affect the dashboard."
+        "description": "Calculate quotes with the full cost breakdown (raw materials, packaging and pallet materials). Nothing is saved -- it's just a lookup tool, it doesn't appear in \"Quotes\" and it doesn't affect the dashboard."
     },
     "quote": {
         "orderSummary": {
@@ -663,6 +676,7 @@
             "itemCount": "{{count}} products quoted",
             "total": "Order total",
             "lineSummary": "{{destination}} · {{pallets}} pallets",
+            "lineSummaryNoDestination": "{{pallets}} pallets",
             "quoteAnother": "Quote another product",
             "clear": "Start a new order"
         },
@@ -705,7 +719,9 @@
                 "rawMaterials": "Raw materials",
                 "unitPackaging": "Unit packaging",
                 "intermediatePackaging": "Intermediate packaging",
+                "processingCosts": "Additional costs",
                 "palletMaterials": "Pallet materials",
+                "percentageCosts": "Percentage charges",
                 "transport": "Transport",
                 "adjustment": "Additional adjustment",
                 "lineTotal": "Line total",
@@ -739,6 +755,38 @@
         "table": {
             "searchPlaceholder": "Search by name...",
             "empty": "No destinations registered"
+        }
+    },
+    "processingCost": {
+        "form": {
+            "displayName": "Name",
+            "value": "Value",
+            "valueLabelPerWeight": "Value (Q per pound)",
+            "valueLabelPercentage": "Value (%)",
+            "valueHintPerWeight": "Applied over the total raw-material weight of each quote (all units, regardless of ingredient type).",
+            "valueHintPercentage": "Applied at the end, over the product's full subtotal already scaled to the quote (raw material, per-weight costs, packaging, and pallet materials) -- transport is NOT part of that base. E.g. \"Contingency\" with value 2 = 2%.",
+            "calculationType": "Calculation type",
+            "calculationTypeOptions": {
+                "per_weight": "Per weight",
+                "percentage": "Percentage"
+            },
+            "translationSectionTitle": "English translation",
+            "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name.",
+            "displayNameEn": "Name (English)"
+        },
+        "list": {
+            "title": "Additional costs",
+            "createLink": "Create additional cost"
+        },
+        "create": {
+            "title": "Create additional cost"
+        },
+        "edit": {
+            "title": "Edit additional cost"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No additional costs registered"
         }
     }
 }

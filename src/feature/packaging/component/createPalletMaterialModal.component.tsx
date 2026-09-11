@@ -25,7 +25,9 @@ type CreatePalletMaterialModalProps = {
 // elegir packagingRole (unit/intermediate/pallet), pero este selector filtra específicamente por
 // "pallet" (ver palletMaterialSelect.component.tsx). Si dejáramos elegir el rol y el usuario
 // pusiera otro, el registro se crearía pero jamás volvería a aparecer en este selector -- así que
-// el rol queda fijo en "pallet" y solo se piden displayName + unitCost.
+// el rol queda fijo en "pallet" y solo se piden code + displayName + unitCost (code es obligatorio
+// en el schema -- ver createPackagingSchema -- así que este modal también debe pedirlo, o el submit
+// fallaría siempre por falta de código).
 export function CreatePalletMaterialModal({ initialDisplayName, onCreated, onClose }: Readonly<CreatePalletMaterialModalProps>) {
     const { t } = useTranslation()
     const queryClient = useQueryClient()
@@ -57,6 +59,14 @@ export function CreatePalletMaterialModal({ initialDisplayName, onCreated, onClo
         <Modal title={t("productVariantPalletMaterial.createModal.title")} onClose={onClose}>
             <form onSubmit={onSubmit}>
                 <input type="hidden" {...register("packagingRole")} />
+
+                <FormField
+                    label={t("packaging.form.code")}
+                    htmlFor="palletMaterialCode"
+                    error={getFieldErrorMessage(t, errors.code)}
+                >
+                    <Input id="palletMaterialCode" required hasError={!!errors.code} {...register("code")} />
+                </FormField>
 
                 <FormField
                     label={t("packaging.form.displayName")}

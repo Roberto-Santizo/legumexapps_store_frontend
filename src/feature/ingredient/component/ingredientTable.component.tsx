@@ -18,6 +18,7 @@ export function IngredientTable() {
             emptyMessage={t("ingredient.table.empty")}
             renderActions={(ingredient) => <EditLink to={`/admin/ingredients/${ingredient.id}/edit`} permission="ingredients:edit" />}
             columns={[
+                { key: "code", header: t("ingredient.form.code"), render: (ingredient) => ingredient.code },
                 { key: "displayName", header: t("ingredient.form.displayName"), render: (ingredient) => ingredient.displayName },
                 {
                     key: "ingredientType",

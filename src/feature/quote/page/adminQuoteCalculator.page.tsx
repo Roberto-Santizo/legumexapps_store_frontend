@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { Calculator } from "lucide-react"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Spinner } from "@/shared/component/spinner.component"
-import { getAdminQuoteProductsAPI, getAdminQuoteDestinationsAPI, previewAdminQuoteAPI, sendAdminQuotePdfEmailAPI } from "@/feature/quote/api/adminQuote.api"
+import { getAdminQuoteProductsAPI, previewAdminQuoteAPI, sendAdminQuotePdfEmailAPI } from "@/feature/quote/api/adminQuote.api"
 import { QuoteCalculatorForm } from "@/feature/quote/component/quoteCalculatorForm.component"
 import type { QuoteWizardStep } from "@/feature/quote/component/quoteCalculatorForm.component"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
@@ -21,7 +21,14 @@ import type { CalculateQuoteInput, QuoteCalculation } from "@/feature/quote/sche
 // ninguna fila en `Quote`, así que esto no puede mezclarse ni contaminar el listado real de
 // cotizaciones de clientes (AdminQuoteListPage) ni las métricas del dashboard; (3) no pasa
 // showCostBreakdown={false} -- el admin SÍ ve el desglose completo (materia prima, empaque,
-// materiales de palet, transporte), a diferencia del cliente final.
+// costos adicionales, materiales de palet, cargos porcentuales), a diferencia del cliente final.
+//
+// Transporte apagado para TODOS por ahora (2026-09-10, fase 2 -- antes solo se había apagado
+// para el cliente, ver quoteRequest.page.tsx). El motor sigue intacto: QuoteCalculatorForm
+// recibe showDestination={false} igual que el cliente (el admin ya no elige destino tampoco), y
+// showTransport ya no se pasa en ningún componente de este archivo -- todos quedan en su
+// default (false), que oculta la línea/encabezado de transporte sin tocar el resto del
+// desglose. Reversión futura: pasar showDestination/showTransport en true donde corresponda.
 export function AdminQuoteCalculatorPage() {
     const { t } = useTranslation()
     // Mismo patrón "pedido en curso" que quoteRequest.page.tsx (cliente, ver esa entrada de
@@ -34,7 +41,10 @@ export function AdminQuoteCalculatorPage() {
     const [formResetKey, setFormResetKey] = useState(0)
 
     const productsQuery = useQuery({ queryKey: ["adminQuoteProducts"], queryFn: getAdminQuoteProductsAPI })
-    const destinationsQuery = useQuery({ queryKey: ["adminQuoteDestinations"], queryFn: getAdminQuoteDestinationsAPI })
+    // Transporte apagado para todos por ahora (2026-09-10, fase 2): el admin ya no elige destino
+    // (ver QuoteCalculatorForm showDestination={false} abajo), así que ya no hace falta traer el
+    // catálogo de destinos acá tampoco -- se deja de llamar GET /admin/quotes/destinations. El
+    // endpoint y getAdminQuoteDestinationsAPI siguen intactos, listos para reactivarse.
 
     const calculateMutation = useMutation({
         mutationFn: previewAdminQuoteAPI,
@@ -50,9 +60,8 @@ export function AdminQuoteCalculatorPage() {
     })
 
     const products = productsQuery.data?.data ?? []
-    const destinations = destinationsQuery.data?.data ?? []
-    const isLoadingCatalog = productsQuery.isLoading || destinationsQuery.isLoading
-    const hasCatalogError = productsQuery.isError || destinationsQuery.isError
+    const isLoadingCatalog = productsQuery.isLoading
+    const hasCatalogError = productsQuery.isError
 
     const handleSubmit = (formData: CalculateQuoteInput) => {
         setCurrentResult(null)
@@ -88,7 +97,8 @@ export function AdminQuoteCalculatorPage() {
                 <QuoteCalculatorForm
                     key={formResetKey}
                     products={products}
-                    destinations={destinations}
+                    destinations={[]}
+                    showDestination={false}
                     onSubmit={handleSubmit}
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}
@@ -107,7 +117,8 @@ export function AdminQuoteCalculatorPage() {
                 <QuoteCalculatorForm
                     key={formResetKey}
                     products={products}
-                    destinations={destinations}
+                    destinations={[]}
+                    showDestination={false}
                     onSubmit={handleSubmit}
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}

@@ -8,6 +8,7 @@ const ingredientTranslationInputSchema = z.object({
 })
 
 export const createIngredientSchema = z.object({
+    code: z.string().trim().min(1).max(60),
     displayName: z.string().trim().min(1).max(120),
     ingredientType: ingredientTypeEnum,
     isOrganic: z.boolean().optional(),
@@ -18,11 +19,13 @@ export const createIngredientSchema = z.object({
 })
 
 export const updateIngredientSchema = createIngredientSchema.partial().extend({
+    code: createIngredientSchema.shape.code,
     costPerUnit: createIngredientSchema.shape.costPerUnit,
     costUnitId: createIngredientSchema.shape.costUnitId,
 })
 
 export const responseIngredientSchema = baseCatalogSchema.extend({
+    code: z.string(),
     displayName: z.string(),
     urlSlug: z.string(),
     ingredientType: ingredientTypeEnum,

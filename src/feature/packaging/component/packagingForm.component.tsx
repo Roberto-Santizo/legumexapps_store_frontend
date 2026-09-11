@@ -20,6 +20,14 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, errors
     return (
         <div>
             <FormField
+                label={t("packaging.form.code")}
+                htmlFor="code"
+                error={getFieldErrorMessage(t, errors.code as FieldError | undefined)}
+            >
+                <Input id="code" required hasError={!!errors.code} {...register("code" as Path<T>)} />
+            </FormField>
+
+            <FormField
                 label={t("packaging.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}

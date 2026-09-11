@@ -4,6 +4,7 @@ import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 const packagingRoleEnum = z.enum(["unit", "intermediate", "pallet"])
 
 export const createPackagingSchema = z.object({
+    code: z.string().trim().min(1).max(60),
     displayName: z.string().trim().min(1).max(80),
     packagingRole: packagingRoleEnum,
 
@@ -11,11 +12,13 @@ export const createPackagingSchema = z.object({
 })
 
 export const updatePackagingSchema = createPackagingSchema.partial().extend({
+    code: createPackagingSchema.shape.code,
     packagingRole: createPackagingSchema.shape.packagingRole,
     unitCost: createPackagingSchema.shape.unitCost,
 })
 
 export const responsePackagingSchema = baseCatalogSchema.extend({
+    code: z.string(),
     displayName: z.string(),
     packagingRole: packagingRoleEnum,
     packagingMaterial: z.string().nullable(),

@@ -26,6 +26,14 @@ export function IngredientForm<T extends UpdateIngredientInput>({
     return (
         <div>
             <FormField
+                label={t("ingredient.form.code")}
+                htmlFor="code"
+                error={getFieldErrorMessage(t, errors.code as FieldError | undefined)}
+            >
+                <Input id="code" required hasError={!!errors.code} {...register("code" as Path<T>)} />
+            </FormField>
+
+            <FormField
                 label={t("ingredient.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}

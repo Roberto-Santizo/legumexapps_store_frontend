@@ -19,6 +19,10 @@ type QuotePdfDocumentProps = {
     // Mismo criterio que QuoteResultCard/QuotedOrderSummary: el cliente final no ve el desglose
     // interno de costos, solo el admin (ver adminQuoteCalculator.page.tsx vs quoteRequest.page.tsx).
     showCostBreakdown?: boolean
+    // Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- default false,
+    // independiente de showCostBreakdown (que el admin sigue necesitando en true para ver el
+    // resto del desglose). Ver el mismo prop en quoteResultCard.component.tsx.
+    showTransport?: boolean
 }
 
 // Documento PDF del "resumen de cotización" -- se genera bajo demanda desde el cotizador (público
@@ -26,7 +30,7 @@ type QuotePdfDocumentProps = {
 // nunca se persiste ni se guarda en el servidor. Usa @react-pdf/renderer, mismo enfoque que el
 // resto del repo para documentos descargables (packing list), pero con su propio diseño ajustado
 // a los datos del cotizador (no hay tarimas/lotes acá, hay productos/palets/costos).
-export function QuotePdfDocument({ clientName, quoteDate, lines, showCostBreakdown = true }: Readonly<QuotePdfDocumentProps>) {
+export function QuotePdfDocument({ clientName, quoteDate, lines, showCostBreakdown = true, showTransport = false }: Readonly<QuotePdfDocumentProps>) {
     const { t } = useTranslation()
 
     const orderTotal = calculateQuoteOrderTotal(lines)
@@ -77,7 +81,11 @@ export function QuotePdfDocument({ clientName, quoteDate, lines, showCostBreakdo
                                 {line.productDisplayName}
                                 {line.variantLabel && <Text style={styles.lineHeaderVariant}> · {line.variantLabel}</Text>}
                             </Text>
-                            <Text style={styles.lineHeaderDestination}>{line.breakdown.transport.displayName}</Text>
+                            {/* Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- gateado por
+                            showTransport (no showCostBreakdown), igual que la fila de transporte más abajo. */}
+                            {showTransport && (
+                                <Text style={styles.lineHeaderDestination}>{line.breakdown.transport.displayName}</Text>
+                            )}
                         </View>
 
                         <View style={styles.lineStatsRow}>
@@ -117,16 +125,30 @@ export function QuotePdfDocument({ clientName, quoteDate, lines, showCostBreakdo
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.intermediatePackagingCost)}</Text>
                                     </View>
                                 )}
+                                {line.breakdown.processingCosts && line.breakdown.processingCosts.length > 0 && (
+                                    <View style={styles.breakdownRow}>
+                                        <Text style={styles.breakdownLabel}>{t("quote.pdf.document.processingCosts")}</Text>
+                                        <Text style={styles.breakdownValue}>{formatCurrency(line.processingCostTotal ?? 0)}</Text>
+                                    </View>
+                                )}
                                 {line.breakdown.palletMaterials.length > 0 && (
                                     <View style={styles.breakdownRow}>
                                         <Text style={styles.breakdownLabel}>{t("quote.pdf.document.palletMaterials")}</Text>
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.palletMaterialCost)}</Text>
                                     </View>
                                 )}
-                                <View style={styles.breakdownRow}>
-                                    <Text style={styles.breakdownLabel}>{t("quote.pdf.document.transport")}</Text>
-                                    <Text style={styles.breakdownValue}>{formatCurrency(line.transportCost)}</Text>
-                                </View>
+                                {line.breakdown.percentageCosts && line.breakdown.percentageCosts.length > 0 && (
+                                    <View style={styles.breakdownRow}>
+                                        <Text style={styles.breakdownLabel}>{t("quote.pdf.document.percentageCosts")}</Text>
+                                        <Text style={styles.breakdownValue}>{formatCurrency(line.percentageCostTotal ?? 0)}</Text>
+                                    </View>
+                                )}
+                                {showTransport && (
+                                    <View style={styles.breakdownRow}>
+                                        <Text style={styles.breakdownLabel}>{t("quote.pdf.document.transport")}</Text>
+                                        <Text style={styles.breakdownValue}>{formatCurrency(line.transportCost)}</Text>
+                                    </View>
+                                )}
                                 {line.breakdown.adjustment && (
                                     <View style={styles.breakdownRow}>
                                         <Text style={styles.breakdownLabel}>{t("quote.pdf.document.adjustment")}</Text>

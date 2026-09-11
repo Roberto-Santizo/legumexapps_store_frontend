@@ -2,7 +2,7 @@ import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { useQuery } from "@tanstack/react-query"
-import { Truck, Wheat, PackageOpen, PackagePlus, Layers, FileSpreadsheet, Loader2, SlidersHorizontal } from "lucide-react"
+import { Truck, Wheat, PackageOpen, PackagePlus, Layers, FileSpreadsheet, Loader2, SlidersHorizontal, Cog, Percent } from "lucide-react"
 import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
 import { getExchangeRateAPI } from "@/feature/quote/api/quote.api"
 import { Card } from "@/shared/component/card.component"
@@ -13,9 +13,24 @@ type QuoteResultCardProps = {
     result: QuoteCalculation | null
     isPending: boolean
     showCostBreakdown?: boolean
+    // Transporte "apagado" para TODOS por ahora (2026-09-10, fase 2 -- ver quoteCalculatorForm
+    // showDestination): default false a propósito, independiente de showCostBreakdown -- ese
+    // flag sigue gobernando el resto de líneas del desglose (materia prima, empaques, costos
+    // adicionales, etc.), que el admin SÍ debe seguir viendo. No reusar showCostBreakdown acá
+    // otra vez (como se hizo en la fase 1, solo para cliente) porque ahora también hay que
+    // apagar transporte para el admin, que sigue con showCostBreakdown=true. Reversión futura:
+    // volver el default a true (o pasarlo explícito) donde se quiera reactivar.
+    showTransport?: boolean
 }
 
 type DisplayCurrency = "GTQ" | "USD"
+
+// Toggle Quetzales/Dólares OCULTO (2026-09-10): la conversión a USD está rota/erronea, así que
+// el control se dejó de renderizar y el sistema muestra SIEMPRE Quetzales. No se borró nada de
+// la lógica de conversión/tasa de cambio a propósito -- con CURRENCY_TOGGLE_ENABLED = true el
+// toggle vuelve a aparecer tal cual estaba, una vez se corrija convertGtqToUsd/la tasa de
+// Banguat. Ver uso más abajo en QuoteResultCard.
+const CURRENCY_TOGGLE_ENABLED = false
 
 // Toggle Quetzales/Dólares: el desglose que llega en `result` SIEMPRE está en GTQ (es el
 // snapshot congelado que devuelve/guarda el backend, ver quoteService.calculateQuote) -- esto
@@ -134,7 +149,7 @@ function CurrencyToggle({
     )
 }
 
-export function QuoteResultCard({ result, isPending, showCostBreakdown = true }: Readonly<QuoteResultCardProps>) {
+export function QuoteResultCard({ result, isPending, showCostBreakdown = true, showTransport = false }: Readonly<QuoteResultCardProps>) {
     const { t } = useTranslation()
     // Hook siempre se ejecuta, sin importar el estado -- no puede ir después de un return
     // temprano o React ve un número distinto de hooks entre renders (Rules of Hooks).
@@ -162,17 +177,24 @@ export function QuoteResultCard({ result, isPending, showCostBreakdown = true }:
 
     return (
         <Card>
-            <div className="mb-4 flex justify-end">
-                <CurrencyToggle currency={currency} onChange={setCurrency} isConverting={isConverting} hasError={hasError} />
-            </div>
-
-            <div className="mb-5 flex items-start justify-between gap-3 border-b border-gris-campo pb-5">
-                <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
-                        {t("site.quoteRequest.result.destination")}
-                    </p>
-                    <p className="font-display text-lg font-bold text-verde-profundo">{breakdown.transport.displayName}</p>
+            {/* Toggle Quetzales/Dólares oculto mientras la conversión a USD esté rota -- ver
+            CURRENCY_TOGGLE_ENABLED más arriba. El estado `currency` nunca se mueve de "GTQ" sin
+            este botón, así que `format` siempre pinta en Quetzales. */}
+            {CURRENCY_TOGGLE_ENABLED && (
+                <div className="mb-4 flex justify-end">
+                    <CurrencyToggle currency={currency} onChange={setCurrency} isConverting={isConverting} hasError={hasError} />
                 </div>
+            )}
+
+            <div className={`mb-5 flex items-start gap-3 border-b border-gris-campo pb-5 ${showTransport ? "justify-between" : "justify-end"}`}>
+                {showTransport && (
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                            {t("site.quoteRequest.result.destination")}
+                        </p>
+                        <p className="font-display text-lg font-bold text-verde-profundo">{breakdown.transport.displayName}</p>
+                    </div>
+                )}
                 <div className="text-right">
                     <p className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
                         {t("site.quoteRequest.result.total")}
@@ -254,6 +276,19 @@ export function QuoteResultCard({ result, isPending, showCostBreakdown = true }:
                     </CostSection>
                 )}
 
+                {showCostBreakdown && breakdown.processingCosts && breakdown.processingCosts.length > 0 && (
+                    <CostSection
+                        icon={<Cog size={15} />}
+                        title={t("site.quoteRequest.result.processingCosts")}
+                        subtotal={result.processingCostTotal ?? 0}
+                        format={format}
+                    >
+                        {breakdown.processingCosts.map((line) => (
+                            <CostRow key={line.processingCostId} label={line.displayName} lineTotal={line.lineTotal} format={format} />
+                        ))}
+                    </CostSection>
+                )}
+
                 {showCostBreakdown && breakdown.palletMaterials.length > 0 && (
                     <CostSection
                         icon={<Layers size={15} />}
@@ -273,14 +308,35 @@ export function QuoteResultCard({ result, isPending, showCostBreakdown = true }:
                     </CostSection>
                 )}
 
-                <CostSection
-                    icon={<Truck size={15} />}
-                    title={t("site.quoteRequest.result.transport")}
-                    subtotal={result.transportCost}
-                    format={format}
-                >
-                    <CostRow label={breakdown.transport.displayName} lineTotal={result.transportCost} format={format} />
-                </CostSection>
+                {showCostBreakdown && breakdown.percentageCosts && breakdown.percentageCosts.length > 0 && (
+                    <CostSection
+                        icon={<Percent size={15} />}
+                        title={t("site.quoteRequest.result.percentageCosts")}
+                        subtotal={result.percentageCostTotal ?? 0}
+                        format={format}
+                    >
+                        {breakdown.percentageCosts.map((line) => (
+                            <CostRow
+                                key={line.processingCostId}
+                                label={line.displayName}
+                                quantityLabel={t("site.quoteRequest.result.percentageOfBase", { value: line.value })}
+                                lineTotal={line.lineTotal}
+                                format={format}
+                            />
+                        ))}
+                    </CostSection>
+                )}
+
+                {showTransport && (
+                    <CostSection
+                        icon={<Truck size={15} />}
+                        title={t("site.quoteRequest.result.transport")}
+                        subtotal={result.transportCost}
+                        format={format}
+                    >
+                        <CostRow label={breakdown.transport.displayName} lineTotal={result.transportCost} format={format} />
+                    </CostSection>
+                )}
 
                 {showCostBreakdown && breakdown.adjustment && (
                     <CostSection

@@ -1,13 +1,10 @@
-import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { useQuery } from "@tanstack/react-query"
-import { Truck, Wheat, PackageOpen, PackagePlus, Layers, FileSpreadsheet, Loader2, SlidersHorizontal, Cog, Percent } from "lucide-react"
+import { Truck, Wheat, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent } from "lucide-react"
 import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
-import { getExchangeRateAPI } from "@/feature/quote/api/quote.api"
 import { Card } from "@/shared/component/card.component"
 import { Spinner } from "@/shared/component/spinner.component"
-import { formatCurrency, formatUsd, convertGtqToUsd } from "@/shared/format/currency"
+import { formatCurrency } from "@/shared/format/currency"
 
 type QuoteResultCardProps = {
     result: QuoteCalculation | null
@@ -21,43 +18,6 @@ type QuoteResultCardProps = {
     // apagar transporte para el admin, que sigue con showCostBreakdown=true. Reversión futura:
     // volver el default a true (o pasarlo explícito) donde se quiera reactivar.
     showTransport?: boolean
-}
-
-type DisplayCurrency = "GTQ" | "USD"
-
-// Toggle Quetzales/Dólares OCULTO (2026-09-10): la conversión a USD está rota/erronea, así que
-// el control se dejó de renderizar y el sistema muestra SIEMPRE Quetzales. No se borró nada de
-// la lógica de conversión/tasa de cambio a propósito -- con CURRENCY_TOGGLE_ENABLED = true el
-// toggle vuelve a aparecer tal cual estaba, una vez se corrija convertGtqToUsd/la tasa de
-// Banguat. Ver uso más abajo en QuoteResultCard.
-const CURRENCY_TOGGLE_ENABLED = false
-
-// Toggle Quetzales/Dólares: el desglose que llega en `result` SIEMPRE está en GTQ (es el
-// snapshot congelado que devuelve/guarda el backend, ver quoteService.calculateQuote) -- esto
-// solo convierte lo que se PINTA en pantalla usando la tasa de Banguat (GET
-// /quotes/exchange-rate), nunca recalcula ni cambia lo que se guarda. Estado local (no
-// contexto/URL) a propósito: es una preferencia de vista de esta tarjeta puntual, no algo que
-// otras partes de la app necesiten leer.
-function useCurrencyToggle() {
-    const [currency, setCurrency] = useState<DisplayCurrency>("GTQ")
-
-    const exchangeRateQuery = useQuery({
-        queryKey: ["quoteExchangeRate"],
-        queryFn: getExchangeRateAPI,
-        enabled: currency === "USD",
-        staleTime: 30 * 60 * 1000, // 30 min -- el tipo de cambio no se mueve de un momento a otro
-    })
-
-    const rate = exchangeRateQuery.data?.data.rate
-    const isConverting = currency === "USD" && exchangeRateQuery.isLoading
-    const hasError = currency === "USD" && exchangeRateQuery.isError
-
-    const format = (valueInGtq: number): string => {
-        if (currency === "USD" && rate) return formatUsd(convertGtqToUsd(valueInGtq, rate))
-        return formatCurrency(valueInGtq)
-    }
-
-    return { currency, setCurrency, format, isConverting, hasError }
 }
 
 function CostRow({
@@ -104,56 +64,12 @@ function CostSection({
     )
 }
 
-// Segmented control Quetzales/Dólares. `isConverting` deshabilita el botón USD mientras se
-// resuelve la tasa (evita doble click disparando dos fetches, aunque react-query ya dedupe por
-// queryKey) y `hasError` lo marca en rojo si Banguat no respondió -- el usuario puede reintentar
-// haciendo click de nuevo (refetchOnMount/staleTime no lo hará solo).
-function CurrencyToggle({
-    currency,
-    onChange,
-    isConverting,
-    hasError,
-}: Readonly<{
-    currency: DisplayCurrency
-    onChange: (currency: DisplayCurrency) => void
-    isConverting: boolean
-    hasError: boolean
-}>) {
-    const { t } = useTranslation()
-
-    return (
-        <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-full border border-gris-campo bg-crema p-0.5 text-xs font-semibold">
-                <button
-                    type="button"
-                    onClick={() => onChange("GTQ")}
-                    className={`rounded-full px-3 py-1 transition ${
-                        currency === "GTQ" ? "bg-verde-profundo text-white" : "text-texto-suave hover:text-verde-profundo"
-                    }`}
-                >
-                    {t("site.quoteRequest.result.currencyGtq")}
-                </button>
-                <button
-                    type="button"
-                    onClick={() => onChange("USD")}
-                    className={`rounded-full px-3 py-1 transition ${
-                        currency === "USD" ? "bg-verde-profundo text-white" : "text-texto-suave hover:text-verde-profundo"
-                    } ${hasError ? "text-error-fg" : ""}`}
-                >
-                    {t("site.quoteRequest.result.currencyUsd")}
-                </button>
-            </div>
-            {isConverting && <Loader2 size={14} className="animate-spin text-texto-suave" />}
-            {hasError && <span className="text-xs text-error-fg">{t("site.quoteRequest.result.exchangeRateError")}</span>}
-        </div>
-    )
-}
-
 export function QuoteResultCard({ result, isPending, showCostBreakdown = true, showTransport = false }: Readonly<QuoteResultCardProps>) {
     const { t } = useTranslation()
-    // Hook siempre se ejecuta, sin importar el estado -- no puede ir después de un return
-    // temprano o React ve un número distinto de hooks entre renders (Rules of Hooks).
-    const { currency, setCurrency, format, isConverting, hasError } = useCurrencyToggle()
+    // Sistema USD-only (2026-09-10): ya no hay toggle de moneda ni conversión -- todo se muestra
+    // en dólares con el formatter compartido. `format` se mantiene como alias para no tener que
+    // tocar la firma de CostRow/CostSection (siguen recibiendo un formatter por prop).
+    const format = formatCurrency
 
     if (isPending) {
         return (
@@ -177,15 +93,6 @@ export function QuoteResultCard({ result, isPending, showCostBreakdown = true, s
 
     return (
         <Card>
-            {/* Toggle Quetzales/Dólares oculto mientras la conversión a USD esté rota -- ver
-            CURRENCY_TOGGLE_ENABLED más arriba. El estado `currency` nunca se mueve de "GTQ" sin
-            este botón, así que `format` siempre pinta en Quetzales. */}
-            {CURRENCY_TOGGLE_ENABLED && (
-                <div className="mb-4 flex justify-end">
-                    <CurrencyToggle currency={currency} onChange={setCurrency} isConverting={isConverting} hasError={hasError} />
-                </div>
-            )}
-
             <div className={`mb-5 flex items-start gap-3 border-b border-gris-campo pb-5 ${showTransport ? "justify-between" : "justify-end"}`}>
                 {showTransport && (
                     <div>

@@ -182,10 +182,7 @@
                 "unitsQuantity": "{{count}} units",
                 "palletsQuantity": "{{count}} pallets",
                 "intermediatePackagesQuantity": "{{count}} intermediate packages",
-                "percentageOfBase": "{{value}}% of subtotal (excluding transport)",
-                "currencyGtq": "Quetzales",
-                "currencyUsd": "Dollars",
-                "exchangeRateError": "Could not fetch the exchange rate."
+                "percentageOfBase": "{{value}}% of subtotal (excluding transport)"
             }
         },
         "footer": {

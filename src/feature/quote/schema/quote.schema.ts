@@ -33,12 +33,6 @@ export const quotableProductSchema = z.object({
 
 export const quoteDestinationSchema = responseDestinationSchema
 
-// Tipo de cambio USD->GTQ (Banco de Guatemala, ver GET /quotes/exchange-rate) -- solo alimenta
-// el toggle de moneda de QuoteResultCard, nunca se manda de vuelta al backend.
-export const exchangeRateSchema = z.object({
-    rate: z.number().positive(),
-})
-
 const ingredientMixLineSchema = z.object({
     ingredientId: z.number().int().positive(),
     percentage: z.number().min(0).max(100).multipleOf(0.01),

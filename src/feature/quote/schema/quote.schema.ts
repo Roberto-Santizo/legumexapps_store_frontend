@@ -57,10 +57,11 @@ const rawMaterialLineSchema = z.object({
     lineTotal: z.number(),
 })
 
-const unitPackagingLineSchema = z.object({
+const unitMaterialLineSchema = z.object({
     packagingId: z.number().int(),
     displayName: z.string(),
     unitCost: z.number(),
+    quantityPerUnit: z.number(),
     totalUnits: z.number(),
     lineTotal: z.number(),
 })
@@ -139,7 +140,11 @@ export const quoteCalculationSchema = z.object({
     totalCost: z.coerce.number(),
     breakdown: z.object({
         rawMaterials: z.array(rawMaterialLineSchema),
-        unitPackaging: unitPackagingLineSchema.nullable(),
+        // Optional para no romper cotizaciones guardadas antes de este campo (2026-09-11, el
+        // FK único ProductVariant.packagingId se reemplazó por un join de N materiales) --
+        // mismo criterio que intermediatePackaging/processingCosts. Una cotización vieja
+        // simplemente no trae esta clave; unitPackagingCost (el total) sigue presente e intacto.
+        unitMaterials: z.array(unitMaterialLineSchema).optional(),
         intermediatePackaging: intermediatePackagingLineSchema.nullable().optional(),
         // Optional para no romper cotizaciones guardadas antes de este campo -- mismo criterio
         // que intermediatePackaging arriba.

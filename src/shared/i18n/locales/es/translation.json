@@ -436,6 +436,7 @@
     },
     "product": {
         "form": {
+            "codigo": "Código",
             "image": "Foto del producto",
             "subCategoryId": "Subcategoría",
             "productTypeId": "Tipo de producto",
@@ -471,7 +472,6 @@
     "productVariant": {
         "form": {
             "presentationId": "Presentación",
-            "packagingId": "Empaque",
             "skuCode": "SKU",
             "unitsPerPallet": "Unidades por palet",
             "unitsPerBox": "Unidades por caja",
@@ -505,6 +505,24 @@
         },
         "table": {
             "empty": "No hay ingredientes registrados"
+        }
+    },
+    "productVariantUnitMaterial": {
+        "selectVariant": "Variante",
+        "noVariants": "Primero agrega una variante para poder definir sus materiales de empaque individual",
+        "form": {
+            "packagingId": "Material individual",
+            "quantityPerUnit": "Cantidad por unidad",
+            "addButton": "Agregar material"
+        },
+        "createModal": {
+            "title": "Crear material individual"
+        },
+        "list": {
+            "title": "Materiales de empaque individual"
+        },
+        "table": {
+            "empty": "No hay materiales de empaque individual registrados"
         }
     },
     "productVariantPalletMaterial": {

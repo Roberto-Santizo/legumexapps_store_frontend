@@ -4,27 +4,26 @@ import { useTranslation } from "react-i18next"
 import { getPackagingsAPI } from "@/feature/packaging/api/packaging.api"
 import { CreatableSearchableSelect } from "@/shared/component/creatableSearchableSelect.component"
 import type { SearchableSelectOption } from "@/shared/component/searchableSelect.component"
-import { CreatePalletMaterialModal } from "@/feature/packaging/component/createPalletMaterialModal.component"
+import { CreateUnitMaterialModal } from "@/feature/packaging/component/createUnitMaterialModal.component"
 
-type PalletMaterialSelectProps = {
+type UnitMaterialSelectProps = {
     inputId?: string
     hasError?: boolean
     value: number | undefined
     onChange: (value: number | undefined) => void
 }
 
-// Creatable/searchable: si el usuario tipea un material de palet que no existe, "Crear '<texto>'"
-// abre CreatePalletMaterialModal (packagingRole queda fijo en "pallet" -- ver ese componente).
-export function PalletMaterialSelect({ inputId, hasError, value, onChange }: Readonly<PalletMaterialSelectProps>) {
+// Empaque individual de una variante (bolsa, etiqueta, tapa...) -- rol "unit", mismo patrón que
+// palletMaterialSelect.component.tsx (rol "pallet"): creatable/searchable, buscable por nombre Y
+// código (ver Packaging.code). Reemplaza el viejo packagingSelect.component.tsx (select nativo,
+// sin búsqueda) que solo alimentaba el FK único ProductVariant.packagingId, ahora eliminado.
+export function UnitMaterialSelect({ inputId, hasError, value, onChange }: Readonly<UnitMaterialSelectProps>) {
     const { t } = useTranslation()
     const [pendingDisplayName, setPendingDisplayName] = useState<string | null>(null)
     const packagingsQuery = useQuery({ queryKey: ["packagings"], queryFn: getPackagingsAPI })
-    const palletMaterials = (packagingsQuery.data?.data ?? []).filter((packaging) => packaging.packagingRole === "pallet")
+    const unitMaterials = (packagingsQuery.data?.data ?? []).filter((packaging) => packaging.packagingRole === "unit")
 
-    // Label incluye el código -- react-select filtra por texto del label, así que esto también
-    // vuelve el selector buscable por código, no solo por nombre (Packaging.code, ver
-    // Packaging.model.ts).
-    const options: SearchableSelectOption[] = palletMaterials.map((packaging) => ({
+    const options: SearchableSelectOption[] = unitMaterials.map((packaging) => ({
         value: packaging.id,
         label: `${packaging.code} · ${packaging.displayName}`,
     }))
@@ -43,7 +42,7 @@ export function PalletMaterialSelect({ inputId, hasError, value, onChange }: Rea
                 onCreateOption={(inputValue) => setPendingDisplayName(inputValue)}
             />
             {pendingDisplayName !== null && (
-                <CreatePalletMaterialModal
+                <CreateUnitMaterialModal
                     initialDisplayName={pendingDisplayName}
                     onClose={() => setPendingDisplayName(null)}
                     onCreated={(packaging) => {

@@ -34,6 +34,7 @@ export function ProductTable() {
             )}
             columns={[
                 { key: "id", header: t("common.id"), render: (product) => product.id },
+                { key: "codigo", header: t("product.form.codigo"), render: (product) => product.codigo },
                 { key: "displayName", header: t("product.form.displayName"), render: (product) => product.displayName },
                 { key: "urlSlug", header: t("product.form.urlSlug"), render: (product) => product.urlSlug },
                 {

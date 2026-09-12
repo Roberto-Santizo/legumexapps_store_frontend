@@ -16,7 +16,6 @@ import {
 import { getPresentationsAPI } from "@/feature/presentation/api/presentation.api"
 import { getPackagingsAPI } from "@/feature/packaging/api/packaging.api"
 import { PresentationSelect } from "@/feature/presentation/component/presentationSelect.component"
-import { PackagingSelect } from "@/feature/packaging/component/packagingSelect.component"
 import { IntermediatePackagingSelect } from "@/feature/packaging/component/intermediatePackagingSelect.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
@@ -31,7 +30,6 @@ type VariantFormInput = z.infer<typeof variantFormSchema>
 function toFormValues(variant: ProductVariantResponse): VariantFormInput {
     return {
         presentationId: variant.presentationId ?? undefined,
-        packagingId: variant.packagingId ?? undefined,
         intermediatePackagingId: variant.intermediatePackagingId ?? undefined,
         skuCode: variant.skuCode ?? undefined,
         unitsPerPallet: variant.unitsPerPallet ?? undefined,
@@ -123,7 +121,6 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                         <TableRow>
                             <Th>{t("productVariant.form.skuCode")}</Th>
                             <Th>{t("productVariant.form.presentationId")}</Th>
-                            <Th>{t("productVariant.form.packagingId")}</Th>
                             <Th>{t("productVariant.form.unitsPerPallet")}</Th>
                             <Th>{t("productVariant.form.unitsPerBox")}</Th>
                             <Th>{t("productVariant.form.intermediatePackagingId")}</Th>
@@ -136,7 +133,6 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                             <TableRow key={variant.id}>
                                 <Td>{variant.skuCode ?? "-"}</Td>
                                 <Td>{variant.presentationId ? presentationNameById.get(variant.presentationId) ?? "-" : "-"}</Td>
-                                <Td>{variant.packagingId ? packagingNameById.get(variant.packagingId) ?? "-" : "-"}</Td>
                                 <Td>{variant.unitsPerPallet ?? "-"}</Td>
                                 <Td>{variant.unitsPerBox ?? "-"}</Td>
                                 <Td>
@@ -163,7 +159,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                                 </Td>
                             </TableRow>
                         ))}
-                        {variants.length === 0 && <TableEmpty message={t("productVariant.table.empty")} colSpan={8} />}
+                        {variants.length === 0 && <TableEmpty message={t("productVariant.table.empty")} colSpan={7} />}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -185,18 +181,6 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                                 onChange={field.onChange}
                             />
                         )}
-                    />
-                </FormField>
-
-                <FormField
-                    label={t("productVariant.form.packagingId")}
-                    htmlFor="packagingId"
-                    error={getFieldErrorMessage(t, errors.packagingId)}
-                >
-                    <PackagingSelect
-                        id="packagingId"
-                        hasError={!!errors.packagingId}
-                        {...register("packagingId", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
 

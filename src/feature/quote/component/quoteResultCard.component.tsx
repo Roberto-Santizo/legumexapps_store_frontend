@@ -147,21 +147,24 @@ export function QuoteResultCard({ result, isPending, showCostBreakdown = true, s
                     </CostSection>
                 )}
 
-                {showCostBreakdown && breakdown.unitPackaging && (
+                {showCostBreakdown && breakdown.unitMaterials && breakdown.unitMaterials.length > 0 && (
                     <CostSection
                         icon={<PackageOpen size={15} />}
                         title={t("site.quoteRequest.result.unitPackaging")}
                         subtotal={result.unitPackagingCost}
                         format={format}
                     >
-                        <CostRow
-                            label={breakdown.unitPackaging.displayName}
-                            quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
-                                count: breakdown.unitPackaging.totalUnits.toLocaleString("es-MX"),
-                            })}
-                            lineTotal={breakdown.unitPackaging.lineTotal}
-                            format={format}
-                        />
+                        {breakdown.unitMaterials.map((line) => (
+                            <CostRow
+                                key={line.packagingId}
+                                label={line.displayName}
+                                quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
+                                    count: line.totalUnits.toLocaleString("es-MX"),
+                                })}
+                                lineTotal={line.lineTotal}
+                                format={format}
+                            />
+                        ))}
                     </CostSection>
                 )}
 

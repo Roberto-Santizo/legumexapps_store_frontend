@@ -12,6 +12,7 @@ import { ProductForm } from "@/feature/product/component/productForm.component"
 import { ProductVariantSection } from "@/feature/product/component/productVariantSection.component"
 import { ProductIngredientSection } from "@/feature/product/component/productIngredientSection.component"
 import { ProductVariantPalletMaterialSection } from "@/feature/product/component/productVariantPalletMaterialSection.component"
+import { ProductVariantUnitMaterialSection } from "@/feature/product/component/productVariantUnitMaterialSection.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
@@ -21,6 +22,7 @@ function toFormValues(product: ProductResponse): UpdateProductInput {
     // Ver el mismo comentario en editCategory.page.tsx::toFormValues.
     const englishTranslation = product.translations.find((translation) => translation.language === "en")
     return {
+        codigo: product.codigo,
         subCategoryId: product.subCategoryId,
         productTypeId: product.productTypeId,
         displayName: product.displayName,
@@ -126,6 +128,13 @@ export function EditProductPage() {
                             isCustomizable={productQuery.data.data.isCustomizable}
                             isOrganic={productQuery.data.data.isOrganic}
                         />
+                    </Card>
+
+                    <Card>
+                        <h2 className="mb-4 text-lg font-semibold text-verde-profundo">
+                            {t("productVariantUnitMaterial.list.title")}
+                        </h2>
+                        <ProductVariantUnitMaterialSection productId={productId} />
                     </Card>
 
                     <Card>

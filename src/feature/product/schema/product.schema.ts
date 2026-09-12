@@ -10,6 +10,8 @@ const productTranslationInputSchema = z.object({
 })
 
 export const createProductSchema = z.object({
+    // Código manual del producto, editable, único (case-insensitive -- validado en el backend).
+    codigo: z.string().trim().min(1).max(60),
     subCategoryId: z.number().int().positive(),
     productTypeId: z.number().int().positive(),
     displayName: z.string().trim().min(1).max(120),
@@ -22,9 +24,14 @@ export const createProductSchema = z.object({
     translations: z.object({ en: productTranslationInputSchema.optional() }).optional(),
 })
 
-export const updateProductSchema = createProductSchema.partial()
+// codigo se recupera como requerido -- no puede quedar vacío ni siquiera al editar (mismo
+// patrón que el resto de campos críticos del repo, ver memoria del proyecto).
+export const updateProductSchema = createProductSchema.partial().extend({
+    codigo: createProductSchema.shape.codigo,
+})
 
 export const responseProductSchema = baseCatalogSchema.extend({
+    codigo: z.string(),
     subCategoryId: z.number().int(),
     productTypeId: z.number().int(),
     displayName: z.string(),

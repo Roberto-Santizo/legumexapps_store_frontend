@@ -52,6 +52,14 @@ export function ProductForm<T extends UpdateProductInput>({
             />
 
             <FormField
+                label={t("product.form.codigo")}
+                htmlFor="codigo"
+                error={getFieldErrorMessage(t, errors.codigo as FieldError | undefined)}
+            >
+                <Input id="codigo" hasError={!!errors.codigo} {...register("codigo" as Path<T>)} />
+            </FormField>
+
+            <FormField
                 label={t("product.form.subCategoryId")}
                 htmlFor="subCategoryId"
                 error={getFieldErrorMessage(t, errors.subCategoryId as FieldError | undefined)}

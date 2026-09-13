@@ -170,6 +170,7 @@
                 "total": "Total cost",
                 "pallets": "Pallets",
                 "units": "Units",
+                "boxesPerPallet": "Boxes per pallet",
                 "perPallet": "Per pallet",
                 "rawMaterials": "Raw materials",
                 "unitPackaging": "Unit packaging",
@@ -650,6 +651,15 @@
         "table": {
             "searchPlaceholder": "Search by name...",
             "empty": "No presentations registered"
+        },
+        "bulkImport": {
+            "title": "Bulk upload from Excel",
+            "description": "Download the template, fill it in with your presentations, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again. Net weight must be for ONE single unit/bag/bottle, in grams -- never the weight of the full case or box.",
+            "downloadTemplate": "Download template",
+            "importButton": "Import file",
+            "importing": "Importing...",
+            "rowErrorsTitle": "The file has {{count}} error(s). No presentation was imported:",
+            "rowErrorItem": "Row {{row}}: {{message}}"
         }
     },
     "product": {
@@ -691,19 +701,37 @@
         "form": {
             "presentationId": "Presentation",
             "skuCode": "SKU",
-            "unitsPerPallet": "Units per pallet",
-            "unitsPerBox": "Units per box",
-            "unitsPerBoxHint": "How many bags/pieces fit in one box. Doesn't affect cost, it's only used to work out how many boxes the pallet needs.",
+            "boxesPerPallet": "Boxes per pallet",
+            "bagsPerBox": "Bags per box",
+            "bagsPerBoxHint": "How many bags/pieces fit in one box. Together with \"Boxes per pallet\" above, this defines the total bags per pallet (boxes × bags per box) -- it DOES affect cost.",
             "intermediatePackagingId": "Intermediate packaging (large bag)",
             "unitsPerIntermediatePackage": "Units per intermediate package",
             "unitsPerIntermediatePackageHint": "Only if this product uses nested packaging (e.g. several small bags inside one large bag, which then goes into the box). How many small units fit inside one large bag -- this DOES affect cost.",
-            "addButton": "Add variant"
+            "addButton": "Add variant",
+            "skuLookup": {
+                "button": "Search",
+                "searching": "Searching...",
+                "found": "SKU data found (product: {{product}}). Review the fields before saving.",
+                "recipeTitle": "This SKU's packaging recipe (reference)",
+                "recipeHint": "This variant already had these materials loaded. Add them again below, in Unit packaging and Pallet materials, once you save this variant.",
+                "unitMaterialLine": "{{name}} — {{quantity}} per unit",
+                "palletMaterialLine": "{{name}} — {{quantity}} per pallet"
+            }
         },
         "list": {
             "title": "Variants"
         },
         "table": {
             "empty": "No variants registered"
+        },
+        "bulkImport": {
+            "title": "Bulk upload SKUs from Excel",
+            "description": "Download the template, fill it in with your SKUs (one row per packaging-recipe material) and upload it. The whole file is validated first: if a single row has an error, no SKU is created -- fix the file and upload it again. Before using this upload, these must already exist in their catalogs: Packaging materials (with their role assigned), Presentations, and the base Products the SKUs belong to. This importer only CREATES new SKUs, it never updates one that already exists, and it excludes by design any SKU without \"Boxes per pallet\" configured.",
+            "downloadTemplate": "Download template",
+            "importButton": "Import file",
+            "importing": "Importing...",
+            "rowErrorsTitle": "The file has {{count}} error(s). No SKU was imported:",
+            "rowErrorItem": "Row {{row}}: {{message}}"
         }
     },
     "productIngredient": {
@@ -746,9 +774,8 @@
     "productVariantPalletMaterial": {
         "selectVariant": "Variant",
         "noVariants": "Add a variant first so you can define its palletizing materials",
-        "boxesPerPalletHint": "With {{unitsPerBox}} units per box and {{unitsPerPallet}} units per pallet, this pallet needs {{boxesPerPallet}} boxes.",
-        "intermediatePackagesPerPalletHint": "With {{unitsPerIntermediatePackage}} units per intermediate package and {{unitsPerPallet}} units per pallet, this pallet needs {{intermediatePackagesPerPallet}} intermediate packages (not loaded here, their cost is already calculated automatically).",
-        "boxesPerPalletFromIntermediateHint": "With {{unitsPerBox}} intermediate packages per box, this pallet needs {{boxesPerPallet}} boxes.",
+        "boxesPerPalletHint": "This pallet needs {{boxesPerPallet}} boxes.",
+        "intermediatePackagesPerPalletHint": "With {{unitsPerIntermediatePackage}} units per intermediate package and {{bagsPerPallet}} bags per pallet, this pallet needs {{intermediatePackagesPerPallet}} intermediate packages (not loaded here, their cost is already calculated automatically).",
         "form": {
             "packagingId": "Pallet material",
             "quantityValue": "Quantity",
@@ -948,6 +975,7 @@
                 "validUntil": "Valid until",
                 "pallets": "Pallets",
                 "units": "Units",
+                "boxesPerPallet": "Boxes per pallet",
                 "perPallet": "Per pallet",
                 "rawMaterials": "Raw materials",
                 "unitPackaging": "Unit packaging",

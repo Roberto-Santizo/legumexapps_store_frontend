@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { PresentationTable } from "@/feature/presentation/component/presentationTable.component"
+import { bulkImportPresentationsAPI, downloadPresentationImportTemplateAPI } from "@/feature/presentation/api/presentation.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
+import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 
 export function PresentationListPage() {
     const { t } = useTranslation()
@@ -19,6 +21,17 @@ export function PresentationListPage() {
                     </Link>
                 )}
             </div>
+            {/* Misma permission que "Crear presentación" -- la carga masiva es otra forma de
+                crear, no una acción distinta (mismo criterio que Empaques/Ingredientes). */}
+            {hasPermission("presentations:create") && (
+                <BulkImportPanel
+                    translationNamespace="presentation.bulkImport"
+                    templateFilename="plantilla-presentaciones.xlsx"
+                    downloadTemplate={downloadPresentationImportTemplateAPI}
+                    bulkImport={bulkImportPresentationsAPI}
+                    invalidateQueryKey={["presentations"]}
+                />
+            )}
             <PresentationTable />
         </PageContainer>
     )

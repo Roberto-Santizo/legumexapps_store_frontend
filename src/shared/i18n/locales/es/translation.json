@@ -179,6 +179,7 @@
                 "total": "Costo total",
                 "pallets": "Palets",
                 "units": "Unidades",
+                "boxesPerPallet": "Cajas por palet",
                 "perPallet": "Por palet",
                 "rawMaterials": "Materia prima",
                 "unitPackaging": "Empaque unitario",
@@ -650,6 +651,15 @@
         "table": {
             "searchPlaceholder": "Buscar por nombre...",
             "empty": "No hay presentaciones registradas"
+        },
+        "bulkImport": {
+            "title": "Carga masiva desde Excel",
+            "description": "Descarga la plantilla, complétala con tus presentaciones y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se importa nada -- corrige el archivo y vuelve a subirlo. El peso neto debe ser el de UNA sola unidad/bolsa/botella, en gramos -- nunca el peso del caso o caja completa.",
+            "downloadTemplate": "Descargar plantilla",
+            "importButton": "Importar archivo",
+            "importing": "Importando...",
+            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ninguna presentación:",
+            "rowErrorItem": "Fila {{row}}: {{message}}"
         }
     },
     "product": {
@@ -691,19 +701,37 @@
         "form": {
             "presentationId": "Presentación",
             "skuCode": "SKU",
-            "unitsPerPallet": "Unidades por palet",
-            "unitsPerBox": "Unidades por caja",
-            "unitsPerBoxHint": "Cuántas bolsas/piezas entran en una caja. No afecta el costo, es solo para calcular cuántas cajas necesita el palet.",
+            "boxesPerPallet": "Cajas por palet",
+            "bagsPerBox": "Bolsas por caja",
+            "bagsPerBoxHint": "Cuántas bolsas/piezas entran en una caja. Junto con \"Cajas por palet\" arriba, define el total de bolsas por palet (cajas × bolsas por caja) -- SÍ afecta el costo.",
             "intermediatePackagingId": "Empaque intermedio (bolsa grande)",
             "unitsPerIntermediatePackage": "Unidades por empaque intermedio",
             "unitsPerIntermediatePackageHint": "Solo si este producto usa empaque anidado (ej. varias bolsitas dentro de una bolsa grande, que a su vez va en la caja). Cuántas unidades pequeñas entran en una bolsa grande -- este dato SÍ afecta el costo.",
-            "addButton": "Agregar variante"
+            "addButton": "Agregar variante",
+            "skuLookup": {
+                "button": "Buscar",
+                "searching": "Buscando...",
+                "found": "Se encontraron datos del SKU (producto: {{product}}). Revisa los campos antes de guardar.",
+                "recipeTitle": "Receta de empaque de este SKU (referencia)",
+                "recipeHint": "Esta variante ya tenía estos materiales cargados. Agrégalos de nuevo abajo, en Empaque individual y Materiales de palet, una vez que guardes esta variante.",
+                "unitMaterialLine": "{{name}} — {{quantity}} por unidad",
+                "palletMaterialLine": "{{name}} — {{quantity}} por palet"
+            }
         },
         "list": {
             "title": "Variantes"
         },
         "table": {
             "empty": "No hay variantes registradas"
+        },
+        "bulkImport": {
+            "title": "Carga masiva de SKUs desde Excel",
+            "description": "Descarga la plantilla, complétala con tus SKUs (una fila por cada material de su receta de empaque) y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se crea ningún SKU -- corrige el archivo y vuelve a subirlo. Antes de usar esta carga, ya deben existir en sus catálogos: los materiales de Empaque (con su rol asignado), las Presentaciones, y los Productos base a los que pertenecen los SKUs. Este importador solo CREA SKUs nuevos, nunca actualiza uno que ya existe, y excluye por diseño cualquier SKU sin \"Cajas por palet\" configurado.",
+            "downloadTemplate": "Descargar plantilla",
+            "importButton": "Importar archivo",
+            "importing": "Importando...",
+            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún SKU:",
+            "rowErrorItem": "Fila {{row}}: {{message}}"
         }
     },
     "productIngredient": {
@@ -746,9 +774,8 @@
     "productVariantPalletMaterial": {
         "selectVariant": "Variante",
         "noVariants": "Primero agrega una variante para poder definir sus materiales de paletización",
-        "boxesPerPalletHint": "Con {{unitsPerBox}} unidades por caja y {{unitsPerPallet}} unidades por palet, este palet necesita {{boxesPerPallet}} cajas.",
-        "intermediatePackagesPerPalletHint": "Con {{unitsPerIntermediatePackage}} unidades por empaque intermedio y {{unitsPerPallet}} unidades por palet, este palet necesita {{intermediatePackagesPerPallet}} empaques intermedios (no se cargan aquí, su costo ya se calcula solo).",
-        "boxesPerPalletFromIntermediateHint": "Con {{unitsPerBox}} empaques intermedios por caja, este palet necesita {{boxesPerPallet}} cajas.",
+        "boxesPerPalletHint": "Este palet necesita {{boxesPerPallet}} cajas.",
+        "intermediatePackagesPerPalletHint": "Con {{unitsPerIntermediatePackage}} unidades por empaque intermedio y {{bagsPerPallet}} bolsas por palet, este palet necesita {{intermediatePackagesPerPallet}} empaques intermedios (no se cargan aquí, su costo ya se calcula solo).",
         "form": {
             "packagingId": "Material de palet",
             "quantityValue": "Cantidad",
@@ -948,6 +975,7 @@
                 "validUntil": "Válida hasta",
                 "pallets": "Palets",
                 "units": "Unidades",
+                "boxesPerPallet": "Cajas por palet",
                 "perPallet": "Por palet",
                 "rawMaterials": "Materia prima",
                 "unitPackaging": "Empaque unitario",

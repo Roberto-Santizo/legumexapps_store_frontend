@@ -115,10 +115,22 @@ export function QuoteResultCard({ result, isPending, showCostBreakdown = true, s
                     <p className="text-lg font-bold text-verde-profundo">{result.requestedPallets}</p>
                     <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.pallets")}</p>
                 </div>
-                <div className="rounded-[10px] bg-crema p-3">
-                    <p className="text-lg font-bold text-verde-profundo">{result.totalUnits.toLocaleString("es-MX")}</p>
-                    <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.units")}</p>
-                </div>
+                {/* El cliente final ve CAJAS por palet, no el conteo crudo de bolsas (totalUnits
+                es un dato interno) -- ver boxesPerPallet en QuoteCalculation, calculado por
+                quoteService y solo optional en el schema por compatibilidad con cotizaciones
+                históricas releídas de la BD (que el admin sí puede ver, ver quote.schema.ts).
+                El admin (showCostBreakdown=true) sigue viendo el total de unidades como siempre. */}
+                {showCostBreakdown ? (
+                    <div className="rounded-[10px] bg-crema p-3">
+                        <p className="text-lg font-bold text-verde-profundo">{result.totalUnits.toLocaleString("es-MX")}</p>
+                        <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.units")}</p>
+                    </div>
+                ) : (
+                    <div className="rounded-[10px] bg-crema p-3">
+                        <p className="text-lg font-bold text-verde-profundo">{result.boxesPerPallet ?? "-"}</p>
+                        <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.boxesPerPallet")}</p>
+                    </div>
+                )}
                 <div className="rounded-[10px] bg-crema p-3">
                     <p className="text-lg font-bold text-verde-profundo">{format(costPerPallet)}</p>
                     <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.perPallet")}</p>

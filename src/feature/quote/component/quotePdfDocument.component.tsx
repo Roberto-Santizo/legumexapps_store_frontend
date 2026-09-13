@@ -93,10 +93,19 @@ export function QuotePdfDocument({ clientName, quoteDate, lines, showCostBreakdo
                                 <Text style={styles.lineStatValue}>{line.requestedPallets}</Text>
                                 <Text style={styles.lineStatLabel}>{t("quote.pdf.document.pallets")}</Text>
                             </View>
-                            <View style={styles.lineStat}>
-                                <Text style={styles.lineStatValue}>{line.totalUnits.toLocaleString("es-MX")}</Text>
-                                <Text style={styles.lineStatLabel}>{t("quote.pdf.document.units")}</Text>
-                            </View>
+                            {/* Mismo criterio que QuoteResultCard: el cliente final ve cajas por
+                            palet, no el conteo crudo de bolsas (totalUnits es un dato interno). */}
+                            {showCostBreakdown ? (
+                                <View style={styles.lineStat}>
+                                    <Text style={styles.lineStatValue}>{line.totalUnits.toLocaleString("es-MX")}</Text>
+                                    <Text style={styles.lineStatLabel}>{t("quote.pdf.document.units")}</Text>
+                                </View>
+                            ) : (
+                                <View style={styles.lineStat}>
+                                    <Text style={styles.lineStatValue}>{line.boxesPerPallet ?? "-"}</Text>
+                                    <Text style={styles.lineStatLabel}>{t("quote.pdf.document.boxesPerPallet")}</Text>
+                                </View>
+                            )}
                             <View style={styles.lineStatLast}>
                                 <Text style={styles.lineStatValue}>
                                     {formatCurrency(line.totalCost / line.requestedPallets)}

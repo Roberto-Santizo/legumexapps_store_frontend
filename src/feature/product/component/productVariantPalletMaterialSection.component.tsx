@@ -68,22 +68,27 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
         (item) => item.productVariantId === activeVariantId
     )
 
-    // Si la variante tiene empaque intermedio (bolsa grande que agrupa varias unidades, ver
-    // ProductVariant.intermediatePackagingId), el conteo de "cajas por palet" ya no sale directo
-    // de unitsPerPallet -- primero hay que bajar de unidades a bolsas grandes, y de ahí a cajas.
-    // La bolsa grande NO se carga como material de palet acá: su costo ya lo calcula
-    // quoteService.calculateQuote solo, a partir de unitsPerIntermediatePackage -- este hint es
-    // puramente informativo para ayudar a llenar la fila de la caja.
+    // "Cajas por palet" (2026-09-12) ya NO se deriva acá -- es un input directo de la variante
+    // (ProductVariant.boxesPerPallet, ver productVariantSection.component.tsx), así que este
+    // hint solo lo muestra, no lo calcula. Antes había que bajar de unidades a bolsas grandes y
+    // de ahí a cajas (dos significados distintos de "unitsPerBox" según hubiera o no empaque
+    // intermedio) -- ese doble significado desapareció junto con la derivación.
+    //
+    // La bolsa grande (empaque intermedio) sigue sin cargarse como material de palet: su costo ya
+    // lo calcula quoteService.calculateQuote solo, a partir de unitsPerIntermediatePackage. El
+    // hint de "empaques intermedios por palet" sigue siendo puramente informativo, ahora derivado
+    // de bagsPerPallet (boxesPerPallet × bagsPerBox) en vez del viejo unitsPerPallet manual --
+    // matemáticamente igual para el mismo dato, solo cambia de dónde sale el multiplicando.
     const hasIntermediatePackaging = !!activeVariant?.intermediatePackagingId && !!activeVariant?.unitsPerIntermediatePackage
+    const bagsPerPallet =
+        activeVariant?.boxesPerPallet && activeVariant?.bagsPerBox
+            ? activeVariant.boxesPerPallet * activeVariant.bagsPerBox
+            : null
     const intermediatePackagesPerPallet =
-        hasIntermediatePackaging && activeVariant?.unitsPerPallet && activeVariant?.unitsPerIntermediatePackage
-            ? activeVariant.unitsPerPallet / activeVariant.unitsPerIntermediatePackage
+        hasIntermediatePackaging && bagsPerPallet && activeVariant?.unitsPerIntermediatePackage
+            ? bagsPerPallet / activeVariant.unitsPerIntermediatePackage
             : null
-    const unitsFeedingBoxCount = hasIntermediatePackaging ? intermediatePackagesPerPallet : activeVariant?.unitsPerPallet ?? null
-    const boxesPerPallet =
-        unitsFeedingBoxCount && activeVariant?.unitsPerBox
-            ? unitsFeedingBoxCount / activeVariant.unitsPerBox
-            : null
+    const boxesPerPallet = activeVariant?.boxesPerPallet ?? null
 
     const {
         register,
@@ -173,7 +178,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
             {hasIntermediatePackaging && intermediatePackagesPerPallet !== null && (
                 <p className="mb-1 -mt-2 text-sm text-texto-suave">
                     {t("productVariantPalletMaterial.intermediatePackagesPerPalletHint", {
-                        unitsPerPallet: activeVariant?.unitsPerPallet,
+                        bagsPerPallet,
                         unitsPerIntermediatePackage: activeVariant?.unitsPerIntermediatePackage,
                         intermediatePackagesPerPallet,
                     })}
@@ -182,16 +187,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
 
             {boxesPerPallet !== null && (
                 <p className="mb-4 -mt-2 text-sm text-texto-suave">
-                    {t(
-                        hasIntermediatePackaging
-                            ? "productVariantPalletMaterial.boxesPerPalletFromIntermediateHint"
-                            : "productVariantPalletMaterial.boxesPerPalletHint",
-                        {
-                            unitsPerPallet: activeVariant?.unitsPerPallet,
-                            unitsPerBox: activeVariant?.unitsPerBox,
-                            boxesPerPallet,
-                        }
-                    )}
+                    {t("productVariantPalletMaterial.boxesPerPalletHint", { boxesPerPallet })}
                 </p>
             )}
 

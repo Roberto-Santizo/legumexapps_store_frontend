@@ -4,7 +4,8 @@ import { responseDestinationSchema } from "@/feature/destination/schema/destinat
 const quotableVariantSchema = z.object({
     id: z.number().int(),
     skuCode: z.string().nullable(),
-    unitsPerPallet: z.number().int(),
+    boxesPerPallet: z.number().int(),
+    bagsPerBox: z.number().int(),
     presentationLabel: z.string().nullable(),
     packagingLabel: z.string().nullable(),
 })
@@ -124,6 +125,13 @@ export const quoteCalculationSchema = z.object({
     variantLabel: z.string().nullable(),
     requestedPallets: z.number().int(),
     totalUnits: z.number(),
+    // Cajas por palet (2026-09-12) -- optional por el mismo motivo que processingCostTotal/
+    // percentageCostTotal/adjustmentCost más abajo: NO se persiste como columna propia de Quote
+    // (vive derivado en el cálculo en vivo, ver quote.service.ts), así que una fila histórica
+    // leída directo de la BD (GET /admin/quotes) no la trae. Solo lo necesita el reporte del
+    // CLIENTE (showCostBreakdown=false), que nunca relee una cotización vieja de la BD -- siempre
+    // es la respuesta en vivo de calcular/guardar, donde este campo sí viene siempre presente.
+    boxesPerPallet: z.number().int().optional(),
     rawMaterialCost: z.coerce.number(),
     unitPackagingCost: z.coerce.number(),
     intermediatePackagingCost: z.coerce.number(),

@@ -11,6 +11,7 @@ import {
     createProductVariantAPI,
     deleteProductVariantAPI,
     getProductVariantsAPI,
+    lookupProductVariantBySkuCodeAPI,
     updateProductVariantAPI,
 } from "@/feature/product/api/productVariant.api"
 import { getPresentationsAPI } from "@/feature/presentation/api/presentation.api"
@@ -27,13 +28,18 @@ import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 const variantFormSchema = createProductVariantSchema.omit({ productId: true })
 type VariantFormInput = z.infer<typeof variantFormSchema>
 
-function toFormValues(variant: ProductVariantResponse): VariantFormInput {
+// Partial<VariantFormInput>, no VariantFormInput a secas -- mismo patrón que el resto de campos
+// críticos vueltos requeridos en este repo (ver memoria del proyecto): una variante vieja creada
+// antes de este cambio puede no tener boxesPerPallet/bagsPerBox (columnas nuevas/reinterpretadas),
+// así que se precarga vacío para poder abrir el registro a editar, pero no se puede volver a
+// GUARDAR sin completarlo (el schema sí los exige).
+function toFormValues(variant: ProductVariantResponse): Partial<VariantFormInput> {
     return {
         presentationId: variant.presentationId ?? undefined,
         intermediatePackagingId: variant.intermediatePackagingId ?? undefined,
         skuCode: variant.skuCode ?? undefined,
-        unitsPerPallet: variant.unitsPerPallet ?? undefined,
-        unitsPerBox: variant.unitsPerBox ?? undefined,
+        boxesPerPallet: variant.boxesPerPallet ?? undefined,
+        bagsPerBox: variant.bagsPerBox ?? undefined,
         unitsPerIntermediatePackage: variant.unitsPerIntermediatePackage ?? undefined,
     }
 }
@@ -57,10 +63,43 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
         control,
         handleSubmit,
         reset,
+        getValues,
+        setValue,
         formState: { errors },
     } = useForm<VariantFormInput>({ resolver: zodResolver(variantFormSchema) })
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariants"] })
+
+    // Autofill del SKU (2026-09-13) -- botón "Buscar" explícito, NUNCA en cada tecla. Solo
+    // PRELLENA los campos del form (reset queda a cargo del usuario vía "Guardar"); el backend
+    // revalida todo igual que si se hubiera tecleado a mano, sin importar de dónde vino el valor.
+    // La receta de empaque (unitMaterials/palletMaterials) que trae la respuesta se muestra abajo
+    // como referencia de solo lectura -- esos materiales viven en sus propias secciones (Empaque
+    // individual / Materiales de palet), que necesitan que la variante YA exista (tienen su propio
+    // productVariantId), así que no se auto-crean acá.
+    const lookupMutation = useMutation({ mutationFn: lookupProductVariantBySkuCodeAPI })
+
+    function handleSkuLookup() {
+        const skuCode = getValues("skuCode")?.trim()
+        if (!skuCode) return
+        lookupMutation.mutate(skuCode, {
+            onSuccess: (data) => {
+                if (!data) return
+                setValue("presentationId", data.data.presentationId ?? undefined, { shouldValidate: true, shouldDirty: true })
+                // boxesPerPallet/bagsPerBox son requeridos en el form (no aceptan undefined) -- si
+                // el SKU encontrado es una variante vieja sin esos datos, se deja el campo tal
+                // como está en vez de "vaciarlo" con un valor inválido.
+                if (data.data.boxesPerPallet !== null) {
+                    setValue("boxesPerPallet", data.data.boxesPerPallet, { shouldValidate: true, shouldDirty: true })
+                }
+                if (data.data.bagsPerBox !== null) {
+                    setValue("bagsPerBox", data.data.bagsPerBox, { shouldValidate: true, shouldDirty: true })
+                }
+                setValue("intermediatePackagingId", data.data.intermediatePackagingId ?? undefined, { shouldValidate: true, shouldDirty: true })
+                setValue("unitsPerIntermediatePackage", data.data.unitsPerIntermediatePackage ?? undefined, { shouldValidate: true, shouldDirty: true })
+            },
+        })
+    }
 
     const createMutation = useMutation({
         mutationFn: createProductVariantAPI,
@@ -68,6 +107,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
             invalidate()
             toast.success(data.message)
             reset({})
+            lookupMutation.reset()
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
@@ -81,6 +121,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
             toast.success(data.message)
             setEditingId(null)
             reset({})
+            lookupMutation.reset()
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
@@ -106,11 +147,13 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
     function startEdit(variant: ProductVariantResponse) {
         setEditingId(variant.id)
         reset(toFormValues(variant))
+        lookupMutation.reset()
     }
 
     function cancelEdit() {
         setEditingId(null)
         reset({})
+        lookupMutation.reset()
     }
 
     return (
@@ -121,8 +164,8 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                         <TableRow>
                             <Th>{t("productVariant.form.skuCode")}</Th>
                             <Th>{t("productVariant.form.presentationId")}</Th>
-                            <Th>{t("productVariant.form.unitsPerPallet")}</Th>
-                            <Th>{t("productVariant.form.unitsPerBox")}</Th>
+                            <Th>{t("productVariant.form.boxesPerPallet")}</Th>
+                            <Th>{t("productVariant.form.bagsPerBox")}</Th>
                             <Th>{t("productVariant.form.intermediatePackagingId")}</Th>
                             <Th>{t("productVariant.form.unitsPerIntermediatePackage")}</Th>
                             <Th>{t("common.actions")}</Th>
@@ -133,8 +176,8 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                             <TableRow key={variant.id}>
                                 <Td>{variant.skuCode ?? "-"}</Td>
                                 <Td>{variant.presentationId ? presentationNameById.get(variant.presentationId) ?? "-" : "-"}</Td>
-                                <Td>{variant.unitsPerPallet ?? "-"}</Td>
-                                <Td>{variant.unitsPerBox ?? "-"}</Td>
+                                <Td>{variant.boxesPerPallet ?? "-"}</Td>
+                                <Td>{variant.bagsPerBox ?? "-"}</Td>
                                 <Td>
                                     {variant.intermediatePackagingId
                                         ? packagingNameById.get(variant.intermediatePackagingId) ?? "-"
@@ -189,36 +232,49 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                     htmlFor="skuCode"
                     error={getFieldErrorMessage(t, errors.skuCode)}
                 >
-                    <Input id="skuCode" hasError={!!errors.skuCode} {...register("skuCode")} />
+                    <div className="flex gap-2">
+                        <Input id="skuCode" hasError={!!errors.skuCode} className="flex-1" {...register("skuCode")} />
+                        <Button type="button" variant="secondary" onClick={handleSkuLookup} disabled={lookupMutation.isPending}>
+                            {lookupMutation.isPending ? t("productVariant.form.skuLookup.searching") : t("productVariant.form.skuLookup.button")}
+                        </Button>
+                    </div>
+                    {lookupMutation.isError && (
+                        <p className="mt-1.5 text-sm text-error-fg">{lookupMutation.error?.message}</p>
+                    )}
+                    {lookupMutation.isSuccess && lookupMutation.data && (
+                        <p className="mt-1.5 text-sm text-verde-tinta">
+                            {t("productVariant.form.skuLookup.found", { product: lookupMutation.data.data.productDisplayName })}
+                        </p>
+                    )}
                 </FormField>
 
                 <FormField
-                    label={t("productVariant.form.unitsPerPallet")}
-                    htmlFor="unitsPerPallet"
-                    error={getFieldErrorMessage(t, errors.unitsPerPallet)}
+                    label={t("productVariant.form.boxesPerPallet")}
+                    htmlFor="boxesPerPallet"
+                    error={getFieldErrorMessage(t, errors.boxesPerPallet)}
                 >
                     <Input
-                        id="unitsPerPallet"
+                        id="boxesPerPallet"
                         type="number"
-                        hasError={!!errors.unitsPerPallet}
-                        {...register("unitsPerPallet", { setValueAs: toOptionalNumber })}
+                        hasError={!!errors.boxesPerPallet}
+                        {...register("boxesPerPallet", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
 
                 <FormField
-                    label={t("productVariant.form.unitsPerBox")}
-                    htmlFor="unitsPerBox"
-                    error={getFieldErrorMessage(t, errors.unitsPerBox)}
+                    label={t("productVariant.form.bagsPerBox")}
+                    htmlFor="bagsPerBox"
+                    error={getFieldErrorMessage(t, errors.bagsPerBox)}
                 >
                     <Input
-                        id="unitsPerBox"
+                        id="bagsPerBox"
                         type="number"
-                        hasError={!!errors.unitsPerBox}
-                        {...register("unitsPerBox", { setValueAs: toOptionalNumber })}
+                        hasError={!!errors.bagsPerBox}
+                        {...register("bagsPerBox", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
                 <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
-                    {t("productVariant.form.unitsPerBoxHint")}
+                    {t("productVariant.form.bagsPerBoxHint")}
                 </p>
 
                 <FormField
@@ -248,6 +304,25 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                 <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
                     {t("productVariant.form.unitsPerIntermediatePackageHint")}
                 </p>
+
+                {lookupMutation.data && (lookupMutation.data.data.unitMaterials.length > 0 || lookupMutation.data.data.palletMaterials.length > 0) && (
+                    <div className="mb-5 rounded-card border border-gris-campo bg-crema/60 p-3 text-sm sm:col-span-2">
+                        <p className="mb-2 font-semibold text-verde-profundo">{t("productVariant.form.skuLookup.recipeTitle")}</p>
+                        <p className="mb-2 text-texto-suave">{t("productVariant.form.skuLookup.recipeHint")}</p>
+                        <ul className="space-y-1 text-texto-suave">
+                            {lookupMutation.data.data.unitMaterials.map((material) => (
+                                <li key={`unit-${material.packagingId}`}>
+                                    {t("productVariant.form.skuLookup.unitMaterialLine", { name: material.displayName, quantity: material.quantity })}
+                                </li>
+                            ))}
+                            {lookupMutation.data.data.palletMaterials.map((material) => (
+                                <li key={`pallet-${material.packagingId}`}>
+                                    {t("productVariant.form.skuLookup.palletMaterialLine", { name: material.displayName, quantity: material.quantity })}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
                 <div className="flex gap-3 sm:col-span-2">
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

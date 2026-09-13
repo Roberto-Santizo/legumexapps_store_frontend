@@ -1,7 +1,4 @@
-// Separado de searchableSelect.component.tsx (mismo motivo que buttonClassName.ts vs.
-// button.component.tsx: un archivo que solo exporta componentes conserva el fast refresh).
-// Lo comparten SearchableSelect y CreatableSearchableSelect -- mismo look & feel, la única
-// diferencia entre ambos es si permiten escribir una opción nueva.
+
 function optionClassName(state: { isSelected: boolean; isFocused: boolean }): string {
     if (state.isSelected) return "bg-verde-profundo text-crema"
     if (state.isFocused) return "bg-crema text-verde-profundo"

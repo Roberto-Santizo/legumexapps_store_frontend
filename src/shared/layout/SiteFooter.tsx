@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { Leaf } from "lucide-react"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { FooterLinkColumn } from "@/shared/layout/FooterLinkColumn"
 import { FooterNewsletterForm } from "@/shared/layout/FooterNewsletterForm"
@@ -24,8 +25,10 @@ export function SiteFooter() {
     ]
 
     return (
-        <footer className="bg-verde-profundo pt-16 pb-8 text-crema">
-            <SiteContainer>
+        <footer className="relative overflow-hidden bg-verde-profundo pt-16 pb-8 text-crema">
+            <Leaf className="pointer-events-none absolute -right-8 -bottom-8 rotate-12 text-crema/5" size={220} strokeWidth={1} />
+
+            <SiteContainer className="relative">
                 <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
                     <div className="col-span-2 sm:col-span-4 lg:col-span-1">
                         <span className="font-display text-xl font-extrabold uppercase tracking-tight">Legumex</span>

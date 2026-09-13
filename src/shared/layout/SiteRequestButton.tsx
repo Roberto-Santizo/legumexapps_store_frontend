@@ -5,9 +5,10 @@ import { isB2cMode } from "@/shared/config/salesMode.config"
 
 type SiteRequestButtonProps = {
     itemCount?: number
+    tone?: "light" | "dark"
 }
 
-export function SiteRequestButton({ itemCount = 0 }: Readonly<SiteRequestButtonProps>) {
+export function SiteRequestButton({ itemCount = 0, tone = "light" }: Readonly<SiteRequestButtonProps>) {
     const { t } = useTranslation()
     const RequestIcon = isB2cMode() ? ShoppingCart : ClipboardList
 
@@ -15,7 +16,9 @@ export function SiteRequestButton({ itemCount = 0 }: Readonly<SiteRequestButtonP
         <Link
             to="/solicitud"
             aria-label={t(isB2cMode() ? "site.header.cart" : "site.header.request")}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full text-verde-profundo transition hover:bg-crema"
+            className={`relative flex h-10 w-10 items-center justify-center rounded-full transition ${
+                tone === "dark" ? "text-crema hover:bg-crema/15" : "text-verde-profundo hover:bg-crema"
+            }`}
         >
             <RequestIcon size={20} />
             {itemCount > 0 && (

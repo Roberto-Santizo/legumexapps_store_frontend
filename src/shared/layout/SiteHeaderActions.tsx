@@ -5,15 +5,22 @@ import { LanguageSwitch } from "@/shared/layout/LanguageSwitch"
 import { SiteSearchButton } from "@/shared/layout/SiteSearchButton"
 import { SiteRequestButton } from "@/shared/layout/SiteRequestButton"
 
-export function SiteHeaderActions() {
+type SiteHeaderActionsProps = {
+    tone?: "light" | "dark"
+}
+
+export function SiteHeaderActions({ tone = "light" }: Readonly<SiteHeaderActionsProps>) {
     const { t } = useTranslation()
 
     return (
         <div className="flex items-center gap-2">
-            <LanguageSwitch />
-            <SiteSearchButton />
-            <SiteRequestButton />
-            <Link to="/solicitud" className={`${buttonClassName("primary")} h-10 px-5 text-xs`}>
+            <LanguageSwitch tone={tone} />
+            <SiteSearchButton tone={tone} />
+            <SiteRequestButton tone={tone} />
+            <Link
+                to="/solicitud"
+                className={`${buttonClassName(tone === "dark" ? "dark" : "primary")} h-10 px-5 text-xs`}
+            >
                 {t("site.header.cta")}
             </Link>
         </div>

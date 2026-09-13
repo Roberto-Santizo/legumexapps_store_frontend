@@ -32,9 +32,6 @@ export function Sidebar({ isOpen, onClose }: Readonly<SidebarProps>) {
                         <X size={20} />
                     </button>
                 </div>
-                {/* min-h-0 es necesario para que un hijo flex con overflow-y-auto (Navigation)
-                    pueda encogerse por debajo de su altura de contenido -- sin esto, un flex item
-                    nunca se reduce más chico que su contenido y el scroll interno nunca activa. */}
                 <div className="flex min-h-0 flex-1 flex-col">
                     <Navigation />
                 </div>

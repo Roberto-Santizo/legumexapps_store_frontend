@@ -4,8 +4,6 @@ import { withUppercase } from "@/shared/form/withUppercase"
 
 type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
     hasError?: boolean
-    // Escape hatch para campos donde la mayúscula automática es incorrecta. 
-    // texto libre se pasa a mayúsculas (ver Input para el mismo comportamiento).
     preserveCase?: boolean
 }
 

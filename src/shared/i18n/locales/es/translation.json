@@ -225,11 +225,229 @@
     },
     "home": {
         "hero": {
-            "eyebrow": "Espacio de cotizaciones",
-            "titleLineOne": "Bienvenido a",
-            "titleLineTwo": "Legumex",
-            "description": "Solicita tu cotización de vegetales frescos y congelados de exportación, fácil y rápido.",
-            "primaryAction": "Solicitar cotización"
+            "eyebrow": "Vegetales frescos e IQF para exportación",
+            "titleLineOne": "Desde nuestros campos",
+            "titleLineTwo": "al mundo entero",
+            "tagline": "Growing Quality. Delivering Trust.",
+            "description": "Vegetales y alimentos de valor agregado con los que podés contar — en todos los formatos, todos los días del año.",
+            "primaryAction": "Ver productos",
+            "secondaryAction": "Hablemos",
+            "scrollCue": "Desliza"
+        },
+        "stats": {
+            "eyebrow": "Quiénes somos",
+            "title": "Integrados verticalmente, de la semilla a la exportación",
+            "description": "Cuatro generaciones y 20 años cultivando, procesando y exportando desde los valles más ricos de Guatemala — una cadena controlada de principio a fin, desde nuestra semilla hasta tu almacén en frío. El resultado: calidad constante, trazabilidad total y un abastecimiento con el que podés planificar, los 365 días del año.",
+            "imageAlt": "Campos de cultivo de Legumex",
+            "items": {
+                "yearsExperience": "Años de experiencia",
+                "generations": "Generaciones cultivando la misma tierra",
+                "countries": "Exportando a mercados globales — con clientes en más de 25 países.",
+                "microclimates": "Microclimas en nuestras regiones",
+                "hectares": "Hectáreas cultivadas"
+            }
+        },
+        "lines": {
+            "eyebrow": "Nuestras líneas de producto",
+            "title": "Siete líneas, un mismo estándar de calidad",
+            "subtitle": "Del campo a la góndola, en el formato que tu negocio necesita.",
+            "lineLabel": "Línea {{number}}",
+            "highlightsTitle": "Destacados de nuestro catálogo",
+            "items": {
+                "fresh": {
+                    "name": "Fresco",
+                    "description": "Producto fresco cultivado en las tierras altas de Guatemala — cosechado en su punto justo y en cadena de frío en cuestión de horas.",
+                    "pills": ["Brócoli", "Ejote", "Zanahoria", "Chile jalapeño", "Fresa"]
+                },
+                "frozen": {
+                    "name": "Congelado (IQF)",
+                    "description": "Congelado individual (IQF) al momento de la cosecha — sin azúcar añadida, sin conservantes, con certificación de inocuidad. Abastecimiento todo el año, sin temporadas.",
+                    "pills": [
+                        "Piña en trozos (orgánica y convencional)",
+                        "Piña tidbits",
+                        "Fresa entera y en rodajas",
+                        "Mango en trozos",
+                        "Arándano",
+                        "Mora",
+                        "Bolitas de melón cantaloupe",
+                        "Bolitas de melón honeydew",
+                        "Bolitas de sandía",
+                        "Durazno (rodajas y trozos)",
+                        "Aguacate en trozos",
+                        "Banano en rodajas",
+                        "Papaya en trozos",
+                        "Plátano frito",
+                        "Brócoli (floretes/cortes/tallos)",
+                        "Okra (entera/en corte)",
+                        "Ejote (entero/en corte)",
+                        "Arveja dulce",
+                        "Zanahoria en rodajas",
+                        "Coliflor y arroz de coliflor",
+                        "Espárrago",
+                        "Kale",
+                        "Arveja",
+                        "Espinaca",
+                        "Repollitas de Bruselas",
+                        "Baby corn",
+                        "Edamame",
+                        "Brocolini",
+                        "Mezcla asiática",
+                        "Normandy de brócoli",
+                        "Stir fry de brócoli",
+                        "Mezcla California",
+                        "Vegetales mixtos",
+                        "Mezcla de invierno",
+                        "Stir fry medley",
+                        "Arveja y zanahoria",
+                        "Brócoli-coliflor",
+                        "Piña",
+                        "Fresa",
+                        "Frambuesa",
+                        "Arándano",
+                        "Mango",
+                        "Durazno",
+                        "Banano",
+                        "Sandía",
+                        "Melón (+ mezclas a medida)",
+                        "Piña-Mango + probióticos",
+                        "Super Green + espirulina",
+                        "Pitaya roja-Açaí + colágeno"
+                    ]
+                },
+                "hpp": {
+                    "name": "HPP",
+                    "description": "Prensado en frío y procesado por alta presión (HPP) — sabor fresco y mayor vida útil, sin nada artificial añadido.",
+                    "pills": [
+                        "Piña",
+                        "Naranja",
+                        "Piña-Naranja",
+                        "Piña-Fresa",
+                        "Sandía",
+                        "Piña-Banano",
+                        "Zanahoria",
+                        "Piña-Maracuyá",
+                        "Piña-Mango",
+                        "Green",
+                        "Green Boost",
+                        "Remolacha",
+                        "Naranja-Jengibre",
+                        "Remolacha-Frambuesa",
+                        "Piña-Cayena",
+                        "Pepino-Menta",
+                        "Zanahoria-Jengibre",
+                        "Bloody Mary",
+                        "Margarita",
+                        "Fresa-Limón",
+                        "Mojito",
+                        "Margarita de Mango Picante",
+                        "Sports Drink (Limón, Naranja, Pepino, Fresa)",
+                        "Wellness (Sandía, Remolacha, Zanahoria, Green)",
+                        "Fresa-Mango-Banano",
+                        "Piña-Mango-Durazno",
+                        "Fresa-Frambuesa-Banano",
+                        "Mango-Zanahoria-Durazno"
+                    ]
+                },
+                "healthySnacks": {
+                    "name": "Snacks saludables",
+                    "description": "Snacks más saludables hechos con fruta y nueces reales — sin nada artificial, con certificación de inocuidad.",
+                    "pills": [
+                        "Mango",
+                        "Uva",
+                        "Piña",
+                        "Durazno",
+                        "Piña",
+                        "Fresa",
+                        "Banano",
+                        "Mango",
+                        "Macadamia",
+                        "Almendra",
+                        "Café",
+                        "Chocolate: amargo, con leche, blanco, golden, sin lácteos",
+                        "Fresa",
+                        "Frutos rojos",
+                        "Mix de fruta",
+                        "Coco",
+                        "Piña-Pepitoria",
+                        "Cubierta de chocolate"
+                    ]
+                },
+                "shelfStable": {
+                    "name": "Anaquel estable",
+                    "description": "Productos listos para consumir, de larga vida útil y sin conservantes añadidos — fáciles de almacenar, transportar y vender donde sea.",
+                    "pills": [
+                        "Brócoli / Brócoli Cheddar",
+                        "Tomate",
+                        "Zanahoria y Jengibre",
+                        "Frijol y Perejil",
+                        "Ayote y Camote",
+                        "Ejote y Zucchini",
+                        "Papa y Tocino",
+                        "Pepián",
+                        "Salsa para estofado",
+                        "Coliflor",
+                        "Camote",
+                        "Ayote butternut",
+                        "Haba",
+                        "Piña-Jalapeño",
+                        "Mango Habanero",
+                        "Frutos rojos Chipotle",
+                        "Aguacate Picante",
+                        "Fresa",
+                        "Mango",
+                        "Piña",
+                        "Rosa de Jamaica",
+                        "Té de limón",
+                        "Naranja-Pepitoria",
+                        "Horchata",
+                        "Piña",
+                        "Piña-Jalapeño",
+                        "Mango",
+                        "Durazno (almíbar ligero o agua de coco)",
+                        "Ejote francés",
+                        "Brocolini",
+                        "Repollitas de Bruselas",
+                        "Baby corn",
+                        "Zanahoria"
+                    ]
+                },
+                "foodService": {
+                    "name": "Food Service",
+                    "description": "Formatos a granel e industriales de nuestras frutas, vegetales y productos de valor agregado — especificaciones consistentes, en volumen y con empaque listo para exportación.",
+                    "pills": ["Formatos industriales", "Ingredientes a granel", "Soluciones naturales", "Packs de exportación"]
+                },
+                "privateLabel": {
+                    "name": "Marca propia",
+                    "description": "Tu marca, nuestra experiencia. Desarrollamos, formulamos, producimos y enviamos bajo tu marca — de la idea a entregado en todo el mundo.",
+                    "pills": ["Idea", "Formulación", "Empaque", "Producción", "Entregado en todo el mundo"]
+                }
+            }
+        },
+        "marquee": {
+            "items": [
+                "Integración vertical",
+                "No-OGM",
+                "365 días al año",
+                "Del campo a la exportación",
+                "Cuatro generaciones",
+                "Cadena de frío global"
+            ]
+        },
+        "leadCapture": {
+            "title": "¿Te interesa? Hablemos.",
+            "description": "Dejanos tus datos y nuestro equipo te contacta en un día hábil.",
+            "successTitle": "¡Gracias!",
+            "successMessage": "Recibimos tus datos y nos pondremos en contacto contigo pronto.",
+            "sendAnother": "Enviar otra solicitud",
+            "form": {
+                "name": "Nombre completo",
+                "companyName": "Empresa",
+                "email": "Correo electrónico",
+                "phone": "Teléfono",
+                "productLineInterest": "Línea de interés (opcional)",
+                "message": "Notas (opcional)",
+                "submit": "Enviar"
+            }
         }
     },
     "category": {
@@ -802,6 +1020,52 @@
         "table": {
             "searchPlaceholder": "Buscar por nombre...",
             "empty": "No hay costos adicionales registrados"
+        }
+    },
+    "lead": {
+        "list": {
+            "title": "Prospectos",
+            "subtitle": "Solicitudes de contacto enviadas desde la landing pública."
+        },
+        "table": {
+            "searchPlaceholder": "Buscar por nombre, empresa o correo...",
+            "empty": "Todavía no hay prospectos",
+            "receivedAt": "Recibido"
+        },
+        "form": {
+            "fullName": "Nombre completo",
+            "companyName": "Empresa",
+            "phone": "Teléfono",
+            "email": "Correo electrónico",
+            "productLineInterest": "Línea de interés",
+            "notes": "Notas",
+            "statusOptions": {
+                "new": "Nuevo",
+                "contacted": "Contactado"
+            }
+        },
+        "edit": {
+            "title": "Detalle del prospecto"
+        }
+    },
+    "siteImage": {
+        "list": {
+            "title": "Imágenes de la landing",
+            "subtitle": "Reemplaza las imágenes del hero y de las líneas de producto que se muestran en la landing pública. Deja un espacio vacío para mantener la imagen por defecto."
+        },
+        "form": {
+            "image": "Imagen"
+        },
+        "slots": {
+            "hero": "Fondo del hero",
+            "who_we_are": "Quiénes somos",
+            "line_fresh": "Fresh",
+            "line_frozen": "Congelado (IQF)",
+            "line_hpp": "HPP",
+            "line_snacks": "Snacks saludables",
+            "line_shelf": "Anaquel estable",
+            "line_foodservice": "Food Service",
+            "line_privatelabel": "Marca propia"
         }
     }
 }

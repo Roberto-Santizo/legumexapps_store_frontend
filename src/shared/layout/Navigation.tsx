@@ -8,6 +8,8 @@ import {
     ClipboardList,
     Cog,
     FolderTree,
+    Image,
+    Inbox,
     LayoutDashboard,
     Layers,
     MapPin,
@@ -36,17 +38,8 @@ type NavGroup = {
     items: NavItem[]
 }
 
-// El dashboard queda FUERA de los grupos a propósito -- es la landing del admin (ver
-// AdminIndexRedirect) y es un solo ítem, así que no tiene sentido volverlo colapsable. Vive como
-// link suelto arriba de todos los grupos, igual que antes de esta reorganización.
 const DASHBOARD_ITEM: NavItem = { url: "/admin/dashboard", labelKey: "dashboard.title", icon: LayoutDashboard, permission: "dashboard:view" }
 
-// Reorganizado en grupos colapsables (2026-09-10) -- la lista plana anterior tenía 16 ítems y
-// algunos quedaban cortados en pantallas cortas. Grupos agrupan por "qué tipo de dato es", no por
-// orden alfabético ni de creación: Cotizaciones (el motor de cotización en sí), Catálogo (todos
-// los datos/costos maestros que alimentan una cotización), Administración (cuentas y control de
-// acceso). Si se agrega una feature nueva de admin, agregar su ítem al grupo que le corresponda
-// por significado, no al final de una lista plana.
 const NAV_GROUPS: NavGroup[] = [
     {
         id: "quotes",
@@ -77,6 +70,8 @@ const NAV_GROUPS: NavGroup[] = [
         labelKey: "nav.groups.administration",
         items: [
             { url: "/admin/customers", labelKey: "customer.list.title", icon: Users, permission: "customers:view" },
+            { url: "/admin/leads", labelKey: "lead.list.title", icon: Inbox, permission: "leads:view" },
+            { url: "/admin/site-images", labelKey: "siteImage.list.title", icon: Image, permission: "siteContent:edit" },
             { url: "/admin/users", labelKey: "user.list.title", icon: UserCog, permission: "users:view" },
             { url: "/admin/roles", labelKey: "role.list.title", icon: ShieldCheck, permission: "roles:view" },
         ],
@@ -108,9 +103,6 @@ type NavGroupSectionProps = {
     onToggle: () => void
 }
 
-// Expand/collapse 100% en CSS (grid-template-rows 0fr -> 1fr + overflow-hidden en el hijo) -- sin
-// librería de acordeón (el repo no tiene ninguna) y sin medir alturas en JS. Transición sutil
-// (200ms), consistente con el resto de transiciones del sidebar (NavLink ya usa "transition").
 function NavGroupSection({ id, labelKey, items, isOpen, onToggle }: Readonly<NavGroupSectionProps>) {
     const { t } = useTranslation()
     const panelId = `nav-group-panel-${id}`
@@ -148,26 +140,18 @@ export function Navigation() {
     const { hasPermission } = usePermission()
     const location = useLocation()
 
-    // Cada grupo se filtra a sus ítems permitidos primero -- un grupo sin NINGÚN ítem visible no
-    // se agrega a la lista, así que su encabezado jamás se renderiza (nunca queda un grupo vacío).
     const visibleGroups = NAV_GROUPS.map((group) => ({
         ...group,
         items: group.items.filter((item) => hasPermission(item.permission)),
     })).filter((group) => group.items.length > 0)
 
-    // Mismo criterio de "activo" que ya usaba cada NavLink (prefijo de la URL, sin "end") -- así
-    // que si la ruta actual es p.ej. /admin/products/create, el grupo "Catálogo" se detecta como
-    // el que contiene la ruta activa igual que su NavLink ya se resalta como activo.
     const activeGroupId = visibleGroups.find((group) =>
         group.items.some((item) => location.pathname.startsWith(item.url))
     )?.id
 
     const [openGroupIds, setOpenGroupIds] = useState<Set<string>>(() => new Set(activeGroupId ? [activeGroupId] : []))
 
-    // El grupo que contiene la ruta activa siempre se abre solo al cargar/navegar -- así nunca se
-    // aterriza en una página cuyo ítem de menú queda escondido dentro de un grupo colapsado. Solo
-    // AGREGA el grupo activo al set (nunca quita nada), para no cerrar de golpe otro grupo que el
-    // usuario haya abierto a mano mientras navega dentro del mismo grupo activo.
+
     useEffect(() => {
         if (!activeGroupId) return
         setOpenGroupIds((prev) => (prev.has(activeGroupId) ? prev : new Set(prev).add(activeGroupId)))

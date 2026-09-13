@@ -216,11 +216,229 @@
     },
     "home": {
         "hero": {
-            "eyebrow": "Quote request space",
-            "titleLineOne": "Welcome to",
-            "titleLineTwo": "Legumex",
-            "description": "Request your quote for fresh and frozen export vegetables, quick and easy.",
-            "primaryAction": "Request a quote"
+            "eyebrow": "Fresh & IQF vegetables for export",
+            "titleLineOne": "From our fields",
+            "titleLineTwo": "to the world",
+            "tagline": "Growing Quality. Delivering Trust.",
+            "description": "Vegetables and value-added foods you can count on — in every format, every day of the year.",
+            "primaryAction": "See our products",
+            "secondaryAction": "Let's talk",
+            "scrollCue": "Scroll"
+        },
+        "stats": {
+            "eyebrow": "Who we are",
+            "title": "Vertically integrated, from seed to export",
+            "description": "Four generations and 20 years growing, processing and exporting from Guatemala's richest valleys — one chain, controlled end to end, from our seed to your cold storage. The result: consistent quality, full traceability, and supply you can plan around, 365 days a year.",
+            "imageAlt": "Legumex crop fields",
+            "items": {
+                "yearsExperience": "Years of experience",
+                "generations": "Generations growing the same land",
+                "countries": "Exporting to global markets — proudly supplying customers in more than 25 countries.",
+                "microclimates": "Microclimates across our regions",
+                "hectares": "Hectares under cultivation"
+            }
+        },
+        "lines": {
+            "eyebrow": "Our product lines",
+            "title": "Seven lines, one standard of quality",
+            "subtitle": "From the field to the shelf, in the format your business needs.",
+            "lineLabel": "Line {{number}}",
+            "highlightsTitle": "Highlights across our catalog",
+            "items": {
+                "fresh": {
+                    "name": "Fresh",
+                    "description": "Fresh produce grown in Guatemala's highlands — harvested at peak ripeness and into the cold chain within hours.",
+                    "pills": ["Broccoli", "Green beans", "Carrots", "Jalapeño peppers", "Strawberries"]
+                },
+                "frozen": {
+                    "name": "Frozen (IQF)",
+                    "description": "Individually quick-frozen at harvest — no sugar added, no preservatives, food-safety certified. Year-round supply with none of the seasonal gaps.",
+                    "pills": [
+                        "Pineapple chunks (organic & conventional)",
+                        "Pineapple tidbits",
+                        "Whole & sliced strawberry",
+                        "Mango chunks",
+                        "Blueberry",
+                        "Blackberry",
+                        "Cantaloupe balls",
+                        "Honeydew balls",
+                        "Watermelon balls",
+                        "Peaches (sliced & chunks)",
+                        "Avocado chunks",
+                        "Banana sliced",
+                        "Papaya chunks",
+                        "Fried plantains",
+                        "Broccoli (florets/cuts/stalks)",
+                        "Okra (whole/cut)",
+                        "Green beans (whole/cut)",
+                        "Sugar snap peas",
+                        "Sliced carrot",
+                        "Cauliflower & cauliflower rice",
+                        "Asparagus",
+                        "Kale",
+                        "Green peas",
+                        "Spinach",
+                        "Brussels sprouts",
+                        "Baby corn",
+                        "Edamame",
+                        "Brocolini",
+                        "Asian blend",
+                        "Broccoli Normandy",
+                        "Broccoli stir fry",
+                        "California mix",
+                        "Mixed vegetables",
+                        "Winter blend",
+                        "Stir fry medley",
+                        "Peas & carrots",
+                        "Broccoli-cauliflower",
+                        "Pineapple",
+                        "Strawberry",
+                        "Raspberry",
+                        "Blueberry",
+                        "Mango",
+                        "Peach",
+                        "Banana",
+                        "Watermelon",
+                        "Melon (+ custom blends)",
+                        "Pineapple-Mango + probiotics",
+                        "Super Green + spirulina",
+                        "Red Dragonfruit-Açaí + collagen"
+                    ]
+                },
+                "hpp": {
+                    "name": "HPP",
+                    "description": "Cold-pressed and high-pressure processed — fresh taste and longer shelf life, with nothing artificial added.",
+                    "pills": [
+                        "Pineapple",
+                        "Orange",
+                        "Pineapple-Orange",
+                        "Pineapple-Strawberry",
+                        "Watermelon",
+                        "Pineapple-Banana",
+                        "Carrot",
+                        "Pineapple-Passion fruit",
+                        "Pineapple-Mango",
+                        "Green",
+                        "Green Boost",
+                        "Beet",
+                        "Orange-Ginger",
+                        "Beet-Raspberry",
+                        "Pineapple-Cayenne",
+                        "Cucumber-Mint",
+                        "Carrot-Ginger",
+                        "Bloody Mary",
+                        "Margarita",
+                        "Strawberry Lime",
+                        "Mojito",
+                        "Spicy Mango Margarita",
+                        "Sports Drink (Lime, Orange, Cucumber, Strawberry)",
+                        "Wellness (Watermelon, Beet, Carrot, Green)",
+                        "Strawberry-Mango-Banana",
+                        "Pineapple-Mango-Peach",
+                        "Strawberry-Raspberry-Banana",
+                        "Mango-Carrot-Peach"
+                    ]
+                },
+                "healthySnacks": {
+                    "name": "Healthy Snacks",
+                    "description": "Better-for-you snacks made with real fruit and nuts — no artificial anything, food-safety certified.",
+                    "pills": [
+                        "Mango",
+                        "Grapes",
+                        "Pineapple",
+                        "Peach",
+                        "Pineapple",
+                        "Strawberry",
+                        "Banana",
+                        "Mango",
+                        "Macadamia",
+                        "Almond",
+                        "Coffee",
+                        "Chocolate: dark, milk, white, golden milk, dairy-free",
+                        "Strawberry",
+                        "Mixed Berries",
+                        "Fruit Mix",
+                        "Coconut",
+                        "Pineapple Pepita",
+                        "Chocolate Coated"
+                    ]
+                },
+                "shelfStable": {
+                    "name": "Shelf Stable",
+                    "description": "Ready-to-eat products with long shelf life and no preservatives added — easy to store, ship and sell anywhere.",
+                    "pills": [
+                        "Broccoli / Broccoli Cheddar",
+                        "Tomato",
+                        "Carrot & Ginger",
+                        "Beans & Parsley",
+                        "Pumpkin & Sweet Potato",
+                        "Green Beans & Zucchini",
+                        "Potato & Bacon",
+                        "Pepián",
+                        "Stew sauce",
+                        "Cauliflower",
+                        "Sweet Potato",
+                        "Butternut Squash",
+                        "Fava Bean",
+                        "Pineapple-Jalapeño",
+                        "Mango Habanero",
+                        "Berries Chipotle",
+                        "Avocado Spicy",
+                        "Strawberry",
+                        "Mango",
+                        "Pineapple",
+                        "Hibiscus",
+                        "Lemon Tea",
+                        "Orange Pepitoria",
+                        "Horchata",
+                        "Pineapple",
+                        "Pineapple-Jalapeño",
+                        "Mango",
+                        "Peaches (light syrup or coconut water)",
+                        "French Beans",
+                        "Brocolini",
+                        "Brussels Sprouts",
+                        "Baby Corn",
+                        "Carrots"
+                    ]
+                },
+                "foodService": {
+                    "name": "Food Service",
+                    "description": "Bulk and industrial formats of our fruits, vegetables and value-added products — consistent specs, delivered at volume, with export-ready packing.",
+                    "pills": ["Industrial formats", "Bulk ingredients", "Natural solutions", "Export packs"]
+                },
+                "privateLabel": {
+                    "name": "Private Label",
+                    "description": "Your brand, our expertise. We develop, formulate, produce and ship under your label — from idea to delivered worldwide.",
+                    "pills": ["Idea", "Formulation", "Packaging", "Production", "Delivered worldwide"]
+                }
+            }
+        },
+        "marquee": {
+            "items": [
+                "Vertically integrated",
+                "Non-GMO",
+                "365 days a year",
+                "Farm to export",
+                "Four generations",
+                "Global cold chain"
+            ]
+        },
+        "leadCapture": {
+            "title": "Interested? Let's talk.",
+            "description": "Leave us your details and our team will get back to you within one business day.",
+            "successTitle": "Thanks!",
+            "successMessage": "We've got your details and we'll be in touch shortly.",
+            "sendAnother": "Send another request",
+            "form": {
+                "name": "Full name",
+                "companyName": "Company",
+                "email": "Email",
+                "phone": "Phone",
+                "productLineInterest": "Product line of interest (optional)",
+                "message": "Notes (optional)",
+                "submit": "Send"
+            }
         }
     },
     "notFound": {
@@ -802,6 +1020,52 @@
         "table": {
             "searchPlaceholder": "Search by name...",
             "empty": "No additional costs registered"
+        }
+    },
+    "lead": {
+        "list": {
+            "title": "Leads",
+            "subtitle": "Contact requests submitted from the public landing page."
+        },
+        "table": {
+            "searchPlaceholder": "Search by name, company or email...",
+            "empty": "No leads yet",
+            "receivedAt": "Received"
+        },
+        "form": {
+            "fullName": "Full name",
+            "companyName": "Company",
+            "phone": "Phone",
+            "email": "Email",
+            "productLineInterest": "Product line of interest",
+            "notes": "Notes",
+            "statusOptions": {
+                "new": "New",
+                "contacted": "Contacted"
+            }
+        },
+        "edit": {
+            "title": "Lead detail"
+        }
+    },
+    "siteImage": {
+        "list": {
+            "title": "Landing images",
+            "subtitle": "Replace the hero and product line images shown on the public landing page. Leave a slot empty to keep the default image."
+        },
+        "form": {
+            "image": "Image"
+        },
+        "slots": {
+            "hero": "Hero background",
+            "who_we_are": "Who we are",
+            "line_fresh": "Fresh",
+            "line_frozen": "Frozen (IQF)",
+            "line_hpp": "HPP",
+            "line_snacks": "Healthy Snacks",
+            "line_shelf": "Shelf Stable",
+            "line_foodservice": "Food Service",
+            "line_privatelabel": "Private Label"
         }
     }
 }

@@ -67,8 +67,6 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
 
                 {preview ? (
                     <>
-                        {/* Alto acotado (no w-full a secas): una foto vertical de celular ya no estira
-                            el modal y tapa los botones de abajo. object-contain evita recortarla. */}
                         <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-hueso sm:h-72">
                             <img src={preview} alt="" className="h-full w-full object-contain" />
                         </div>

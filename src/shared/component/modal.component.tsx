@@ -9,10 +9,7 @@ type ModalProps = {
     children: ReactNode
 }
 
-// Modal genérico sin librería -- overlay + panel centrado, cierra con Escape o clic afuera.
-// Se usa para los formularios de "alta rápida" que abren los *Select creatables (ver
-// ingredientSelect/palletMaterialSelect/presentationSelect.component.tsx) cuando el usuario
-// tipea un valor que no existe todavía en el catálogo.
+
 export function Modal({ title, onClose, children }: Readonly<ModalProps>) {
     const { t } = useTranslation()
 

@@ -139,6 +139,13 @@ const EditCustomerPage = lazy(() =>
     import("@/feature/customer/page/editCustomer.page").then((module) => ({ default: module.EditCustomerPage }))
 )
 
+const LeadListPage = lazy(() => import("@/feature/lead/page/lead.page").then((module) => ({ default: module.LeadListPage })))
+const EditLeadPage = lazy(() => import("@/feature/lead/page/editLead.page").then((module) => ({ default: module.EditLeadPage })))
+
+const SiteImageListPage = lazy(() =>
+    import("@/feature/siteImage/page/siteImage.page").then((module) => ({ default: module.SiteImageListPage }))
+)
+
 const routes = [
     { path: "dashboard", component: DashboardPage, permission: "dashboard:view" },
 
@@ -188,6 +195,11 @@ const routes = [
     { path: "customers", component: CustomerListPage, permission: "customers:view" },
     { path: "customers/create", component: CreateCustomerPage, permission: "customers:create" },
     { path: "customers/:customerId/edit", component: EditCustomerPage, permission: "customers:edit" },
+
+    { path: "leads", component: LeadListPage, permission: "leads:view" },
+    { path: "leads/:leadId/edit", component: EditLeadPage, permission: "leads:edit" },
+
+    { path: "site-images", component: SiteImageListPage, permission: "siteContent:edit" },
 
     { path: "users", component: UserListPage, permission: "users:view" },
     { path: "users/create", component: CreateUserPage, permission: "users:create" },

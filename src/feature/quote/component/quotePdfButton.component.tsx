@@ -23,6 +23,9 @@ type QuotePdfButtonProps = {
     // Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- default false,
     // solo se reenvía a QuotePdfDocument. Ver el mismo prop ahí.
     showTransport?: boolean
+    // Aviso "cotización de referencia" (2026-09-13) -- default false, solo se reenvía a
+    // QuotePdfDocument. Ver el mismo prop ahí.
+    showReferenceDisclaimer?: boolean
     sendEmailAPI: (formData: FormData) => Promise<{ message: string } | undefined>
 }
 
@@ -65,7 +68,13 @@ function triggerBrowserDownload(blob: Blob, fileName: string): void {
 }
 
 
-export function QuotePdfButton({ lines, showCostBreakdown = true, showTransport = false, sendEmailAPI }: Readonly<QuotePdfButtonProps>) {
+export function QuotePdfButton({
+    lines,
+    showCostBreakdown = true,
+    showTransport = false,
+    showReferenceDisclaimer = false,
+    sendEmailAPI,
+}: Readonly<QuotePdfButtonProps>) {
     const { t } = useTranslation()
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [step, setStep] = useState<PdfModalStep>("name")
@@ -159,6 +168,7 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, showTransport 
                     lines={lines}
                     showCostBreakdown={showCostBreakdown}
                     showTransport={showTransport}
+                    showReferenceDisclaimer={showReferenceDisclaimer}
                 />
             ).toBlob()
 
@@ -197,6 +207,7 @@ export function QuotePdfButton({ lines, showCostBreakdown = true, showTransport 
                     lines={lines}
                     showCostBreakdown={showCostBreakdown}
                     showTransport={showTransport}
+                    showReferenceDisclaimer={showReferenceDisclaimer}
                 />
             ).toBlob()
         } catch {

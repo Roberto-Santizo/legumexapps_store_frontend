@@ -9,11 +9,13 @@ import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { Spinner } from "@/shared/component/spinner.component"
 import { getQuoteProductsAPI, saveQuoteAPI, sendQuotePdfEmailAPI } from "@/feature/quote/api/quote.api"
 import { QuoteCalculatorForm } from "@/feature/quote/component/quoteCalculatorForm.component"
-import type { QuoteWizardStep } from "@/feature/quote/component/quoteCalculatorForm.component"
+import type { QuoteWizardStep, LeadContactFormValues } from "@/feature/quote/component/quoteCalculatorForm.component"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary.component"
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
 import type { CalculateQuoteInput, QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+
+const EMPTY_LEAD_CONTACT: LeadContactFormValues = { fullName: "", companyName: "", email: "", notes: "" }
 
 export function QuoteRequestPage() {
     const { t } = useTranslation()
@@ -24,6 +26,13 @@ export function QuoteRequestPage() {
     const [wizardStep, setWizardStep] = useState<QuoteWizardStep>("mode")
 
     const [formResetKey, setFormResetKey] = useState(0)
+
+    // Datos de contacto del prospecto (2026-09-13) -- vive ACÁ, no dentro de QuoteCalculatorForm,
+    // porque "Cotizar otro producto" remonta ese form con un `key` nuevo (formResetKey) para
+    // limpiar el resto de sus campos -- si el contacto viviera adentro, el cliente tendría que
+    // volver a escribirlo en cada producto del mismo pedido. Solo se limpia al empezar un pedido
+    // NUEVO (handleClearOrder), no al cotizar otro producto del mismo pedido.
+    const [leadContact, setLeadContact] = useState<LeadContactFormValues>(EMPTY_LEAD_CONTACT)
 
     const productsQuery = useQuery({ queryKey: ["quoteProducts"], queryFn: getQuoteProductsAPI })
     // Transporte "apagado" temporalmente (2026-09-10): el cliente ya no elige destino (ver
@@ -71,6 +80,7 @@ export function QuoteRequestPage() {
 
     const handleClearOrder = () => {
         setQuotedLines([])
+        setLeadContact(EMPTY_LEAD_CONTACT)
         handleQuoteAnother()
     }
 
@@ -87,18 +97,27 @@ export function QuoteRequestPage() {
                     products={products}
                     destinations={[]}
                     showDestination={false}
+                    showLeadContact
+                    leadContact={leadContact}
+                    onLeadContactChange={setLeadContact}
                     onSubmit={handleSubmit}
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}
                 />
                 <div className="space-y-6">
-                    <QuoteResultCard result={currentResult} isPending={calculateMutation.isPending} showCostBreakdown={false} />
+                    <QuoteResultCard
+                        result={currentResult}
+                        isPending={calculateMutation.isPending}
+                        showCostBreakdown={false}
+                        showReferenceDisclaimer
+                    />
                     {quotedLines.length > 0 && (
                         <QuotedOrderSummary
                             lines={quotedLines}
                             onQuoteAnother={handleQuoteAnother}
                             onClear={handleClearOrder}
                             showCostBreakdown={false}
+                            showReferenceDisclaimer
                         />
                     )}
                 </div>
@@ -113,6 +132,9 @@ export function QuoteRequestPage() {
                     products={products}
                     destinations={[]}
                     showDestination={false}
+                    showLeadContact
+                    leadContact={leadContact}
+                    onLeadContactChange={setLeadContact}
                     onSubmit={handleSubmit}
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}
@@ -123,6 +145,7 @@ export function QuoteRequestPage() {
                         onQuoteAnother={handleQuoteAnother}
                         onClear={handleClearOrder}
                         showCostBreakdown={false}
+                        showReferenceDisclaimer
                     />
                 )}
             </div>
@@ -144,7 +167,12 @@ export function QuoteRequestPage() {
                     </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-5">
-                    <QuotePdfButton lines={quotedLines} showCostBreakdown={false} sendEmailAPI={sendQuotePdfEmailAPI} />
+                    <QuotePdfButton
+                        lines={quotedLines}
+                        showCostBreakdown={false}
+                        showReferenceDisclaimer
+                        sendEmailAPI={sendQuotePdfEmailAPI}
+                    />
                     <button
                         onClick={logout}
                         type="button"

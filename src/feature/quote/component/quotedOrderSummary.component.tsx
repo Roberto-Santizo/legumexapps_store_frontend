@@ -17,10 +17,20 @@ type QuotedOrderSummaryProps = {
     // para el motivo de no reusar showCostBreakdown acá (admin sigue viendo el resto del
     // desglose con showCostBreakdown=true, pero ya no debe ver transporte).
     showTransport?: boolean
+    // Aviso "cotización de referencia" (2026-09-13) -- default false, ver el mismo prop en
+    // quoteResultCard.component.tsx (acá solo se reenvía al detalle expandido de cada línea).
+    showReferenceDisclaimer?: boolean
 }
 
 
-export function QuotedOrderSummary({ lines, onQuoteAnother, onClear, showCostBreakdown = true, showTransport = false }: Readonly<QuotedOrderSummaryProps>) {
+export function QuotedOrderSummary({
+    lines,
+    onQuoteAnother,
+    onClear,
+    showCostBreakdown = true,
+    showTransport = false,
+    showReferenceDisclaimer = false,
+}: Readonly<QuotedOrderSummaryProps>) {
     const { t } = useTranslation()
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
     const total = lines.reduce((sum, line) => sum + line.totalCost, 0)
@@ -96,7 +106,13 @@ export function QuotedOrderSummary({ lines, onQuoteAnother, onClear, showCostBre
                             </button>
                             {isExpanded && (
                                 <div className="pb-3">
-                                    <QuoteResultCard result={line} isPending={false} showCostBreakdown={showCostBreakdown} showTransport={showTransport} />
+                                    <QuoteResultCard
+                                        result={line}
+                                        isPending={false}
+                                        showCostBreakdown={showCostBreakdown}
+                                        showTransport={showTransport}
+                                        showReferenceDisclaimer={showReferenceDisclaimer}
+                                    />
                                 </div>
                             )}
                         </div>

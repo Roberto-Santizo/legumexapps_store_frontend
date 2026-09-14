@@ -65,7 +65,7 @@ export function SiteHeader() {
                 </div>
 
                 <div className="flex items-center gap-3 lg:hidden">
-                    <Link to="/catalogo" className={`${buttonClassName("primary")} h-10 px-4 text-xs`}>
+                    <Link to="/solicitud" className={`${buttonClassName("primary")} h-10 px-4 text-xs`}>
                         {t("site.header.cta")}
                     </Link>
                     <button

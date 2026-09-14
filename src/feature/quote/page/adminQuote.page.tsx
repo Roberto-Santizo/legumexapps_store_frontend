@@ -28,6 +28,12 @@ export function AdminQuoteListPage() {
                   quote.quotingCustomer.companyName,
                   quote.quotingCustomer.email,
                   quote.productDisplayName,
+                  // Prospecto vinculado (2026-09-13, ver Quote.leadId) -- también filtrable, no
+                  // solo visible, para que el staff pueda buscar "las cotizaciones de este
+                  // prospecto" por su nombre/empresa/correo.
+                  quote.quotedLead?.fullName,
+                  quote.quotedLead?.companyName,
+                  quote.quotedLead?.email,
               ]
                   .filter(Boolean)
                   .join(" ")
@@ -77,6 +83,16 @@ export function AdminQuoteListPage() {
                                         {quote.quotingCustomer.companyName && ` · ${quote.quotingCustomer.companyName}`}
                                         {` · ${quote.quotingCustomer.email}`}
                                     </p>
+                                    {/* Prospecto vinculado (2026-09-13, ver Quote.leadId) -- ausente en cotizaciones
+                                    guardadas antes de este cambio, se omite la línea en ese caso. */}
+                                    {quote.quotedLead && (
+                                        <p className="mt-1 truncate text-xs font-medium text-dorado">
+                                            {t("adminQuote.list.leadLabel", {
+                                                fullName: quote.quotedLead.fullName,
+                                                companyName: quote.quotedLead.companyName,
+                                            })}
+                                        </p>
+                                    )}
                                     <p className="mt-1 text-xs text-texto-suave">
                                         {/* Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- ya no se
                                         interpola el destino acá tampoco. Reversión futura: volver a

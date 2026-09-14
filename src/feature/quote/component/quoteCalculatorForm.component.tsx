@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 import { ArrowLeft, ChevronRight, Package, SlidersHorizontal } from "lucide-react"
-import { calculateQuoteSchema } from "@/feature/quote/schema/quote.schema"
+import { calculateQuoteSchema, quoteLeadContactSchema } from "@/feature/quote/schema/quote.schema"
 import type { CalculateQuoteInput, QuotableProduct, QuoteDestination } from "@/feature/quote/schema/quote.schema"
 import type { DestinationCountry } from "@/feature/destination/schema/destination.schema"
 import { Card } from "@/shared/component/card.component"
@@ -32,6 +33,16 @@ type QuoteCalculatorFormProps = {
     // consumidor que lo pasa en false. destinationId ya es opcional en calculateQuoteSchema, así
     // que no enviarlo nunca no rompe la validación.
     showDestination?: boolean
+    // Datos de contacto del prospecto (2026-09-13) -- default false a propósito, mismo criterio
+    // inverso a showDestination: SOLO el cliente (quoteRequest.page.tsx) lo activa, el admin
+    // (adminQuoteCalculatorPage) no lo pasa y no ve ningún cambio. Controlado desde AFUERA (no es
+    // estado interno de este componente) porque el "pedido en curso" remonta este form con un
+    // `key` distinto al pasar a la siguiente línea (ver formResetKey en quoteRequest.page.tsx) --
+    // si el contacto viviera acá adentro, el cliente tendría que volver a escribirlo en cada
+    // producto del mismo pedido.
+    showLeadContact?: boolean
+    leadContact?: LeadContactFormValues
+    onLeadContactChange?: (contact: LeadContactFormValues) => void
 }
 
 const MIX_PERCENTAGE_TOLERANCE = 0.5
@@ -40,8 +51,26 @@ type QuoteMode = "finished" | "customizable"
 
 export type QuoteWizardStep = "mode" | "category" | "product" | "details"
 
-function variantLabel(variant: QuotableProduct["variants"][number]): string {
-    return [variant.presentationLabel, variant.packagingLabel, variant.skuCode].filter(Boolean).join(" · ")
+export type LeadContactFormValues = { fullName: string; companyName: string; email: string; notes: string }
+
+// No exportado a propósito (oxlint react/only-export-components) -- un archivo .component.tsx
+// solo debería exportar componentes para que Fast Refresh funcione bien; quoteRequest.page.tsx
+// define su propia copia local de este mismo valor por defecto en vez de importarlo de acá.
+const EMPTY_LEAD_CONTACT: LeadContactFormValues = { fullName: "", companyName: "", email: "", notes: "" }
+
+// Etiqueta del selector de SKU (2026-09-13) -- compuesta 100% de datos que ya existen en
+// QuotableVariant/QuotableProduct, nunca de un campo de texto libre nuevo ni de Excel: nombre del
+// Producto (para que la opción sea autocontenida, aunque el producto ya se eligió en el paso
+// anterior del wizard) + bagsPerBox × presentationLabel (tamaño por unidad) + boxesPerPallet.
+// boxesPerPallet/bagsPerBox nunca vienen null acá: listQuotableProducts (quote.service.ts,
+// backend) ya filtra con `WHERE boxesPerPallet IS NOT NULL AND bagsPerBox IS NOT NULL` -- una
+// variante sin esos datos ni siquiera llega a esta lista. presentationLabel sí puede ser null
+// (variante sin presentationId) -- en ese caso se omite el "× tamaño" en vez de mostrar "null".
+function variantLabel(productName: string, variant: QuotableProduct["variants"][number], t: TFunction): string {
+    const unitsPerBox = t("site.quoteRequest.form.variantLabel.unitsPerBox", { count: variant.bagsPerBox })
+    const sizePart = variant.presentationLabel ? `${unitsPerBox} × ${variant.presentationLabel}` : unitsPerBox
+    const boxesPerPallet = t("site.quoteRequest.form.variantLabel.boxesPerPallet", { count: variant.boxesPerPallet })
+    return [productName, sizePart, boxesPerPallet].filter(Boolean).join(" · ")
 }
 
 function crumbClassName(isActive: boolean, enabled: boolean): string {
@@ -50,7 +79,17 @@ function crumbClassName(isActive: boolean, enabled: boolean): string {
     return "cursor-not-allowed text-gris-campo"
 }
 
-export function QuoteCalculatorForm({ products, destinations, onSubmit, isSubmitting, onStepChange, showDestination = true }: Readonly<QuoteCalculatorFormProps>) {
+export function QuoteCalculatorForm({
+    products,
+    destinations,
+    onSubmit,
+    isSubmitting,
+    onStepChange,
+    showDestination = true,
+    showLeadContact = false,
+    leadContact = EMPTY_LEAD_CONTACT,
+    onLeadContactChange,
+}: Readonly<QuoteCalculatorFormProps>) {
     const { t } = useTranslation()
     const [step, setStep] = useState<QuoteWizardStep>("mode")
     const [mode, setMode] = useState<QuoteMode>("finished")
@@ -117,6 +156,23 @@ export function QuoteCalculatorForm({ products, destinations, onSubmit, isSubmit
     const mixTotal = ingredientPool.reduce((sum, option) => sum + (Number(mixPercentages[option.ingredientId]) || 0), 0)
     const isMixComplete = Math.abs(mixTotal - 100) <= MIX_PERCENTAGE_TOLERANCE
 
+    // Validación real del contacto del prospecto (2026-09-13) -- reusa quoteLeadContactSchema, el
+    // mismo schema que el backend exige en POST /quotes (saveQuoteSchema), en vez de chequeos
+    // sueltos a mano. notes vacío se manda como undefined porque el schema lo trata como opcional
+    // (una cadena vacía técnicamente "cuenta" para z.string(), no queremos que un textarea vacío
+    // cuente como "notas provistas").
+    const leadContactValidation = quoteLeadContactSchema.safeParse({
+        fullName: leadContact.fullName,
+        companyName: leadContact.companyName,
+        email: leadContact.email,
+        notes: leadContact.notes.trim() || undefined,
+    })
+    const isLeadContactValid = !showLeadContact || leadContactValidation.success
+
+    const handleLeadContactFieldChange = (field: keyof LeadContactFormValues, value: string) => {
+        onLeadContactChange?.({ ...leadContact, [field]: value })
+    }
+
     const resetProductSelection = () => {
         setSelectedProductId(null)
         setValue("productVariantId", undefined as unknown as number)
@@ -155,6 +211,16 @@ export function QuoteCalculatorForm({ products, destinations, onSubmit, isSubmit
     }
 
     const submit = handleSubmit((formData) => {
+        // Igual que ingredientMix abajo: leadContact no es un campo registrado con
+        // react-hook-form (vive controlado desde afuera, ver leadContact/onLeadContactChange), se
+        // mergea a mano acá. Si showLeadContact está activo pero el contacto no es válido, no se
+        // llega a onSubmit -- el botón ya está disabled en ese caso (ver isLeadContactValid), esto
+        // es una segunda barrera por si el submit se dispara de otra forma (ej. Enter en un input).
+        if (showLeadContact) {
+            if (!leadContactValidation.success) return
+            formData = { ...formData, leadContact: leadContactValidation.data }
+        }
+
         if (mode !== "customizable") {
             onSubmit(formData)
             return
@@ -389,7 +455,7 @@ export function QuoteCalculatorForm({ products, destinations, onSubmit, isSubmit
                                 <option value="">{t("common.selectPlaceholder")}</option>
                                 {variants.map((variant) => (
                                     <option key={variant.id} value={variant.id}>
-                                        {variantLabel(variant)}
+                                        {variantLabel(selectedProduct.displayName, variant, t)}
                                     </option>
                                 ))}
                             </Select>
@@ -453,9 +519,50 @@ export function QuoteCalculatorForm({ products, destinations, onSubmit, isSubmit
                             </>
                         )}
 
+                        {showLeadContact && (
+                            <div className="mb-2 rounded-[10px] border border-gris-campo p-4 sm:col-span-2">
+                                <p className="mb-1 text-sm font-semibold text-verde-profundo">{t("site.quoteRequest.form.leadContact.title")}</p>
+                                <p className="mb-3 text-sm text-texto-suave">{t("site.quoteRequest.form.leadContact.subtitle")}</p>
+                                <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+                                    <FormField label={t("site.quoteRequest.form.leadContact.fullName")} htmlFor="leadContactFullName">
+                                        <Input
+                                            id="leadContactFullName"
+                                            value={leadContact.fullName}
+                                            onChange={(event) => handleLeadContactFieldChange("fullName", event.target.value)}
+                                        />
+                                    </FormField>
+                                    <FormField label={t("site.quoteRequest.form.leadContact.companyName")} htmlFor="leadContactCompanyName">
+                                        <Input
+                                            id="leadContactCompanyName"
+                                            value={leadContact.companyName}
+                                            onChange={(event) => handleLeadContactFieldChange("companyName", event.target.value)}
+                                        />
+                                    </FormField>
+                                    <FormField label={t("site.quoteRequest.form.leadContact.email")} htmlFor="leadContactEmail">
+                                        <Input
+                                            id="leadContactEmail"
+                                            type="email"
+                                            value={leadContact.email}
+                                            onChange={(event) => handleLeadContactFieldChange("email", event.target.value)}
+                                        />
+                                    </FormField>
+                                    <FormField label={t("site.quoteRequest.form.leadContact.notes")} htmlFor="leadContactNotes">
+                                        <Input
+                                            id="leadContactNotes"
+                                            value={leadContact.notes}
+                                            onChange={(event) => handleLeadContactFieldChange("notes", event.target.value)}
+                                        />
+                                    </FormField>
+                                </div>
+                                {!isLeadContactValid && (leadContact.fullName || leadContact.companyName || leadContact.email) && (
+                                    <p className="mt-2 text-sm text-error-fg">{t("site.quoteRequest.form.leadContact.incomplete")}</p>
+                                )}
+                            </div>
+                        )}
+
                         <Button
                             type="submit"
-                            disabled={isSubmitting || (mode === "customizable" && !isMixComplete)}
+                            disabled={isSubmitting || (mode === "customizable" && !isMixComplete) || !isLeadContactValid}
                             className="mt-2 w-full"
                         >
                             {isSubmitting ? t("common.loading") : t("site.quoteRequest.form.submit")}

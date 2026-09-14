@@ -1,5 +1,18 @@
 import { z } from "zod"
 import { responseDestinationSchema } from "@/feature/destination/schema/destination.schema"
+import { leadCaptureSchema } from "@/feature/home/schema/leadCapture.schema"
+
+// Datos de contacto del prospecto capturados en el cotizador del cliente (2026-09-13) -- reusa
+// los mismos validadores del formulario público de la landing (leadCaptureSchema) en vez de
+// retipearlos, quedándose solo con los 4 campos que el cotizador SÍ pide (no phone/
+// productLineInterest/website, ver Lead.model.ts). Mismo criterio "reusar, no duplicar" que el
+// schema espejo del backend (quoteLeadContactSchema en lead.schema.ts).
+export const quoteLeadContactSchema = leadCaptureSchema.pick({
+    fullName: true,
+    companyName: true,
+    email: true,
+    notes: true,
+})
 
 const quotableVariantSchema = z.object({
     id: z.number().int(),
@@ -47,6 +60,13 @@ export const calculateQuoteSchema = z.object({
     destinationId: z.number().int().positive().optional(),
     requestedPallets: z.number().int().min(1),
     ingredientMix: z.array(ingredientMixLineSchema).optional(),
+    // Opcional ACÁ (2026-09-13) -- QuoteCalculatorForm es compartido por cliente y admin (ver
+    // showLeadContact), y el admin no lo captura. Mismo patrón que ingredientMix: no viene de un
+    // campo registrado con react-hook-form, se mergea a mano en el submit del wizard (ver
+    // quoteCalculatorForm.component.tsx). El backend SÍ lo exige para la ruta de guardar del
+    // cliente (POST /quotes usa saveQuoteSchema, requerido ahí) -- acá queda opcional solo para
+    // que este mismo tipo sirva también al admin, que nunca lo manda.
+    leadContact: quoteLeadContactSchema.optional(),
 })
 
 const rawMaterialLineSchema = z.object({
@@ -178,9 +198,21 @@ const quoteCustomerSchema = z.object({
     email: z.string(),
 })
 
+// Prospecto vinculado (2026-09-13, ver Quote.leadId en el backend). nullable+optional: cotizaciones
+// guardadas ANTES de este cambio no tienen leadId -- listAllQuotes las sigue devolviendo, solo sin
+// esta clave/con quotedLead: null.
+const quoteLeadSchema = z.object({
+    id: z.number().int(),
+    fullName: z.string(),
+    companyName: z.string(),
+    email: z.string(),
+})
+
 export const adminQuoteSchema = savedQuoteSchema.extend({
     customerId: z.number().int(),
     quotingCustomer: quoteCustomerSchema,
+    leadId: z.number().int().nullable().optional(),
+    quotedLead: quoteLeadSchema.nullable().optional(),
 })
 
 export type QuotableProduct = z.infer<typeof quotableProductSchema>

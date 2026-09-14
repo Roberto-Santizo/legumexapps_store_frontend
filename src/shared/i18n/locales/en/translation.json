@@ -121,6 +121,10 @@
                 "category": "Category",
                 "product": "Product",
                 "variant": "Presentation",
+                "variantLabel": {
+                    "unitsPerBox": "{{count}} units",
+                    "boxesPerPallet": "{{count}} boxes/pallet"
+                },
                 "requestedPallets": "Pallets requested",
                 "country": "Destination country",
                 "countryOptions": {
@@ -129,6 +133,15 @@
                 },
                 "destination": "Destination",
                 "noDestinationsForCountry": "There are no destinations configured for this country yet.",
+                "leadContact": {
+                    "title": "Who is this quote for?",
+                    "subtitle": "Tell us who is requesting this quote so our team can follow up.",
+                    "fullName": "Full name",
+                    "companyName": "Company",
+                    "email": "Email",
+                    "notes": "Additional notes (optional)",
+                    "incomplete": "Fill in name, company, and a valid email to calculate the quote."
+                },
                 "submit": "Calculate quote",
                 "modeFinished": "Ready-made product",
                 "modeCustomizable": "Customize my product",
@@ -166,6 +179,7 @@
             },
             "result": {
                 "empty": "Fill out the form and calculate your quote to see the cost breakdown here.",
+                "referenceDisclaimer": "Reference quote only. Prices are estimates, not a final offer. We'll confirm details and final pricing when we contact you.",
                 "destination": "Destination",
                 "total": "Total cost",
                 "pallets": "Pallets",
@@ -923,7 +937,8 @@
             "empty": "No quote has been saved yet.",
             "noMatches": "No quote matches the search.",
             "summary": "{{date}} · {{pallets}} pallets · {{destination}}",
-            "summaryNoDestination": "{{date}} · {{pallets}} pallets"
+            "summaryNoDestination": "{{date}} · {{pallets}} pallets",
+            "leadLabel": "Lead: {{fullName}} · {{companyName}}"
         }
     },
     "adminQuoteCalculator": {
@@ -987,6 +1002,7 @@
                 "adjustment": "Additional adjustment",
                 "lineTotal": "Line total",
                 "orderTotal": "Order total",
+                "referenceDisclaimer": "Reference quote only. Prices are estimates, not a final offer. We'll confirm details and final pricing when we contact you.",
                 "restrictionsTitle": "Restrictions",
                 "restrictionsText": "This quote is valid for {{days}} days only from its issue date. After this period prices may change and a new quote must be requested.",
                 "generatedAt": "Document generated on {{date}}"
@@ -1073,7 +1089,9 @@
             }
         },
         "edit": {
-            "title": "Lead detail"
+            "title": "Lead detail",
+            "linkedQuotesTitle": "This lead's quotes",
+            "linkedQuoteSummary": "{{date}} · {{pallets}} pallet(s)"
         }
     },
     "siteImage": {

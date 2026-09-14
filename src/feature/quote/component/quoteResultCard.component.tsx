@@ -18,6 +18,11 @@ type QuoteResultCardProps = {
     // apagar transporte para el admin, que sigue con showCostBreakdown=true. Reversión futura:
     // volver el default a true (o pasarlo explícito) donde se quiera reactivar.
     showTransport?: boolean
+    // Aviso "cotización de referencia" (2026-09-13) -- default false, SOLO el cliente
+    // (quoteRequest.page.tsx) lo activa. El admin (AdminQuoteListPage/adminQuoteCalculatorPage)
+    // no lo pasa: internamente el staff SÍ conoce el desglose real, el aviso es para quien
+    // recibe el precio desde afuera sin ver cómo se armó.
+    showReferenceDisclaimer?: boolean
 }
 
 function CostRow({
@@ -64,7 +69,13 @@ function CostSection({
     )
 }
 
-export function QuoteResultCard({ result, isPending, showCostBreakdown = true, showTransport = false }: Readonly<QuoteResultCardProps>) {
+export function QuoteResultCard({
+    result,
+    isPending,
+    showCostBreakdown = true,
+    showTransport = false,
+    showReferenceDisclaimer = false,
+}: Readonly<QuoteResultCardProps>) {
     const { t } = useTranslation()
     // Sistema USD-only (2026-09-10): ya no hay toggle de moneda ni conversión -- todo se muestra
     // en dólares con el formatter compartido. `format` se mantiene como alias para no tener que
@@ -109,6 +120,15 @@ export function QuoteResultCard({ result, isPending, showCostBreakdown = true, s
                     <p className="font-display text-2xl font-extrabold text-verde-profundo">{format(result.totalCost)}</p>
                 </div>
             </div>
+
+            {/* Aviso "cotización de referencia" (2026-09-13) -- solo cliente, ver
+            showReferenceDisclaimer arriba. Un bloque corto, en rojo, cerca del total -- nunca en
+            el cotizador interno del admin. */}
+            {showReferenceDisclaimer && (
+                <p className="mb-5 rounded-[10px] border border-error-bd bg-error-bg px-3 py-2.5 text-sm font-medium text-error-fg">
+                    {t("site.quoteRequest.result.referenceDisclaimer")}
+                </p>
+            )}
 
             <div className="mb-5 grid grid-cols-3 gap-3 text-center">
                 <div className="rounded-[10px] bg-crema p-3">

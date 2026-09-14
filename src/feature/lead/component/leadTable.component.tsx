@@ -19,7 +19,7 @@ export function LeadTable() {
             columns={[
                 { key: "fullName", header: t("lead.form.fullName"), render: (lead) => lead.fullName },
                 { key: "companyName", header: t("lead.form.companyName"), render: (lead) => lead.companyName },
-                { key: "phone", header: t("lead.form.phone"), render: (lead) => lead.phone },
+                { key: "phone", header: t("lead.form.phone"), render: (lead) => lead.phone ?? "—" },
                 { key: "email", header: t("lead.form.email"), render: (lead) => lead.email },
                 {
                     key: "productLineInterest",

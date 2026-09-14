@@ -23,6 +23,10 @@ type QuotePdfDocumentProps = {
     // independiente de showCostBreakdown (que el admin sigue necesitando en true para ver el
     // resto del desglose). Ver el mismo prop en quoteResultCard.component.tsx.
     showTransport?: boolean
+    // Aviso "cotización de referencia" (2026-09-13) -- default false, solo cliente. Un bloque
+    // único a nivel de documento (no por línea), cerca del total del PEDIDO -- ver el mismo
+    // criterio que el aviso de "Restricciones" (vigencia), que tampoco se repite por línea.
+    showReferenceDisclaimer?: boolean
 }
 
 // Documento PDF del "resumen de cotización" -- se genera bajo demanda desde el cotizador (público
@@ -30,7 +34,14 @@ type QuotePdfDocumentProps = {
 // nunca se persiste ni se guarda en el servidor. Usa @react-pdf/renderer, mismo enfoque que el
 // resto del repo para documentos descargables (packing list), pero con su propio diseño ajustado
 // a los datos del cotizador (no hay tarimas/lotes acá, hay productos/palets/costos).
-export function QuotePdfDocument({ clientName, quoteDate, lines, showCostBreakdown = true, showTransport = false }: Readonly<QuotePdfDocumentProps>) {
+export function QuotePdfDocument({
+    clientName,
+    quoteDate,
+    lines,
+    showCostBreakdown = true,
+    showTransport = false,
+    showReferenceDisclaimer = false,
+}: Readonly<QuotePdfDocumentProps>) {
     const { t } = useTranslation()
 
     const orderTotal = calculateQuoteOrderTotal(lines)
@@ -179,6 +190,13 @@ export function QuotePdfDocument({ clientName, quoteDate, lines, showCostBreakdo
                     <Text style={styles.orderTotalLabel}>{t("quote.pdf.document.orderTotal")}</Text>
                     <Text style={styles.orderTotalValue}>{formatCurrency(orderTotal)}</Text>
                 </View>
+
+                {/* Aviso "cotización de referencia" (2026-09-13, solo cliente) */}
+                {showReferenceDisclaimer && (
+                    <View style={styles.disclaimerBox}>
+                        <Text style={styles.disclaimerText}>{t("quote.pdf.document.referenceDisclaimer")}</Text>
+                    </View>
+                )}
 
                 {/* Restricciones */}
                 <View style={styles.restrictionsBox}>

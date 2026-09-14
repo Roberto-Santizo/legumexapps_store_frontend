@@ -130,6 +130,10 @@
                 "category": "Categoría",
                 "product": "Producto",
                 "variant": "Presentación",
+                "variantLabel": {
+                    "unitsPerBox": "{{count}} und",
+                    "boxesPerPallet": "{{count}} cajas/palet"
+                },
                 "requestedPallets": "Palets solicitados",
                 "country": "País de destino",
                 "countryOptions": {
@@ -138,6 +142,15 @@
                 },
                 "destination": "Destino",
                 "noDestinationsForCountry": "Aún no hay destinos configurados para este país.",
+                "leadContact": {
+                    "title": "¿Para quién es esta cotización?",
+                    "subtitle": "Cuéntanos quién solicita esta cotización para que nuestro equipo pueda dar seguimiento.",
+                    "fullName": "Nombre completo",
+                    "companyName": "Empresa",
+                    "email": "Correo electrónico",
+                    "notes": "Notas adicionales (opcional)",
+                    "incomplete": "Completa nombre, empresa y un correo electrónico válido para poder calcular la cotización."
+                },
                 "submit": "Calcular cotización",
                 "modeFinished": "Producto terminado",
                 "modeCustomizable": "Personalizar mi producto",
@@ -175,6 +188,7 @@
             },
             "result": {
                 "empty": "Completa el formulario y calcula tu cotización para ver el desglose de costos aquí.",
+                "referenceDisclaimer": "Cotización de referencia. Los valores son estimados y no constituyen una oferta final. Al contactarte confirmaremos disponibilidad, especificaciones y el precio definitivo.",
                 "destination": "Destino",
                 "total": "Costo total",
                 "pallets": "Palets",
@@ -923,7 +937,8 @@
             "empty": "Todavía no hay ninguna cotización guardada.",
             "noMatches": "Ninguna cotización coincide con la búsqueda.",
             "summary": "{{date}} · {{pallets}} palets · {{destination}}",
-            "summaryNoDestination": "{{date}} · {{pallets}} palets"
+            "summaryNoDestination": "{{date}} · {{pallets}} palets",
+            "leadLabel": "Prospecto: {{fullName}} · {{companyName}}"
         }
     },
     "adminQuoteCalculator": {
@@ -987,6 +1002,7 @@
                 "adjustment": "Ajuste adicional",
                 "lineTotal": "Total de la línea",
                 "orderTotal": "Total del pedido",
+                "referenceDisclaimer": "Cotización de referencia. Los valores son estimados y no constituyen una oferta final. Al contactarte confirmaremos disponibilidad, especificaciones y el precio definitivo.",
                 "restrictionsTitle": "Restricciones",
                 "restrictionsText": "Esta cotización es válida únicamente por {{days}} días a partir de su fecha de emisión. Transcurrido este período, los precios pueden variar y deberá solicitarse una nueva cotización.",
                 "generatedAt": "Documento generado el {{date}}"
@@ -1073,7 +1089,9 @@
             }
         },
         "edit": {
-            "title": "Detalle del prospecto"
+            "title": "Detalle del prospecto",
+            "linkedQuotesTitle": "Cotizaciones de este prospecto",
+            "linkedQuoteSummary": "{{date}} · {{pallets}} palet(s)"
         }
     },
     "siteImage": {

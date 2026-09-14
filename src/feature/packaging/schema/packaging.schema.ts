@@ -21,10 +21,23 @@ export const responsePackagingSchema = baseCatalogSchema.extend({
     code: z.string(),
     displayName: z.string(),
     packagingRole: packagingRoleEnum,
-    packagingMaterial: z.string().nullable(),
     unitCost: z.coerce.number().nullable(),
+})
+
+// Fila del filtro "Empaques de este SKU" (GET /packagings/by-sku/:skuCode, solo lectura) --
+// no es un PackagingResponse: no tiene id/isActive de BaseCatalogModel, es una vista aplanada de
+// la receta de empaque de esa variante (ver packaging.service.ts::listPackagingUsageBySkuCode en
+// el backend).
+export const packagingSkuUsageItemSchema = z.object({
+    packagingId: z.number().int(),
+    code: z.string(),
+    displayName: z.string(),
+    packagingRole: packagingRoleEnum,
+    unitCost: z.coerce.number().nullable(),
+    quantity: z.number(),
 })
 
 export type CreatePackagingInput = z.infer<typeof createPackagingSchema>
 export type UpdatePackagingInput = z.infer<typeof updatePackagingSchema>
 export type PackagingResponse = z.infer<typeof responsePackagingSchema>
+export type PackagingSkuUsageItem = z.infer<typeof packagingSkuUsageItemSchema>

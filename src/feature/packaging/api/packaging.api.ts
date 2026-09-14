@@ -2,13 +2,14 @@ import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 import { apiItemResponseSchema, apiListResponseSchema, apiMutationResponseSchema, apiPaginatedListResponseSchema } from "@/shared/api/apiResponse.schema"
 import { getBulkImportTemplate, postBulkImportFile } from "@/shared/api/bulkImport.api"
-import { responsePackagingSchema } from "@/feature/packaging/schema/packaging.schema"
+import { packagingSkuUsageItemSchema, responsePackagingSchema } from "@/feature/packaging/schema/packaging.schema"
 import type { CreatePackagingInput, UpdatePackagingInput } from "@/feature/packaging/schema/packaging.schema"
 
 const packagingListResponseSchema = apiListResponseSchema(responsePackagingSchema)
 const packagingPaginatedListResponseSchema = apiPaginatedListResponseSchema(responsePackagingSchema)
 const packagingItemResponseSchema = apiItemResponseSchema(responsePackagingSchema)
 const packagingMutationResponseSchema = apiMutationResponseSchema(responsePackagingSchema)
+const packagingSkuUsageResponseSchema = apiListResponseSchema(packagingSkuUsageItemSchema)
 
 // Sin params -- también la usan PackagingSelect y PalletMaterialSelect (filtran por packagingRole
 // client-side). No tocar esta firma.
@@ -54,6 +55,18 @@ export async function updatePackagingAPI(id: number, formData: UpdatePackagingIn
     try {
         const { data } = await api.put(`/packagings/${id}`, formData)
         return packagingMutationResponseSchema.parse(data)
+    } catch (error) {
+        handleApiError(error)
+    }
+}
+
+// Filtro "Empaques de este SKU" (solo lectura) -- case-insensitive en el backend, 404 traducido
+// ("SKU no encontrado") que el componente muestra tal cual, mismo criterio que
+// lookupProductVariantBySkuCodeAPI (product/api/productVariant.api.ts).
+export async function getPackagingUsageBySkuCodeAPI(skuCode: string) {
+    try {
+        const { data } = await api.get(`/packagings/by-sku/${encodeURIComponent(skuCode)}`)
+        return packagingSkuUsageResponseSchema.parse(data)
     } catch (error) {
         handleApiError(error)
     }

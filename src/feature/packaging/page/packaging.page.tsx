@@ -1,6 +1,9 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { PackagingTable } from "@/feature/packaging/component/packagingTable.component"
+import { PackagingSkuFilter } from "@/feature/packaging/component/packagingSkuFilter.component"
+import { PackagingSkuUsageTable } from "@/feature/packaging/component/packagingSkuUsageTable.component"
 import { bulkImportPackagingsAPI, downloadPackagingImportTemplateAPI } from "@/feature/packaging/api/packaging.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
@@ -10,6 +13,10 @@ import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 export function PackagingListPage() {
     const { t } = useTranslation()
     const { hasPermission } = usePermission()
+    // Filtro "Empaques de este SKU" (2026-09-13): mientras haya un skuCode aplicado, reemplaza el
+    // catálogo completo por la receta de empaque de ese SKU -- limpiar el filtro vuelve al catálogo
+    // normal. Ver PackagingSkuFilter/PackagingSkuUsageTable.
+    const [skuFilter, setSkuFilter] = useState<string | null>(null)
 
     return (
         <PageContainer wide>
@@ -32,7 +39,8 @@ export function PackagingListPage() {
                     invalidateQueryKey={["packagings"]}
                 />
             )}
-            <PackagingTable />
+            <PackagingSkuFilter appliedSkuCode={skuFilter} onApply={setSkuFilter} onClear={() => setSkuFilter(null)} />
+            {skuFilter ? <PackagingSkuUsageTable skuCode={skuFilter} /> : <PackagingTable />}
         </PageContainer>
     )
 }

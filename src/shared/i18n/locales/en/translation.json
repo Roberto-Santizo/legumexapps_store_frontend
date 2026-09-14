@@ -644,6 +644,15 @@
             "importing": "Importing...",
             "rowErrorsTitle": "The file has {{count}} error(s). No material was imported:",
             "rowErrorItem": "Row {{row}}: {{message}}"
+        },
+        "skuFilter": {
+            "label": "Search a SKU's packaging",
+            "placeholder": "e.g. SKU-001",
+            "button": "Search",
+            "clear": "View full catalog",
+            "resultsFor": "Packaging materials for SKU \"{{skuCode}}\":",
+            "quantity": "Quantity",
+            "empty": "This SKU has no packaging materials configured"
         }
     },
     "presentation": {

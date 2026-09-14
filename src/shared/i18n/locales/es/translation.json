@@ -644,6 +644,15 @@
             "importing": "Importando...",
             "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún material:",
             "rowErrorItem": "Fila {{row}}: {{message}}"
+        },
+        "skuFilter": {
+            "label": "Buscar empaques de un SKU",
+            "placeholder": "Ej. SKU-001",
+            "button": "Buscar",
+            "clear": "Ver catálogo completo",
+            "resultsFor": "Materiales de empaque del SKU \"{{skuCode}}\":",
+            "quantity": "Cantidad",
+            "empty": "Este SKU no tiene materiales de empaque configurados"
         }
     },
     "presentation": {

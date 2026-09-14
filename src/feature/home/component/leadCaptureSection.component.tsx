@@ -1,6 +1,6 @@
 import { motion } from "motion/react"
 import { useTranslation } from "react-i18next"
-import { Leaf, Mail, MapPin, Phone } from "lucide-react"
+import { Clock, Leaf, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { fadeUp, slideFromLeft, slideFromRight, viewportOnce } from "@/shared/animation/motionVariants"
 import { HOME_IMAGES } from "@/feature/home/constant/homeImages.constant"
@@ -37,14 +37,25 @@ export function LeadCaptureSection() {
                         </div>
 
                         <div className="relative mt-10 flex flex-col gap-3 text-sm text-crema/80">
+                            <a href="mailto:kate@legumex.net" className="flex items-center gap-2 hover:text-crema">
+                                <Mail size={16} className="text-dorado" /> kate@legumex.net
+                            </a>
+                            <a href="tel:+50230425579" className="flex items-center gap-2 hover:text-crema">
+                                <Phone size={16} className="text-dorado" /> +502 3042 5579
+                            </a>
+                            <a
+                                href="https://wa.me/50230425579"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 hover:text-crema"
+                            >
+                                <MessageCircle size={16} className="text-dorado" /> {t("home.leadCapture.contact.whatsappCta")}
+                            </a>
                             <span className="flex items-center gap-2">
-                                <Mail size={16} className="text-dorado" /> ventas@legumex.com.gt
+                                <MapPin size={16} className="text-dorado" /> Guatemala, El Tejar, Chimaltenango
                             </span>
                             <span className="flex items-center gap-2">
-                                <Phone size={16} className="text-dorado" /> +502 0000 0000
-                            </span>
-                            <span className="flex items-center gap-2">
-                                <MapPin size={16} className="text-dorado" /> Guatemala
+                                <Clock size={16} className="text-dorado" /> {t("home.leadCapture.contact.hours")}
                             </span>
                         </div>
 

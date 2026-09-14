@@ -445,6 +445,10 @@
             "successTitle": "Thanks!",
             "successMessage": "We've got your details and we'll be in touch shortly.",
             "sendAnother": "Send another request",
+            "contact": {
+                "whatsappCta": "Open a chat",
+                "hours": "Monday to Friday, 7:00 – 17:00 (GMT-6)"
+            },
             "form": {
                 "name": "Full name",
                 "companyName": "Company",

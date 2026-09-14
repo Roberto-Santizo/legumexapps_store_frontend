@@ -1,5 +1,5 @@
 import { useState } from "react"
-import type { FormEvent } from "react"
+import type { SubmitEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { Input } from "@/shared/component/input.component"
 import { Button } from "@/shared/component/button.component"
@@ -18,7 +18,7 @@ export function PackagingSkuFilter({ appliedSkuCode, onApply, onClear }: Readonl
     const { t } = useTranslation()
     const [skuCode, setSkuCode] = useState(appliedSkuCode ?? "")
 
-    function handleSubmit(event: FormEvent) {
+    function handleSubmit(event: SubmitEvent) {
         event.preventDefault()
         const trimmed = skuCode.trim()
         if (trimmed) onApply(trimmed)

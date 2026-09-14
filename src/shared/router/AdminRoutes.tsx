@@ -1,148 +1,149 @@
-import { lazy, Suspense } from "react"
+﻿import { Suspense } from "react"
 import { Navigate, Route } from "react-router-dom"
 import { AppLayout } from "@/shared/layout/AppLayout"
 import { Spinner } from "@/shared/component/spinner.component"
 import { ProtectedRoute } from "@/shared/auth/ProtectedRoute"
 import { AccessDenied, PermissionGate } from "@/shared/auth/PermissionGate"
 import { usePermission } from "@/shared/auth/usePermission"
+import { lazyWithRetry } from "@/shared/router/lazyWithRetry"
 
-const CategoryListPage = lazy(() =>
+const CategoryListPage = lazyWithRetry(() =>
     import("@/feature/category/page/category.page").then((module) => ({ default: module.CategoryListPage }))
 )
-const CreateCategoryPage = lazy(() =>
+const CreateCategoryPage = lazyWithRetry(() =>
     import("@/feature/category/page/createCategory.page").then((module) => ({ default: module.CreateCategoryPage }))
 )
-const EditCategoryPage = lazy(() =>
+const EditCategoryPage = lazyWithRetry(() =>
     import("@/feature/category/page/editCategory.page").then((module) => ({ default: module.EditCategoryPage }))
 )
 
-const SubCategoryListPage = lazy(() =>
+const SubCategoryListPage = lazyWithRetry(() =>
     import("@/feature/category/page/subCategory.page").then((module) => ({ default: module.SubCategoryListPage }))
 )
-const CreateSubCategoryPage = lazy(() =>
+const CreateSubCategoryPage = lazyWithRetry(() =>
     import("@/feature/category/page/createSubCategory.page").then((module) => ({ default: module.CreateSubCategoryPage }))
 )
-const EditSubCategoryPage = lazy(() =>
+const EditSubCategoryPage = lazyWithRetry(() =>
     import("@/feature/category/page/editSubCategory.page").then((module) => ({ default: module.EditSubCategoryPage }))
 )
 
-const ProductTypeListPage = lazy(() =>
+const ProductTypeListPage = lazyWithRetry(() =>
     import("@/feature/product-type/page/productType.page").then((module) => ({ default: module.ProductTypeListPage }))
 )
-const CreateProductTypePage = lazy(() =>
+const CreateProductTypePage = lazyWithRetry(() =>
     import("@/feature/product-type/page/createProductType.page").then((module) => ({ default: module.CreateProductTypePage }))
 )
-const EditProductTypePage = lazy(() =>
+const EditProductTypePage = lazyWithRetry(() =>
     import("@/feature/product-type/page/editProductType.page").then((module) => ({ default: module.EditProductTypePage }))
 )
 
-const UnitListPage = lazy(() =>
+const UnitListPage = lazyWithRetry(() =>
     import("@/feature/unit/page/unit.page").then((module) => ({ default: module.UnitListPage }))
 )
-const CreateUnitPage = lazy(() =>
+const CreateUnitPage = lazyWithRetry(() =>
     import("@/feature/unit/page/createUnit.page").then((module) => ({ default: module.CreateUnitPage }))
 )
-const EditUnitPage = lazy(() =>
+const EditUnitPage = lazyWithRetry(() =>
     import("@/feature/unit/page/editUnit.page").then((module) => ({ default: module.EditUnitPage }))
 )
 
-const IngredientListPage = lazy(() =>
+const IngredientListPage = lazyWithRetry(() =>
     import("@/feature/ingredient/page/ingredient.page").then((module) => ({ default: module.IngredientListPage }))
 )
-const CreateIngredientPage = lazy(() =>
+const CreateIngredientPage = lazyWithRetry(() =>
     import("@/feature/ingredient/page/createIngredient.page").then((module) => ({ default: module.CreateIngredientPage }))
 )
-const EditIngredientPage = lazy(() =>
+const EditIngredientPage = lazyWithRetry(() =>
     import("@/feature/ingredient/page/editIngredient.page").then((module) => ({ default: module.EditIngredientPage }))
 )
 
-const PackagingListPage = lazy(() =>
+const PackagingListPage = lazyWithRetry(() =>
     import("@/feature/packaging/page/packaging.page").then((module) => ({ default: module.PackagingListPage }))
 )
-const CreatePackagingPage = lazy(() =>
+const CreatePackagingPage = lazyWithRetry(() =>
     import("@/feature/packaging/page/createPackaging.page").then((module) => ({ default: module.CreatePackagingPage }))
 )
-const EditPackagingPage = lazy(() =>
+const EditPackagingPage = lazyWithRetry(() =>
     import("@/feature/packaging/page/editPackaging.page").then((module) => ({ default: module.EditPackagingPage }))
 )
 
-const DestinationListPage = lazy(() =>
+const DestinationListPage = lazyWithRetry(() =>
     import("@/feature/destination/page/destination.page").then((module) => ({ default: module.DestinationListPage }))
 )
-const CreateDestinationPage = lazy(() =>
+const CreateDestinationPage = lazyWithRetry(() =>
     import("@/feature/destination/page/createDestination.page").then((module) => ({ default: module.CreateDestinationPage }))
 )
-const EditDestinationPage = lazy(() =>
+const EditDestinationPage = lazyWithRetry(() =>
     import("@/feature/destination/page/editDestination.page").then((module) => ({ default: module.EditDestinationPage }))
 )
 
-const ProcessingCostListPage = lazy(() =>
+const ProcessingCostListPage = lazyWithRetry(() =>
     import("@/feature/processingCost/page/processingCost.page").then((module) => ({ default: module.ProcessingCostListPage }))
 )
-const CreateProcessingCostPage = lazy(() =>
+const CreateProcessingCostPage = lazyWithRetry(() =>
     import("@/feature/processingCost/page/createProcessingCost.page").then((module) => ({ default: module.CreateProcessingCostPage }))
 )
-const EditProcessingCostPage = lazy(() =>
+const EditProcessingCostPage = lazyWithRetry(() =>
     import("@/feature/processingCost/page/editProcessingCost.page").then((module) => ({ default: module.EditProcessingCostPage }))
 )
 
-const PresentationListPage = lazy(() =>
+const PresentationListPage = lazyWithRetry(() =>
     import("@/feature/presentation/page/presentation.page").then((module) => ({ default: module.PresentationListPage }))
 )
-const CreatePresentationPage = lazy(() =>
+const CreatePresentationPage = lazyWithRetry(() =>
     import("@/feature/presentation/page/createPresentation.page").then((module) => ({ default: module.CreatePresentationPage }))
 )
-const EditPresentationPage = lazy(() =>
+const EditPresentationPage = lazyWithRetry(() =>
     import("@/feature/presentation/page/editPresentation.page").then((module) => ({ default: module.EditPresentationPage }))
 )
 
-const ProductListPage = lazy(() =>
+const ProductListPage = lazyWithRetry(() =>
     import("@/feature/product/page/product.page").then((module) => ({ default: module.ProductListPage }))
 )
-const CreateProductPage = lazy(() =>
+const CreateProductPage = lazyWithRetry(() =>
     import("@/feature/product/page/createProduct.page").then((module) => ({ default: module.CreateProductPage }))
 )
-const EditProductPage = lazy(() =>
+const EditProductPage = lazyWithRetry(() =>
     import("@/feature/product/page/editProduct.page").then((module) => ({ default: module.EditProductPage }))
 )
 
-const UserListPage = lazy(() => import("@/feature/user/page/user.page").then((module) => ({ default: module.UserListPage })))
-const CreateUserPage = lazy(() =>
+const UserListPage = lazyWithRetry(() => import("@/feature/user/page/user.page").then((module) => ({ default: module.UserListPage })))
+const CreateUserPage = lazyWithRetry(() =>
     import("@/feature/user/page/createUser.page").then((module) => ({ default: module.CreateUserPage }))
 )
-const EditUserPage = lazy(() => import("@/feature/user/page/editUser.page").then((module) => ({ default: module.EditUserPage })))
+const EditUserPage = lazyWithRetry(() => import("@/feature/user/page/editUser.page").then((module) => ({ default: module.EditUserPage })))
 
-const RoleListPage = lazy(() => import("@/feature/role/page/role.page").then((module) => ({ default: module.RoleListPage })))
-const CreateRolePage = lazy(() =>
+const RoleListPage = lazyWithRetry(() => import("@/feature/role/page/role.page").then((module) => ({ default: module.RoleListPage })))
+const CreateRolePage = lazyWithRetry(() =>
     import("@/feature/role/page/createRole.page").then((module) => ({ default: module.CreateRolePage }))
 )
-const EditRolePage = lazy(() => import("@/feature/role/page/editRole.page").then((module) => ({ default: module.EditRolePage })))
+const EditRolePage = lazyWithRetry(() => import("@/feature/role/page/editRole.page").then((module) => ({ default: module.EditRolePage })))
 
-const DashboardPage = lazy(() =>
+const DashboardPage = lazyWithRetry(() =>
     import("@/feature/dashboard/page/dashboard.page").then((module) => ({ default: module.DashboardPage }))
 )
 
-const AdminQuoteListPage = lazy(() =>
+const AdminQuoteListPage = lazyWithRetry(() =>
     import("@/feature/quote/page/adminQuote.page").then((module) => ({ default: module.AdminQuoteListPage }))
 )
-const AdminQuoteCalculatorPage = lazy(() =>
+const AdminQuoteCalculatorPage = lazyWithRetry(() =>
     import("@/feature/quote/page/adminQuoteCalculator.page").then((module) => ({ default: module.AdminQuoteCalculatorPage }))
 )
 
-const CustomerListPage = lazy(() =>
+const CustomerListPage = lazyWithRetry(() =>
     import("@/feature/customer/page/customer.page").then((module) => ({ default: module.CustomerListPage }))
 )
-const CreateCustomerPage = lazy(() =>
+const CreateCustomerPage = lazyWithRetry(() =>
     import("@/feature/customer/page/createCustomer.page").then((module) => ({ default: module.CreateCustomerPage }))
 )
-const EditCustomerPage = lazy(() =>
+const EditCustomerPage = lazyWithRetry(() =>
     import("@/feature/customer/page/editCustomer.page").then((module) => ({ default: module.EditCustomerPage }))
 )
 
-const LeadListPage = lazy(() => import("@/feature/lead/page/lead.page").then((module) => ({ default: module.LeadListPage })))
-const EditLeadPage = lazy(() => import("@/feature/lead/page/editLead.page").then((module) => ({ default: module.EditLeadPage })))
+const LeadListPage = lazyWithRetry(() => import("@/feature/lead/page/lead.page").then((module) => ({ default: module.LeadListPage })))
+const EditLeadPage = lazyWithRetry(() => import("@/feature/lead/page/editLead.page").then((module) => ({ default: module.EditLeadPage })))
 
-const SiteImageListPage = lazy(() =>
+const SiteImageListPage = lazyWithRetry(() =>
     import("@/feature/siteImage/page/siteImage.page").then((module) => ({ default: module.SiteImageListPage }))
 )
 

@@ -22,9 +22,6 @@ const processingCostShape = {
     translations: z.object({ en: processingCostTranslationInputSchema.optional() }).optional(),
 }
 
-// Mismo patrón que el backend: el refine (tope de "value" solo cuando calculationType es
-// "percentage") se aplica como último paso, DESPUÉS de .partial()/.extend() -- un ZodObject deja
-// de tener esos métodos una vez envuelto en .refine().
 function refinePercentageBound(data: { value: number; calculationType: string }): boolean {
     return data.calculationType !== "percentage" || data.value <= MAX_PERCENTAGE_VALUE
 }

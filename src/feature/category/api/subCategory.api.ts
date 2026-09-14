@@ -9,8 +9,7 @@ const subCategoryPaginatedListResponseSchema = apiPaginatedListResponseSchema(re
 const subCategoryItemResponseSchema = apiItemResponseSchema(responseSubCategorySchema)
 const subCategoryMutationResponseSchema = apiMutationResponseSchema(responseSubCategorySchema)
 
-// Sin params -- la usan SubCategoryTable (antes de paginación) y SubCategorySelect. No tocar esta
-// firma, sigue siendo la que consume el select.
+
 export async function getSubCategoriesAPI() {
     try {
         const { data } = await api.get("/sub-categories")

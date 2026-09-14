@@ -1,14 +1,15 @@
-import { lazy, Suspense } from "react"
+import { Suspense } from "react"
 import { Route, Routes } from "react-router-dom"
 import SiteRoutes from "@/shared/router/SiteRoutes"
 import AdminRoutes from "@/shared/router/AdminRoutes"
+import { lazyWithRetry } from "@/shared/router/lazyWithRetry"
 import { Spinner } from "@/shared/component/spinner.component"
 import { PublicOnlyRoute } from "@/shared/auth/PublicOnlyRoute"
 import { CustomerPublicOnlyRoute } from "@/shared/auth/customer/CustomerPublicOnlyRoute"
 
-const NotFoundPage = lazy(() => import("@/shared/page/notFound.page").then((m) => ({ default: m.NotFoundPage })))
-const LoginPage = lazy(() => import("@/feature/login/page/login.page").then((m) => ({ default: m.LoginPage })))
-const CustomerLoginPage = lazy(() =>
+const NotFoundPage = lazyWithRetry(() => import("@/shared/page/notFound.page").then((m) => ({ default: m.NotFoundPage })))
+const LoginPage = lazyWithRetry(() => import("@/feature/login/page/login.page").then((m) => ({ default: m.LoginPage })))
+const CustomerLoginPage = lazyWithRetry(() =>
     import("@/feature/customerAuth/page/customerLogin.page").then((m) => ({ default: m.CustomerLoginPage }))
 )
 

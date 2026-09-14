@@ -15,7 +15,6 @@ import { Button } from "@/shared/component/button.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
 
 function toFormValues(subCategory: SubCategoryResponse): UpdateSubCategoryInput {
-    // Ver el mismo comentario en editCategory.page.tsx::toFormValues.
     const englishTranslation = subCategory.translations.find((translation) => translation.language === "en")
     return {
         categoryId: subCategory.categoryId,

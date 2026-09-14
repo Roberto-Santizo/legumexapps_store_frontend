@@ -464,6 +464,10 @@
         "message": "The page you're looking for doesn't exist",
         "backLink": "Back to home"
     },
+    "errorBoundary": {
+        "message": "Something went wrong, reloading…",
+        "reload": "Reload"
+    },
     "accessDenied": {
         "title": "Access restricted",
         "message": "You don't have permission to view this section. If you think this is a mistake, contact an administrator.",

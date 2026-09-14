@@ -26,7 +26,7 @@ export function StatItem({ icon: Icon, value, suffix, label }: Readonly<StatItem
                 <Icon size={22} />
             </span>
             <span className="font-display text-4xl font-extrabold text-crema sm:text-5xl">
-                <CountUp end={value} suffix={suffix} duration={2.4} enableScrollSpy scrollSpyOnce separator="," />
+                <CountUp end={value} suffix={suffix} duration={2.4} autoAnimate autoAnimateOnce separator="," />
             </span>
             <span className="max-w-48 text-sm leading-snug text-crema/70">{label}</span>
         </motion.div>

@@ -7,21 +7,12 @@ import { CHART_CATEGORICAL_PALETTE, CHART_OTHER_COLOR, CHART_TOOLTIP_BG, CHART_T
 import type { DashboardTopProduct } from "@/feature/dashboard/schema/dashboard.schema"
 
 interface ProductRevenueShareChartProps {
-    // Ya viene ordenado por ingresos (ver dashboardService.getSummary -> topProductsByRevenue),
-    // no por unidades como el resto de la sección de productos.
     productsByRevenue: DashboardTopProduct[]
     totalRevenue: number
     emptyMessage: string
 }
 
-// Solo el pastel del dashboard combina varias series en una misma gráfica -- por eso usa la
-// paleta categórica validada del skill de dataviz (references/palette.md) en vez de los acentos
-// de marca de una sola serie: verde-tinta/verde-profundo/dorado/brote no pasan el validador
-// cuando conviven entre sí (ver chartColors.ts). Máximo 4 productos con color propio + "Otros"
-// en gris de baja croma (el cubo de sobrante, no una categoría real).
 const MAX_SLICES = 4
-// Bajo este porcentaje, la etiqueta directa sobre la dona se omite -- se apoya en la leyenda y el
-// tooltip en vez de imprimir un número que no cabe (ver dataviz: "label selectively").
 const MIN_LABEL_PERCENT = 6
 
 interface Slice {
@@ -36,8 +27,6 @@ interface RevenueTooltipPayload {
     payload: Slice
 }
 
-// Cell está deprecado desde Recharts 3.10 (se elimina en 4.0) -- el reemplazo oficial es
-// resolver el color por sector vía el prop `shape` en vez de <Cell> por dato.
 function renderSlice(props: PieSectorShapeProps) {
     const slice = props.payload as Slice
     return <Sector {...props} fill={slice.color} />

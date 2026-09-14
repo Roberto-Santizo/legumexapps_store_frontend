@@ -16,8 +16,6 @@ interface RankedBarListProps {
     subtitle?: string
     items: RankedBarListItem[]
     emptyMessage: string
-    // Una sola serie por lista -- un acento de marca fijo alcanza (ver dataviz: "single series
-    // needs no legend"), no requiere pasar por el validador de paleta categórica.
     accentColor: string
 }
 
@@ -41,9 +39,6 @@ function RankedBarTooltip({ active, payload }: Readonly<TooltipContentProps>) {
     )
 }
 
-// Ranking horizontal de una sola serie (magnitud): la barra es refuerzo visual del orden, el
-// valor real siempre está impreso al final de la barra (ver dataviz: "Bars -> value at the tip"),
-// y el nombre completo + el detalle secundario viven en el tooltip cuando el eje los trunca.
 export function RankedBarList({ title, subtitle, items, emptyMessage, accentColor }: Readonly<RankedBarListProps>) {
     const chartData = items.map((item) => ({ ...item, displayLabel: truncateLabel(item.label) }))
 

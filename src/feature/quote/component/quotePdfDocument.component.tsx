@@ -1,3 +1,4 @@
+import { useRef } from "react"
 import { Document, Page, View, Text, Image } from "@react-pdf/renderer"
 import { useTranslation } from "react-i18next"
 import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
@@ -44,6 +45,19 @@ export function QuotePdfDocument({
 }: Readonly<QuotePdfDocumentProps>) {
     const { t } = useTranslation()
 
+    // Mismo criterio que QuotedOrderSummary: las líneas no tienen id propio (QuoteCalculation es
+    // una vista previa de cálculo, no una entidad persistida), así que se identifican por
+    // identidad de objeto en vez de por índice -- estable aunque el pedido crezca, y no colisiona
+    // entre dos líneas con contenido idéntico (mismo producto cotizado dos veces).
+    const lineIdsRef = useRef(new WeakMap<QuoteCalculation, string>())
+    const getLineId = (line: QuoteCalculation) => {
+        const existingId = lineIdsRef.current.get(line)
+        if (existingId) return existingId
+        const newId = crypto.randomUUID()
+        lineIdsRef.current.set(line, newId)
+        return newId
+    }
+
     const orderTotal = calculateQuoteOrderTotal(lines)
     const validUntil = calculateQuoteValidUntil(quoteDate)
 
@@ -85,8 +99,8 @@ export function QuotePdfDocument({
                 </View>
 
                 {/* Líneas cotizadas */}
-                {lines.map((line, index) => (
-                    <View key={index} style={styles.lineCard} wrap={false}>
+                {lines.map((line) => (
+                    <View key={getLineId(line)} style={styles.lineCard} wrap={false}>
                         <View style={styles.lineHeader}>
                             <Text style={styles.lineHeaderProduct}>
                                 {line.productDisplayName}

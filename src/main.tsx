@@ -7,18 +7,21 @@ import '@/shared/i18n/i18n'
 import { queryClient } from '@/shared/query/queryClient'
 import { AuthProvider } from '@/shared/auth/AuthContext'
 import { CustomerAuthProvider } from '@/shared/auth/customer/CustomerAuthContext'
+import { ErrorBoundary } from '@/shared/component/errorBoundary.component'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <CustomerAuthProvider>
-            <App />
-          </CustomerAuthProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AuthProvider>
+            <CustomerAuthProvider>
+              <App />
+            </CustomerAuthProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

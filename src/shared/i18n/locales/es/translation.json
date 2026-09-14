@@ -100,6 +100,10 @@
         "message": "La página que buscas no existe",
         "backLink": "Volver al inicio"
     },
+    "errorBoundary": {
+        "message": "Algo salió mal, recargando…",
+        "reload": "Recargar"
+    },
     "accessDenied": {
         "title": "Acceso restringido",
         "message": "No tienes permiso para ver esta sección. Si crees que es un error, contacta a un administrador.",

@@ -8,9 +8,6 @@ interface StatTileProps {
     icon: ReactNode
 }
 
-// Contrato "stat tile" del sistema de diseño: label en sentence case, valor en semibold sin
-// tabular-nums (es un numero grande y suelto, no una columna que deba alinear digito a digito),
-// caption opcional para dar contexto sin agregar un segundo numero grande.
 export function StatTile({ label, value, caption, icon }: Readonly<StatTileProps>) {
     return (
         <Card className="flex items-start justify-between gap-3">

@@ -9,6 +9,7 @@ import { Spinner } from "@/shared/component/spinner.component"
 import { getAdminQuoteProductsAPI, previewAdminQuoteAPI, sendAdminQuotePdfEmailAPI } from "@/feature/quote/api/adminQuote.api"
 import { QuoteCalculatorForm } from "@/feature/quote/component/quoteCalculatorForm.component"
 import type { QuoteWizardStep } from "@/feature/quote/component/quoteCalculatorForm.component"
+import { WIZARD_DETAILS_LAYOUT_CLASSNAME, WIZARD_STEP_LAYOUT_CLASSNAME } from "@/feature/quote/component/quoteWizardLayout"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary.component"
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
@@ -70,7 +71,7 @@ export function AdminQuoteCalculatorPage() {
 
     const handleStepChange = (nextStep: QuoteWizardStep) => {
         setWizardStep(nextStep)
-        if (nextStep !== "details") {
+        if (nextStep !== "total") {
             setCurrentResult(null)
         }
     }
@@ -91,9 +92,9 @@ export function AdminQuoteCalculatorPage() {
         content = <Spinner />
     } else if (hasCatalogError) {
         content = <p className="py-12 text-center text-error-fg">{t("common.loadError")}</p>
-    } else if (wizardStep === "details") {
+    } else if (wizardStep === "total") {
         content = (
-            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
+            <div className={WIZARD_DETAILS_LAYOUT_CLASSNAME}>
                 <QuoteCalculatorForm
                     key={formResetKey}
                     products={products}
@@ -106,14 +107,19 @@ export function AdminQuoteCalculatorPage() {
                 <div className="space-y-6">
                     <QuoteResultCard result={currentResult} isPending={calculateMutation.isPending} />
                     {quotedLines.length > 0 && (
-                        <QuotedOrderSummary lines={quotedLines} onQuoteAnother={handleQuoteAnother} onClear={handleClearOrder} />
+                        <QuotedOrderSummary
+                            lines={quotedLines}
+                            onQuoteAnother={handleQuoteAnother}
+                            onClear={handleClearOrder}
+                            pdfAction={<QuotePdfButton lines={quotedLines} sendEmailAPI={sendAdminQuotePdfEmailAPI} />}
+                        />
                     )}
                 </div>
             </div>
         )
     } else {
         content = (
-            <div className="mx-auto max-w-3xl space-y-6">
+            <div className={WIZARD_STEP_LAYOUT_CLASSNAME}>
                 <QuoteCalculatorForm
                     key={formResetKey}
                     products={products}
@@ -124,7 +130,12 @@ export function AdminQuoteCalculatorPage() {
                     onStepChange={handleStepChange}
                 />
                 {quotedLines.length > 0 && (
-                    <QuotedOrderSummary lines={quotedLines} onQuoteAnother={handleQuoteAnother} onClear={handleClearOrder} />
+                    <QuotedOrderSummary
+                        lines={quotedLines}
+                        onQuoteAnother={handleQuoteAnother}
+                        onClear={handleClearOrder}
+                        pdfAction={<QuotePdfButton lines={quotedLines} sendEmailAPI={sendAdminQuotePdfEmailAPI} />}
+                    />
                 )}
             </div>
         )
@@ -139,9 +150,6 @@ export function AdminQuoteCalculatorPage() {
                         <h1 className="text-2xl font-semibold text-verde-profundo">{t("adminQuoteCalculator.title")}</h1>
                         <p className="mt-1 max-w-2xl text-texto-suave">{t("adminQuoteCalculator.description")}</p>
                     </div>
-                </div>
-                <div className="shrink-0">
-                    <QuotePdfButton lines={quotedLines} sendEmailAPI={sendAdminQuotePdfEmailAPI} />
                 </div>
             </div>
 

@@ -23,6 +23,8 @@
         "status": "Status",
         "active": "Active",
         "inactive": "Inactive",
+        "yes": "Yes",
+        "no": "No",
         "activate": "Activate",
         "deactivate": "Deactivate",
         "confirmDeactivate": "Are you sure you want to deactivate \"{{name}}\"? It will no longer be available until you activate it again.",
@@ -79,11 +81,11 @@
             "submitting": "Signing in...",
             "footer": "© {{year}} Legumex Apps. All rights reserved."
         },
-        "customerLogin": {
+        "salespersonLogin": {
             "title": "Sign in",
             "subtitle": "Sign in to see pricing and request quotes",
             "brand": "Legumex",
-            "brandSubtitle": "Customer access",
+            "brandSubtitle": "Legumex representative access",
             "email": "Email",
             "emailPlaceholder": "you@company.com",
             "password": "Password",
@@ -126,6 +128,14 @@
                     "boxesPerPallet": "{{count}} boxes/pallet"
                 },
                 "requestedPallets": "Pallets requested",
+                "unitMaterialLabel": "Individual packaging",
+                "intermediateMaterialLabel": "Intermediate packaging",
+                "palletMaterialLabel": "Pallet material",
+                "livePreview": {
+                    "label": "Estimated total",
+                    "loading": "Calculating...",
+                    "forPallets": "For {{count}} pallet(s)"
+                },
                 "country": "Destination country",
                 "countryOptions": {
                     "GT": "Guatemala",
@@ -133,15 +143,6 @@
                 },
                 "destination": "Destination",
                 "noDestinationsForCountry": "There are no destinations configured for this country yet.",
-                "leadContact": {
-                    "title": "Who is this quote for?",
-                    "subtitle": "Tell us who is requesting this quote so our team can follow up.",
-                    "fullName": "Full name",
-                    "companyName": "Company",
-                    "email": "Email",
-                    "notes": "Additional notes (optional)",
-                    "incomplete": "Fill in name, company, and a valid email to calculate the quote."
-                },
                 "submit": "Calculate quote",
                 "modeFinished": "Ready-made product",
                 "modeCustomizable": "Customize my product",
@@ -150,6 +151,8 @@
                 "noProductsFinished": "There are no ready-made products available to quote yet.",
                 "noProductsCustomizable": "There are no customizable products available to quote yet.",
                 "organicBadge": "100% Organic",
+                "fixedRecipeTitle": "Composition",
+                "fixedRecipeLine": "{{percentage}}% {{name}}",
                 "mixTitle": "Build your mix",
                 "mixTotal": "Total: {{total}}%",
                 "mixIncomplete": "The mix must total 100% before you can request a quote.",
@@ -161,7 +164,31 @@
                         "mode": "Type",
                         "category": "Category",
                         "product": "Product",
-                        "details": "Details"
+                        "pallets": "Pallets",
+                        "materials": "Materials",
+                        "total": "Total"
+                    },
+                    "pallets": {
+                        "title": "How many pallets do you need?",
+                        "subtitle": "Choose the presentation (if applicable) and the number of pallets. You'll see the boxes per pallet and the total weight of your order.",
+                        "boxesPerPallet": "Boxes per pallet",
+                        "totalWeight": "Total order weight",
+                        "continue": "Continue"
+                    },
+                    "total": {
+                        "summaryTitle": "Your selection",
+                        "edit": "Edit"
+                    },
+                    "materials": {
+                        "title": "Choose your materials",
+                        "subtitle": "Pick what your order is packed with. The default option is already selected; the total updates as you change it.",
+                        "defaultBadge": "Default",
+                        "noOptionsForVariant": "This presentation has no alternative materials: it is quoted with the standard configuration.",
+                        "levelHints": {
+                            "unit": "The container or bag of each unit.",
+                            "intermediate": "The large bag that groups several units.",
+                            "pallet": "The box or material used to build the pallet."
+                        }
                     },
                     "mode": {
                         "title": "What do you want to quote?",
@@ -248,7 +275,7 @@
             "items": {
                 "yearsExperience": "Years of experience",
                 "generations": "Generations growing the same land",
-                "countries": "Exporting to global markets — proudly supplying customers in more than 25 countries.",
+                "countries": "Exporting to global markets — proudly supplying clients in more than 25 countries.",
                 "microclimates": "Microclimates across our regions",
                 "hectares": "Hectares under cultivation"
             }
@@ -499,26 +526,6 @@
             "empty": "No categories registered"
         }
     },
-    "productType": {
-        "form": {
-            "typeCode": "Code",
-            "displayName": "Name"
-        },
-        "list": {
-            "title": "Product types",
-            "createLink": "Create product type"
-        },
-        "create": {
-            "title": "Create product type"
-        },
-        "edit": {
-            "title": "Edit product type"
-        },
-        "table": {
-            "searchPlaceholder": "Search by name...",
-            "empty": "No product types registered"
-        }
-    },
     "unit": {
         "form": {
             "unitCode": "Code",
@@ -652,15 +659,6 @@
             "importing": "Importing...",
             "rowErrorsTitle": "The file has {{count}} error(s). No material was imported:",
             "rowErrorItem": "Row {{row}}: {{message}}"
-        },
-        "skuFilter": {
-            "label": "Search a SKU's packaging",
-            "placeholder": "e.g. SKU-001",
-            "button": "Search",
-            "clear": "View full catalog",
-            "resultsFor": "Packaging materials for SKU \"{{skuCode}}\":",
-            "quantity": "Quantity",
-            "empty": "This SKU has no packaging materials configured"
         }
     },
     "presentation": {
@@ -695,23 +693,23 @@
     },
     "product": {
         "form": {
-            "codigo": "Code",
+            "codigo": "SKU/Item Number",
             "image": "Product photo",
             "subCategoryId": "Subcategory",
-            "productTypeId": "Product type",
-            "displayName": "Name",
+            "clientId": "Client",
+            "displayName": "Product name",
             "urlSlug": "URL slug",
             "isOrganic": "Organic",
-            "isOrganicHint": "If you check this box, the ingredient selector below will only offer organic variants (plus water/salt/sugar or other items with no variant). Customers will see a \"100% Organic\" badge when they pick this product.",
+            "isOrganicHint": "If you check this box, the ingredient selector below will only offer organic variants (plus water/salt/sugar or other items with no variant). Salespeople will see a \"100% Organic\" badge when they pick this product.",
             "isCustomizable": "Recipe type",
             "isCustomizableFinished": "Ready-made (fixed recipe)",
             "isCustomizableCustom": "Customizable (% mix)",
-            "isCustomizableHint": "Customizable: the customer builds the ingredient mix by percentage when requesting a quote, instead of a fixed recipe.",
+            "isCustomizableHint": "Customizable: the salesperson builds the ingredient mix by percentage when requesting a quote, instead of a fixed recipe.",
             "additionalCostPerUnit": "Additional cost per unit (optional)",
             "additionalCostPerUnitHint": "For costs that aren't well defined yet. Added to the cost of each unit when quoting. Leave the field empty to remove it.",
             "translationSectionTitle": "English translation",
             "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name.",
-            "displayNameEn": "Name (English)"
+            "displayNameEn": "Product name (English)"
         },
         "list": {
             "title": "Products",
@@ -731,23 +729,13 @@
     "productVariant": {
         "form": {
             "presentationId": "Presentation",
-            "skuCode": "SKU",
+            "presentationImmutableHint": "You can't change the Presentation of an already-created SKU. Create a new SKU for a different Presentation.",
             "boxesPerPallet": "Boxes per pallet",
             "bagsPerBox": "Bags per box",
             "bagsPerBoxHint": "How many bags/pieces fit in one box. Together with \"Boxes per pallet\" above, this defines the total bags per pallet (boxes × bags per box) -- it DOES affect cost.",
-            "intermediatePackagingId": "Intermediate packaging (large bag)",
             "unitsPerIntermediatePackage": "Units per intermediate package",
             "unitsPerIntermediatePackageHint": "Only if this product uses nested packaging (e.g. several small bags inside one large bag, which then goes into the box). How many small units fit inside one large bag -- this DOES affect cost.",
-            "addButton": "Add variant",
-            "skuLookup": {
-                "button": "Search",
-                "searching": "Searching...",
-                "found": "SKU data found (product: {{product}}). Review the fields before saving.",
-                "recipeTitle": "This SKU's packaging recipe (reference)",
-                "recipeHint": "This variant already had these materials loaded. Add them again below, in Unit packaging and Pallet materials, once you save this variant.",
-                "unitMaterialLine": "{{name}} — {{quantity}} per unit",
-                "palletMaterialLine": "{{name}} — {{quantity}} per pallet"
-            }
+            "addButton": "Add variant"
         },
         "list": {
             "title": "Variants"
@@ -768,13 +756,14 @@
     "productIngredient": {
         "form": {
             "ingredientId": "Ingredient",
-            "quantityValue": "Quantity",
-            "quantityUnitId": "Quantity unit",
+            "percentage": "Enter the ingredient's percentage",
+            "percentageTotal": "Total: {{total}}%",
+            "percentageTotalIncomplete": "The percentages must total 100% before this product can be quoted.",
             "minPercentage": "Min %",
             "maxPercentage": "Max %",
             "percentageRange": "% Range",
             "addButton": "Add ingredient",
-            "customizableHint": "This product is customizable: define here which ingredients the customer can choose and, optionally, an allowed % range for each one."
+            "customizableHint": "This product is customizable: define here which ingredients the salesperson can choose and, optionally, an allowed % range for each one."
         },
         "list": {
             "title": "Ingredients",
@@ -790,6 +779,9 @@
         "form": {
             "packagingId": "Individual material",
             "quantityPerUnit": "Quantity per unit",
+            "isSwappable": "The client can choose this material when quoting",
+            "isDefault": "Default",
+            "isDefaultHint": "Mark which option is used when the client doesn't choose one.",
             "addButton": "Add material"
         },
         "createModal": {
@@ -799,7 +791,9 @@
             "title": "Individual packaging materials"
         },
         "table": {
-            "empty": "No individual packaging materials registered"
+            "empty": "No individual packaging materials registered",
+            "swappable": "Client-optional",
+            "default": "Default"
         }
     },
     "productVariantPalletMaterial": {
@@ -810,6 +804,9 @@
         "form": {
             "packagingId": "Pallet material",
             "quantityValue": "Quantity",
+            "isSwappable": "The client can choose this material when quoting",
+            "isDefault": "Default",
+            "isDefaultHint": "Mark which option is used when the client doesn't choose one.",
             "addButton": "Add material"
         },
         "createModal": {
@@ -819,10 +816,31 @@
             "title": "Palletizing materials"
         },
         "table": {
-            "empty": "No palletizing materials registered"
+            "empty": "No palletizing materials registered",
+            "swappable": "Client-optional",
+            "default": "Default"
         }
     },
-    "customer": {
+    "productVariantIntermediateMaterial": {
+        "selectVariant": "Variant",
+        "noVariants": "First add a variant so you can define its intermediate packaging",
+        "form": {
+            "packagingId": "Intermediate packaging",
+            "isSwappable": "The client can choose this material when quoting",
+            "isDefault": "Default",
+            "isDefaultHint": "Mark which option is used when the client doesn't choose one.",
+            "addButton": "Add material"
+        },
+        "list": {
+            "title": "Intermediate packaging materials"
+        },
+        "table": {
+            "empty": "No intermediate packaging materials registered",
+            "swappable": "Client-optional",
+            "default": "Default"
+        }
+    },
+    "salesperson": {
         "form": {
             "name": "Name",
             "companyName": "Company",
@@ -832,18 +850,39 @@
             "newPasswordPlaceholder": "Leave blank to keep it unchanged"
         },
         "list": {
-            "title": "Customers",
-            "createLink": "Create customer"
+            "title": "Representantes Legumex",
+            "createLink": "Create Legumex representative"
         },
         "create": {
-            "title": "Create customer"
+            "title": "Create Legumex representative"
         },
         "edit": {
-            "title": "Edit customer"
+            "title": "Edit Legumex representative"
         },
         "table": {
             "searchPlaceholder": "Search by name or email...",
-            "empty": "No customers registered"
+            "empty": "No Legumex representatives registered"
+        }
+    },
+    "client": {
+        "form": {
+            "name": "Name",
+            "email": "Email",
+            "phone": "Phone"
+        },
+        "list": {
+            "title": "Clients",
+            "createLink": "Create client"
+        },
+        "create": {
+            "title": "Create client"
+        },
+        "edit": {
+            "title": "Edit client"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name or email...",
+            "empty": "No clients registered"
         }
     },
     "user": {
@@ -895,7 +934,7 @@
     },
     "dashboard": {
         "title": "Dashboard",
-        "subtitle": "Best-selling products, customers and ingredients for the selected date range.",
+        "subtitle": "Best-selling products, salespeople and ingredients for the selected date range.",
         "filters": {
             "startDate": "From",
             "endDate": "To",
@@ -910,7 +949,7 @@
             "totalQuotes": "Saved quotes",
             "totalRevenue": "Total quoted value",
             "totalPallets": "Requested pallets",
-            "uniqueCustomers": "Active customers",
+            "uniqueSalespeople": "Active representatives",
             "averageQuoteValue": "Average quote value"
         },
         "trend": {
@@ -933,10 +972,10 @@
             "empty": "No revenue data for this range.",
             "other": "Other products"
         },
-        "topCustomers": {
-            "title": "Top customers",
+        "topSalespeople": {
+            "title": "Top representatives",
             "subtitle": "Ranked by total quoted value.",
-            "empty": "No customer data for this range.",
+            "empty": "No representative data for this range.",
             "secondary": "{{count}} quotes · {{pallets}} pallets"
         },
         "topIngredients": {
@@ -949,13 +988,12 @@
     "adminQuote": {
         "list": {
             "title": "Quotes",
-            "description": "All quotes customers have saved, regardless of which customer.",
-            "searchPlaceholder": "Search by customer, company, email or product...",
+            "description": "All quotes representatives have saved, regardless of which representative.",
+            "searchPlaceholder": "Search by representative, company, email or product...",
             "empty": "No quote has been saved yet.",
             "noMatches": "No quote matches the search.",
             "summary": "{{date}} · {{pallets}} pallets · {{destination}}",
-            "summaryNoDestination": "{{date}} · {{pallets}} pallets",
-            "leadLabel": "Lead: {{fullName}} · {{companyName}}"
+            "summaryNoDestination": "{{date}} · {{pallets}} pallets"
         }
     },
     "adminQuoteCalculator": {
@@ -1106,9 +1144,7 @@
             }
         },
         "edit": {
-            "title": "Lead detail",
-            "linkedQuotesTitle": "This lead's quotes",
-            "linkedQuoteSummary": "{{date}} · {{pallets}} pallet(s)"
+            "title": "Lead detail"
         }
     },
     "siteImage": {

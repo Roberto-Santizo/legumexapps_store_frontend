@@ -34,7 +34,7 @@ export function OptionCards({
     imageHeightClassName = "h-28",
 }: Readonly<OptionCardsProps>) {
     return (
-        <div className={`grid gap-3 ${columnsClassName}`}>
+        <div className={`grid gap-3 sm:gap-4 ${columnsClassName}`}>
             {options.map((option) => {
                 const isSelected = value === option.value
 
@@ -67,6 +67,7 @@ export function OptionCards({
                     <button
                         key={option.value}
                         type="button"
+                        aria-pressed={isSelected}
                         onClick={() => onChange(option.value)}
                         className={`group relative flex flex-col overflow-hidden rounded-2xl border-[1.5px] text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-dorado/50 focus:ring-offset-2 ${cardBorderClassName(isSelected, hasError)}`}
                     >

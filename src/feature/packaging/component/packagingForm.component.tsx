@@ -23,6 +23,7 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, errors
                 label={t("packaging.form.code")}
                 htmlFor="code"
                 error={getFieldErrorMessage(t, errors.code as FieldError | undefined)}
+                required
             >
                 <Input id="code" required hasError={!!errors.code} {...register("code" as Path<T>)} />
             </FormField>
@@ -31,6 +32,7 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, errors
                 label={t("packaging.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
+                required
             >
                 <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
             </FormField>
@@ -39,6 +41,7 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, errors
                 label={t("packaging.form.packagingRole")}
                 htmlFor="packagingRole"
                 error={getFieldErrorMessage(t, errors.packagingRole as FieldError | undefined)}
+                required
             >
                 <Select
                     id="packagingRole"
@@ -56,6 +59,7 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, errors
                 label={t("packaging.form.unitCost")}
                 htmlFor="unitCost"
                 error={getFieldErrorMessage(t, errors.unitCost as FieldError | undefined)}
+                required
             >
                 <Input
                     id="unitCost"

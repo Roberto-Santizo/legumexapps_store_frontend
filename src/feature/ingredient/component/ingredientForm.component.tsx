@@ -29,6 +29,7 @@ export function IngredientForm<T extends UpdateIngredientInput>({
                 label={t("ingredient.form.code")}
                 htmlFor="code"
                 error={getFieldErrorMessage(t, errors.code as FieldError | undefined)}
+                required
             >
                 <Input id="code" required hasError={!!errors.code} {...register("code" as Path<T>)} />
             </FormField>
@@ -37,6 +38,7 @@ export function IngredientForm<T extends UpdateIngredientInput>({
                 label={t("ingredient.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
+                required
             >
                 <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
             </FormField>
@@ -45,6 +47,7 @@ export function IngredientForm<T extends UpdateIngredientInput>({
                 label={t("ingredient.form.ingredientType")}
                 htmlFor="ingredientType"
                 error={getFieldErrorMessage(t, errors.ingredientType as FieldError | undefined)}
+                required
             >
                 <Select
                     id="ingredientType"
@@ -66,6 +69,7 @@ export function IngredientForm<T extends UpdateIngredientInput>({
                 label={t("ingredient.form.costPerUnit")}
                 htmlFor="costPerUnit"
                 error={getFieldErrorMessage(t, errors.costPerUnit as FieldError | undefined)}
+                required
             >
                 <Input
                     id="costPerUnit"
@@ -80,6 +84,7 @@ export function IngredientForm<T extends UpdateIngredientInput>({
                 label={t("ingredient.form.costUnitId")}
                 htmlFor="costUnitId"
                 error={getFieldErrorMessage(t, errors.costUnitId as FieldError | undefined)}
+                required
             >
                 <UnitSelect
                     id="costUnitId"

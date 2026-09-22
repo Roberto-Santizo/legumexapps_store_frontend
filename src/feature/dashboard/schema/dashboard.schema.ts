@@ -5,7 +5,7 @@ const dashboardOverviewSchema = z.object({
     totalRevenue: z.number(),
     totalPallets: z.number(),
     totalUnits: z.number(),
-    uniqueCustomers: z.number(),
+    uniqueSalespeople: z.number(),
     averageQuoteValue: z.number(),
 })
 
@@ -24,8 +24,8 @@ const dashboardTopProductSchema = z.object({
     totalRevenue: z.number(),
 })
 
-const dashboardTopCustomerSchema = z.object({
-    customerId: z.number().int(),
+const dashboardTopSalespersonSchema = z.object({
+    salespersonId: z.number().int(),
     name: z.string(),
     companyName: z.string().nullable(),
     email: z.string(),
@@ -51,7 +51,7 @@ export const dashboardSummarySchema = z.object({
     trendGranularity: z.enum(["day", "week"]),
     topProducts: z.array(dashboardTopProductSchema),
     topProductsByRevenue: z.array(dashboardTopProductSchema),
-    topCustomers: z.array(dashboardTopCustomerSchema),
+    topSalespeople: z.array(dashboardTopSalespersonSchema),
     topIngredients: z.array(dashboardTopIngredientSchema),
 })
 

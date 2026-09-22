@@ -36,6 +36,10 @@ export function CategoryForm<T extends UpdateCategoryInput>({
                         onChange={field.onChange}
                         initialImageUrl={currentImageUrl}
                         errorMessage={getFieldErrorMessage(t, errors.image as FieldError | undefined)}
+                        // image es requerido en createCategorySchema, pero updateCategorySchema
+                        // (.partial()) lo vuelve opcional -- currentImageUrl solo llega desde
+                        // EditCategoryPage, así que su ausencia identifica el formulario de creación.
+                        required={currentImageUrl === undefined}
                     />
                 )}
             />
@@ -44,6 +48,7 @@ export function CategoryForm<T extends UpdateCategoryInput>({
                 label={t("category.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
+                required
             >
                 <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
             </FormField>

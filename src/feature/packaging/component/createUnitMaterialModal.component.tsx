@@ -58,6 +58,7 @@ export function CreateUnitMaterialModal({ initialDisplayName, onCreated, onClose
                     label={t("packaging.form.code")}
                     htmlFor="unitMaterialCode"
                     error={getFieldErrorMessage(t, errors.code)}
+                    required
                 >
                     <Input id="unitMaterialCode" required hasError={!!errors.code} {...register("code")} />
                 </FormField>
@@ -66,6 +67,7 @@ export function CreateUnitMaterialModal({ initialDisplayName, onCreated, onClose
                     label={t("packaging.form.displayName")}
                     htmlFor="unitMaterialDisplayName"
                     error={getFieldErrorMessage(t, errors.displayName)}
+                    required
                 >
                     <Input id="unitMaterialDisplayName" hasError={!!errors.displayName} {...register("displayName")} />
                 </FormField>
@@ -74,6 +76,7 @@ export function CreateUnitMaterialModal({ initialDisplayName, onCreated, onClose
                     label={t("packaging.form.unitCost")}
                     htmlFor="unitMaterialUnitCost"
                     error={getFieldErrorMessage(t, errors.unitCost)}
+                    required
                 >
                     <Input
                         id="unitMaterialUnitCost"

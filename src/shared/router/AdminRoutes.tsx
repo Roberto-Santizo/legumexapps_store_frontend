@@ -27,16 +27,6 @@ const EditSubCategoryPage = lazyWithRetry(() =>
     import("@/feature/category/page/editSubCategory.page").then((module) => ({ default: module.EditSubCategoryPage }))
 )
 
-const ProductTypeListPage = lazyWithRetry(() =>
-    import("@/feature/product-type/page/productType.page").then((module) => ({ default: module.ProductTypeListPage }))
-)
-const CreateProductTypePage = lazyWithRetry(() =>
-    import("@/feature/product-type/page/createProductType.page").then((module) => ({ default: module.CreateProductTypePage }))
-)
-const EditProductTypePage = lazyWithRetry(() =>
-    import("@/feature/product-type/page/editProductType.page").then((module) => ({ default: module.EditProductTypePage }))
-)
-
 const UnitListPage = lazyWithRetry(() =>
     import("@/feature/unit/page/unit.page").then((module) => ({ default: module.UnitListPage }))
 )
@@ -130,14 +120,24 @@ const AdminQuoteCalculatorPage = lazyWithRetry(() =>
     import("@/feature/quote/page/adminQuoteCalculator.page").then((module) => ({ default: module.AdminQuoteCalculatorPage }))
 )
 
-const CustomerListPage = lazyWithRetry(() =>
-    import("@/feature/customer/page/customer.page").then((module) => ({ default: module.CustomerListPage }))
+const SalespersonListPage = lazyWithRetry(() =>
+    import("@/feature/salesperson/page/salesperson.page").then((module) => ({ default: module.SalespersonListPage }))
 )
-const CreateCustomerPage = lazyWithRetry(() =>
-    import("@/feature/customer/page/createCustomer.page").then((module) => ({ default: module.CreateCustomerPage }))
+const CreateSalespersonPage = lazyWithRetry(() =>
+    import("@/feature/salesperson/page/createSalesperson.page").then((module) => ({ default: module.CreateSalespersonPage }))
 )
-const EditCustomerPage = lazyWithRetry(() =>
-    import("@/feature/customer/page/editCustomer.page").then((module) => ({ default: module.EditCustomerPage }))
+const EditSalespersonPage = lazyWithRetry(() =>
+    import("@/feature/salesperson/page/editSalesperson.page").then((module) => ({ default: module.EditSalespersonPage }))
+)
+
+const ClientListPage = lazyWithRetry(() =>
+    import("@/feature/client/page/client.page").then((module) => ({ default: module.ClientListPage }))
+)
+const CreateClientPage = lazyWithRetry(() =>
+    import("@/feature/client/page/createClient.page").then((module) => ({ default: module.CreateClientPage }))
+)
+const EditClientPage = lazyWithRetry(() =>
+    import("@/feature/client/page/editClient.page").then((module) => ({ default: module.EditClientPage }))
 )
 
 const LeadListPage = lazyWithRetry(() => import("@/feature/lead/page/lead.page").then((module) => ({ default: module.LeadListPage })))
@@ -160,10 +160,6 @@ const routes = [
     { path: "sub-categories", component: SubCategoryListPage, permission: "subCategories:view" },
     { path: "sub-categories/create", component: CreateSubCategoryPage, permission: "subCategories:create" },
     { path: "sub-categories/:subCategoryId/edit", component: EditSubCategoryPage, permission: "subCategories:edit" },
-
-    { path: "product-types", component: ProductTypeListPage, permission: "productTypes:view" },
-    { path: "product-types/create", component: CreateProductTypePage, permission: "productTypes:create" },
-    { path: "product-types/:productTypeId/edit", component: EditProductTypePage, permission: "productTypes:edit" },
 
     { path: "units", component: UnitListPage, permission: "units:view" },
     { path: "units/create", component: CreateUnitPage, permission: "units:create" },
@@ -193,9 +189,13 @@ const routes = [
     { path: "products/create", component: CreateProductPage, permission: "products:create" },
     { path: "products/:productId/edit", component: EditProductPage, permission: "products:edit" },
 
-    { path: "customers", component: CustomerListPage, permission: "customers:view" },
-    { path: "customers/create", component: CreateCustomerPage, permission: "customers:create" },
-    { path: "customers/:customerId/edit", component: EditCustomerPage, permission: "customers:edit" },
+    { path: "salespeople", component: SalespersonListPage, permission: "salespeople:view" },
+    { path: "salespeople/create", component: CreateSalespersonPage, permission: "salespeople:create" },
+    { path: "salespeople/:salespersonId/edit", component: EditSalespersonPage, permission: "salespeople:edit" },
+
+    { path: "clients", component: ClientListPage, permission: "clients:view" },
+    { path: "clients/create", component: CreateClientPage, permission: "clients:create" },
+    { path: "clients/:clientId/edit", component: EditClientPage, permission: "clients:edit" },
 
     { path: "leads", component: LeadListPage, permission: "leads:view" },
     { path: "leads/:leadId/edit", component: EditLeadPage, permission: "leads:edit" },

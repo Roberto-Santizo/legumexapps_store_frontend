@@ -22,6 +22,7 @@ export function EditUnitForm({ register, errors, watch }: Readonly<EditUnitFormP
                 label={t("unit.form.unitKey")}
                 htmlFor="unitKey"
                 error={getFieldErrorMessage(t, errors.unitKey)}
+                required
             >
                 <Select id="unitKey" hasError={!!errors.unitKey} {...register("unitKey")}>
                     {UNIT_CATALOG.map((entry) => (

@@ -20,6 +20,7 @@ import { UnitMaterialSelect } from "@/feature/packaging/component/unitMaterialSe
 import { Select } from "@/shared/component/select.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
+import { Checkbox } from "@/shared/component/checkbox.component"
 import { Button } from "@/shared/component/button.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
@@ -32,6 +33,8 @@ function toFormValues(item: ProductVariantUnitMaterialResponse): Partial<UnitMat
     return {
         packagingId: item.packagingId,
         quantityPerUnit: Number(item.quantityPerUnit),
+        isSwappable: item.isSwappable,
+        isDefault: item.isDefault,
     }
 }
 
@@ -59,7 +62,6 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
     const packagingNameById = new Map((packagingsQuery.data?.data ?? []).map((p) => [p.id, p.displayName]))
 
     function variantLabel(variant: (typeof variants)[number]): string {
-        if (variant.skuCode) return variant.skuCode
         if (variant.presentationId) return presentationNameById.get(variant.presentationId) ?? `#${variant.id}`
         return `#${variant.id}`
     }
@@ -75,8 +77,10 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
         control,
         handleSubmit,
         reset,
+        watch,
         formState: { errors },
     } = useForm<UnitMaterialFormInput>({ resolver: zodResolver(unitMaterialFormSchema) })
+    const isSwappable = watch("isSwappable")
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariantUnitMaterials"] })
 
@@ -161,6 +165,8 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                         <TableRow>
                             <Th>{t("productVariantUnitMaterial.form.packagingId")}</Th>
                             <Th>{t("productVariantUnitMaterial.form.quantityPerUnit")}</Th>
+                            <Th>{t("productVariantUnitMaterial.table.swappable")}</Th>
+                            <Th>{t("productVariantUnitMaterial.table.default")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -169,6 +175,8 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                             <TableRow key={item.id}>
                                 <Td>{packagingNameById.get(item.packagingId) ?? "-"}</Td>
                                 <Td>{item.quantityPerUnit}</Td>
+                                <Td>{item.isSwappable ? t("common.yes") : t("common.no")}</Td>
+                                <Td>{item.isSwappable && item.isDefault ? t("common.yes") : "-"}</Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
@@ -199,6 +207,7 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                     label={t("productVariantUnitMaterial.form.packagingId")}
                     htmlFor="unitMaterialPackagingId"
                     error={getFieldErrorMessage(t, errors.packagingId)}
+                    required
                 >
                     <Controller
                         name="packagingId"
@@ -218,6 +227,7 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                     label={t("productVariantUnitMaterial.form.quantityPerUnit")}
                     htmlFor="quantityPerUnit"
                     error={getFieldErrorMessage(t, errors.quantityPerUnit)}
+                    required
                 >
                     <Input
                         id="quantityPerUnit"
@@ -228,6 +238,25 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                         {...register("quantityPerUnit", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
+
+                <div className="mb-5 flex flex-wrap items-center gap-6 sm:col-span-2">
+                    <Checkbox
+                        id="unitMaterialIsSwappable"
+                        label={t("productVariantUnitMaterial.form.isSwappable")}
+                        {...register("isSwappable")}
+                    />
+                    <Checkbox
+                        id="unitMaterialIsDefault"
+                        label={t("productVariantUnitMaterial.form.isDefault")}
+                        disabled={!isSwappable}
+                        {...register("isDefault")}
+                    />
+                </div>
+                {isSwappable && (
+                    <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
+                        {t("productVariantUnitMaterial.form.isDefaultHint")}
+                    </p>
+                )}
 
                 <div className="flex gap-3 sm:col-span-2">
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

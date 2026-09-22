@@ -35,6 +35,7 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
                 label={t("processingCost.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
+                required
             >
                 <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
             </FormField>
@@ -43,6 +44,7 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
                 label={t(isPercentage ? "processingCost.form.valueLabelPercentage" : "processingCost.form.valueLabelPerWeight")}
                 htmlFor="value"
                 error={getFieldErrorMessage(t, errors.value as FieldError | undefined)}
+                required
             >
                 <Input
                     id="value"
@@ -60,6 +62,7 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
                 label={t("processingCost.form.calculationType")}
                 htmlFor="calculationType"
                 error={getFieldErrorMessage(t, errors.calculationType as FieldError | undefined)}
+                required
             >
                 <Select
                     id="calculationType"

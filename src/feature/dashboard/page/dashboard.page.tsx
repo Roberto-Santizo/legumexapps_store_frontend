@@ -13,7 +13,7 @@ import { QuotesTrendChart } from "@/feature/dashboard/component/quotesTrendChart
 import { RankedBarList } from "@/feature/dashboard/component/rankedBarList.component"
 import { ProductRevenueShareChart } from "@/feature/dashboard/component/productRevenueShareChart.component"
 import {
-    CHART_ACCENT_CUSTOMERS,
+    CHART_ACCENT_SALESPEOPLE,
     CHART_ACCENT_INGREDIENTS,
     CHART_ACCENT_PRODUCTS,
 } from "@/feature/dashboard/constant/chartColors"
@@ -58,8 +58,8 @@ export function DashboardPage() {
                         icon={<Boxes size={20} />}
                     />
                     <StatTile
-                        label={t("dashboard.overview.uniqueCustomers")}
-                        value={formatNumber(summary.overview.uniqueCustomers)}
+                        label={t("dashboard.overview.uniqueSalespeople")}
+                        value={formatNumber(summary.overview.uniqueSalespeople)}
                         icon={<Users size={20} />}
                     />
                     <StatTile
@@ -102,19 +102,19 @@ export function DashboardPage() {
 
                 <div className="grid gap-4 lg:grid-cols-2">
                     <RankedBarList
-                        title={t("dashboard.topCustomers.title")}
-                        subtitle={t("dashboard.topCustomers.subtitle")}
-                        emptyMessage={t("dashboard.topCustomers.empty")}
-                        accentColor={CHART_ACCENT_CUSTOMERS}
-                        items={summary.topCustomers.map((customer) => ({
-                            key: customer.customerId,
-                            label: customer.companyName ? `${customer.name} · ${customer.companyName}` : customer.name,
-                            secondaryLabel: t("dashboard.topCustomers.secondary", {
-                                count: customer.quoteCount,
-                                pallets: formatNumber(customer.totalPallets),
+                        title={t("dashboard.topSalespeople.title")}
+                        subtitle={t("dashboard.topSalespeople.subtitle")}
+                        emptyMessage={t("dashboard.topSalespeople.empty")}
+                        accentColor={CHART_ACCENT_SALESPEOPLE}
+                        items={summary.topSalespeople.map((salesperson) => ({
+                            key: salesperson.salespersonId,
+                            label: salesperson.companyName ? `${salesperson.name} · ${salesperson.companyName}` : salesperson.name,
+                            secondaryLabel: t("dashboard.topSalespeople.secondary", {
+                                count: salesperson.quoteCount,
+                                pallets: formatNumber(salesperson.totalPallets),
                             }),
-                            value: customer.totalRevenue,
-                            valueLabel: formatCurrency(customer.totalRevenue),
+                            value: salesperson.totalRevenue,
+                            valueLabel: formatCurrency(salesperson.totalRevenue),
                         }))}
                     />
 

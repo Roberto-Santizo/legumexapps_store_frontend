@@ -1,4 +1,5 @@
 import { useRef, useState } from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react"
 import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
@@ -20,6 +21,10 @@ type QuotedOrderSummaryProps = {
     // Aviso "cotización de referencia" (2026-09-13) -- default false, ver el mismo prop en
     // quoteResultCard.component.tsx (acá solo se reenvía al detalle expandido de cada línea).
     showReferenceDisclaimer?: boolean
+    // Slot para <QuotePdfButton> (2026-09-22, paso "total" del wizard -- ver CLAUDE.md #6): se
+    // renderiza en la MISMA fila que "Nueva cotización" para que ambas acciones queden juntas,
+    // en vez de que el botón de PDF viva suelto en el encabezado de la página.
+    pdfAction?: ReactNode
 }
 
 
@@ -30,6 +35,7 @@ export function QuotedOrderSummary({
     showCostBreakdown = true,
     showTransport = false,
     showReferenceDisclaimer = false,
+    pdfAction,
 }: Readonly<QuotedOrderSummaryProps>) {
     const { t } = useTranslation()
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
@@ -124,6 +130,7 @@ export function QuotedOrderSummary({
                 <Button type="button" onClick={onQuoteAnother}>
                     {t("quote.orderSummary.quoteAnother")}
                 </Button>
+                {pdfAction}
                 <button
                     type="button"
                     onClick={onClear}

@@ -64,6 +64,7 @@ export function CreatePalletMaterialModal({ initialDisplayName, onCreated, onClo
                     label={t("packaging.form.code")}
                     htmlFor="palletMaterialCode"
                     error={getFieldErrorMessage(t, errors.code)}
+                    required
                 >
                     <Input id="palletMaterialCode" required hasError={!!errors.code} {...register("code")} />
                 </FormField>
@@ -72,6 +73,7 @@ export function CreatePalletMaterialModal({ initialDisplayName, onCreated, onClo
                     label={t("packaging.form.displayName")}
                     htmlFor="palletMaterialDisplayName"
                     error={getFieldErrorMessage(t, errors.displayName)}
+                    required
                 >
                     <Input id="palletMaterialDisplayName" hasError={!!errors.displayName} {...register("displayName")} />
                 </FormField>
@@ -80,6 +82,7 @@ export function CreatePalletMaterialModal({ initialDisplayName, onCreated, onClo
                     label={t("packaging.form.unitCost")}
                     htmlFor="palletMaterialUnitCost"
                     error={getFieldErrorMessage(t, errors.unitCost)}
+                    required
                 >
                     <Input
                         id="palletMaterialUnitCost"

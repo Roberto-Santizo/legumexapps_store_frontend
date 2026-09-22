@@ -266,6 +266,7 @@ export function QuotePdfButton({
                                     label={t("quote.pdf.modal.clientNameLabel")}
                                     htmlFor="quote-pdf-client-name"
                                     error={nameError}
+                                    required
                                 >
                                     <Input
                                         id="quote-pdf-client-name"
@@ -336,6 +337,7 @@ export function QuotePdfButton({
                                         label={t("quote.pdf.modal.clientEmailLabel")}
                                         htmlFor="quote-pdf-client-email"
                                         error={emailError}
+                                        required
                                     >
                                         <Input
                                             id="quote-pdf-client-email"

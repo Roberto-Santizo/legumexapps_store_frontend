@@ -15,7 +15,6 @@ import {
 } from "@/feature/product/api/productIngredient.api"
 import { getIngredientsAPI } from "@/feature/ingredient/api/ingredient.api"
 import { IngredientSelect } from "@/feature/ingredient/component/ingredientSelect.component"
-import { UnitSelect } from "@/feature/unit/component/unitSelect.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
 import { Button } from "@/shared/component/button.component"
@@ -26,20 +25,20 @@ import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 const baseIngredientFormSchema = createProductIngredientSchema.omit({ productId: true })
 type IngredientFormInput = z.infer<typeof baseIngredientFormSchema>
 
-// Receta fija (!isCustomizable): quantityValue es la cantidad real que quote.service.ts
-// multiplica por el costo -- no puede quedar vacía, o esa materia prima "cuesta" $0 en cada
-// cotización sin ningún aviso. Producto personalizable: este campo no se usa (se usa
-// minPercentage/maxPercentage en su lugar), se queda opcional a propósito.
+// Receta fija (!isCustomizable): percentage es el % real que quote.service.ts convierte a gramos
+// sobre el peso neto de la presentación -- no puede quedar vacío, o esa materia prima "cuesta" $0
+// en cada cotización sin ningún aviso (mismo riesgo que tenía el viejo quantityValue). Producto
+// personalizable: este campo no se usa (se usa minPercentage/maxPercentage en su lugar), se queda
+// opcional a propósito.
 function buildIngredientFormSchema(isCustomizable: boolean) {
     if (isCustomizable) return baseIngredientFormSchema
-    return baseIngredientFormSchema.extend({ quantityValue: z.number().positive() })
+    return baseIngredientFormSchema.extend({ percentage: z.number().positive().max(100) })
 }
 
 function toFormValues(productIngredient: ProductIngredientResponse): IngredientFormInput {
     return {
         ingredientId: productIngredient.ingredientId,
-        quantityValue: productIngredient.quantityValue !== null ? Number(productIngredient.quantityValue) : undefined,
-        quantityUnitId: productIngredient.quantityUnitId ?? undefined,
+        percentage: productIngredient.percentage !== null ? Number(productIngredient.percentage) : undefined,
         minPercentage: productIngredient.minPercentage !== null ? Number(productIngredient.minPercentage) : undefined,
         maxPercentage: productIngredient.maxPercentage !== null ? Number(productIngredient.maxPercentage) : undefined,
     }
@@ -51,10 +50,17 @@ function formatPercentageRange(productIngredient: ProductIngredientResponse): st
     return `${min}% - ${max}%`
 }
 
+// Mismo umbral que quoteService.MIX_PERCENTAGE_TOLERANCE / quoteCalculatorForm.component.tsx --
+// esto es solo un aviso en vivo para el admin (no bloquea el guardado de cada fila individual,
+// ver assertFixedRecipePercentageCeiling en el backend); el gate real que sí bloquea cotizar
+// corre en quote.service.ts al momento de calcular.
+const FIXED_PERCENTAGE_TOLERANCE = 0.5
+
 type ProductIngredientSectionProps = {
     productId: number
-    // Producto terminado -> receta fija (quantityValue). Producto personalizable ->
-    // pool de ingredientes permitidos con % mín/máx opcionales (ver Product.isCustomizable).
+    // Producto terminado -> receta fija (percentage, fijado por el admin y bloqueado para el
+    // cliente). Producto personalizable -> pool de ingredientes permitidos con % mín/máx
+    // opcionales que el cliente elige en el cotizador (ver Product.isCustomizable).
     isCustomizable: boolean
     // Si el producto está marcado como orgánico (Product.isOrganic), el selector solo debe
     // ofrecer variantes orgánicas o insumos tipo "other" (agua, sal, azúcar...) -- ver
@@ -67,10 +73,10 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
     const queryClient = useQueryClient()
     const [editingId, setEditingId] = useState<number | null>(null)
     // Fuerza a que el <form> se desmonte/remonte tras guardar -- reset({}) limpia el estado de
-    // react-hook-form, pero UnitSelect es un <select> nativo no controlado (register/ref);
-    // remontarlo garantiza que el DOM quede realmente en blanco. IngredientSelect ya no lo
-    // necesita (es un componente controlado vía Controller/value-onChange), pero remontar no le
-    // hace daño.
+    // react-hook-form, pero los <Input> numéricos (percentage/min/maxPercentage) son no
+    // controlados (register/ref); remontarlo garantiza que el DOM quede realmente en blanco.
+    // IngredientSelect no lo necesita (es un componente controlado vía Controller/value-onChange),
+    // pero remontar no le hace daño.
     const [formResetKey, setFormResetKey] = useState(0)
 
     const productIngredientsQuery = useQuery({
@@ -83,6 +89,18 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
         (productIngredient) => productIngredient.productId === productId
     )
     const ingredientNameById = new Map((ingredientsQuery.data?.data ?? []).map((i) => [i.id, i.displayName]))
+
+    // Receta fija: total en vivo de los % ya guardados, para que el admin vea si la receta ya
+    // suma 100 antes de intentar cotizar (ver comentario de FIXED_PERCENTAGE_TOLERANCE arriba).
+    const fixedPercentageTotal = productIngredients.reduce(
+        (sum, productIngredient) => sum + (productIngredient.percentage !== null ? Number(productIngredient.percentage) : 0),
+        0
+    )
+    const isFixedPercentageComplete = Math.abs(fixedPercentageTotal - 100) <= FIXED_PERCENTAGE_TOLERANCE
+    // Auto-completa 100% cuando es el primer/único ingrediente que se está por agregar a un
+    // producto de receta fija (decisión de negocio: conveniencia, no un valor forzado -- el admin
+    // puede cambiarlo antes de guardar).
+    const isFirstFixedIngredient = !isCustomizable && !editingId && productIngredients.length === 0
 
     const {
         register,
@@ -156,7 +174,7 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
                     <TableHead>
                         <TableRow>
                             <Th>{t("productIngredient.form.ingredientId")}</Th>
-                            <Th>{isCustomizable ? t("productIngredient.form.percentageRange") : t("productIngredient.form.quantityValue")}</Th>
+                            <Th>{isCustomizable ? t("productIngredient.form.percentageRange") : t("productIngredient.form.percentage")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -164,7 +182,13 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
                         {productIngredients.map((productIngredient) => (
                             <TableRow key={productIngredient.id}>
                                 <Td>{ingredientNameById.get(productIngredient.ingredientId) ?? "-"}</Td>
-                                <Td>{isCustomizable ? formatPercentageRange(productIngredient) : productIngredient.quantityValue ?? "-"}</Td>
+                                <Td>
+                                    {isCustomizable
+                                        ? formatPercentageRange(productIngredient)
+                                        : productIngredient.percentage !== null
+                                          ? `${productIngredient.percentage}%`
+                                          : "-"}
+                                </Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
@@ -190,11 +214,19 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
                 </Table>
             </TableContainer>
 
+            {!isCustomizable && productIngredients.length > 0 && (
+                <p className={`mb-4 text-sm font-semibold ${isFixedPercentageComplete ? "text-verde-profundo" : "text-error-fg"}`}>
+                    {t("productIngredient.form.percentageTotal", { total: fixedPercentageTotal })}
+                    {!isFixedPercentageComplete && ` — ${t("productIngredient.form.percentageTotalIncomplete")}`}
+                </p>
+            )}
+
             <form key={formResetKey} onSubmit={onSubmit} className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
                 <FormField
                     label={t("productIngredient.form.ingredientId")}
                     htmlFor="ingredientId"
                     error={getFieldErrorMessage(t, errors.ingredientId)}
+                    required
                 >
                     <Controller
                         name="ingredientId"
@@ -249,33 +281,23 @@ export function ProductIngredientSection({ productId, isCustomizable, isOrganic 
                         </FormField>
                     </>
                 ) : (
-                    <>
-                        <FormField
-                            label={t("productIngredient.form.quantityUnitId")}
-                            htmlFor="quantityUnitId"
-                            error={getFieldErrorMessage(t, errors.quantityUnitId)}
-                        >
-                            <UnitSelect
-                                id="quantityUnitId"
-                                hasError={!!errors.quantityUnitId}
-                                {...register("quantityUnitId", { setValueAs: toOptionalNumber })}
-                            />
-                        </FormField>
-
-                        <FormField
-                            label={t("productIngredient.form.quantityValue")}
-                            htmlFor="quantityValue"
-                            error={getFieldErrorMessage(t, errors.quantityValue)}
-                        >
-                            <Input
-                                id="quantityValue"
-                                type="number"
-                                step="0.01"
-                                hasError={!!errors.quantityValue}
-                                {...register("quantityValue", { setValueAs: toOptionalNumber })}
-                            />
-                        </FormField>
-                    </>
+                    <FormField
+                        label={t("productIngredient.form.percentage")}
+                        htmlFor="percentage"
+                        error={getFieldErrorMessage(t, errors.percentage)}
+                        required
+                    >
+                        <Input
+                            id="percentage"
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            max={100}
+                            defaultValue={isFirstFixedIngredient ? 100 : undefined}
+                            hasError={!!errors.percentage}
+                            {...register("percentage", { setValueAs: toOptionalNumber })}
+                        />
+                    </FormField>
                 )}
 
                 <div className="flex gap-3 sm:col-span-2">

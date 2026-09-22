@@ -8,7 +8,7 @@
 // categórica (ese validador solo aplica cuando dos o más series conviven en la misma gráfica).
 export const CHART_ACCENT_TREND = "#e9b93c" // --color-dorado
 export const CHART_ACCENT_PRODUCTS = "#1c4430" // --color-verde-tinta
-export const CHART_ACCENT_CUSTOMERS = "#a8c544" // --color-brote
+export const CHART_ACCENT_SALESPEOPLE = "#a8c544" // --color-brote
 export const CHART_ACCENT_INGREDIENTS = "#0f2e1e" // --color-verde-profundo
 
 // Paleta categórica para el único gráfico con varias series a la vez (pastel de participación

@@ -27,5 +27,3 @@ export const PRODUCT_LINE_IMAGES = {
     foodService: unsplash("photo-1552566626-52f8b828add9", 1400),
     privateLabel: unsplash("photo-1607349913338-fca6f7fc42d0", 1400),
 } as const
-
-export type ProductLineImageKey = keyof typeof PRODUCT_LINE_IMAGES

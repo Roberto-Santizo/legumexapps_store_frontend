@@ -29,6 +29,7 @@ export function PresentationForm<T extends UpdatePresentationInput>({
                 label={t("presentation.form.displayLabel")}
                 htmlFor="displayLabel"
                 error={getFieldErrorMessage(t, errors.displayLabel as FieldError | undefined)}
+                required
             >
                 <Input id="displayLabel" hasError={!!errors.displayLabel} {...register("displayLabel" as Path<T>)} />
             </FormField>
@@ -37,6 +38,7 @@ export function PresentationForm<T extends UpdatePresentationInput>({
                 label={t("presentation.form.netWeightGrams")}
                 htmlFor="netWeightGrams"
                 error={getFieldErrorMessage(t, errors.netWeightGrams as FieldError | undefined)}
+                required
             >
                 <Input
                     id="netWeightGrams"

@@ -19,7 +19,12 @@ export function RoleForm<T extends UpdateRoleInput>({ register, errors }: Readon
 
     return (
         <div>
-            <FormField label={t("role.form.name")} htmlFor="name" error={getFieldErrorMessage(t, errors.name as FieldError | undefined)}>
+            <FormField
+                label={t("role.form.name")}
+                htmlFor="name"
+                error={getFieldErrorMessage(t, errors.name as FieldError | undefined)}
+                required
+            >
                 <Input id="name" hasError={!!errors.name} {...register("name" as Path<T>)} />
             </FormField>
         </div>

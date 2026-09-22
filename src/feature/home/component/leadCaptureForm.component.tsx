@@ -105,7 +105,12 @@ export function LeadCaptureForm() {
                 onSubmit={handleSubmit(onSubmit)}
                 noValidate
             >
-                <FormField label={t("home.leadCapture.form.name")} htmlFor="lead-fullName" error={errors.fullName?.message}>
+                <FormField
+                    label={t("home.leadCapture.form.name")}
+                    htmlFor="lead-fullName"
+                    error={errors.fullName?.message}
+                    required
+                >
                     <Input id="lead-fullName" preserveCase hasError={!!errors.fullName} {...register("fullName")} />
                 </FormField>
 
@@ -113,12 +118,13 @@ export function LeadCaptureForm() {
                     label={t("home.leadCapture.form.companyName")}
                     htmlFor="lead-company"
                     error={errors.companyName?.message}
+                    required
                 >
                     <Input id="lead-company" preserveCase hasError={!!errors.companyName} {...register("companyName")} />
                 </FormField>
 
                 <div className="grid gap-x-4 sm:grid-cols-2">
-                    <FormField label={t("home.leadCapture.form.email")} htmlFor="lead-email" error={errors.email?.message}>
+                    <FormField label={t("home.leadCapture.form.email")} htmlFor="lead-email" error={errors.email?.message} required>
                         <Input
                             id="lead-email"
                             type="email"
@@ -128,7 +134,7 @@ export function LeadCaptureForm() {
                         />
                     </FormField>
 
-                    <FormField label={t("home.leadCapture.form.phone")} htmlFor="lead-phone" error={errors.phone?.message}>
+                    <FormField label={t("home.leadCapture.form.phone")} htmlFor="lead-phone" error={errors.phone?.message} required>
                         <Input id="lead-phone" preserveCase hasError={!!errors.phone} {...register("phone")} />
                     </FormField>
                 </div>

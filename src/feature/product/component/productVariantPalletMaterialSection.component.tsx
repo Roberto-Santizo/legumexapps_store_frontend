@@ -20,6 +20,7 @@ import { PalletMaterialSelect } from "@/feature/packaging/component/palletMateri
 import { Select } from "@/shared/component/select.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
+import { Checkbox } from "@/shared/component/checkbox.component"
 import { Button } from "@/shared/component/button.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
@@ -33,6 +34,8 @@ function toFormValues(item: ProductVariantPalletMaterialResponse): Partial<Palle
     return {
         packagingId: item.packagingId,
         quantityValue: item.quantityValue !== null ? Number(item.quantityValue) : undefined,
+        isSwappable: item.isSwappable,
+        isDefault: item.isDefault,
     }
 }
 
@@ -56,7 +59,6 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
     const packagingNameById = new Map((packagingsQuery.data?.data ?? []).map((p) => [p.id, p.displayName]))
 
     function variantLabel(variant: (typeof variants)[number]): string {
-        if (variant.skuCode) return variant.skuCode
         if (variant.presentationId) return presentationNameById.get(variant.presentationId) ?? `#${variant.id}`
         return `#${variant.id}`
     }
@@ -79,7 +81,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
     // hint de "empaques intermedios por palet" sigue siendo puramente informativo, ahora derivado
     // de bagsPerPallet (boxesPerPallet × bagsPerBox) en vez del viejo unitsPerPallet manual --
     // matemáticamente igual para el mismo dato, solo cambia de dónde sale el multiplicando.
-    const hasIntermediatePackaging = !!activeVariant?.intermediatePackagingId && !!activeVariant?.unitsPerIntermediatePackage
+    const hasIntermediatePackaging = !!activeVariant?.unitsPerIntermediatePackage
     const bagsPerPallet =
         activeVariant?.boxesPerPallet && activeVariant?.bagsPerBox
             ? activeVariant.boxesPerPallet * activeVariant.bagsPerBox
@@ -95,8 +97,10 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
         control,
         handleSubmit,
         reset,
+        watch,
         formState: { errors },
     } = useForm<PalletMaterialFormInput>({ resolver: zodResolver(palletMaterialFormSchema) })
+    const isSwappable = watch("isSwappable")
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariantPalletMaterials"] })
 
@@ -197,6 +201,8 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                         <TableRow>
                             <Th>{t("productVariantPalletMaterial.form.packagingId")}</Th>
                             <Th>{t("productVariantPalletMaterial.form.quantityValue")}</Th>
+                            <Th>{t("productVariantPalletMaterial.table.swappable")}</Th>
+                            <Th>{t("productVariantPalletMaterial.table.default")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -205,6 +211,8 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                             <TableRow key={item.id}>
                                 <Td>{packagingNameById.get(item.packagingId) ?? "-"}</Td>
                                 <Td>{item.quantityValue ?? "-"}</Td>
+                                <Td>{item.isSwappable ? t("common.yes") : t("common.no")}</Td>
+                                <Td>{item.isSwappable && item.isDefault ? t("common.yes") : "-"}</Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
@@ -235,6 +243,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                     label={t("productVariantPalletMaterial.form.packagingId")}
                     htmlFor="packagingId"
                     error={getFieldErrorMessage(t, errors.packagingId)}
+                    required
                 >
                     <Controller
                         name="packagingId"
@@ -254,6 +263,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                     label={t("productVariantPalletMaterial.form.quantityValue")}
                     htmlFor="quantityValue"
                     error={getFieldErrorMessage(t, errors.quantityValue)}
+                    required
                 >
                     <Input
                         id="quantityValue"
@@ -263,6 +273,25 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                         {...register("quantityValue", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
+
+                <div className="mb-5 flex flex-wrap items-center gap-6 sm:col-span-2">
+                    <Checkbox
+                        id="palletMaterialIsSwappable"
+                        label={t("productVariantPalletMaterial.form.isSwappable")}
+                        {...register("isSwappable")}
+                    />
+                    <Checkbox
+                        id="palletMaterialIsDefault"
+                        label={t("productVariantPalletMaterial.form.isDefault")}
+                        disabled={!isSwappable}
+                        {...register("isDefault")}
+                    />
+                </div>
+                {isSwappable && (
+                    <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
+                        {t("productVariantPalletMaterial.form.isDefaultHint")}
+                    </p>
+                )}
 
                 <div className="flex gap-3 sm:col-span-2">
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

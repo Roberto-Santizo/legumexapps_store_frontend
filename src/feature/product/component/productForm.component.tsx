@@ -7,11 +7,10 @@ import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
 import { Select } from "@/shared/component/select.component"
 import { Checkbox } from "@/shared/component/checkbox.component"
-import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 import { toNullableNumber } from "@/shared/form/toNullableNumber"
 import { toBoolean } from "@/shared/form/toBoolean"
 import { SubCategorySelect } from "@/feature/category/component/subCategorySelect.component"
-import { ProductTypeSelect } from "@/feature/product-type/component/productTypeSelect.component"
+import { ClientSelect } from "@/feature/client/component/clientSelect.component"
 import { ImageUploadField } from "@/shared/component/imageUploadField.component"
 import { TranslationSection } from "@/shared/component/translationSection.component"
 
@@ -55,6 +54,7 @@ export function ProductForm<T extends UpdateProductInput>({
                 label={t("product.form.codigo")}
                 htmlFor="codigo"
                 error={getFieldErrorMessage(t, errors.codigo as FieldError | undefined)}
+                required
             >
                 <Input id="codigo" hasError={!!errors.codigo} {...register("codigo" as Path<T>)} />
             </FormField>
@@ -63,6 +63,7 @@ export function ProductForm<T extends UpdateProductInput>({
                 label={t("product.form.subCategoryId")}
                 htmlFor="subCategoryId"
                 error={getFieldErrorMessage(t, errors.subCategoryId as FieldError | undefined)}
+                required
             >
                 <Controller
                     name={"subCategoryId" as Path<T>}
@@ -79,14 +80,22 @@ export function ProductForm<T extends UpdateProductInput>({
             </FormField>
 
             <FormField
-                label={t("product.form.productTypeId")}
-                htmlFor="productTypeId"
-                error={getFieldErrorMessage(t, errors.productTypeId as FieldError | undefined)}
+                label={t("product.form.clientId")}
+                htmlFor="clientId"
+                error={getFieldErrorMessage(t, errors.clientId as FieldError | undefined)}
+                required
             >
-                <ProductTypeSelect
-                    id="productTypeId"
-                    hasError={!!errors.productTypeId}
-                    {...register("productTypeId" as Path<T>, { setValueAs: toOptionalNumber })}
+                <Controller
+                    name={"clientId" as Path<T>}
+                    control={control}
+                    render={({ field }) => (
+                        <ClientSelect
+                            inputId="clientId"
+                            hasError={!!errors.clientId}
+                            value={field.value as number | undefined}
+                            onChange={field.onChange}
+                        />
+                    )}
                 />
             </FormField>
 
@@ -94,6 +103,7 @@ export function ProductForm<T extends UpdateProductInput>({
                 label={t("product.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
+                required
             >
                 <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
             </FormField>

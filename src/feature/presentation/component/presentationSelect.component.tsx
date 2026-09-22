@@ -11,12 +11,13 @@ type PresentationSelectProps = {
     hasError?: boolean
     value: number | undefined
     onChange: (value: number | undefined) => void
+    disabled?: boolean
 }
 
 // Creatable/searchable: si el usuario tipea una presentación que no existe, "Crear '<texto>'"
 // abre CreatePresentationModal para pedir el peso neto (obligatorio, ver presentation.schema.ts)
 // antes de crearla.
-export function PresentationSelect({ inputId, hasError, value, onChange }: Readonly<PresentationSelectProps>) {
+export function PresentationSelect({ inputId, hasError, value, onChange, disabled }: Readonly<PresentationSelectProps>) {
     const { t } = useTranslation()
     const [pendingDisplayLabel, setPendingDisplayLabel] = useState<string | null>(null)
     const presentationsQuery = useQuery({ queryKey: ["presentations"], queryFn: getPresentationsAPI })
@@ -36,6 +37,7 @@ export function PresentationSelect({ inputId, hasError, value, onChange }: Reado
                 placeholder={t("common.searchPlaceholder")}
                 noOptionsMessage={() => t("common.noOptionsFound")}
                 isClearable
+                isDisabled={disabled}
                 value={options.find((option) => option.value === value) ?? null}
                 onChange={(selected) => onChange(selected?.value ?? undefined)}
                 onCreateOption={(inputValue) => setPendingDisplayLabel(inputValue)}

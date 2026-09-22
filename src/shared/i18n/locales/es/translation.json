@@ -23,6 +23,8 @@
         "status": "Estado",
         "active": "Activo",
         "inactive": "Inactivo",
+        "yes": "Sí",
+        "no": "No",
         "activate": "Activar",
         "deactivate": "Desactivar",
         "confirmDeactivate": "¿Seguro que deseas desactivar \"{{name}}\"? Dejará de estar disponible hasta que lo actives de nuevo.",
@@ -79,11 +81,11 @@
             "submitting": "Iniciando sesión...",
             "footer": "© {{year}} Legumex Apps. Todos los derechos reservados."
         },
-        "customerLogin": {
+        "salespersonLogin": {
             "title": "Iniciar sesión",
             "subtitle": "Ingresa a tu cuenta para ver precios y cotizar",
             "brand": "Legumex",
-            "brandSubtitle": "Acceso para clientes",
+            "brandSubtitle": "Acceso para representantes Legumex",
             "email": "Correo electrónico",
             "emailPlaceholder": "tucorreo@empresa.com",
             "password": "Contraseña",
@@ -139,6 +141,14 @@
                     "boxesPerPallet": "{{count}} cajas/palet"
                 },
                 "requestedPallets": "Palets solicitados",
+                "unitMaterialLabel": "Empaque individual",
+                "intermediateMaterialLabel": "Empaque intermedio",
+                "palletMaterialLabel": "Material de paletización",
+                "livePreview": {
+                    "label": "Total estimado",
+                    "loading": "Calculando...",
+                    "forPallets": "Para {{count}} palet(s)"
+                },
                 "country": "País de destino",
                 "countryOptions": {
                     "GT": "Guatemala",
@@ -146,15 +156,6 @@
                 },
                 "destination": "Destino",
                 "noDestinationsForCountry": "Aún no hay destinos configurados para este país.",
-                "leadContact": {
-                    "title": "¿Para quién es esta cotización?",
-                    "subtitle": "Cuéntanos quién solicita esta cotización para que nuestro equipo pueda dar seguimiento.",
-                    "fullName": "Nombre completo",
-                    "companyName": "Empresa",
-                    "email": "Correo electrónico",
-                    "notes": "Notas adicionales (opcional)",
-                    "incomplete": "Completa nombre, empresa y un correo electrónico válido para poder calcular la cotización."
-                },
                 "submit": "Calcular cotización",
                 "modeFinished": "Producto terminado",
                 "modeCustomizable": "Personalizar mi producto",
@@ -163,6 +164,8 @@
                 "noProductsFinished": "Aún no hay productos terminados disponibles para cotizar.",
                 "noProductsCustomizable": "Aún no hay productos personalizables disponibles para cotizar.",
                 "organicBadge": "100% Orgánico",
+                "fixedRecipeTitle": "Composición",
+                "fixedRecipeLine": "{{percentage}}% {{name}}",
                 "mixTitle": "Arma tu mezcla",
                 "mixTotal": "Total: {{total}}%",
                 "mixIncomplete": "La mezcla debe sumar 100% para poder cotizar.",
@@ -174,7 +177,31 @@
                         "mode": "Tipo",
                         "category": "Categoría",
                         "product": "Producto",
-                        "details": "Detalles"
+                        "pallets": "Palets",
+                        "materials": "Materiales",
+                        "total": "Total"
+                    },
+                    "pallets": {
+                        "title": "¿Cuántos palets necesitas?",
+                        "subtitle": "Elige la presentación (si aplica) y la cantidad de palets. Verás las cajas por palet y el peso total de tu pedido.",
+                        "boxesPerPallet": "Cajas por palet",
+                        "totalWeight": "Peso total del pedido",
+                        "continue": "Continuar"
+                    },
+                    "total": {
+                        "summaryTitle": "Tu selección",
+                        "edit": "Editar"
+                    },
+                    "materials": {
+                        "title": "Elige tus materiales",
+                        "subtitle": "Selecciona con qué se empaca tu pedido. Ya dejamos marcada la opción predeterminada; el total se actualiza al cambiarla.",
+                        "defaultBadge": "Predeterminado",
+                        "noOptionsForVariant": "Esta presentación no tiene materiales alternativos: se cotiza con la configuración estándar.",
+                        "levelHints": {
+                            "unit": "El envase o bolsa de cada unidad.",
+                            "intermediate": "La bolsa grande que agrupa varias unidades.",
+                            "pallet": "La caja o material con que se arma el palet."
+                        }
                     },
                     "mode": {
                         "title": "¿Qué quieres cotizar?",
@@ -499,26 +526,6 @@
             "empty": "No hay categorías registradas"
         }
     },
-    "productType": {
-        "form": {
-            "typeCode": "Código",
-            "displayName": "Nombre"
-        },
-        "list": {
-            "title": "Tipos de producto",
-            "createLink": "Crear tipo de producto"
-        },
-        "create": {
-            "title": "Crear tipo de producto"
-        },
-        "edit": {
-            "title": "Editar tipo de producto"
-        },
-        "table": {
-            "searchPlaceholder": "Buscar por nombre...",
-            "empty": "No hay tipos de producto registrados"
-        }
-    },
     "unit": {
         "form": {
             "unitCode": "Código",
@@ -652,15 +659,6 @@
             "importing": "Importando...",
             "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún material:",
             "rowErrorItem": "Fila {{row}}: {{message}}"
-        },
-        "skuFilter": {
-            "label": "Buscar empaques de un SKU",
-            "placeholder": "Ej. SKU-001",
-            "button": "Buscar",
-            "clear": "Ver catálogo completo",
-            "resultsFor": "Materiales de empaque del SKU \"{{skuCode}}\":",
-            "quantity": "Cantidad",
-            "empty": "Este SKU no tiene materiales de empaque configurados"
         }
     },
     "presentation": {
@@ -695,23 +693,23 @@
     },
     "product": {
         "form": {
-            "codigo": "Código",
+            "codigo": "SKU / Número de artículo",
             "image": "Foto del producto",
             "subCategoryId": "Subcategoría",
-            "productTypeId": "Tipo de producto",
-            "displayName": "Nombre",
+            "clientId": "Cliente",
+            "displayName": "Nombre del producto",
             "urlSlug": "Slug de URL",
             "isOrganic": "Orgánico",
-            "isOrganicHint": "Si marcas esta casilla, el selector de ingredientes de abajo solo va a ofrecer variantes orgánicas (y agua/sal/azúcar u otros insumos sin variante). El cliente verá una insignia \"100% Orgánico\" al elegir este producto.",
+            "isOrganicHint": "Si marcas esta casilla, el selector de ingredientes de abajo solo va a ofrecer variantes orgánicas (y agua/sal/azúcar u otros insumos sin variante). El representante verá una insignia \"100% Orgánico\" al elegir este producto.",
             "isCustomizable": "Tipo de receta",
             "isCustomizableFinished": "Terminado (receta fija)",
             "isCustomizableCustom": "Personalizable (mezcla %)",
-            "isCustomizableHint": "Personalizable: el cliente arma la mezcla de ingredientes por porcentaje al cotizar, en vez de una receta fija.",
+            "isCustomizableHint": "Personalizable: el representante arma la mezcla de ingredientes por porcentaje al cotizar, en vez de una receta fija.",
             "additionalCostPerUnit": "Costo adicional por unidad (opcional)",
             "additionalCostPerUnitHint": "Para costos que todavía no están bien definidos. Se suma al costo de cada unidad al cotizar. Deja el campo vacío para quitarlo.",
             "translationSectionTitle": "Traducción al inglés",
             "translationSectionHint": "Opcional. Si se deja vacío, el sitio en inglés muestra el nombre en español.",
-            "displayNameEn": "Nombre (inglés)"
+            "displayNameEn": "Nombre del producto (inglés)"
         },
         "list": {
             "title": "Productos",
@@ -731,23 +729,13 @@
     "productVariant": {
         "form": {
             "presentationId": "Presentación",
-            "skuCode": "SKU",
+            "presentationImmutableHint": "La Presentación no se puede cambiar en un SKU ya creado. Crea un SKU nuevo para una Presentación distinta.",
             "boxesPerPallet": "Cajas por palet",
             "bagsPerBox": "Bolsas por caja",
             "bagsPerBoxHint": "Cuántas bolsas/piezas entran en una caja. Junto con \"Cajas por palet\" arriba, define el total de bolsas por palet (cajas × bolsas por caja) -- SÍ afecta el costo.",
-            "intermediatePackagingId": "Empaque intermedio (bolsa grande)",
             "unitsPerIntermediatePackage": "Unidades por empaque intermedio",
             "unitsPerIntermediatePackageHint": "Solo si este producto usa empaque anidado (ej. varias bolsitas dentro de una bolsa grande, que a su vez va en la caja). Cuántas unidades pequeñas entran en una bolsa grande -- este dato SÍ afecta el costo.",
-            "addButton": "Agregar variante",
-            "skuLookup": {
-                "button": "Buscar",
-                "searching": "Buscando...",
-                "found": "Se encontraron datos del SKU (producto: {{product}}). Revisa los campos antes de guardar.",
-                "recipeTitle": "Receta de empaque de este SKU (referencia)",
-                "recipeHint": "Esta variante ya tenía estos materiales cargados. Agrégalos de nuevo abajo, en Empaque individual y Materiales de palet, una vez que guardes esta variante.",
-                "unitMaterialLine": "{{name}} — {{quantity}} por unidad",
-                "palletMaterialLine": "{{name}} — {{quantity}} por palet"
-            }
+            "addButton": "Agregar variante"
         },
         "list": {
             "title": "Variantes"
@@ -768,13 +756,14 @@
     "productIngredient": {
         "form": {
             "ingredientId": "Ingrediente",
-            "quantityValue": "Cantidad",
-            "quantityUnitId": "Unidad de cantidad",
+            "percentage": "Ingrese el porcentaje del ingrediente",
+            "percentageTotal": "Total: {{total}}%",
+            "percentageTotalIncomplete": "Los porcentajes deben sumar 100% para poder cotizar este producto.",
             "minPercentage": "% mínimo",
             "maxPercentage": "% máximo",
             "percentageRange": "Rango %",
             "addButton": "Agregar ingrediente",
-            "customizableHint": "Este producto es personalizable: define aquí qué ingredientes puede elegir el cliente y, si quieres, un rango de % permitido para cada uno."
+            "customizableHint": "Este producto es personalizable: define aquí qué ingredientes puede elegir el representante y, si quieres, un rango de % permitido para cada uno."
         },
         "list": {
             "title": "Ingredientes",
@@ -790,6 +779,9 @@
         "form": {
             "packagingId": "Material individual",
             "quantityPerUnit": "Cantidad por unidad",
+            "isSwappable": "El cliente puede elegir este material al cotizar",
+            "isDefault": "Predeterminado",
+            "isDefaultHint": "Marca cuál de las opciones se usa cuando el cliente no elige ninguna.",
             "addButton": "Agregar material"
         },
         "createModal": {
@@ -799,7 +791,9 @@
             "title": "Materiales de empaque individual"
         },
         "table": {
-            "empty": "No hay materiales de empaque individual registrados"
+            "empty": "No hay materiales de empaque individual registrados",
+            "swappable": "Opcional para el cliente",
+            "default": "Predeterminado"
         }
     },
     "productVariantPalletMaterial": {
@@ -810,6 +804,9 @@
         "form": {
             "packagingId": "Material de palet",
             "quantityValue": "Cantidad",
+            "isSwappable": "El cliente puede elegir este material al cotizar",
+            "isDefault": "Predeterminado",
+            "isDefaultHint": "Marca cuál de las opciones se usa cuando el cliente no elige ninguna.",
             "addButton": "Agregar material"
         },
         "createModal": {
@@ -819,10 +816,31 @@
             "title": "Materiales de paletización"
         },
         "table": {
-            "empty": "No hay materiales de paletización registrados"
+            "empty": "No hay materiales de paletización registrados",
+            "swappable": "Opcional para el cliente",
+            "default": "Predeterminado"
         }
     },
-    "customer": {
+    "productVariantIntermediateMaterial": {
+        "selectVariant": "Variante",
+        "noVariants": "Primero agrega una variante para poder definir su empaque intermedio",
+        "form": {
+            "packagingId": "Empaque intermedio",
+            "isSwappable": "El cliente puede elegir este material al cotizar",
+            "isDefault": "Predeterminado",
+            "isDefaultHint": "Marca cuál de las opciones se usa cuando el cliente no elige ninguna.",
+            "addButton": "Agregar material"
+        },
+        "list": {
+            "title": "Materiales de empaque intermedio"
+        },
+        "table": {
+            "empty": "No hay materiales de empaque intermedio registrados",
+            "swappable": "Opcional para el cliente",
+            "default": "Predeterminado"
+        }
+    },
+    "salesperson": {
         "form": {
             "name": "Nombre",
             "companyName": "Empresa",
@@ -830,6 +848,27 @@
             "password": "Contraseña",
             "newPassword": "Nueva contraseña",
             "newPasswordPlaceholder": "Dejar en blanco para no cambiarla"
+        },
+        "list": {
+            "title": "Representantes Legumex",
+            "createLink": "Crear representante Legumex"
+        },
+        "create": {
+            "title": "Crear representante Legumex"
+        },
+        "edit": {
+            "title": "Editar representante Legumex"
+        },
+        "table": {
+            "searchPlaceholder": "Buscar por nombre o correo...",
+            "empty": "No hay representantes Legumex registrados"
+        }
+    },
+    "client": {
+        "form": {
+            "name": "Nombre",
+            "email": "Correo electrónico",
+            "phone": "Teléfono"
         },
         "list": {
             "title": "Clientes",
@@ -895,7 +934,7 @@
     },
     "dashboard": {
         "title": "Panel general",
-        "subtitle": "Productos más vendidos, clientes e ingredientes para el rango de fechas seleccionado.",
+        "subtitle": "Productos más vendidos, representantes e ingredientes para el rango de fechas seleccionado.",
         "filters": {
             "startDate": "Desde",
             "endDate": "Hasta",
@@ -910,7 +949,7 @@
             "totalQuotes": "Cotizaciones guardadas",
             "totalRevenue": "Valor total cotizado",
             "totalPallets": "Palets solicitados",
-            "uniqueCustomers": "Clientes activos",
+            "uniqueSalespeople": "Representantes activos",
             "averageQuoteValue": "Valor promedio por cotización"
         },
         "trend": {
@@ -933,10 +972,10 @@
             "empty": "No hay datos de ingresos para este rango.",
             "other": "Otros productos"
         },
-        "topCustomers": {
-            "title": "Mejores clientes",
+        "topSalespeople": {
+            "title": "Mejores representantes",
             "subtitle": "Ordenados por valor total cotizado.",
-            "empty": "No hay datos de clientes para este rango.",
+            "empty": "No hay datos de representantes para este rango.",
             "secondary": "{{count}} cotizaciones · {{pallets}} palets"
         },
         "topIngredients": {
@@ -949,13 +988,12 @@
     "adminQuote": {
         "list": {
             "title": "Cotizaciones",
-            "description": "Todas las cotizaciones que han guardado los clientes, sin importar cuál.",
-            "searchPlaceholder": "Buscar por cliente, empresa, correo o producto...",
+            "description": "Todas las cotizaciones que han guardado los representantes, sin importar cuál.",
+            "searchPlaceholder": "Buscar por representante, empresa, correo o producto...",
             "empty": "Todavía no hay ninguna cotización guardada.",
             "noMatches": "Ninguna cotización coincide con la búsqueda.",
             "summary": "{{date}} · {{pallets}} palets · {{destination}}",
-            "summaryNoDestination": "{{date}} · {{pallets}} palets",
-            "leadLabel": "Prospecto: {{fullName}} · {{companyName}}"
+            "summaryNoDestination": "{{date}} · {{pallets}} palets"
         }
     },
     "adminQuoteCalculator": {
@@ -1106,9 +1144,7 @@
             }
         },
         "edit": {
-            "title": "Detalle del prospecto",
-            "linkedQuotesTitle": "Cotizaciones de este prospecto",
-            "linkedQuoteSummary": "{{date}} · {{pallets}} palet(s)"
+            "title": "Detalle del prospecto"
         }
     },
     "siteImage": {

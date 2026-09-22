@@ -28,6 +28,7 @@ export function SubCategoryForm<T extends UpdateSubCategoryInput>({
                 label={t("subCategory.form.categoryId")}
                 htmlFor="categoryId"
                 error={getFieldErrorMessage(t, errors.categoryId as FieldError | undefined)}
+                required
             >
                 <Controller
                     name={"categoryId" as Path<T>}
@@ -47,6 +48,7 @@ export function SubCategoryForm<T extends UpdateSubCategoryInput>({
                 label={t("subCategory.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
+                required
             >
                 <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
             </FormField>

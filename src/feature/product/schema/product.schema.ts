@@ -13,7 +13,9 @@ export const createProductSchema = z.object({
     // Código manual del producto, editable, único (case-insensitive -- validado en el backend).
     codigo: z.string().trim().min(1).max(60),
     subCategoryId: z.number().int().positive(),
-    productTypeId: z.number().int().positive(),
+    // Requerido (2026-09-16): cada Producto pertenece a exactamente un Cliente real (ver
+    // feature/client/ -- no confundir con salesperson/, la cuenta que cotiza).
+    clientId: z.number().int().positive(),
     displayName: z.string().trim().min(1).max(120),
     isOrganic: z.boolean().optional(),
     isCustomizable: z.boolean().optional(),
@@ -28,12 +30,16 @@ export const createProductSchema = z.object({
 // patrón que el resto de campos críticos del repo, ver memoria del proyecto).
 export const updateProductSchema = createProductSchema.partial().extend({
     codigo: createProductSchema.shape.codigo,
+    clientId: createProductSchema.shape.clientId,
 })
 
 export const responseProductSchema = baseCatalogSchema.extend({
     codigo: z.string(),
     subCategoryId: z.number().int(),
-    productTypeId: z.number().int(),
+    clientId: z.number().int(),
+    // Solo lectura -- viene del include del backend (product.service.ts::CLIENT_INCLUDE), para
+    // no tener que pedir el catálogo completo de clientes aparte en vistas de solo lectura.
+    client: z.object({ id: z.number().int(), name: z.string() }).optional(),
     displayName: z.string(),
     urlSlug: z.string(),
     isOrganic: z.boolean(),

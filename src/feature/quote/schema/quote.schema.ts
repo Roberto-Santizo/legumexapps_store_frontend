@@ -1,26 +1,31 @@
 import { z } from "zod"
 import { responseDestinationSchema } from "@/feature/destination/schema/destination.schema"
-import { leadCaptureSchema } from "@/feature/home/schema/leadCapture.schema"
 
-// Datos de contacto del prospecto capturados en el cotizador del cliente (2026-09-13) -- reusa
-// los mismos validadores del formulario público de la landing (leadCaptureSchema) en vez de
-// retipearlos, quedándose solo con los 4 campos que el cotizador SÍ pide (no phone/
-// productLineInterest/website, ver Lead.model.ts). Mismo criterio "reusar, no duplicar" que el
-// schema espejo del backend (quoteLeadContactSchema en lead.schema.ts).
-export const quoteLeadContactSchema = leadCaptureSchema.pick({
-    fullName: true,
-    companyName: true,
-    email: true,
-    notes: true,
+// Default + opcional (2026-09-21, ver CLAUDE.md #4): `id` es el id de la FILA del join
+// (ProductVariantUnitMaterial/IntermediateMaterial/PalletMaterial), el mismo que
+// calculateQuoteSchema.selectedXMaterialId espera al cotizar -- no el packagingId.
+const quotableMaterialOptionSchema = z.object({
+    id: z.number().int(),
+    packagingId: z.number().int(),
+    displayName: z.string(),
+    unitCost: z.number(),
+    isDefault: z.boolean(),
 })
 
 const quotableVariantSchema = z.object({
     id: z.number().int(),
-    skuCode: z.string().nullable(),
     boxesPerPallet: z.number().int(),
     bagsPerBox: z.number().int(),
     presentationLabel: z.string().nullable(),
+    // Peso neto por bolsa/unidad en gramos (2026-09-22, paso "pallets" del wizard -- ver
+    // CLAUDE.md #6) -- solo lectura, usado para calcular el peso total del pedido en el cliente
+    // (boxesPerPallet × bagsPerBox × netWeightGrams × requestedPallets). No participa en
+    // calculateQuoteSchema ni en el cálculo de dinero.
+    netWeightGrams: z.number().nullable(),
     packagingLabel: z.string().nullable(),
+    unitMaterialOptions: z.array(quotableMaterialOptionSchema),
+    intermediateMaterialOptions: z.array(quotableMaterialOptionSchema),
+    palletMaterialOptions: z.array(quotableMaterialOptionSchema),
 })
 
 const quotableIngredientOptionSchema = z.object({
@@ -31,17 +36,26 @@ const quotableIngredientOptionSchema = z.object({
     maxPercentage: z.number(),
 })
 
+// Receta fija (!isCustomizable): el % lo fija el admin y el cliente nunca lo puede alterar, pero
+// sí debe VER qué está cotizando (ej. "100% Piña") -- distinto de quotableIngredientOptionSchema
+// (el pool editable del mix personalizable) a propósito, son conceptos diferentes.
+const quotableFixedIngredientSchema = z.object({
+    ingredientId: z.number().int(),
+    displayName: z.string(),
+    percentage: z.number(),
+})
+
 export const quotableProductSchema = z.object({
     id: z.number().int(),
     displayName: z.string(),
     isOrganic: z.boolean(),
     isCustomizable: z.boolean(),
-    productTypeName: z.string().nullable(),
     imageUrl: z.string().nullable(),
     categoryId: z.number().int(),
     categoryName: z.string(),
     categoryImageUrl: z.string().nullable(),
     ingredientPool: z.array(quotableIngredientOptionSchema),
+    fixedRecipe: z.array(quotableFixedIngredientSchema),
     variants: z.array(quotableVariantSchema),
 })
 
@@ -60,13 +74,12 @@ export const calculateQuoteSchema = z.object({
     destinationId: z.number().int().positive().optional(),
     requestedPallets: z.number().int().min(1),
     ingredientMix: z.array(ingredientMixLineSchema).optional(),
-    // Opcional ACÁ (2026-09-13) -- QuoteCalculatorForm es compartido por cliente y admin (ver
-    // showLeadContact), y el admin no lo captura. Mismo patrón que ingredientMix: no viene de un
-    // campo registrado con react-hook-form, se mergea a mano en el submit del wizard (ver
-    // quoteCalculatorForm.component.tsx). El backend SÍ lo exige para la ruta de guardar del
-    // cliente (POST /quotes usa saveQuoteSchema, requerido ahí) -- acá queda opcional solo para
-    // que este mismo tipo sirva también al admin, que nunca lo manda.
-    leadContact: quoteLeadContactSchema.optional(),
+    // Default + opcional (2026-09-21, ver CLAUDE.md #4) -- mismo schema espejo del backend: el id
+    // de la FILA del join elegida por el cliente en el wizard, no el packagingId. Si se omite, el
+    // backend usa el default de ese nivel.
+    selectedUnitMaterialId: z.number().int().positive().optional(),
+    selectedIntermediateMaterialId: z.number().int().positive().optional(),
+    selectedPalletMaterialId: z.number().int().positive().optional(),
 })
 
 const rawMaterialLineSchema = z.object({
@@ -191,28 +204,16 @@ export const savedQuoteSchema = quoteCalculationSchema.extend({
     createdAt: z.coerce.date(),
 })
 
-const quoteCustomerSchema = z.object({
+const quoteSalespersonSchema = z.object({
     id: z.number().int(),
     name: z.string(),
     companyName: z.string().nullable(),
     email: z.string(),
 })
 
-// Prospecto vinculado (2026-09-13, ver Quote.leadId en el backend). nullable+optional: cotizaciones
-// guardadas ANTES de este cambio no tienen leadId -- listAllQuotes las sigue devolviendo, solo sin
-// esta clave/con quotedLead: null.
-const quoteLeadSchema = z.object({
-    id: z.number().int(),
-    fullName: z.string(),
-    companyName: z.string(),
-    email: z.string(),
-})
-
 export const adminQuoteSchema = savedQuoteSchema.extend({
-    customerId: z.number().int(),
-    quotingCustomer: quoteCustomerSchema,
-    leadId: z.number().int().nullable().optional(),
-    quotedLead: quoteLeadSchema.nullable().optional(),
+    salespersonId: z.number().int(),
+    quotingSalesperson: quoteSalespersonSchema,
 })
 
 export type QuotableProduct = z.infer<typeof quotableProductSchema>

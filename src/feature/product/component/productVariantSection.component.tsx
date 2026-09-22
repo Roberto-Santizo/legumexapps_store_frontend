@@ -11,13 +11,10 @@ import {
     createProductVariantAPI,
     deleteProductVariantAPI,
     getProductVariantsAPI,
-    lookupProductVariantBySkuCodeAPI,
     updateProductVariantAPI,
 } from "@/feature/product/api/productVariant.api"
 import { getPresentationsAPI } from "@/feature/presentation/api/presentation.api"
-import { getPackagingsAPI } from "@/feature/packaging/api/packaging.api"
 import { PresentationSelect } from "@/feature/presentation/component/presentationSelect.component"
-import { IntermediatePackagingSelect } from "@/feature/packaging/component/intermediatePackagingSelect.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
 import { Button } from "@/shared/component/button.component"
@@ -36,8 +33,6 @@ type VariantFormInput = z.infer<typeof variantFormSchema>
 function toFormValues(variant: ProductVariantResponse): Partial<VariantFormInput> {
     return {
         presentationId: variant.presentationId ?? undefined,
-        intermediatePackagingId: variant.intermediatePackagingId ?? undefined,
-        skuCode: variant.skuCode ?? undefined,
         boxesPerPallet: variant.boxesPerPallet ?? undefined,
         bagsPerBox: variant.bagsPerBox ?? undefined,
         unitsPerIntermediatePackage: variant.unitsPerIntermediatePackage ?? undefined,
@@ -52,54 +47,19 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
 
     const variantsQuery = useQuery({ queryKey: ["productVariants"], queryFn: getProductVariantsAPI })
     const presentationsQuery = useQuery({ queryKey: ["presentations"], queryFn: getPresentationsAPI })
-    const packagingsQuery = useQuery({ queryKey: ["packagings"], queryFn: getPackagingsAPI })
 
     const variants = (variantsQuery.data?.data ?? []).filter((variant) => variant.productId === productId)
     const presentationNameById = new Map((presentationsQuery.data?.data ?? []).map((p) => [p.id, p.displayLabel]))
-    const packagingNameById = new Map((packagingsQuery.data?.data ?? []).map((p) => [p.id, p.displayName]))
 
     const {
         register,
         control,
         handleSubmit,
         reset,
-        getValues,
-        setValue,
         formState: { errors },
     } = useForm<VariantFormInput>({ resolver: zodResolver(variantFormSchema) })
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariants"] })
-
-    // Autofill del SKU (2026-09-13) -- botón "Buscar" explícito, NUNCA en cada tecla. Solo
-    // PRELLENA los campos del form (reset queda a cargo del usuario vía "Guardar"); el backend
-    // revalida todo igual que si se hubiera tecleado a mano, sin importar de dónde vino el valor.
-    // La receta de empaque (unitMaterials/palletMaterials) que trae la respuesta se muestra abajo
-    // como referencia de solo lectura -- esos materiales viven en sus propias secciones (Empaque
-    // individual / Materiales de palet), que necesitan que la variante YA exista (tienen su propio
-    // productVariantId), así que no se auto-crean acá.
-    const lookupMutation = useMutation({ mutationFn: lookupProductVariantBySkuCodeAPI })
-
-    function handleSkuLookup() {
-        const skuCode = getValues("skuCode")?.trim()
-        if (!skuCode) return
-        lookupMutation.mutate(skuCode, {
-            onSuccess: (data) => {
-                if (!data) return
-                setValue("presentationId", data.data.presentationId ?? undefined, { shouldValidate: true, shouldDirty: true })
-                // boxesPerPallet/bagsPerBox son requeridos en el form (no aceptan undefined) -- si
-                // el SKU encontrado es una variante vieja sin esos datos, se deja el campo tal
-                // como está en vez de "vaciarlo" con un valor inválido.
-                if (data.data.boxesPerPallet !== null) {
-                    setValue("boxesPerPallet", data.data.boxesPerPallet, { shouldValidate: true, shouldDirty: true })
-                }
-                if (data.data.bagsPerBox !== null) {
-                    setValue("bagsPerBox", data.data.bagsPerBox, { shouldValidate: true, shouldDirty: true })
-                }
-                setValue("intermediatePackagingId", data.data.intermediatePackagingId ?? undefined, { shouldValidate: true, shouldDirty: true })
-                setValue("unitsPerIntermediatePackage", data.data.unitsPerIntermediatePackage ?? undefined, { shouldValidate: true, shouldDirty: true })
-            },
-        })
-    }
 
     const createMutation = useMutation({
         mutationFn: createProductVariantAPI,
@@ -107,7 +67,6 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
             invalidate()
             toast.success(data.message)
             reset({})
-            lookupMutation.reset()
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
@@ -121,7 +80,6 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
             toast.success(data.message)
             setEditingId(null)
             reset({})
-            lookupMutation.reset()
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
@@ -147,13 +105,11 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
     function startEdit(variant: ProductVariantResponse) {
         setEditingId(variant.id)
         reset(toFormValues(variant))
-        lookupMutation.reset()
     }
 
     function cancelEdit() {
         setEditingId(null)
         reset({})
-        lookupMutation.reset()
     }
 
     return (
@@ -162,11 +118,9 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <Th>{t("productVariant.form.skuCode")}</Th>
                             <Th>{t("productVariant.form.presentationId")}</Th>
                             <Th>{t("productVariant.form.boxesPerPallet")}</Th>
                             <Th>{t("productVariant.form.bagsPerBox")}</Th>
-                            <Th>{t("productVariant.form.intermediatePackagingId")}</Th>
                             <Th>{t("productVariant.form.unitsPerIntermediatePackage")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
@@ -174,15 +128,9 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                     <TableBody>
                         {variants.map((variant) => (
                             <TableRow key={variant.id}>
-                                <Td>{variant.skuCode ?? "-"}</Td>
                                 <Td>{variant.presentationId ? presentationNameById.get(variant.presentationId) ?? "-" : "-"}</Td>
                                 <Td>{variant.boxesPerPallet ?? "-"}</Td>
                                 <Td>{variant.bagsPerBox ?? "-"}</Td>
-                                <Td>
-                                    {variant.intermediatePackagingId
-                                        ? packagingNameById.get(variant.intermediatePackagingId) ?? "-"
-                                        : "-"}
-                                </Td>
                                 <Td>{variant.unitsPerIntermediatePackage ?? "-"}</Td>
                                 <Td className="space-x-3">
                                     <button
@@ -202,7 +150,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                                 </Td>
                             </TableRow>
                         ))}
-                        {variants.length === 0 && <TableEmpty message={t("productVariant.table.empty")} colSpan={7} />}
+                        {variants.length === 0 && <TableEmpty message={t("productVariant.table.empty")} colSpan={5} />}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -212,6 +160,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                     label={t("productVariant.form.presentationId")}
                     htmlFor="presentationId"
                     error={getFieldErrorMessage(t, errors.presentationId)}
+                    required
                 >
                     <Controller
                         name="presentationId"
@@ -222,29 +171,12 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                                 hasError={!!errors.presentationId}
                                 value={field.value}
                                 onChange={field.onChange}
+                                disabled={!!editingId}
                             />
                         )}
                     />
-                </FormField>
-
-                <FormField
-                    label={t("productVariant.form.skuCode")}
-                    htmlFor="skuCode"
-                    error={getFieldErrorMessage(t, errors.skuCode)}
-                >
-                    <div className="flex gap-2">
-                        <Input id="skuCode" hasError={!!errors.skuCode} className="flex-1" {...register("skuCode")} />
-                        <Button type="button" variant="secondary" onClick={handleSkuLookup} disabled={lookupMutation.isPending}>
-                            {lookupMutation.isPending ? t("productVariant.form.skuLookup.searching") : t("productVariant.form.skuLookup.button")}
-                        </Button>
-                    </div>
-                    {lookupMutation.isError && (
-                        <p className="mt-1.5 text-sm text-error-fg">{lookupMutation.error?.message}</p>
-                    )}
-                    {lookupMutation.isSuccess && lookupMutation.data && (
-                        <p className="mt-1.5 text-sm text-verde-tinta">
-                            {t("productVariant.form.skuLookup.found", { product: lookupMutation.data.data.productDisplayName })}
-                        </p>
+                    {editingId && (
+                        <p className="mt-1.5 text-sm text-texto-suave">{t("productVariant.form.presentationImmutableHint")}</p>
                     )}
                 </FormField>
 
@@ -252,6 +184,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                     label={t("productVariant.form.boxesPerPallet")}
                     htmlFor="boxesPerPallet"
                     error={getFieldErrorMessage(t, errors.boxesPerPallet)}
+                    required
                 >
                     <Input
                         id="boxesPerPallet"
@@ -265,6 +198,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                     label={t("productVariant.form.bagsPerBox")}
                     htmlFor="bagsPerBox"
                     error={getFieldErrorMessage(t, errors.bagsPerBox)}
+                    required
                 >
                     <Input
                         id="bagsPerBox"
@@ -276,18 +210,6 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                 <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
                     {t("productVariant.form.bagsPerBoxHint")}
                 </p>
-
-                <FormField
-                    label={t("productVariant.form.intermediatePackagingId")}
-                    htmlFor="intermediatePackagingId"
-                    error={getFieldErrorMessage(t, errors.intermediatePackagingId)}
-                >
-                    <IntermediatePackagingSelect
-                        id="intermediatePackagingId"
-                        hasError={!!errors.intermediatePackagingId}
-                        {...register("intermediatePackagingId", { setValueAs: toOptionalNumber })}
-                    />
-                </FormField>
 
                 <FormField
                     label={t("productVariant.form.unitsPerIntermediatePackage")}
@@ -304,25 +226,6 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                 <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
                     {t("productVariant.form.unitsPerIntermediatePackageHint")}
                 </p>
-
-                {lookupMutation.data && (lookupMutation.data.data.unitMaterials.length > 0 || lookupMutation.data.data.palletMaterials.length > 0) && (
-                    <div className="mb-5 rounded-card border border-gris-campo bg-crema/60 p-3 text-sm sm:col-span-2">
-                        <p className="mb-2 font-semibold text-verde-profundo">{t("productVariant.form.skuLookup.recipeTitle")}</p>
-                        <p className="mb-2 text-texto-suave">{t("productVariant.form.skuLookup.recipeHint")}</p>
-                        <ul className="space-y-1 text-texto-suave">
-                            {lookupMutation.data.data.unitMaterials.map((material) => (
-                                <li key={`unit-${material.packagingId}`}>
-                                    {t("productVariant.form.skuLookup.unitMaterialLine", { name: material.displayName, quantity: material.quantity })}
-                                </li>
-                            ))}
-                            {lookupMutation.data.data.palletMaterials.map((material) => (
-                                <li key={`pallet-${material.packagingId}`}>
-                                    {t("productVariant.form.skuLookup.palletMaterialLine", { name: material.displayName, quantity: material.quantity })}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
 
                 <div className="flex gap-3 sm:col-span-2">
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

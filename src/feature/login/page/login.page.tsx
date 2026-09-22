@@ -69,7 +69,7 @@ export function LoginPage() {
                 <p className="text-sm text-texto-suave">{t("auth.adminLogin.footer", { year: new Date().getFullYear() })}</p>
             }
         >
-            <FormField label={t("auth.adminLogin.username")} htmlFor="username" error={getFieldErrorMessage(t, errors.username)}>
+            <FormField label={t("auth.adminLogin.username")} htmlFor="username" error={getFieldErrorMessage(t, errors.username)} required>
                 <div className="relative">
                     <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-texto-suave" />
                     <Input
@@ -86,7 +86,7 @@ export function LoginPage() {
                 </div>
             </FormField>
 
-            <FormField label={t("auth.adminLogin.password")} htmlFor="password" error={getFieldErrorMessage(t, errors.password)}>
+            <FormField label={t("auth.adminLogin.password")} htmlFor="password" error={getFieldErrorMessage(t, errors.password)} required>
                 <PasswordInput
                     id="password"
                     placeholder={t("auth.adminLogin.passwordPlaceholder")}

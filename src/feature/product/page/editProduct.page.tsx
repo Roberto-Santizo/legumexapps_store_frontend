@@ -13,6 +13,7 @@ import { ProductVariantSection } from "@/feature/product/component/productVarian
 import { ProductIngredientSection } from "@/feature/product/component/productIngredientSection.component"
 import { ProductVariantPalletMaterialSection } from "@/feature/product/component/productVariantPalletMaterialSection.component"
 import { ProductVariantUnitMaterialSection } from "@/feature/product/component/productVariantUnitMaterialSection.component"
+import { ProductVariantIntermediateMaterialSection } from "@/feature/product/component/productVariantIntermediateMaterialSection.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
@@ -24,7 +25,7 @@ function toFormValues(product: ProductResponse): UpdateProductInput {
     return {
         codigo: product.codigo,
         subCategoryId: product.subCategoryId,
-        productTypeId: product.productTypeId,
+        clientId: product.clientId,
         displayName: product.displayName,
         isOrganic: product.isOrganic,
         isCustomizable: product.isCustomizable,
@@ -135,6 +136,13 @@ export function EditProductPage() {
                             {t("productVariantUnitMaterial.list.title")}
                         </h2>
                         <ProductVariantUnitMaterialSection productId={productId} />
+                    </Card>
+
+                    <Card>
+                        <h2 className="mb-4 text-lg font-semibold text-verde-profundo">
+                            {t("productVariantIntermediateMaterial.list.title")}
+                        </h2>
+                        <ProductVariantIntermediateMaterialSection productId={productId} />
                     </Card>
 
                     <Card>

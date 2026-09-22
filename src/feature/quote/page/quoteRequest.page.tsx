@@ -4,35 +4,27 @@ import { useTranslation } from "react-i18next"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { ClipboardList, LogOut } from "lucide-react"
-import { useCustomerAuth } from "@/shared/auth/customer/useCustomerAuth"
+import { useSalespersonAuth } from "@/shared/auth/salesperson/useSalespersonAuth"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { Spinner } from "@/shared/component/spinner.component"
-import { getQuoteProductsAPI, saveQuoteAPI, sendQuotePdfEmailAPI } from "@/feature/quote/api/quote.api"
+import { getQuoteProductsAPI, previewQuoteAPI, saveQuoteAPI, sendQuotePdfEmailAPI } from "@/feature/quote/api/quote.api"
 import { QuoteCalculatorForm } from "@/feature/quote/component/quoteCalculatorForm.component"
-import type { QuoteWizardStep, LeadContactFormValues } from "@/feature/quote/component/quoteCalculatorForm.component"
+import type { QuoteWizardStep } from "@/feature/quote/component/quoteCalculatorForm.component"
+import { WIZARD_DETAILS_LAYOUT_CLASSNAME, WIZARD_STEP_LAYOUT_CLASSNAME } from "@/feature/quote/component/quoteWizardLayout"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary.component"
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
 import type { CalculateQuoteInput, QuoteCalculation } from "@/feature/quote/schema/quote.schema"
 
-const EMPTY_LEAD_CONTACT: LeadContactFormValues = { fullName: "", companyName: "", email: "", notes: "" }
-
 export function QuoteRequestPage() {
     const { t } = useTranslation()
-    const { customer, logout } = useCustomerAuth()
+    const { salesperson, logout } = useSalespersonAuth()
 
     const [currentResult, setCurrentResult] = useState<QuoteCalculation | null>(null)
     const [quotedLines, setQuotedLines] = useState<QuoteCalculation[]>([])
     const [wizardStep, setWizardStep] = useState<QuoteWizardStep>("mode")
 
     const [formResetKey, setFormResetKey] = useState(0)
-
-    // Datos de contacto del prospecto (2026-09-13) -- vive ACÁ, no dentro de QuoteCalculatorForm,
-    // porque "Cotizar otro producto" remonta ese form con un `key` nuevo (formResetKey) para
-    // limpiar el resto de sus campos -- si el contacto viviera adentro, el cliente tendría que
-    // volver a escribirlo en cada producto del mismo pedido. Solo se limpia al empezar un pedido
-    // NUEVO (handleClearOrder), no al cotizar otro producto del mismo pedido.
-    const [leadContact, setLeadContact] = useState<LeadContactFormValues>(EMPTY_LEAD_CONTACT)
 
     const productsQuery = useQuery({ queryKey: ["quoteProducts"], queryFn: getQuoteProductsAPI })
     // Transporte "apagado" temporalmente (2026-09-10): el cliente ya no elige destino (ver
@@ -67,7 +59,7 @@ export function QuoteRequestPage() {
 
     const handleStepChange = (nextStep: QuoteWizardStep) => {
         setWizardStep(nextStep)
-        if (nextStep !== "details") {
+        if (nextStep !== "total") {
             setCurrentResult(null)
         }
     }
@@ -80,7 +72,6 @@ export function QuoteRequestPage() {
 
     const handleClearOrder = () => {
         setQuotedLines([])
-        setLeadContact(EMPTY_LEAD_CONTACT)
         handleQuoteAnother()
     }
 
@@ -89,20 +80,18 @@ export function QuoteRequestPage() {
         content = <Spinner />
     } else if (hasCatalogError) {
         content = <p className="py-12 text-center text-error-fg">{t("common.loadError")}</p>
-    } else if (wizardStep === "details") {
+    } else if (wizardStep === "total") {
         content = (
-            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
+            <div className={WIZARD_DETAILS_LAYOUT_CLASSNAME}>
                 <QuoteCalculatorForm
                     key={formResetKey}
                     products={products}
                     destinations={[]}
                     showDestination={false}
-                    showLeadContact
-                    leadContact={leadContact}
-                    onLeadContactChange={setLeadContact}
                     onSubmit={handleSubmit}
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}
+                    previewAPI={previewQuoteAPI}
                 />
                 <div className="space-y-6">
                     <QuoteResultCard
@@ -118,6 +107,7 @@ export function QuoteRequestPage() {
                             onClear={handleClearOrder}
                             showCostBreakdown={false}
                             showReferenceDisclaimer
+                            pdfAction={<QuotePdfButton lines={quotedLines} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={sendQuotePdfEmailAPI} />}
                         />
                     )}
                 </div>
@@ -126,18 +116,16 @@ export function QuoteRequestPage() {
     } else {
 
         content = (
-            <div className="mx-auto max-w-3xl space-y-6">
+            <div className={WIZARD_STEP_LAYOUT_CLASSNAME}>
                 <QuoteCalculatorForm
                     key={formResetKey}
                     products={products}
                     destinations={[]}
                     showDestination={false}
-                    showLeadContact
-                    leadContact={leadContact}
-                    onLeadContactChange={setLeadContact}
                     onSubmit={handleSubmit}
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}
+                    previewAPI={previewQuoteAPI}
                 />
                 {quotedLines.length > 0 && (
                     <QuotedOrderSummary
@@ -146,6 +134,7 @@ export function QuoteRequestPage() {
                         onClear={handleClearOrder}
                         showCostBreakdown={false}
                         showReferenceDisclaimer
+                        pdfAction={<QuotePdfButton lines={quotedLines} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={sendQuotePdfEmailAPI} />}
                     />
                 )}
             </div>
@@ -162,17 +151,11 @@ export function QuoteRequestPage() {
                             {t("site.quoteRequest.title")}
                         </h1>
                         <p className="mt-1 max-w-xl text-texto-suave">
-                            {t("site.quoteRequest.description", { name: customer?.name ?? "" })}
+                            {t("site.quoteRequest.description", { name: salesperson?.name ?? "" })}
                         </p>
                     </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-5">
-                    <QuotePdfButton
-                        lines={quotedLines}
-                        showCostBreakdown={false}
-                        showReferenceDisclaimer
-                        sendEmailAPI={sendQuotePdfEmailAPI}
-                    />
                     <button
                         onClick={logout}
                         type="button"

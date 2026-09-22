@@ -31,6 +31,7 @@ export function CreateUnitForm({ register, errors, watch }: Readonly<CreateUnitF
                 label={t("unit.form.unitKey")}
                 htmlFor="unitKey"
                 error={getFieldErrorMessage(t, errors.unitKey)}
+                required
             >
                 <Select id="unitKey" hasError={!!errors.unitKey} defaultValue="" {...register("unitKey")}>
                     <option value="" disabled>

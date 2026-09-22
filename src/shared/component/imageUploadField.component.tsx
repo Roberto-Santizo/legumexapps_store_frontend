@@ -9,9 +9,11 @@ type Props = {
     onChange: (next: string | null) => void
     initialImageUrl?: string | null
     errorMessage?: string
+    /** Whether the image is required per its zod schema — drives the red asterisk next to the label. */
+    required?: boolean
 }
 
-export function ImageUploadField({ label, value, onChange, initialImageUrl, errorMessage }: Readonly<Props>) {
+export function ImageUploadField({ label, value, onChange, initialImageUrl, errorMessage, required = false }: Readonly<Props>) {
     const { t } = useTranslation()
     const [isPickerOpen, setIsPickerOpen] = useState(false)
 
@@ -23,7 +25,14 @@ export function ImageUploadField({ label, value, onChange, initialImageUrl, erro
 
     return (
         <div className="mb-5">
-            <p className="mb-2 text-sm font-medium text-verde-profundo">{label}</p>
+            <p className="mb-2 text-sm font-medium text-verde-profundo">
+                {label}
+                {required && (
+                    <span className="ml-0.5 text-error-fg" aria-hidden="true">
+                        *
+                    </span>
+                )}
+            </p>
 
             <div
                 className={`relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-[10px] border-[1.5px] bg-hueso ${

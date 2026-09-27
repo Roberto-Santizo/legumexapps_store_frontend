@@ -6,7 +6,20 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { createProductVariantIntermediateMaterialSchema } from "@/feature/product/schema/productVariantIntermediateMaterial.schema"
-import type { ProductVariantIntermediateMaterialResponse } from "@/feature/product/schema/productVariantIntermediateMaterial.schema"
+import type {
+    ProductVariantIntermediateMaterialResponse,
+    UpdateProductVariantIntermediateMaterialInput,
+} from "@/feature/product/schema/productVariantIntermediateMaterial.schema"
+import {
+    EMPTY_MATERIAL_OPTION_GROUP_VALUES,
+    listMaterialOptionGroups,
+    materialOptionGroupFormShape,
+    refineMaterialOptionGroup,
+    sortByMaterialOptionGroup,
+    toMaterialOptionGroupFormValues,
+    toMaterialOptionGroupPayload,
+} from "@/feature/product/schema/materialOptionGroup.schema"
+import { MaterialOptionGroupFields } from "@/feature/product/component/materialOptionGroupFields.component"
 import {
     createProductVariantIntermediateMaterialAPI,
     deleteProductVariantIntermediateMaterialAPI,
@@ -19,27 +32,29 @@ import { getPackagingsAPI } from "@/feature/packaging/api/packaging.api"
 import { IntermediatePackagingSelect } from "@/feature/packaging/component/intermediatePackagingSelect.component"
 import { Select } from "@/shared/component/select.component"
 import { FormField } from "@/shared/component/formField.component"
-import { Checkbox } from "@/shared/component/checkbox.component"
 import { Button } from "@/shared/component/button.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 
-const intermediateMaterialFormSchema = createProductVariantIntermediateMaterialSchema.omit({ productVariantId: true })
+// optionGroup de la API se desdobla en isOptional + nombre en el form (ver materialOptionGroup.schema.ts).
+const intermediateMaterialFormSchema = createProductVariantIntermediateMaterialSchema
+    .omit({ productVariantId: true, optionGroup: true })
+    .extend(materialOptionGroupFormShape)
+    .superRefine(refineMaterialOptionGroup)
 type IntermediateMaterialFormInput = z.infer<typeof intermediateMaterialFormSchema>
 
 function toFormValues(item: ProductVariantIntermediateMaterialResponse): Partial<IntermediateMaterialFormInput> {
     return {
         packagingId: item.packagingId,
-        isSwappable: item.isSwappable,
-        isDefault: item.isDefault,
+        ...toMaterialOptionGroupFormValues(item),
     }
 }
 
 // Reemplaza el viejo campo único ProductVariant.intermediatePackagingId (FK, ver
 // productVariantSection.component.tsx) -- mismo diseño mini-CRUD que
 // ProductVariantUnitMaterialSection/ProductVariantPalletMaterialSection (2026-09-21), con
-// default + opcional (isSwappable/isDefault) para que el cliente pueda elegir entre alternativas
+// grupos de opciones (optionGroup/isDefault) para que el cliente pueda elegir entre alternativas
 // al cotizar. Sin campo de cantidad propio: el motor sigue usando
 // ProductVariant.unitsPerIntermediatePackage, compartido entre cualquier alternativa elegida.
 export function ProductVariantIntermediateMaterialSection({ productId }: Readonly<{ productId: number }>) {
@@ -68,9 +83,10 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
 
     const activeVariantId = selectedVariantId ?? variants[0]?.id ?? null
 
-    const intermediateMaterials = (intermediateMaterialsQuery.data?.data ?? []).filter(
-        (item) => item.productVariantId === activeVariantId
+    const intermediateMaterials = sortByMaterialOptionGroup(
+        (intermediateMaterialsQuery.data?.data ?? []).filter((item) => item.productVariantId === activeVariantId)
     )
+    const existingOptionGroups = listMaterialOptionGroups(intermediateMaterials)
 
     const {
         register,
@@ -78,8 +94,11 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
         reset,
         watch,
         formState: { errors },
-    } = useForm<IntermediateMaterialFormInput>({ resolver: zodResolver(intermediateMaterialFormSchema) })
-    const isSwappable = watch("isSwappable")
+    } = useForm<IntermediateMaterialFormInput>({
+        resolver: zodResolver(intermediateMaterialFormSchema),
+        defaultValues: EMPTY_MATERIAL_OPTION_GROUP_VALUES,
+    })
+    const isOptional = watch("isOptional")
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariantIntermediateMaterials"] })
 
@@ -88,20 +107,20 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
     })
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, formData }: { id: number; formData: IntermediateMaterialFormInput }) =>
+        mutationFn: ({ id, formData }: { id: number; formData: UpdateProductVariantIntermediateMaterialInput }) =>
             updateProductVariantIntermediateMaterialAPI(id, formData),
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
             setEditingId(null)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
@@ -118,10 +137,11 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
 
     const onSubmit = handleSubmit((formData) => {
         if (!activeVariantId) return
+        const payload = toMaterialOptionGroupPayload(formData)
         if (editingId) {
-            updateMutation.mutate({ id: editingId, formData })
+            updateMutation.mutate({ id: editingId, formData: payload })
         } else {
-            createMutation.mutate({ ...formData, productVariantId: activeVariantId })
+            createMutation.mutate({ ...payload, productVariantId: activeVariantId })
         }
     })
 
@@ -132,7 +152,7 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
 
     function cancelEdit() {
         setEditingId(null)
-        reset({})
+        reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
     }
 
     if (variants.length === 0) {
@@ -163,8 +183,8 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
                     <TableHead>
                         <TableRow>
                             <Th>{t("productVariantIntermediateMaterial.form.packagingId")}</Th>
-                            <Th>{t("productVariantIntermediateMaterial.table.swappable")}</Th>
-                            <Th>{t("productVariantIntermediateMaterial.table.default")}</Th>
+                            <Th>{t("materialOptionGroup.table.group")}</Th>
+                            <Th>{t("materialOptionGroup.table.default")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -172,8 +192,8 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
                         {intermediateMaterials.map((item) => (
                             <TableRow key={item.id}>
                                 <Td>{packagingNameById.get(item.packagingId) ?? "-"}</Td>
-                                <Td>{item.isSwappable ? t("common.yes") : t("common.no")}</Td>
-                                <Td>{item.isSwappable && item.isDefault ? t("common.yes") : "-"}</Td>
+                                <Td>{item.optionGroup ?? t("materialOptionGroup.table.fixed")}</Td>
+                                <Td>{item.optionGroup !== null && item.isDefault ? t("common.yes") : "-"}</Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
@@ -213,24 +233,15 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
                     />
                 </FormField>
 
-                <div className="mb-5 flex flex-wrap items-center gap-6 sm:col-span-2">
-                    <Checkbox
-                        id="intermediateMaterialIsSwappable"
-                        label={t("productVariantIntermediateMaterial.form.isSwappable")}
-                        {...register("isSwappable")}
-                    />
-                    <Checkbox
-                        id="intermediateMaterialIsDefault"
-                        label={t("productVariantIntermediateMaterial.form.isDefault")}
-                        disabled={!isSwappable}
-                        {...register("isDefault")}
-                    />
-                </div>
-                {isSwappable && (
-                    <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
-                        {t("productVariantIntermediateMaterial.form.isDefaultHint")}
-                    </p>
-                )}
+                <MaterialOptionGroupFields
+                    idPrefix="intermediateMaterial"
+                    isOptional={isOptional}
+                    existingGroups={existingOptionGroups}
+                    hasOptionGroupError={!!errors.optionGroup}
+                    isOptionalField={register("isOptional")}
+                    optionGroupField={register("optionGroup")}
+                    isDefaultField={register("isDefault")}
+                />
 
                 <div className="flex gap-3 sm:col-span-2">
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

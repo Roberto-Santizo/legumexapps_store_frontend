@@ -1,15 +1,22 @@
 import { z } from "zod"
 import { responseDestinationSchema } from "@/feature/destination/schema/destination.schema"
 
-// Default + opcional (2026-09-21, ver CLAUDE.md #4): `id` es el id de la FILA del join
+// Grupos de opciones (2026-09-24, ver CLAUDE.md #4): `id` es el id de la FILA del join
 // (ProductVariantUnitMaterial/IntermediateMaterial/PalletMaterial), el mismo que
-// calculateQuoteSchema.selectedXMaterialId espera al cotizar -- no el packagingId.
+// calculateQuoteSchema.selectedXMaterialIds espera al cotizar -- no el packagingId.
 const quotableMaterialOptionSchema = z.object({
     id: z.number().int(),
     packagingId: z.number().int(),
     displayName: z.string(),
     unitCost: z.number(),
     isDefault: z.boolean(),
+})
+
+// Un chooser por grupo (ej. "Caja" y "Esquinero" en paletización) -- el backend ya agrupa y
+// normaliza el nombre; el cliente elige exactamente una opción de cada grupo.
+const quotableMaterialOptionGroupSchema = z.object({
+    group: z.string(),
+    options: z.array(quotableMaterialOptionSchema),
 })
 
 const quotableVariantSchema = z.object({
@@ -23,13 +30,13 @@ const quotableVariantSchema = z.object({
     // calculateQuoteSchema ni en el cálculo de dinero.
     netWeightGrams: z.number().nullable(),
     packagingLabel: z.string().nullable(),
-    unitMaterialOptions: z.array(quotableMaterialOptionSchema),
-    intermediateMaterialOptions: z.array(quotableMaterialOptionSchema),
-    palletMaterialOptions: z.array(quotableMaterialOptionSchema),
+    unitMaterialOptionGroups: z.array(quotableMaterialOptionGroupSchema),
+    intermediateMaterialOptionGroups: z.array(quotableMaterialOptionGroupSchema),
+    palletMaterialOptionGroups: z.array(quotableMaterialOptionGroupSchema),
 })
 
-const quotableIngredientOptionSchema = z.object({
-    ingredientId: z.number().int(),
+const quotableRawMaterialOptionSchema = z.object({
+    rawMaterialId: z.number().int(),
     displayName: z.string(),
     isOrganic: z.boolean(),
     minPercentage: z.number(),
@@ -37,10 +44,10 @@ const quotableIngredientOptionSchema = z.object({
 })
 
 // Receta fija (!isCustomizable): el % lo fija el admin y el cliente nunca lo puede alterar, pero
-// sí debe VER qué está cotizando (ej. "100% Piña") -- distinto de quotableIngredientOptionSchema
+// sí debe VER qué está cotizando (ej. "100% Piña") -- distinto de quotableRawMaterialOptionSchema
 // (el pool editable del mix personalizable) a propósito, son conceptos diferentes.
-const quotableFixedIngredientSchema = z.object({
-    ingredientId: z.number().int(),
+const quotableFixedRawMaterialSchema = z.object({
+    rawMaterialId: z.number().int(),
     displayName: z.string(),
     percentage: z.number(),
 })
@@ -54,15 +61,15 @@ export const quotableProductSchema = z.object({
     categoryId: z.number().int(),
     categoryName: z.string(),
     categoryImageUrl: z.string().nullable(),
-    ingredientPool: z.array(quotableIngredientOptionSchema),
-    fixedRecipe: z.array(quotableFixedIngredientSchema),
+    rawMaterialPool: z.array(quotableRawMaterialOptionSchema),
+    fixedRecipe: z.array(quotableFixedRawMaterialSchema),
     variants: z.array(quotableVariantSchema),
 })
 
 export const quoteDestinationSchema = responseDestinationSchema
 
-const ingredientMixLineSchema = z.object({
-    ingredientId: z.number().int().positive(),
+const rawMaterialMixLineSchema = z.object({
+    rawMaterialId: z.number().int().positive(),
     percentage: z.number().min(0).max(100).multipleOf(0.01),
 })
 
@@ -73,17 +80,17 @@ export const calculateQuoteSchema = z.object({
     // criterio que el schema espejo del backend.
     destinationId: z.number().int().positive().optional(),
     requestedPallets: z.number().int().min(1),
-    ingredientMix: z.array(ingredientMixLineSchema).optional(),
-    // Default + opcional (2026-09-21, ver CLAUDE.md #4) -- mismo schema espejo del backend: el id
-    // de la FILA del join elegida por el cliente en el wizard, no el packagingId. Si se omite, el
-    // backend usa el default de ese nivel.
-    selectedUnitMaterialId: z.number().int().positive().optional(),
-    selectedIntermediateMaterialId: z.number().int().positive().optional(),
-    selectedPalletMaterialId: z.number().int().positive().optional(),
+    rawMaterialMix: z.array(rawMaterialMixLineSchema).optional(),
+    // Grupos de opciones (2026-09-24, ver CLAUDE.md #4) -- mismo schema espejo del backend: por
+    // nivel, los ids de FILA elegidos en el wizard (uno por grupo), no el packagingId. El backend
+    // lee el grupo de cada fila; un grupo sin id enviado usa su default.
+    selectedUnitMaterialIds: z.array(z.number().int().positive()).max(50).optional(),
+    selectedIntermediateMaterialIds: z.array(z.number().int().positive()).max(50).optional(),
+    selectedPalletMaterialIds: z.array(z.number().int().positive()).max(50).optional(),
 })
 
 const rawMaterialLineSchema = z.object({
-    ingredientId: z.number().int(),
+    rawMaterialId: z.number().int(),
     displayName: z.string(),
     unitCost: z.number(),
     quantityPerUnit: z.number(),
@@ -91,19 +98,22 @@ const rawMaterialLineSchema = z.object({
     lineTotal: z.number(),
 })
 
+// optionGroup (2026-09-24): grupo de opciones de la fila costeada, null = fila fija. Solo lo usa el
+// desglose admin ("Caja: caja de envío").
 const unitMaterialLineSchema = z.object({
     packagingId: z.number().int(),
     displayName: z.string(),
+    optionGroup: z.string().nullable(),
     unitCost: z.number(),
     quantityPerUnit: z.number(),
     totalUnits: z.number(),
     lineTotal: z.number(),
 })
 
-
-const intermediatePackagingLineSchema = z.object({
+const intermediateMaterialLineSchema = z.object({
     packagingId: z.number().int(),
     displayName: z.string(),
+    optionGroup: z.string().nullable(),
     unitCost: z.number(),
     unitsPerPackage: z.number(),
     totalUnits: z.number(),
@@ -130,6 +140,7 @@ const percentageCostLineSchema = z.object({
 const palletMaterialLineSchema = z.object({
     packagingId: z.number().int(),
     displayName: z.string(),
+    optionGroup: z.string().nullable(),
     unitCost: z.number(),
     quantityPerPallet: z.number(),
     requestedPallets: z.number(),
@@ -186,7 +197,9 @@ export const quoteCalculationSchema = z.object({
         // mismo criterio que intermediatePackaging/processingCosts. Una cotización vieja
         // simplemente no trae esta clave; unitPackagingCost (el total) sigue presente e intacto.
         unitMaterials: z.array(unitMaterialLineSchema).optional(),
-        intermediatePackaging: intermediatePackagingLineSchema.nullable().optional(),
+        // Array desde 2026-09-24 (antes un objeto único o null): el nivel intermedio admite N filas
+        // fijas + N grupos, igual que unit/pallet.
+        intermediateMaterials: z.array(intermediateMaterialLineSchema).optional(),
         // Optional para no romper cotizaciones guardadas antes de este campo -- mismo criterio
         // que intermediatePackaging arriba.
         processingCosts: z.array(processingCostLineSchema).optional(),

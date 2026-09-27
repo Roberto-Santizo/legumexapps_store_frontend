@@ -37,14 +37,14 @@ const EditUnitPage = lazyWithRetry(() =>
     import("@/feature/unit/page/editUnit.page").then((module) => ({ default: module.EditUnitPage }))
 )
 
-const IngredientListPage = lazyWithRetry(() =>
-    import("@/feature/ingredient/page/ingredient.page").then((module) => ({ default: module.IngredientListPage }))
+const RawMaterialListPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterial/page/rawMaterial.page").then((module) => ({ default: module.RawMaterialListPage }))
 )
-const CreateIngredientPage = lazyWithRetry(() =>
-    import("@/feature/ingredient/page/createIngredient.page").then((module) => ({ default: module.CreateIngredientPage }))
+const CreateRawMaterialPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterial/page/createRawMaterial.page").then((module) => ({ default: module.CreateRawMaterialPage }))
 )
-const EditIngredientPage = lazyWithRetry(() =>
-    import("@/feature/ingredient/page/editIngredient.page").then((module) => ({ default: module.EditIngredientPage }))
+const EditRawMaterialPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterial/page/editRawMaterial.page").then((module) => ({ default: module.EditRawMaterialPage }))
 )
 
 const PackagingListPage = lazyWithRetry(() =>
@@ -165,9 +165,9 @@ const routes = [
     { path: "units/create", component: CreateUnitPage, permission: "units:create" },
     { path: "units/:unitId/edit", component: EditUnitPage, permission: "units:edit" },
 
-    { path: "ingredients", component: IngredientListPage, permission: "ingredients:view" },
-    { path: "ingredients/create", component: CreateIngredientPage, permission: "ingredients:create" },
-    { path: "ingredients/:ingredientId/edit", component: EditIngredientPage, permission: "ingredients:edit" },
+    { path: "raw-materials", component: RawMaterialListPage, permission: "rawMaterials:view" },
+    { path: "raw-materials/create", component: CreateRawMaterialPage, permission: "rawMaterials:create" },
+    { path: "raw-materials/:rawMaterialId/edit", component: EditRawMaterialPage, permission: "rawMaterials:edit" },
 
     { path: "packagings", component: PackagingListPage, permission: "packagings:view" },
     { path: "packagings/create", component: CreatePackagingPage, permission: "packagings:create" },

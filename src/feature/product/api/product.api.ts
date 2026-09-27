@@ -1,6 +1,7 @@
 import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 import { apiItemResponseSchema, apiMutationResponseSchema, apiPaginatedListResponseSchema } from "@/shared/api/apiResponse.schema"
+import { getBulkImportTemplate, postBulkImportFile } from "@/shared/api/bulkImport.api"
 import { responseProductSchema } from "@/feature/product/schema/product.schema"
 import type { CreateProductInput, UpdateProductInput } from "@/feature/product/schema/product.schema"
 
@@ -54,3 +55,8 @@ export async function updateProductStatusAPI(id: number, isActive: boolean) {
         handleApiError(error)
     }
 }
+
+// Carga masiva de Productos base (2026-09-25, paso 1 de 3: Productos -> Recetas -> SKUs) --
+// mismo plumbing genérico de shared/api/bulkImport.api.ts que el resto de cargas masivas.
+export const bulkImportProductsAPI = (file: File) => postBulkImportFile("/products/bulk-import", file)
+export const downloadProductImportTemplateAPI = () => getBulkImportTemplate("/products/bulk-import/template")

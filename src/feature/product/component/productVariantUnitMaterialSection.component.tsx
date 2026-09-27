@@ -6,7 +6,20 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { createProductVariantUnitMaterialSchema } from "@/feature/product/schema/productVariantUnitMaterial.schema"
-import type { ProductVariantUnitMaterialResponse } from "@/feature/product/schema/productVariantUnitMaterial.schema"
+import type {
+    ProductVariantUnitMaterialResponse,
+    UpdateProductVariantUnitMaterialInput,
+} from "@/feature/product/schema/productVariantUnitMaterial.schema"
+import {
+    EMPTY_MATERIAL_OPTION_GROUP_VALUES,
+    listMaterialOptionGroups,
+    materialOptionGroupFormShape,
+    refineMaterialOptionGroup,
+    sortByMaterialOptionGroup,
+    toMaterialOptionGroupFormValues,
+    toMaterialOptionGroupPayload,
+} from "@/feature/product/schema/materialOptionGroup.schema"
+import { MaterialOptionGroupFields } from "@/feature/product/component/materialOptionGroupFields.component"
 import {
     createProductVariantUnitMaterialAPI,
     deleteProductVariantUnitMaterialAPI,
@@ -20,21 +33,23 @@ import { UnitMaterialSelect } from "@/feature/packaging/component/unitMaterialSe
 import { Select } from "@/shared/component/select.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
-import { Checkbox } from "@/shared/component/checkbox.component"
 import { Button } from "@/shared/component/button.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 
-const unitMaterialFormSchema = createProductVariantUnitMaterialSchema.omit({ productVariantId: true })
+// optionGroup de la API se desdobla en isOptional + nombre en el form (ver materialOptionGroup.schema.ts).
+const unitMaterialFormSchema = createProductVariantUnitMaterialSchema
+    .omit({ productVariantId: true, optionGroup: true })
+    .extend(materialOptionGroupFormShape)
+    .superRefine(refineMaterialOptionGroup)
 type UnitMaterialFormInput = z.infer<typeof unitMaterialFormSchema>
 
 function toFormValues(item: ProductVariantUnitMaterialResponse): Partial<UnitMaterialFormInput> {
     return {
         packagingId: item.packagingId,
         quantityPerUnit: Number(item.quantityPerUnit),
-        isSwappable: item.isSwappable,
-        isDefault: item.isDefault,
+        ...toMaterialOptionGroupFormValues(item),
     }
 }
 
@@ -68,9 +83,10 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
 
     const activeVariantId = selectedVariantId ?? variants[0]?.id ?? null
 
-    const unitMaterials = (unitMaterialsQuery.data?.data ?? []).filter(
-        (item) => item.productVariantId === activeVariantId
+    const unitMaterials = sortByMaterialOptionGroup(
+        (unitMaterialsQuery.data?.data ?? []).filter((item) => item.productVariantId === activeVariantId)
     )
+    const existingOptionGroups = listMaterialOptionGroups(unitMaterials)
 
     const {
         register,
@@ -79,8 +95,11 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
         reset,
         watch,
         formState: { errors },
-    } = useForm<UnitMaterialFormInput>({ resolver: zodResolver(unitMaterialFormSchema) })
-    const isSwappable = watch("isSwappable")
+    } = useForm<UnitMaterialFormInput>({
+        resolver: zodResolver(unitMaterialFormSchema),
+        defaultValues: EMPTY_MATERIAL_OPTION_GROUP_VALUES,
+    })
+    const isOptional = watch("isOptional")
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariantUnitMaterials"] })
 
@@ -89,20 +108,20 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
     })
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, formData }: { id: number; formData: UnitMaterialFormInput }) =>
+        mutationFn: ({ id, formData }: { id: number; formData: UpdateProductVariantUnitMaterialInput }) =>
             updateProductVariantUnitMaterialAPI(id, formData),
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
             setEditingId(null)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
@@ -119,10 +138,11 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
 
     const onSubmit = handleSubmit((formData) => {
         if (!activeVariantId) return
+        const payload = toMaterialOptionGroupPayload(formData)
         if (editingId) {
-            updateMutation.mutate({ id: editingId, formData })
+            updateMutation.mutate({ id: editingId, formData: payload })
         } else {
-            createMutation.mutate({ ...formData, productVariantId: activeVariantId })
+            createMutation.mutate({ ...payload, productVariantId: activeVariantId })
         }
     })
 
@@ -133,7 +153,7 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
 
     function cancelEdit() {
         setEditingId(null)
-        reset({})
+        reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
     }
 
     if (variants.length === 0) {
@@ -165,8 +185,8 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                         <TableRow>
                             <Th>{t("productVariantUnitMaterial.form.packagingId")}</Th>
                             <Th>{t("productVariantUnitMaterial.form.quantityPerUnit")}</Th>
-                            <Th>{t("productVariantUnitMaterial.table.swappable")}</Th>
-                            <Th>{t("productVariantUnitMaterial.table.default")}</Th>
+                            <Th>{t("materialOptionGroup.table.group")}</Th>
+                            <Th>{t("materialOptionGroup.table.default")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -175,8 +195,8 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                             <TableRow key={item.id}>
                                 <Td>{packagingNameById.get(item.packagingId) ?? "-"}</Td>
                                 <Td>{item.quantityPerUnit}</Td>
-                                <Td>{item.isSwappable ? t("common.yes") : t("common.no")}</Td>
-                                <Td>{item.isSwappable && item.isDefault ? t("common.yes") : "-"}</Td>
+                                <Td>{item.optionGroup ?? t("materialOptionGroup.table.fixed")}</Td>
+                                <Td>{item.optionGroup !== null && item.isDefault ? t("common.yes") : "-"}</Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
@@ -239,24 +259,15 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                     />
                 </FormField>
 
-                <div className="mb-5 flex flex-wrap items-center gap-6 sm:col-span-2">
-                    <Checkbox
-                        id="unitMaterialIsSwappable"
-                        label={t("productVariantUnitMaterial.form.isSwappable")}
-                        {...register("isSwappable")}
-                    />
-                    <Checkbox
-                        id="unitMaterialIsDefault"
-                        label={t("productVariantUnitMaterial.form.isDefault")}
-                        disabled={!isSwappable}
-                        {...register("isDefault")}
-                    />
-                </div>
-                {isSwappable && (
-                    <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
-                        {t("productVariantUnitMaterial.form.isDefaultHint")}
-                    </p>
-                )}
+                <MaterialOptionGroupFields
+                    idPrefix="unitMaterial"
+                    isOptional={isOptional}
+                    existingGroups={existingOptionGroups}
+                    hasOptionGroupError={!!errors.optionGroup}
+                    isOptionalField={register("isOptional")}
+                    optionGroupField={register("optionGroup")}
+                    isDefaultField={register("isDefault")}
+                />
 
                 <div className="flex gap-3 sm:col-span-2">
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

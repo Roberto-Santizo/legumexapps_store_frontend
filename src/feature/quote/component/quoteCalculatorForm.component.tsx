@@ -18,10 +18,10 @@ import type { CardOption } from "@/shared/component/optionCards.component"
 import { Input } from "@/shared/component/input.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
-import { QuoteLiveTotal, QuoteMaterialsStep } from "@/feature/quote/component/quoteMaterialsStep.component"
+import { QuoteLiveTotal, QuoteMaterialGroups } from "@/feature/quote/component/quoteMaterialGroups.component"
 import { QuotePalletsStep } from "@/feature/quote/component/quotePalletsStep.component"
 import { QuoteWizardBackButton } from "@/feature/quote/component/quoteWizardBackButton.component"
-import type { MaterialGroup, MaterialLevel } from "@/feature/quote/component/quoteMaterialsStep.component"
+import type { MaterialGroup, MaterialLevel, MaterialOption } from "@/feature/quote/component/quoteMaterialGroups.component"
 import { calculateTotalOrderWeightKg, formatTotalOrderWeight } from "@/feature/quote/quoteWeight.util"
 
 type QuoteCalculatorFormProps = {
@@ -41,9 +41,10 @@ type QuoteCalculatorFormProps = {
     // criterio inverso que showDestination: SOLO el cliente (quoteRequest.page.tsx) lo pasa
     // (previewQuoteAPI). El admin (adminQuoteCalculatorPage) no lo pasa -- su propio submit YA es
     // un cálculo sin persistir (previewAdminQuoteAPI), así que esta feature no le aporta nada
-    // nuevo (el paso "materiales" SÍ existe también para el admin, solo sin total en vivo).
+    // nuevo (las tarjetas de materiales SÍ se muestran también al admin, solo sin total en vivo).
     // Cuando está presente, el form llama a este preview con debounce cada vez que cambia la
-    // selección de un material o de variante, y muestra un total estimado antes del submit final.
+    // selección de un material, de variante o de palets, y muestra UN total estimado antes del
+    // submit final.
     previewAPI?: (formData: CalculateQuoteInput) => Promise<{ data: { totalCost: number } } | undefined>
 }
 
@@ -53,37 +54,49 @@ const MIX_PERCENTAGE_TOLERANCE = 0.5
 
 type QuoteMode = "finished" | "customizable"
 
-// Orden del wizard (2026-09-22, ver CLAUDE.md #6): mode -> category -> product -> pallets ->
-// materials -> total. "pallets" siempre existe una vez elegido el producto (ahí se elige también
-// el SKU/presentación, porque las opciones de materiales dependen de él); "materials" solo existe
-// si ALGUNA variante del producto ofrece opciones swappable (ver productHasMaterialOptions) -- si
-// no, el flujo va pallets -> total directo. "total" es el paso final: solo lectura (resumen +
-// total real, que muestra el padre vía QuoteResultCard/QuotedOrderSummary), nunca antes de haber
-// calculado con éxito -- ver hasReachedTotal.
-export type QuoteWizardStep = "mode" | "category" | "product" | "pallets" | "materials" | "total"
+// Orden del wizard (2026-09-23, ver CLAUDE.md #6): mode -> category -> product -> pallets ->
+// total. "pallets" es el paso combinado palets + materiales: SKU/presentación, cantidad de palets,
+// cajas/peso y, debajo, las tarjetas de los niveles de material que tengan alternativas swappable
+// en el SKU elegido (ninguna -> solo palets/peso), con UN solo total en vivo al pie. "total" es
+// el paso final: solo lectura (resumen + total real, que muestra el padre vía
+// QuoteResultCard/QuotedOrderSummary), nunca antes de haber calculado con éxito -- ver
+// hasReachedTotal.
+export type QuoteWizardStep = "mode" | "category" | "product" | "pallets" | "total"
 
-type QuotableVariant = QuotableProduct["variants"][number]
+type MaterialGroupsKey = "unitMaterialOptionGroups" | "intermediateMaterialOptionGroups" | "palletMaterialOptionGroups"
+type SelectedMaterialIds = Pick<CalculateQuoteInput, "selectedUnitMaterialIds" | "selectedIntermediateMaterialIds" | "selectedPalletMaterialIds">
 
-const MATERIAL_LEVELS: { level: MaterialLevel; optionsKey: "unitMaterialOptions" | "intermediateMaterialOptions" | "palletMaterialOptions" }[] = [
-    { level: "unit", optionsKey: "unitMaterialOptions" },
-    { level: "intermediate", optionsKey: "intermediateMaterialOptions" },
-    { level: "pallet", optionsKey: "palletMaterialOptions" },
+const MATERIAL_LEVELS: { level: MaterialLevel; groupsKey: MaterialGroupsKey; payloadKey: keyof SelectedMaterialIds }[] = [
+    { level: "unit", groupsKey: "unitMaterialOptionGroups", payloadKey: "selectedUnitMaterialIds" },
+    { level: "intermediate", groupsKey: "intermediateMaterialOptionGroups", payloadKey: "selectedIntermediateMaterialIds" },
+    { level: "pallet", groupsKey: "palletMaterialOptionGroups", payloadKey: "selectedPalletMaterialIds" },
 ]
 
-function variantHasMaterialOptions(variant: QuotableVariant): boolean {
-    return MATERIAL_LEVELS.some(({ optionsKey }) => variant[optionsKey].length > 0)
+// Clave de la elección del cliente por grupo de opciones (2026-09-24): "nivel:grupo". El nombre ya
+// viene normalizado del backend; se baja a minúsculas por la misma regla insensible a mayúsculas.
+function materialGroupKey(level: MaterialLevel, group: string): string {
+    return `${level}:${group.toLowerCase()}`
 }
 
-function productHasMaterialOptions(product: QuotableProduct): boolean {
-    return product.variants.some(variantHasMaterialOptions)
+// Ids elegidos por nivel (uno por grupo), ORDENADOS -- así su JSON sirve como dependencia estable
+// del efecto de recálculo en vivo (un array nuevo en cada render lo haría correr en loop).
+function buildSelectedMaterialIds(groups: MaterialGroup[]): SelectedMaterialIds {
+    const selected: SelectedMaterialIds = {}
+    for (const { level, payloadKey } of MATERIAL_LEVELS) {
+        selected[payloadKey] = groups
+            .filter((group) => group.level === level && group.selectedId !== undefined)
+            .map((group) => group.selectedId as number)
+            .sort((a, b) => a - b)
+    }
+    return selected
 }
 
-// La elección vigente de un nivel: lo que el cliente tocó (si sigue siendo una opción REAL de este
-// SKU -- protege contra ids viejos de otra variante), o si no, el default. Nunca se inventa una
-// opción: si el nivel no tiene default configurado queda undefined y el backend lo rechaza al
-// cotizar (errors.*_material_default_not_configured), no se adivina acá.
+// La elección vigente de un grupo de opciones: lo que el cliente tocó (si sigue siendo una opción
+// REAL de este grupo del SKU -- protege contra ids viejos de otra variante), o si no, el default
+// del grupo. Nunca se inventa una opción: si el grupo no tiene default configurado queda undefined
+// y el backend lo rechaza al cotizar (errors.*_material_default_not_configured), no se adivina acá.
 function resolveSelectedMaterialId(
-    options: QuotableVariant["unitMaterialOptions"],
+    options: MaterialOption[],
     chosenId: number | undefined
 ): number | undefined {
     if (chosenId !== undefined && options.some((option) => option.id === chosenId)) return chosenId
@@ -129,11 +142,11 @@ export function QuoteCalculatorForm({
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
     const [mixPercentages, setMixPercentages] = useState<Record<number, string>>({})
     const [selectedCountry, setSelectedCountry] = useState<DestinationCountry>("GT")
-    // Lo que el cliente TOCÓ por nivel en el paso de materiales -- estado local, NO un campo de
+    // Lo que el cliente TOCÓ por nivel en las tarjetas de materiales -- estado local, NO un campo de
     // react-hook-form: un <select>/campo registrado re-inyectaba el valor viejo al cambiar de
     // variante (id de un SKU ajeno -> 422 invalid_*_material_selection). Se limpia al cambiar de
     // producto o de variante; lo vigente (tocado o default) sale de resolveSelectedMaterialId.
-    const [materialSelection, setMaterialSelection] = useState<Partial<Record<MaterialLevel, number>>>({})
+    const [materialSelection, setMaterialSelection] = useState<Record<string, number>>({})
     const [livePreviewTotal, setLivePreviewTotal] = useState<number | null>(null)
     const [isLivePreviewLoading, setIsLivePreviewLoading] = useState(false)
     // El paso "total" es de solo lectura (el resultado real lo muestra el padre vía
@@ -155,8 +168,8 @@ export function QuoteCalculatorForm({
         formState: { errors },
     } = useForm<CalculateQuoteInput>({
         resolver: zodResolver(calculateQuoteSchema),
-        // Palets arranca en 1 (mismo valor del input) para que el total en vivo del paso de
-        // pallets -- donde ese input todavía no está montado -- ya tenga con qué calcular.
+        // Palets arranca en 1 (mismo valor del input) para que el total en vivo ya tenga con qué
+        // calcular apenas se elige el SKU, antes de que el cliente toque la cantidad.
         defaultValues: { requestedPallets: 1 },
     })
 
@@ -193,10 +206,10 @@ export function QuoteCalculatorForm({
 
     const selectedProduct = categoryProducts.find((product) => product.id === selectedProductId)
     const variants = selectedProduct?.variants ?? []
-    const ingredientPool = selectedProduct?.ingredientPool ?? []
+    const rawMaterialPool = selectedProduct?.rawMaterialPool ?? []
 
     // Default + opcional por nivel (2026-09-21, ver CLAUDE.md #4) -- el menú de alternativas de
-    // cada nivel viene ya resuelto en el SKU elegido (QuotableVariant.*MaterialOptions), nunca se
+    // cada nivel viene ya resuelto en el SKU elegido (QuotableVariant.*MaterialOptionGroups), nunca se
     // arma acá. watch("productVariantId") en vez de selectedProductId/variants porque lo que
     // importa es la VARIANTE (SKU) elegida en el propio <select>, no el producto del paso
     // anterior.
@@ -205,35 +218,34 @@ export function QuoteCalculatorForm({
     const watchedRequestedPallets = watch("requestedPallets")
     const totalWeightKg = selectedVariant ? calculateTotalOrderWeightKg(selectedVariant, watchedRequestedPallets) : null
 
-    // El paso "materiales" existe para un producto si ALGUNA de sus variantes ofrece opciones (la
-    // variante se elige en el paso "pallets" anterior). Si ninguna variante ofrece nada, el flujo
-    // va pallets -> total directo.
-    const hasMaterialsStep = selectedProduct ? productHasMaterialOptions(selectedProduct) : false
-
+    // Grupos de opciones (2026-09-24, ver CLAUDE.md #4): un chooser por grupo de cada nivel (ej.
+    // "Caja" y "Esquinero" en paletización), cada uno con su propia elección vigente.
     const materialGroups: MaterialGroup[] = selectedVariant
-        ? MATERIAL_LEVELS.filter(({ optionsKey }) => selectedVariant[optionsKey].length > 0).map(({ level, optionsKey }) => ({
-              level,
-              options: selectedVariant[optionsKey],
-              selectedId: resolveSelectedMaterialId(selectedVariant[optionsKey], materialSelection[level]),
-          }))
+        ? MATERIAL_LEVELS.flatMap(({ level, groupsKey }) =>
+              selectedVariant[groupsKey].map((optionGroup) => {
+                  const key = materialGroupKey(level, optionGroup.group)
+                  return {
+                      key,
+                      level,
+                      group: optionGroup.group,
+                      options: optionGroup.options,
+                      selectedId: resolveSelectedMaterialId(optionGroup.options, materialSelection[key]),
+                  }
+              })
+          )
         : []
-    const selectedMaterialIds = {
-        selectedUnitMaterialId: materialGroups.find((group) => group.level === "unit")?.selectedId,
-        selectedIntermediateMaterialId: materialGroups.find((group) => group.level === "intermediate")?.selectedId,
-        selectedPalletMaterialId: materialGroups.find((group) => group.level === "pallet")?.selectedId,
-    }
-    const { selectedUnitMaterialId, selectedIntermediateMaterialId, selectedPalletMaterialId } = selectedMaterialIds
+    const selectedMaterialIdsKey = JSON.stringify(buildSelectedMaterialIds(materialGroups))
 
     // Recalculo en vivo (2026-09-21, ver CLAUDE.md #6) -- llama a previewAPI (NUNCA guarda, ver
     // el comentario de la prop) con debounce cada vez que cambia la elección de un material, de
-    // variante o de palets, SOLO mientras el cliente está en el paso de pallets o el de
-    // materiales (los dos pasos previos al cálculo real -- "total" ya muestra el resultado
-    // persistido, no una vista previa). No corre en modo personalizable: ahí el backend exige la
-    // mezcla de ingredientes (que se captura en el paso de pallets y este preview no manda), así
+    // variante o de palets (cualquiera de los dos inputs del paso combinado dispara el recálculo),
+    // SOLO mientras el cliente está en el paso "pallets" (el único previo al cálculo real --
+    // "total" ya muestra el resultado persistido, no una vista previa). No corre en modo
+    // personalizable: ahí el backend exige la mezcla de materias primas (que este preview no manda), así
     // que el total nunca se podría calcular y la caja quedaría en "-" para siempre -- mejor no
     // mostrarla. Silencioso ante errores: un total que no se puede calcular todavía simplemente
     // no se muestra, el submit real sigue siendo la fuente de verdad de errores visibles.
-    const isLiveTotalAvailable = !!previewAPI && mode !== "customizable" && (step === "pallets" || step === "materials")
+    const isLiveTotalAvailable = !!previewAPI && mode !== "customizable" && step === "pallets"
     useEffect(() => {
         if (!isLiveTotalAvailable || !previewAPI || !selectedVariantId || !watchedRequestedPallets) {
             setLivePreviewTotal(null)
@@ -243,13 +255,12 @@ export function QuoteCalculatorForm({
 
         let cancelled = false
         setIsLivePreviewLoading(true)
+        const selectedMaterialIds = JSON.parse(selectedMaterialIdsKey) as SelectedMaterialIds
         const timeoutId = setTimeout(() => {
             previewAPI({
                 productVariantId: selectedVariantId,
                 requestedPallets: watchedRequestedPallets,
-                selectedUnitMaterialId,
-                selectedIntermediateMaterialId,
-                selectedPalletMaterialId,
+                ...selectedMaterialIds,
             })
                 .then((response) => {
                     if (cancelled) return
@@ -267,7 +278,7 @@ export function QuoteCalculatorForm({
             cancelled = true
             clearTimeout(timeoutId)
         }
-    }, [isLiveTotalAvailable, previewAPI, selectedVariantId, watchedRequestedPallets, selectedUnitMaterialId, selectedIntermediateMaterialId, selectedPalletMaterialId])
+    }, [isLiveTotalAvailable, previewAPI, selectedVariantId, watchedRequestedPallets, selectedMaterialIdsKey])
 
     const destinationOptions: SearchableSelectOption[] = destinations
         .filter((destination) => destination.country === selectedCountry)
@@ -276,7 +287,7 @@ export function QuoteCalculatorForm({
             label: destination.displayName,
         }))
 
-    const mixTotal = ingredientPool.reduce((sum, option) => sum + (Number(mixPercentages[option.ingredientId]) || 0), 0)
+    const mixTotal = rawMaterialPool.reduce((sum, option) => sum + (Number(mixPercentages[option.rawMaterialId]) || 0), 0)
     const isMixComplete = Math.abs(mixTotal - 100) <= MIX_PERCENTAGE_TOLERANCE
 
     const resetProductSelection = () => {
@@ -305,7 +316,7 @@ export function QuoteCalculatorForm({
     const handleProductChange = (productId: number) => {
         const product = categoryProducts.find((candidate) => candidate.id === productId)
         // Con un único SKU no hay nada que elegir en el paso "pallets": se preselecciona para que
-        // ya muestre cajas/peso de una vez. Con más de un SKU, el cliente elige ahí.
+        // ya muestre cajas/peso/materiales de una vez. Con más de un SKU, el cliente elige ahí.
         const onlyVariant = product?.variants.length === 1 ? product.variants[0] : undefined
         setSelectedProductId(productId)
         setValue("productVariantId", (onlyVariant?.id ?? undefined) as unknown as number)
@@ -322,12 +333,12 @@ export function QuoteCalculatorForm({
         setHasReachedTotal(false)
     }
 
-    const handleMaterialSelect = (level: MaterialLevel, materialId: number) => {
-        setMaterialSelection((current) => ({ ...current, [level]: materialId }))
+    const handleMaterialSelect = (groupKey: string, materialId: number) => {
+        setMaterialSelection((current) => ({ ...current, [groupKey]: materialId }))
     }
 
-    const handleMixPercentageChange = (ingredientId: number, value: string) => {
-        setMixPercentages((current) => ({ ...current, [ingredientId]: value }))
+    const handleMixPercentageChange = (rawMaterialId: number, value: string) => {
+        setMixPercentages((current) => ({ ...current, [rawMaterialId]: value }))
     }
 
     const handleCountryChange = (country: DestinationCountry) => {
@@ -336,10 +347,10 @@ export function QuoteCalculatorForm({
     }
 
     const submit = handleSubmit((formData) => {
-        // Igual que ingredientMix: la elección de materiales vive en estado local (no
+        // Igual que rawMaterialMix: la elección de materiales vive en estado local (no
         // es un campo registrado), se mergea acá. El backend igual la revalida contra las opciones
         // reales del SKU -- este paso solo cambia DÓNDE elige el cliente, no la validación.
-        const withMaterials = { ...formData, ...selectedMaterialIds }
+        const withMaterials = { ...formData, ...buildSelectedMaterialIds(materialGroups) }
 
         // Avanza al paso "total" apenas la validación del propio form pasa (sin esperar la
         // respuesta async de onSubmit) -- QuoteResultCard ya sabe mostrar su propio spinner
@@ -351,29 +362,23 @@ export function QuoteCalculatorForm({
             onSubmit(withMaterials)
             return
         }
-        const ingredientMix = ingredientPool
-            .map((option) => ({ ingredientId: option.ingredientId, percentage: Number(mixPercentages[option.ingredientId]) || 0 }))
+        const rawMaterialMix = rawMaterialPool
+            .map((option) => ({ rawMaterialId: option.rawMaterialId, percentage: Number(mixPercentages[option.rawMaterialId]) || 0 }))
             .filter((line) => line.percentage > 0)
-        onSubmit({ ...withMaterials, ingredientMix })
+        onSubmit({ ...withMaterials, rawMaterialMix })
     })
 
-    // "materiales" solo aparece como migaja si el producto elegido lo tiene (ver hasMaterialsStep),
-    // y requiere ya haber elegido SKU en "pallets" (ahí se elige). "total" solo se habilita tras
-    // haber calculado con éxito -- ver hasReachedTotal.
+    // "total" solo se habilita tras haber calculado con éxito -- ver hasReachedTotal.
     const crumbs: { key: QuoteWizardStep; label: string; enabled: boolean }[] = [
         { key: "mode", label: t("site.quoteRequest.form.wizard.steps.mode"), enabled: true },
         { key: "category", label: t("site.quoteRequest.form.wizard.steps.category"), enabled: true },
         { key: "product", label: t("site.quoteRequest.form.wizard.steps.product"), enabled: selectedCategoryId !== null },
         { key: "pallets", label: t("site.quoteRequest.form.wizard.steps.pallets"), enabled: selectedProductId !== null },
-        ...(hasMaterialsStep
-            ? [{ key: "materials" as const, label: t("site.quoteRequest.form.wizard.steps.materials"), enabled: !!selectedVariant }]
-            : []),
         { key: "total", label: t("site.quoteRequest.form.wizard.steps.total"), enabled: hasReachedTotal },
     ]
 
-    // Selector de presentación (SKU): vive en el paso "pallets" (las opciones de materiales del
-    // siguiente paso dependen de él). Un único helper para que el <select> real y el resumen de
-    // solo lectura del paso "materiales" compartan el mismo campo registrado.
+    // Selector de presentación (SKU): vive arriba del paso "pallets" (las tarjetas de materiales
+    // de más abajo dependen de él).
     const variantFieldProps = register("productVariantId", { setValueAs: toOptionalNumber })
     const renderVariantField = (product: QuotableProduct) => (
         <FormField
@@ -427,10 +432,8 @@ export function QuoteCalculatorForm({
     )
 
     // El botón de calcular depende solo de lo que la cotización realmente necesita: variante, palets,
-    // una elección vigente en cada nivel que ofrece opciones y -- en modo personalizable -- una
-    // mezcla que sume 100%. (Ya no hay datos de prospecto en este flujo.) Se reusa también para
-    // habilitar "Continuar" del paso "pallets" hacia "materiales": los defaults de cada nivel ya
-    // están resueltos en ese punto, así que la condición es la misma.
+    // una elección vigente en CADA grupo de opciones (todos son obligatorios) y -- en modo personalizable -- una
+    // mezcla que sume 100%. (Ya no hay datos de prospecto en este flujo.)
     const canSubmit =
         !!selectedVariantId &&
         !!watchedRequestedPallets &&
@@ -447,10 +450,10 @@ export function QuoteCalculatorForm({
                 <p className="mb-2 text-sm font-semibold text-verde-profundo">{t("site.quoteRequest.form.fixedRecipeTitle")}</p>
                 <p className="text-sm text-texto-suave">
                     {product.fixedRecipe
-                        .map((ingredient) =>
+                        .map((rawMaterial) =>
                             t("site.quoteRequest.form.fixedRecipeLine", {
-                                percentage: ingredient.percentage,
-                                name: ingredient.displayName,
+                                percentage: rawMaterial.percentage,
+                                name: rawMaterial.displayName,
                             })
                         )
                         .join(" · ")}
@@ -468,17 +471,17 @@ export function QuoteCalculatorForm({
                     </p>
                 </div>
 
-                {ingredientPool.length === 0 ? (
+                {rawMaterialPool.length === 0 ? (
                     <p className="text-sm text-texto-suave">{t("site.quoteRequest.form.mixEmpty")}</p>
                 ) : (
                     <div className="space-y-3">
-                        {ingredientPool.map((option) => (
-                            <div key={option.ingredientId} className="flex items-center justify-between gap-3">
+                        {rawMaterialPool.map((option) => (
+                            <div key={option.rawMaterialId} className="flex items-center justify-between gap-3">
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <p className="text-sm text-verde-profundo">{option.displayName}</p>
                                         <Chip tone={option.isOrganic ? "fresh" : "neutral"}>
-                                            {option.isOrganic ? t("ingredient.organicTag") : t("ingredient.conventionalTag")}
+                                            {option.isOrganic ? t("rawMaterial.organicTag") : t("rawMaterial.conventionalTag")}
                                         </Chip>
                                     </div>
                                     <p className="text-xs text-texto-suave">
@@ -494,8 +497,8 @@ export function QuoteCalculatorForm({
                                         step="0.1"
                                         min={option.minPercentage}
                                         max={option.maxPercentage}
-                                        value={mixPercentages[option.ingredientId] ?? ""}
-                                        onChange={(event) => handleMixPercentageChange(option.ingredientId, event.target.value)}
+                                        value={mixPercentages[option.rawMaterialId] ?? ""}
+                                        onChange={(event) => handleMixPercentageChange(option.rawMaterialId, event.target.value)}
                                     />
                                     <span className="text-sm text-texto-suave">%</span>
                                 </div>
@@ -503,7 +506,7 @@ export function QuoteCalculatorForm({
                         ))}
                     </div>
                 )}
-                {!isMixComplete && ingredientPool.length > 0 && (
+                {!isMixComplete && rawMaterialPool.length > 0 && (
                     <p className="mt-3 text-xs text-error-fg">{t("site.quoteRequest.form.mixIncomplete")}</p>
                 )}
             </div>
@@ -659,9 +662,9 @@ export function QuoteCalculatorForm({
                         </div>
                     )}
 
-                    {/* Paso "pallets" (2026-09-22, ver CLAUDE.md #6): elige SKU + cantidad de
-                    palets, muestra cajas/palet y peso total del pedido. Es el primer paso de
-                    input propio del producto, siempre existe. */}
+                    {/* Paso combinado palets + materiales (2026-09-23, ver CLAUDE.md #6): SKU +
+                    cantidad de palets + cajas/peso arriba, tarjetas de materiales debajo (solo los
+                    niveles con alternativas en el SKU elegido), un único total en vivo al pie. */}
                     {step === "pallets" && selectedProduct && (
                         <QuotePalletsStep
                             header={renderProductHeader(selectedProduct)}
@@ -695,36 +698,13 @@ export function QuoteCalculatorForm({
                                     />
                                 </FormField>
                             }
+                            materialsSection={<QuoteMaterialGroups groups={materialGroups} onSelect={handleMaterialSelect} />}
                             mixSection={renderMixSection()}
                             destinationSection={renderDestinationSection()}
                             liveTotal={liveTotal}
-                            isLastStep={!hasMaterialsStep}
-                            canContinue={canSubmit}
-                            isSubmitting={isSubmitting}
-                            onBack={() => setStep("product")}
-                            onContinue={() => setStep("materials")}
-                        />
-                    )}
-
-                    {/* Paso "materiales" (2026-09-21, reordenado 2026-09-22 -- ver CLAUDE.md #6):
-                    tarjetas por nivel con alternativas, ver QuoteMaterialsStep. Solo existe si el
-                    producto tiene opciones en alguna variante; el SKU ya se eligió en "pallets". */}
-                    {step === "materials" && selectedProduct && hasMaterialsStep && (
-                        <QuoteMaterialsStep
-                            header={renderProductHeader(selectedProduct)}
-                            variantSummary={
-                                selectedVariant ? (
-                                    <p className="mb-5 rounded-[10px] border border-gris-campo px-4 py-3 text-sm text-verde-profundo">
-                                        {variantLabel(selectedProduct.displayName, selectedVariant, t)}
-                                    </p>
-                                ) : null
-                            }
-                            groups={materialGroups}
                             canSubmit={canSubmit}
                             isSubmitting={isSubmitting}
-                            liveTotal={liveTotal}
-                            onSelect={handleMaterialSelect}
-                            onBack={() => setStep("pallets")}
+                            onBack={() => setStep("product")}
                         />
                     )}
 
@@ -734,7 +714,7 @@ export function QuoteCalculatorForm({
                     tras un submit exitoso (ver hasReachedTotal). */}
                     {step === "total" && selectedProduct && (
                         <div>
-                            <QuoteWizardBackButton onClick={() => setStep(hasMaterialsStep ? "materials" : "pallets")} />
+                            <QuoteWizardBackButton onClick={() => setStep("pallets")} />
 
                             {renderProductHeader(selectedProduct)}
 
@@ -745,7 +725,7 @@ export function QuoteCalculatorForm({
                                     </p>
                                     <button
                                         type="button"
-                                        onClick={() => setStep(hasMaterialsStep ? "materials" : "pallets")}
+                                        onClick={() => setStep("pallets")}
                                         className="text-sm font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
                                     >
                                         {t("site.quoteRequest.form.wizard.total.edit")}
@@ -762,9 +742,9 @@ export function QuoteCalculatorForm({
                                         </li>
                                     )}
                                     {materialGroups.map((group) => (
-                                        <li key={group.level}>
+                                        <li key={group.key}>
                                             <span className="font-medium text-verde-profundo">
-                                                {t(`site.quoteRequest.form.${group.level}MaterialLabel`)}:
+                                                {t(`site.quoteRequest.form.${group.level}MaterialLabel`)} · {group.group}:
                                             </span>{" "}
                                             {group.options.find((option) => option.id === group.selectedId)?.displayName ?? "-"}
                                         </li>

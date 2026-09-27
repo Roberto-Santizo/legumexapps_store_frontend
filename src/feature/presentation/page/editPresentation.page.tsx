@@ -21,7 +21,6 @@ function toFormValues(presentation: PresentationResponse): Partial<UpdatePresent
     return {
         displayLabel: presentation.displayLabel,
         netWeightGrams: presentation.netWeightGrams ?? undefined,
-        categoryId: presentation.categoryId ?? undefined,
     }
 }
 
@@ -40,7 +39,6 @@ export function EditPresentationPage() {
 
     const {
         register,
-        control,
         handleSubmit,
         reset,
         formState: { errors },
@@ -85,7 +83,7 @@ export function EditPresentationPage() {
 
                 {presentationQuery.data && (
                     <form onSubmit={onSubmit}>
-                        <PresentationForm register={register} control={control} errors={errors} />
+                        <PresentationForm register={register} errors={errors} />
                         <Button type="submit" disabled={updatePresentationMutation.isPending}>
                             {updatePresentationMutation.isPending ? t("common.saving") : t("common.save")}
                         </Button>

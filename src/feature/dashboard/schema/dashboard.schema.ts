@@ -34,8 +34,8 @@ const dashboardTopSalespersonSchema = z.object({
     totalRevenue: z.number(),
 })
 
-const dashboardTopIngredientSchema = z.object({
-    ingredientId: z.number().int(),
+const dashboardTopRawMaterialSchema = z.object({
+    rawMaterialId: z.number().int(),
     displayName: z.string(),
     quoteCount: z.number(),
     totalCost: z.number(),
@@ -52,7 +52,7 @@ export const dashboardSummarySchema = z.object({
     topProducts: z.array(dashboardTopProductSchema),
     topProductsByRevenue: z.array(dashboardTopProductSchema),
     topSalespeople: z.array(dashboardTopSalespersonSchema),
-    topIngredients: z.array(dashboardTopIngredientSchema),
+    topRawMaterials: z.array(dashboardTopRawMaterialSchema),
 })
 
 export type DashboardTrendPoint = z.infer<typeof dashboardTrendPointSchema>

@@ -6,7 +6,6 @@ export const createPresentationSchema = z.object({
     // Requerido: es el peso físico real de la presentación y alimenta directo el cálculo de %
     // en productos personalizables. Sin este dato el cálculo no puede convertir % -> gramos.
     netWeightGrams: z.number().positive(),
-    categoryId: z.number().int().positive().optional(),
 })
 
 // .partial() salvo netWeightGrams -- no puede quedar vacío ni siquiera al editar una
@@ -23,7 +22,6 @@ export const responsePresentationSchema = baseCatalogSchema.extend({
     // la respuesta fallaba el parseo en el frontend con "server response does not have the
     // expected format").
     netWeightGrams: z.coerce.number().nullable(),
-    categoryId: z.number().int().nullable(),
 })
 
 export type CreatePresentationInput = z.infer<typeof createPresentationSchema>

@@ -15,7 +15,7 @@ import { Button } from "@/shared/component/button.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
 
 function toFormValues(processingCost: ProcessingCostResponse): UpdateProcessingCostInput {
-    // Ver el mismo comentario en editIngredient.page.tsx::toFormValues.
+    // Ver el mismo comentario en editRawMaterial.page.tsx::toFormValues.
     const englishTranslation = processingCost.translations.find((translation) => translation.language === "en")
     return {
         displayName: processingCost.displayName,

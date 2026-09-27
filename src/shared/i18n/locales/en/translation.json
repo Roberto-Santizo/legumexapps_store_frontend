@@ -111,7 +111,7 @@
             "search": "Search",
             "request": "View request",
             "cart": "View cart",
-            "cta": "Request a quote",
+            "cta": "Legumex Team",
             "openMenu": "Open menu",
             "closeMenu": "Close menu"
         },
@@ -147,7 +147,7 @@
                 "modeFinished": "Ready-made product",
                 "modeCustomizable": "Customize my product",
                 "modeFinishedHint": "Choose from our ready-made presentations, with a fixed recipe.",
-                "modeCustomizableHint": "Build your own mix: pick the % of each ingredient until it adds up to 100%.",
+                "modeCustomizableHint": "Build your own mix: pick the % of each raw material until it adds up to 100%.",
                 "noProductsFinished": "There are no ready-made products available to quote yet.",
                 "noProductsCustomizable": "There are no customizable products available to quote yet.",
                 "organicBadge": "100% Organic",
@@ -157,23 +157,21 @@
                 "mixTotal": "Total: {{total}}%",
                 "mixIncomplete": "The mix must total 100% before you can request a quote.",
                 "mixRange": "{{min}}% - {{max}}%",
-                "mixEmpty": "This product doesn't have any ingredients configured yet. Contact the administrator.",
+                "mixEmpty": "This product doesn't have any raw materials configured yet. Contact the administrator.",
                 "wizard": {
                     "back": "Back",
                     "steps": {
                         "mode": "Type",
                         "category": "Category",
                         "product": "Product",
-                        "pallets": "Pallets",
-                        "materials": "Materials",
+                        "pallets": "Pallets & materials",
                         "total": "Total"
                     },
                     "pallets": {
                         "title": "How many pallets do you need?",
                         "subtitle": "Choose the presentation (if applicable) and the number of pallets. You'll see the boxes per pallet and the total weight of your order.",
                         "boxesPerPallet": "Boxes per pallet",
-                        "totalWeight": "Total order weight",
-                        "continue": "Continue"
+                        "totalWeight": "Total order weight"
                     },
                     "total": {
                         "summaryTitle": "Your selection",
@@ -181,9 +179,9 @@
                     },
                     "materials": {
                         "title": "Choose your materials",
-                        "subtitle": "Pick what your order is packed with. The default option is already selected; the total updates as you change it.",
+                        "subtitle": "Pick what your order is packed with: choose one option from each group. Each group's default is already selected; the total updates as you change it.",
                         "defaultBadge": "Default",
-                        "noOptionsForVariant": "This presentation has no alternative materials: it is quoted with the standard configuration.",
+                        "chooseOne": "Choose one",
                         "levelHints": {
                             "unit": "The container or bag of each unit.",
                             "intermediate": "The large bag that groups several units.",
@@ -264,7 +262,7 @@
             "tagline": "Growing Quality. Delivering Trust.",
             "description": "Vegetables and value-added foods you can count on — in every format, every day of the year.",
             "primaryAction": "See our products",
-            "secondaryAction": "Let's talk",
+            "secondaryAction": "Request a quote",
             "scrollCue": "Scroll"
         },
         "stats": {
@@ -290,7 +288,13 @@
                 "fresh": {
                     "name": "Fresh",
                     "description": "Fresh produce grown in Guatemala's highlands — harvested at peak ripeness and into the cold chain within hours.",
-                    "pills": ["Broccoli", "Green beans", "Carrots", "Jalapeño peppers", "Strawberries"]
+                    "pills": [
+                        "Broccoli",
+                        "Green beans",
+                        "Carrots",
+                        "Jalapeño peppers",
+                        "Strawberries"
+                    ]
                 },
                 "frozen": {
                     "name": "Frozen (IQF)",
@@ -447,12 +451,23 @@
                 "foodService": {
                     "name": "Food Service",
                     "description": "Bulk and industrial formats of our fruits, vegetables and value-added products — consistent specs, delivered at volume, with export-ready packing.",
-                    "pills": ["Industrial formats", "Bulk ingredients", "Natural solutions", "Export packs"]
+                    "pills": [
+                        "Industrial formats",
+                        "Bulk ingredients",
+                        "Natural solutions",
+                        "Export packs"
+                    ]
                 },
                 "privateLabel": {
                     "name": "Private Label",
                     "description": "Your brand, our expertise. We develop, formulate, produce and ship under your label — from idea to delivered worldwide.",
-                    "pills": ["Idea", "Formulation", "Packaging", "Production", "Delivered worldwide"]
+                    "pills": [
+                        "Idea",
+                        "Formulation",
+                        "Packaging",
+                        "Production",
+                        "Delivered worldwide"
+                    ]
                 }
             }
         },
@@ -554,15 +569,14 @@
             "empty": "No units registered"
         }
     },
-    "ingredient": {
+    "rawMaterial": {
         "form": {
             "code": "Code",
             "displayName": "Name",
-            "ingredientType": "Ingredient type",
-            "costPerUnit": "Cost per unit",
-            "costUnitId": "Cost unit",
+            "ingredientType": "Raw material type",
+            "costPerUnit": "Cost per pound",
             "isOrganic": "Is the organic variant",
-            "isOrganicHint": "Check this box if this specific row is the organic version (with its own cost) — not whether the ingredient \"can be\" organic. Conventional and organic are two separate ingredients in the catalog, e.g. \"Pineapple\" and \"Organic Pineapple\".",
+            "isOrganicHint": "Check this box if this specific row is the organic version (with its own cost) — not whether the raw material \"can be\" organic. Conventional and organic are two separate raw materials in the catalog, e.g. \"Pineapple\" and \"Organic Pineapple\".",
             "isMixable": "Mixable",
             "ingredientTypeOptions": {
                 "fruit": "Fruit",
@@ -577,26 +591,26 @@
         "organicTag": "Organic",
         "conventionalTag": "Conventional",
         "list": {
-            "title": "Ingredients",
-            "createLink": "Create ingredient"
+            "title": "Raw Materials",
+            "createLink": "Create raw material"
         },
         "create": {
-            "title": "Create ingredient"
+            "title": "Create raw material"
         },
         "edit": {
-            "title": "Edit ingredient"
+            "title": "Edit raw material"
         },
         "table": {
             "searchPlaceholder": "Search by name...",
-            "empty": "No ingredients registered"
+            "empty": "No raw materials registered"
         },
         "bulkImport": {
             "title": "Bulk import from Excel",
-            "description": "Download the template, fill it in with your ingredients, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again. \"Code\" is the first column and must be unique -- it cannot repeat across ingredients or within the file. \"Cost unit\" must be the exact name of a Unit that already exists in the catalog.",
+            "description": "Download the template, fill it in with your raw materials, and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again. \"Code\" is the first column and must be unique -- it cannot repeat across raw materials or within the file. \"Cost per pound\" is always costed in pounds -- the cost unit is no longer chosen.",
             "downloadTemplate": "Download template",
             "importButton": "Import file",
             "importing": "Importing...",
-            "rowErrorsTitle": "The file has {{count}} error(s). No ingredient was imported:",
+            "rowErrorsTitle": "The file has {{count}} error(s). No raw material was imported:",
             "rowErrorItem": "Row {{row}}: {{message}}"
         }
     },
@@ -664,8 +678,7 @@
     "presentation": {
         "form": {
             "displayLabel": "Name",
-            "netWeightGrams": "Net weight (g)",
-            "categoryId": "Category"
+            "netWeightGrams": "Net weight (g)"
         },
         "list": {
             "title": "Presentations",
@@ -700,11 +713,11 @@
             "displayName": "Product name",
             "urlSlug": "URL slug",
             "isOrganic": "Organic",
-            "isOrganicHint": "If you check this box, the ingredient selector below will only offer organic variants (plus water/salt/sugar or other items with no variant). Salespeople will see a \"100% Organic\" badge when they pick this product.",
+            "isOrganicHint": "If you check this box, the raw material selector below will only offer organic variants (plus water/salt/sugar or other items with no variant). Salespeople will see a \"100% Organic\" badge when they pick this product.",
             "isCustomizable": "Recipe type",
             "isCustomizableFinished": "Ready-made (fixed recipe)",
             "isCustomizableCustom": "Customizable (% mix)",
-            "isCustomizableHint": "Customizable: the salesperson builds the ingredient mix by percentage when requesting a quote, instead of a fixed recipe.",
+            "isCustomizableHint": "Customizable: the salesperson builds the raw material mix by percentage when requesting a quote, instead of a fixed recipe.",
             "additionalCostPerUnit": "Additional cost per unit (optional)",
             "additionalCostPerUnitHint": "For costs that aren't well defined yet. Added to the cost of each unit when quoting. Leave the field empty to remove it.",
             "translationSectionTitle": "English translation",
@@ -724,6 +737,22 @@
         "table": {
             "searchPlaceholder": "Search by name...",
             "empty": "No products registered"
+        },
+        "bulkImport": {
+            "title": "Bulk upload Products from Excel",
+            "description": "Download the template, fill it in with your products (one row per product) and upload it. Each product needs a Code, Subcategory, Client, Name and Recipe type (Fija/fixed or Personalizable/customizable); Category, English name, Organic and Additional cost are optional. Subcategory and Client are looked up by their exact name (ignoring case and accents) and must exist and be active. The whole file is validated first: if a single row has an error, no product is created. This importer only CREATES new products. The image is not loaded from Excel: upload it afterward from each product's edit screen.",
+            "downloadTemplate": "Download template",
+            "importButton": "Import file",
+            "importing": "Importing...",
+            "rowErrorsTitle": "The file has {{count}} error(s). No product was imported:",
+            "rowErrorItem": "Row {{row}}: {{message}}"
+        },
+        "bulkImportSteps": {
+            "title": "Bulk upload from Excel",
+            "intro": "Create complete products (everything except the image) with three files, uploaded in this order. Each file is fully validated and all-or-nothing: if it fails, fix it and upload it again, the previous steps stay saved. The image is uploaded afterward from each product's edit screen.",
+            "requires1": "Step 1 · Products — requires their Subcategories and Clients to already exist.",
+            "requires2": "Step 2 · Recipes — requires the Products from step 1 and the Raw Materials in their catalog.",
+            "requires3": "Step 3 · SKUs & packaging — requires the Products with a complete recipe (step 2), and the Presentations and Packaging in their catalogs."
         }
     },
     "productVariant": {
@@ -745,7 +774,7 @@
         },
         "bulkImport": {
             "title": "Bulk upload SKUs from Excel",
-            "description": "Download the template, fill it in with your SKUs (one row per packaging-recipe material) and upload it. The whole file is validated first: if a single row has an error, no SKU is created -- fix the file and upload it again. Before using this upload, these must already exist in their catalogs: Packaging materials (with their role assigned), Presentations, and the base Products the SKUs belong to. This importer only CREATES new SKUs, it never updates one that already exists, and it excludes by design any SKU without \"Boxes per pallet\" configured.",
+            "description": "Download the template, fill it in with your SKUs (one row per packaging-recipe material) and upload it. The whole file is validated first: if a single row has an error, no SKU is created -- fix the file and upload it again. Before using this upload, these must already exist in their catalogs: Packaging materials (with their role assigned), Presentations, and the base Products the SKUs belong to. This importer only CREATES new SKUs, it never updates one that already exists, and it excludes by design any SKU without \"Boxes per pallet\" configured. The optional \"Grupo\" (group) and \"Predeterminado\" (default) columns define the options the client picks when quoting (one per group); without them, every material is imported as fixed. Each product must already have a complete recipe (step 2): fixed totaling 100%, or customizable with at least one raw material; otherwise its SKUs are rejected.",
             "downloadTemplate": "Download template",
             "importButton": "Import file",
             "importing": "Importing...",
@@ -753,24 +782,33 @@
             "rowErrorItem": "Row {{row}}: {{message}}"
         }
     },
-    "productIngredient": {
+    "productRawMaterial": {
         "form": {
-            "ingredientId": "Ingredient",
-            "percentage": "Enter the ingredient's percentage",
+            "rawMaterialId": "Raw Material",
+            "percentage": "Enter the raw material's percentage",
             "percentageTotal": "Total: {{total}}%",
             "percentageTotalIncomplete": "The percentages must total 100% before this product can be quoted.",
             "minPercentage": "Min %",
             "maxPercentage": "Max %",
             "percentageRange": "% Range",
-            "addButton": "Add ingredient",
-            "customizableHint": "This product is customizable: define here which ingredients the salesperson can choose and, optionally, an allowed % range for each one."
+            "addButton": "Add raw material",
+            "customizableHint": "This product is customizable: define here which raw materials the salesperson can choose and, optionally, an allowed % range for each one."
         },
         "list": {
-            "title": "Ingredients",
-            "titleCustomizable": "Allowed ingredients (% mix)"
+            "title": "Raw Materials",
+            "titleCustomizable": "Allowed raw materials (% mix)"
         },
         "table": {
-            "empty": "No ingredients registered"
+            "empty": "No raw materials registered"
+        },
+        "bulkImport": {
+            "title": "Bulk upload Recipes from Excel",
+            "description": "Download the template, fill it in with each product's recipe (one row per raw material) and upload it. The products must already exist (step 1) and each raw material is looked up by its code. Fixed recipe: fill in only \"Porcentaje\" (percentage) and the product's rows must total 100%. Customizable recipe: leave \"Porcentaje\" empty and optionally use \"% mínimo\"/\"% máximo\" (min/max); the raw materials must be mixable and the ranges must allow reaching 100%. The whole file is validated first: if a single row has an error, no recipe is created. This importer only CREATES recipes: a product that already has one is rejected (edit it from its screen).",
+            "downloadTemplate": "Download template",
+            "importButton": "Import file",
+            "importing": "Importing...",
+            "rowErrorsTitle": "The file has {{count}} error(s). No recipe was imported:",
+            "rowErrorItem": "Row {{row}}: {{message}}"
         }
     },
     "productVariantUnitMaterial": {
@@ -779,9 +817,6 @@
         "form": {
             "packagingId": "Individual material",
             "quantityPerUnit": "Quantity per unit",
-            "isSwappable": "The client can choose this material when quoting",
-            "isDefault": "Default",
-            "isDefaultHint": "Mark which option is used when the client doesn't choose one.",
             "addButton": "Add material"
         },
         "createModal": {
@@ -791,9 +826,7 @@
             "title": "Individual packaging materials"
         },
         "table": {
-            "empty": "No individual packaging materials registered",
-            "swappable": "Client-optional",
-            "default": "Default"
+            "empty": "No individual packaging materials registered"
         }
     },
     "productVariantPalletMaterial": {
@@ -804,9 +837,6 @@
         "form": {
             "packagingId": "Pallet material",
             "quantityValue": "Quantity",
-            "isSwappable": "The client can choose this material when quoting",
-            "isDefault": "Default",
-            "isDefaultHint": "Mark which option is used when the client doesn't choose one.",
             "addButton": "Add material"
         },
         "createModal": {
@@ -816,9 +846,7 @@
             "title": "Palletizing materials"
         },
         "table": {
-            "empty": "No palletizing materials registered",
-            "swappable": "Client-optional",
-            "default": "Default"
+            "empty": "No palletizing materials registered"
         }
     },
     "productVariantIntermediateMaterial": {
@@ -826,18 +854,26 @@
         "noVariants": "First add a variant so you can define its intermediate packaging",
         "form": {
             "packagingId": "Intermediate packaging",
-            "isSwappable": "The client can choose this material when quoting",
-            "isDefault": "Default",
-            "isDefaultHint": "Mark which option is used when the client doesn't choose one.",
             "addButton": "Add material"
         },
         "list": {
             "title": "Intermediate packaging materials"
         },
         "table": {
-            "empty": "No intermediate packaging materials registered",
-            "swappable": "Client-optional",
-            "default": "Default"
+            "empty": "No intermediate packaging materials registered"
+        }
+    },
+    "materialOptionGroup": {
+        "isOptional": "The client chooses this material when quoting (optional)",
+        "optionGroup": "Option group",
+        "optionGroupPlaceholder": "E.g. Box, Corner protector, Bag",
+        "optionGroupRequired": "Enter the option group name",
+        "isDefault": "Default in this group",
+        "hint": "Materials with the same group are alternatives: the client picks one per group. Each group has exactly one default, used when the client doesn't pick another.",
+        "table": {
+            "group": "Group",
+            "default": "Group default",
+            "fixed": "Fixed"
         }
     },
     "salesperson": {
@@ -934,7 +970,7 @@
     },
     "dashboard": {
         "title": "Dashboard",
-        "subtitle": "Best-selling products, salespeople and ingredients for the selected date range.",
+        "subtitle": "Best-selling products, salespeople and raw materials for the selected date range.",
         "filters": {
             "startDate": "From",
             "endDate": "To",
@@ -978,10 +1014,10 @@
             "empty": "No representative data for this range.",
             "secondary": "{{count}} quotes · {{pallets}} pallets"
         },
-        "topIngredients": {
-            "title": "Most used ingredients",
+        "topRawMaterials": {
+            "title": "Most used raw materials",
             "subtitle": "Ranked by total cost consumed across quotes.",
-            "empty": "No ingredient data for this range.",
+            "empty": "No raw material data for this range.",
             "secondary": "{{count}} quotes"
         }
     },
@@ -1034,7 +1070,7 @@
                 "sending": "Sending email...",
                 "sendSuccess": "Email sent to {{email}} with the PDF attached.",
                 "emailSubject": "Legumex Quote – {{clientName}}",
-                "emailBody": "Hello,\n\nPlease find attached the quote requested for {{clientName}}.\n\nQuote date: {{quoteDate}}\nValid until: {{validUntil}}\nOrder total: {{total}}\n\nBest regards,\nLegumex",
+                "emailBody": "Hello,\n\nPlease find attached the quote requested for {{clientName}}.\n\nQuote date: {{quoteDate}}\nValid until: {{validUntil}}\nQuote Total: {{total}}\n\nBest regards,\nLegumex",
                 "error": "The PDF could not be generated. Please try again."
             },
             "document": {
@@ -1095,7 +1131,7 @@
             "value": "Value",
             "valueLabelPerWeight": "Value (Q per pound)",
             "valueLabelPercentage": "Value (%)",
-            "valueHintPerWeight": "Applied over the total raw-material weight of each quote (all units, regardless of ingredient type).",
+            "valueHintPerWeight": "Applied over the total raw-material weight of each quote (all units, regardless of raw material type).",
             "valueHintPercentage": "Applied at the end, over the product's full subtotal already scaled to the quote (raw material, per-weight costs, packaging, and pallet materials) -- transport is NOT part of that base. E.g. \"Contingency\" with value 2 = 2%.",
             "calculationType": "Calculation type",
             "calculationTypeOptions": {

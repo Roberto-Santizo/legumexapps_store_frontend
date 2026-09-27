@@ -22,7 +22,7 @@ export function PresentationListPage() {
                 )}
             </div>
             {/* Misma permission que "Crear presentación" -- la carga masiva es otra forma de
-                crear, no una acción distinta (mismo criterio que Empaques/Ingredientes). */}
+                crear, no una acción distinta (mismo criterio que Empaques/Materias Primas). */}
             {hasPermission("presentations:create") && (
                 <BulkImportPanel
                     translationNamespace="presentation.bulkImport"

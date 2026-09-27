@@ -21,7 +21,7 @@ type CreatePalletMaterialModalProps = {
 
 // Alta rápida que PalletMaterialSelect abre cuando el usuario tipea un material de palet que no
 // existe en el catálogo (ver palletMaterialSelect.component.tsx). A diferencia de
-// CreateIngredientModal/CreatePresentationModal, NO reusa PackagingForm completo -- ese form deja
+// CreateRawMaterialModal/CreatePresentationModal, NO reusa PackagingForm completo -- ese form deja
 // elegir packagingRole (unit/intermediate/pallet), pero este selector filtra específicamente por
 // "pallet" (ver palletMaterialSelect.component.tsx). Si dejáramos elegir el rol y el usuario
 // pusiera otro, el registro se crearía pero jamás volvería a aparecer en este selector -- así que

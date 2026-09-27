@@ -7,17 +7,17 @@ export const createProductVariantPalletMaterialSchema = z.object({
     // Requerido: quantityPerPallet * requestedPallets es la fórmula directa del costo de esta
     // línea de paletización. Si queda vacío, el material "cuesta" $0 en cada cotización.
     quantityValue: z.number().positive(),
-    // Default + opcional (2026-09-21) -- sin .default(), ver el comentario en
+    // Grupos de opciones (2026-09-24) -- sin .default(), ver el comentario en
     // productVariantUnitMaterial.schema.ts.
-    isSwappable: z.boolean(),
+    optionGroup: z.string().trim().min(1).max(60).nullable(),
     isDefault: z.boolean(),
 })
 
-// .partial() salvo quantityValue/isSwappable/isDefault -- mismo criterio que
+// .partial() salvo quantityValue/optionGroup/isDefault -- mismo criterio que
 // productVariantUnitMaterial.schema.ts, ver el comentario ahí.
 const updateProductVariantPalletMaterialSchema = createProductVariantPalletMaterialSchema.partial().extend({
     quantityValue: createProductVariantPalletMaterialSchema.shape.quantityValue,
-    isSwappable: createProductVariantPalletMaterialSchema.shape.isSwappable,
+    optionGroup: createProductVariantPalletMaterialSchema.shape.optionGroup,
     isDefault: createProductVariantPalletMaterialSchema.shape.isDefault,
 })
 
@@ -27,7 +27,7 @@ export const responseProductVariantPalletMaterialSchema = baseCatalogSchema.exte
     // DECIMAL en Postgres: Sequelize lo devuelve como string en un SELECT normal, pero como
     // número tras un .update() -- z.coerce.number() acepta ambos formatos.
     quantityValue: z.coerce.number().nullable(),
-    isSwappable: z.boolean(),
+    optionGroup: z.string().nullable(),
     isDefault: z.boolean(),
 })
 

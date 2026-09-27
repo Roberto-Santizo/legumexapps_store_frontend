@@ -26,7 +26,6 @@ export function CreatePresentationModal({ initialDisplayLabel, onCreated, onClos
 
     const {
         register,
-        control,
         handleSubmit,
         formState: { errors },
     } = useForm<CreatePresentationInput>({
@@ -51,7 +50,7 @@ export function CreatePresentationModal({ initialDisplayLabel, onCreated, onClos
     return (
         <Modal title={t("presentation.create.title")} onClose={onClose}>
             <form onSubmit={onSubmit}>
-                <PresentationForm register={register} control={control} errors={errors} />
+                <PresentationForm register={register} errors={errors} />
                 <div className="flex gap-3">
                     <Button type="submit" disabled={createMutation.isPending}>
                         {createMutation.isPending ? t("common.saving") : t("common.save")}

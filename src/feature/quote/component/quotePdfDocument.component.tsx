@@ -153,7 +153,7 @@ export function QuotePdfDocument({
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.unitPackagingCost)}</Text>
                                     </View>
                                 )}
-                                {line.breakdown.intermediatePackaging && (
+                                {line.breakdown.intermediateMaterials && line.breakdown.intermediateMaterials.length > 0 && (
                                     <View style={styles.breakdownRow}>
                                         <Text style={styles.breakdownLabel}>{t("quote.pdf.document.intermediatePackaging")}</Text>
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.intermediatePackagingCost)}</Text>

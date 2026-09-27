@@ -6,7 +6,20 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { createProductVariantPalletMaterialSchema } from "@/feature/product/schema/productVariantPalletMaterial.schema"
-import type { ProductVariantPalletMaterialResponse } from "@/feature/product/schema/productVariantPalletMaterial.schema"
+import type {
+    ProductVariantPalletMaterialResponse,
+    UpdateProductVariantPalletMaterialInput,
+} from "@/feature/product/schema/productVariantPalletMaterial.schema"
+import {
+    EMPTY_MATERIAL_OPTION_GROUP_VALUES,
+    listMaterialOptionGroups,
+    materialOptionGroupFormShape,
+    refineMaterialOptionGroup,
+    sortByMaterialOptionGroup,
+    toMaterialOptionGroupFormValues,
+    toMaterialOptionGroupPayload,
+} from "@/feature/product/schema/materialOptionGroup.schema"
+import { MaterialOptionGroupFields } from "@/feature/product/component/materialOptionGroupFields.component"
 import {
     createProductVariantPalletMaterialAPI,
     deleteProductVariantPalletMaterialAPI,
@@ -20,13 +33,16 @@ import { PalletMaterialSelect } from "@/feature/packaging/component/palletMateri
 import { Select } from "@/shared/component/select.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
-import { Checkbox } from "@/shared/component/checkbox.component"
 import { Button } from "@/shared/component/button.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 
-const palletMaterialFormSchema = createProductVariantPalletMaterialSchema.omit({ productVariantId: true })
+// optionGroup de la API se desdobla en isOptional + nombre en el form (ver materialOptionGroup.schema.ts).
+const palletMaterialFormSchema = createProductVariantPalletMaterialSchema
+    .omit({ productVariantId: true, optionGroup: true })
+    .extend(materialOptionGroupFormShape)
+    .superRefine(refineMaterialOptionGroup)
 type PalletMaterialFormInput = z.infer<typeof palletMaterialFormSchema>
 
 
@@ -34,8 +50,7 @@ function toFormValues(item: ProductVariantPalletMaterialResponse): Partial<Palle
     return {
         packagingId: item.packagingId,
         quantityValue: item.quantityValue !== null ? Number(item.quantityValue) : undefined,
-        isSwappable: item.isSwappable,
-        isDefault: item.isDefault,
+        ...toMaterialOptionGroupFormValues(item),
     }
 }
 
@@ -66,9 +81,10 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
     const activeVariantId = selectedVariantId ?? variants[0]?.id ?? null
     const activeVariant = variants.find((variant) => variant.id === activeVariantId) ?? null
 
-    const palletMaterials = (palletMaterialsQuery.data?.data ?? []).filter(
-        (item) => item.productVariantId === activeVariantId
+    const palletMaterials = sortByMaterialOptionGroup(
+        (palletMaterialsQuery.data?.data ?? []).filter((item) => item.productVariantId === activeVariantId)
     )
+    const existingOptionGroups = listMaterialOptionGroups(palletMaterials)
 
     // "Cajas por palet" (2026-09-12) ya NO se deriva acá -- es un input directo de la variante
     // (ProductVariant.boxesPerPallet, ver productVariantSection.component.tsx), así que este
@@ -99,8 +115,11 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
         reset,
         watch,
         formState: { errors },
-    } = useForm<PalletMaterialFormInput>({ resolver: zodResolver(palletMaterialFormSchema) })
-    const isSwappable = watch("isSwappable")
+    } = useForm<PalletMaterialFormInput>({
+        resolver: zodResolver(palletMaterialFormSchema),
+        defaultValues: EMPTY_MATERIAL_OPTION_GROUP_VALUES,
+    })
+    const isOptional = watch("isOptional")
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariantPalletMaterials"] })
 
@@ -109,20 +128,20 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
     })
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, formData }: { id: number; formData: PalletMaterialFormInput }) =>
+        mutationFn: ({ id, formData }: { id: number; formData: UpdateProductVariantPalletMaterialInput }) =>
             updateProductVariantPalletMaterialAPI(id, formData),
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
             setEditingId(null)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => toast.error(error.message),
@@ -139,10 +158,11 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
 
     const onSubmit = handleSubmit((formData) => {
         if (!activeVariantId) return
+        const payload = toMaterialOptionGroupPayload(formData)
         if (editingId) {
-            updateMutation.mutate({ id: editingId, formData })
+            updateMutation.mutate({ id: editingId, formData: payload })
         } else {
-            createMutation.mutate({ ...formData, productVariantId: activeVariantId })
+            createMutation.mutate({ ...payload, productVariantId: activeVariantId })
         }
     })
 
@@ -153,7 +173,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
 
     function cancelEdit() {
         setEditingId(null)
-        reset({})
+        reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
     }
 
     if (variants.length === 0) {
@@ -201,8 +221,8 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                         <TableRow>
                             <Th>{t("productVariantPalletMaterial.form.packagingId")}</Th>
                             <Th>{t("productVariantPalletMaterial.form.quantityValue")}</Th>
-                            <Th>{t("productVariantPalletMaterial.table.swappable")}</Th>
-                            <Th>{t("productVariantPalletMaterial.table.default")}</Th>
+                            <Th>{t("materialOptionGroup.table.group")}</Th>
+                            <Th>{t("materialOptionGroup.table.default")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -211,8 +231,8 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                             <TableRow key={item.id}>
                                 <Td>{packagingNameById.get(item.packagingId) ?? "-"}</Td>
                                 <Td>{item.quantityValue ?? "-"}</Td>
-                                <Td>{item.isSwappable ? t("common.yes") : t("common.no")}</Td>
-                                <Td>{item.isSwappable && item.isDefault ? t("common.yes") : "-"}</Td>
+                                <Td>{item.optionGroup ?? t("materialOptionGroup.table.fixed")}</Td>
+                                <Td>{item.optionGroup !== null && item.isDefault ? t("common.yes") : "-"}</Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
@@ -274,24 +294,15 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                     />
                 </FormField>
 
-                <div className="mb-5 flex flex-wrap items-center gap-6 sm:col-span-2">
-                    <Checkbox
-                        id="palletMaterialIsSwappable"
-                        label={t("productVariantPalletMaterial.form.isSwappable")}
-                        {...register("isSwappable")}
-                    />
-                    <Checkbox
-                        id="palletMaterialIsDefault"
-                        label={t("productVariantPalletMaterial.form.isDefault")}
-                        disabled={!isSwappable}
-                        {...register("isDefault")}
-                    />
-                </div>
-                {isSwappable && (
-                    <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
-                        {t("productVariantPalletMaterial.form.isDefaultHint")}
-                    </p>
-                )}
+                <MaterialOptionGroupFields
+                    idPrefix="palletMaterial"
+                    isOptional={isOptional}
+                    existingGroups={existingOptionGroups}
+                    hasOptionGroupError={!!errors.optionGroup}
+                    isOptionalField={register("isOptional")}
+                    optionGroupField={register("optionGroup")}
+                    isDefaultField={register("isDefault")}
+                />
 
                 <div className="flex gap-3 sm:col-span-2">
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

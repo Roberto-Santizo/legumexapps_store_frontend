@@ -124,7 +124,7 @@
             "search": "Buscar",
             "request": "Ver solicitud",
             "cart": "Ver carrito",
-            "cta": "Solicitar cotización",
+            "cta": "Equipo Legumex",
             "openMenu": "Abrir menú",
             "closeMenu": "Cerrar menú"
         },
@@ -160,7 +160,7 @@
                 "modeFinished": "Producto terminado",
                 "modeCustomizable": "Personalizar mi producto",
                 "modeFinishedHint": "Elige entre nuestras presentaciones ya armadas, con receta fija.",
-                "modeCustomizableHint": "Arma tu propio mix: eliges el % de cada ingrediente hasta llegar a 100%.",
+                "modeCustomizableHint": "Arma tu propio mix: eliges el % de cada materia prima hasta llegar a 100%.",
                 "noProductsFinished": "Aún no hay productos terminados disponibles para cotizar.",
                 "noProductsCustomizable": "Aún no hay productos personalizables disponibles para cotizar.",
                 "organicBadge": "100% Orgánico",
@@ -170,23 +170,21 @@
                 "mixTotal": "Total: {{total}}%",
                 "mixIncomplete": "La mezcla debe sumar 100% para poder cotizar.",
                 "mixRange": "{{min}}% - {{max}}%",
-                "mixEmpty": "Este producto todavía no tiene ingredientes configurados. Contacta al administrador.",
+                "mixEmpty": "Este producto todavía no tiene materias primas configuradas. Contacta al administrador.",
                 "wizard": {
                     "back": "Atrás",
                     "steps": {
                         "mode": "Tipo",
                         "category": "Categoría",
                         "product": "Producto",
-                        "pallets": "Palets",
-                        "materials": "Materiales",
+                        "pallets": "Palets y materiales",
                         "total": "Total"
                     },
                     "pallets": {
                         "title": "¿Cuántos palets necesitas?",
                         "subtitle": "Elige la presentación (si aplica) y la cantidad de palets. Verás las cajas por palet y el peso total de tu pedido.",
                         "boxesPerPallet": "Cajas por palet",
-                        "totalWeight": "Peso total del pedido",
-                        "continue": "Continuar"
+                        "totalWeight": "Peso total del pedido"
                     },
                     "total": {
                         "summaryTitle": "Tu selección",
@@ -194,9 +192,9 @@
                     },
                     "materials": {
                         "title": "Elige tus materiales",
-                        "subtitle": "Selecciona con qué se empaca tu pedido. Ya dejamos marcada la opción predeterminada; el total se actualiza al cambiarla.",
+                        "subtitle": "Selecciona con qué se empaca tu pedido: elige una opción de cada grupo. Ya dejamos marcada la opción predeterminada de cada uno; el total se actualiza al cambiarla.",
                         "defaultBadge": "Predeterminado",
-                        "noOptionsForVariant": "Esta presentación no tiene materiales alternativos: se cotiza con la configuración estándar.",
+                        "chooseOne": "Elige una opción",
                         "levelHints": {
                             "unit": "El envase o bolsa de cada unidad.",
                             "intermediate": "La bolsa grande que agrupa varias unidades.",
@@ -277,7 +275,7 @@
             "tagline": "Growing Quality. Delivering Trust.",
             "description": "Vegetales y alimentos de valor agregado con los que podés contar — en todos los formatos, todos los días del año.",
             "primaryAction": "Ver productos",
-            "secondaryAction": "Hablemos",
+            "secondaryAction": "Solicitar cotización",
             "scrollCue": "Desliza"
         },
         "stats": {
@@ -303,7 +301,13 @@
                 "fresh": {
                     "name": "Fresco",
                     "description": "Producto fresco cultivado en las tierras altas de Guatemala — cosechado en su punto justo y en cadena de frío en cuestión de horas.",
-                    "pills": ["Brócoli", "Ejote", "Zanahoria", "Chile jalapeño", "Fresa"]
+                    "pills": [
+                        "Brócoli",
+                        "Ejote",
+                        "Zanahoria",
+                        "Chile jalapeño",
+                        "Fresa"
+                    ]
                 },
                 "frozen": {
                     "name": "Congelado (IQF)",
@@ -460,12 +464,23 @@
                 "foodService": {
                     "name": "Food Service",
                     "description": "Formatos a granel e industriales de nuestras frutas, vegetales y productos de valor agregado — especificaciones consistentes, en volumen y con empaque listo para exportación.",
-                    "pills": ["Formatos industriales", "Ingredientes a granel", "Soluciones naturales", "Packs de exportación"]
+                    "pills": [
+                        "Formatos industriales",
+                        "Ingredientes a granel",
+                        "Soluciones naturales",
+                        "Packs de exportación"
+                    ]
                 },
                 "privateLabel": {
                     "name": "Marca propia",
                     "description": "Tu marca, nuestra experiencia. Desarrollamos, formulamos, producimos y enviamos bajo tu marca — de la idea a entregado en todo el mundo.",
-                    "pills": ["Idea", "Formulación", "Empaque", "Producción", "Entregado en todo el mundo"]
+                    "pills": [
+                        "Idea",
+                        "Formulación",
+                        "Empaque",
+                        "Producción",
+                        "Entregado en todo el mundo"
+                    ]
                 }
             }
         },
@@ -554,15 +569,14 @@
             "empty": "No hay unidades registradas"
         }
     },
-    "ingredient": {
+    "rawMaterial": {
         "form": {
             "code": "Código",
             "displayName": "Nombre",
-            "ingredientType": "Tipo de ingrediente",
-            "costPerUnit": "Costo por unidad",
-            "costUnitId": "Unidad de costo",
+            "ingredientType": "Tipo de materia prima",
+            "costPerUnit": "Costo por libra",
             "isOrganic": "Es la variante orgánica",
-            "isOrganicHint": "Marca esta casilla si esta fila es específicamente la versión orgánica (con su propio costo) — no si el ingrediente \"admite\" ser orgánico. Convencional y orgánico son dos ingredientes separados en el catálogo, ej. \"Piña\" y \"Piña Orgánica\".",
+            "isOrganicHint": "Marca esta casilla si esta fila es específicamente la versión orgánica (con su propio costo) — no si la materia prima \"admite\" ser orgánica. Convencional y orgánica son dos materias primas separadas en el catálogo, ej. \"Piña\" y \"Piña Orgánica\".",
             "isMixable": "Se puede mezclar",
             "ingredientTypeOptions": {
                 "fruit": "Fruta",
@@ -577,26 +591,26 @@
         "organicTag": "Orgánico",
         "conventionalTag": "Convencional",
         "list": {
-            "title": "Ingredientes",
-            "createLink": "Crear ingrediente"
+            "title": "Materias Primas",
+            "createLink": "Crear materia prima"
         },
         "create": {
-            "title": "Crear ingrediente"
+            "title": "Crear materia prima"
         },
         "edit": {
-            "title": "Editar ingrediente"
+            "title": "Editar materia prima"
         },
         "table": {
             "searchPlaceholder": "Buscar por nombre...",
-            "empty": "No hay ingredientes registrados"
+            "empty": "No hay materias primas registradas"
         },
         "bulkImport": {
             "title": "Carga masiva desde Excel",
-            "description": "Descarga la plantilla, complétala con tus ingredientes y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se importa nada -- corrige el archivo y vuelve a subirlo. El \"Código\" es la primera columna y debe ser único -- no puede repetirse entre ingredientes ni dentro del archivo. La \"Unidad de costo\" debe ser el nombre exacto de una Unidad que ya exista en el catálogo.",
+            "description": "Descarga la plantilla, complétala con tus materias primas y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se importa nada -- corrige el archivo y vuelve a subirlo. El \"Código\" es la primera columna y debe ser único -- no puede repetirse entre materias primas ni dentro del archivo. El \"Costo por libra\" siempre se costea en libras -- la unidad de costeo ya no se elige.",
             "downloadTemplate": "Descargar plantilla",
             "importButton": "Importar archivo",
             "importing": "Importando...",
-            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún ingrediente:",
+            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ninguna materia prima:",
             "rowErrorItem": "Fila {{row}}: {{message}}"
         }
     },
@@ -664,8 +678,7 @@
     "presentation": {
         "form": {
             "displayLabel": "Nombre",
-            "netWeightGrams": "Peso neto (g)",
-            "categoryId": "Categoría"
+            "netWeightGrams": "Peso neto (g)"
         },
         "list": {
             "title": "Presentaciones",
@@ -700,11 +713,11 @@
             "displayName": "Nombre del producto",
             "urlSlug": "Slug de URL",
             "isOrganic": "Orgánico",
-            "isOrganicHint": "Si marcas esta casilla, el selector de ingredientes de abajo solo va a ofrecer variantes orgánicas (y agua/sal/azúcar u otros insumos sin variante). El representante verá una insignia \"100% Orgánico\" al elegir este producto.",
+            "isOrganicHint": "Si marcas esta casilla, el selector de materias primas de abajo solo va a ofrecer variantes orgánicas (y agua/sal/azúcar u otros insumos sin variante). El representante verá una insignia \"100% Orgánico\" al elegir este producto.",
             "isCustomizable": "Tipo de receta",
             "isCustomizableFinished": "Terminado (receta fija)",
             "isCustomizableCustom": "Personalizable (mezcla %)",
-            "isCustomizableHint": "Personalizable: el representante arma la mezcla de ingredientes por porcentaje al cotizar, en vez de una receta fija.",
+            "isCustomizableHint": "Personalizable: el representante arma la mezcla de materias primas por porcentaje al cotizar, en vez de una receta fija.",
             "additionalCostPerUnit": "Costo adicional por unidad (opcional)",
             "additionalCostPerUnitHint": "Para costos que todavía no están bien definidos. Se suma al costo de cada unidad al cotizar. Deja el campo vacío para quitarlo.",
             "translationSectionTitle": "Traducción al inglés",
@@ -724,6 +737,22 @@
         "table": {
             "searchPlaceholder": "Buscar por nombre...",
             "empty": "No hay productos registrados"
+        },
+        "bulkImport": {
+            "title": "Carga masiva de Productos desde Excel",
+            "description": "Descarga la plantilla, llénala con tus productos (una fila por producto) y súbela. Cada producto necesita Código, Subcategoría, Cliente, Nombre y Tipo de receta (Fija o Personalizable); Categoría, nombre en inglés, Orgánico y Costo adicional son opcionales. Subcategoría y Cliente se buscan por su nombre exacto (sin importar mayúsculas ni acentos) y deben existir y estar activos. El archivo se valida completo primero: si una sola fila tiene un error, no se crea ningún producto. Solo CREA productos nuevos. La imagen no se carga por Excel: súbela después desde la pantalla de edición de cada producto.",
+            "downloadTemplate": "Descargar plantilla",
+            "importButton": "Importar archivo",
+            "importing": "Importando...",
+            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún producto:",
+            "rowErrorItem": "Fila {{row}}: {{message}}"
+        },
+        "bulkImportSteps": {
+            "title": "Carga masiva por Excel",
+            "intro": "Crea productos completos (todo menos la imagen) con tres archivos, subidos en este orden. Cada archivo se valida completo y es todo-o-nada: si falla, corrígelo y súbelo de nuevo, los pasos anteriores quedan guardados. La imagen se sube después desde la pantalla de edición de cada producto.",
+            "requires1": "Paso 1 · Productos — requiere que ya existan sus Subcategorías y Clientes.",
+            "requires2": "Paso 2 · Recetas — requiere los Productos del paso 1 y las Materias Primas en su catálogo.",
+            "requires3": "Paso 3 · SKUs y empaque — requiere los Productos con su receta completa (paso 2), las Presentaciones y los Empaques en sus catálogos."
         }
     },
     "productVariant": {
@@ -745,7 +774,7 @@
         },
         "bulkImport": {
             "title": "Carga masiva de SKUs desde Excel",
-            "description": "Descarga la plantilla, complétala con tus SKUs (una fila por cada material de su receta de empaque) y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se crea ningún SKU -- corrige el archivo y vuelve a subirlo. Antes de usar esta carga, ya deben existir en sus catálogos: los materiales de Empaque (con su rol asignado), las Presentaciones, y los Productos base a los que pertenecen los SKUs. Este importador solo CREA SKUs nuevos, nunca actualiza uno que ya existe, y excluye por diseño cualquier SKU sin \"Cajas por palet\" configurado.",
+            "description": "Descarga la plantilla, complétala con tus SKUs (una fila por cada material de su receta de empaque) y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se crea ningún SKU -- corrige el archivo y vuelve a subirlo. Antes de usar esta carga, ya deben existir en sus catálogos: los materiales de Empaque (con su rol asignado), las Presentaciones, y los Productos base a los que pertenecen los SKUs. Este importador solo CREA SKUs nuevos, nunca actualiza uno que ya existe, y excluye por diseño cualquier SKU sin \"Cajas por palet\" configurado. Las columnas opcionales \"Grupo\" y \"Predeterminado\" definen las opciones que el cliente elige al cotizar (una por grupo); sin ellas, todos los materiales se importan como fijos. Cada producto ya debe tener su receta completa (paso 2): fija sumando 100% o personalizable con al menos una materia prima; si no, sus SKUs se rechazan.",
             "downloadTemplate": "Descargar plantilla",
             "importButton": "Importar archivo",
             "importing": "Importando...",
@@ -753,24 +782,33 @@
             "rowErrorItem": "Fila {{row}}: {{message}}"
         }
     },
-    "productIngredient": {
+    "productRawMaterial": {
         "form": {
-            "ingredientId": "Ingrediente",
-            "percentage": "Ingrese el porcentaje del ingrediente",
+            "rawMaterialId": "Materia Prima",
+            "percentage": "Ingrese el porcentaje de la materia prima",
             "percentageTotal": "Total: {{total}}%",
             "percentageTotalIncomplete": "Los porcentajes deben sumar 100% para poder cotizar este producto.",
             "minPercentage": "% mínimo",
             "maxPercentage": "% máximo",
             "percentageRange": "Rango %",
-            "addButton": "Agregar ingrediente",
-            "customizableHint": "Este producto es personalizable: define aquí qué ingredientes puede elegir el representante y, si quieres, un rango de % permitido para cada uno."
+            "addButton": "Agregar materia prima",
+            "customizableHint": "Este producto es personalizable: define aquí qué materias primas puede elegir el representante y, si quieres, un rango de % permitido para cada una."
         },
         "list": {
-            "title": "Ingredientes",
-            "titleCustomizable": "Ingredientes permitidos (mezcla %)"
+            "title": "Materias Primas",
+            "titleCustomizable": "Materias primas permitidas (mezcla %)"
         },
         "table": {
-            "empty": "No hay ingredientes registrados"
+            "empty": "No hay materias primas registradas"
+        },
+        "bulkImport": {
+            "title": "Carga masiva de Recetas desde Excel",
+            "description": "Descarga la plantilla, llénala con la receta de cada producto (una fila por materia prima) y súbela. Los productos ya deben existir (paso 1) y cada materia prima se busca por su código. Receta fija: llena solo \"Porcentaje\" y las filas del producto deben sumar 100%. Receta personalizable: deja vacío \"Porcentaje\" y usa, si quieres, \"% mínimo\"/\"% máximo\"; las materias primas deben ser mezclables y los rangos deben permitir llegar a 100%. El archivo se valida completo primero: si una sola fila tiene un error, no se crea ninguna receta. Solo CREA recetas: un producto que ya tiene receta se rechaza (edítala desde su pantalla).",
+            "downloadTemplate": "Descargar plantilla",
+            "importButton": "Importar archivo",
+            "importing": "Importando...",
+            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ninguna receta:",
+            "rowErrorItem": "Fila {{row}}: {{message}}"
         }
     },
     "productVariantUnitMaterial": {
@@ -779,9 +817,6 @@
         "form": {
             "packagingId": "Material individual",
             "quantityPerUnit": "Cantidad por unidad",
-            "isSwappable": "El cliente puede elegir este material al cotizar",
-            "isDefault": "Predeterminado",
-            "isDefaultHint": "Marca cuál de las opciones se usa cuando el cliente no elige ninguna.",
             "addButton": "Agregar material"
         },
         "createModal": {
@@ -791,9 +826,7 @@
             "title": "Materiales de empaque individual"
         },
         "table": {
-            "empty": "No hay materiales de empaque individual registrados",
-            "swappable": "Opcional para el cliente",
-            "default": "Predeterminado"
+            "empty": "No hay materiales de empaque individual registrados"
         }
     },
     "productVariantPalletMaterial": {
@@ -804,9 +837,6 @@
         "form": {
             "packagingId": "Material de palet",
             "quantityValue": "Cantidad",
-            "isSwappable": "El cliente puede elegir este material al cotizar",
-            "isDefault": "Predeterminado",
-            "isDefaultHint": "Marca cuál de las opciones se usa cuando el cliente no elige ninguna.",
             "addButton": "Agregar material"
         },
         "createModal": {
@@ -816,9 +846,7 @@
             "title": "Materiales de paletización"
         },
         "table": {
-            "empty": "No hay materiales de paletización registrados",
-            "swappable": "Opcional para el cliente",
-            "default": "Predeterminado"
+            "empty": "No hay materiales de paletización registrados"
         }
     },
     "productVariantIntermediateMaterial": {
@@ -826,18 +854,26 @@
         "noVariants": "Primero agrega una variante para poder definir su empaque intermedio",
         "form": {
             "packagingId": "Empaque intermedio",
-            "isSwappable": "El cliente puede elegir este material al cotizar",
-            "isDefault": "Predeterminado",
-            "isDefaultHint": "Marca cuál de las opciones se usa cuando el cliente no elige ninguna.",
             "addButton": "Agregar material"
         },
         "list": {
             "title": "Materiales de empaque intermedio"
         },
         "table": {
-            "empty": "No hay materiales de empaque intermedio registrados",
-            "swappable": "Opcional para el cliente",
-            "default": "Predeterminado"
+            "empty": "No hay materiales de empaque intermedio registrados"
+        }
+    },
+    "materialOptionGroup": {
+        "isOptional": "El cliente elige este material al cotizar (opcional)",
+        "optionGroup": "Grupo de opciones",
+        "optionGroupPlaceholder": "Ej. Caja, Esquinero, Bolsa",
+        "optionGroupRequired": "Escribe el nombre del grupo de opciones",
+        "isDefault": "Predeterminado en este grupo",
+        "hint": "Los materiales con el mismo grupo son alternativas: el cliente elige uno por grupo. Cada grupo tiene exactamente un predeterminado, que se usa si el cliente no elige otro.",
+        "table": {
+            "group": "Grupo",
+            "default": "Predeterminado del grupo",
+            "fixed": "Fijo"
         }
     },
     "salesperson": {
@@ -934,7 +970,7 @@
     },
     "dashboard": {
         "title": "Panel general",
-        "subtitle": "Productos más vendidos, representantes e ingredientes para el rango de fechas seleccionado.",
+        "subtitle": "Productos más vendidos, representantes y materias primas para el rango de fechas seleccionado.",
         "filters": {
             "startDate": "Desde",
             "endDate": "Hasta",
@@ -978,10 +1014,10 @@
             "empty": "No hay datos de representantes para este rango.",
             "secondary": "{{count}} cotizaciones · {{pallets}} palets"
         },
-        "topIngredients": {
-            "title": "Ingredientes más utilizados",
-            "subtitle": "Ordenados por costo total consumido en las cotizaciones.",
-            "empty": "No hay datos de ingredientes para este rango.",
+        "topRawMaterials": {
+            "title": "Materias primas más utilizadas",
+            "subtitle": "Ordenadas por costo total consumido en las cotizaciones.",
+            "empty": "No hay datos de materias primas para este rango.",
             "secondary": "{{count}} cotizaciones"
         }
     },
@@ -1034,7 +1070,7 @@
                 "sending": "Enviando correo...",
                 "sendSuccess": "Correo enviado a {{email}} con el PDF adjunto.",
                 "emailSubject": "Cotización Legumex – {{clientName}}",
-                "emailBody": "Hola,\n\nAdjunto la cotización solicitada para {{clientName}}.\n\nFecha de cotización: {{quoteDate}}\nVálida hasta: {{validUntil}}\nTotal del pedido: {{total}}\n\nSaludos,\nLegumex",
+                "emailBody": "Hola,\n\nAdjunto la cotización solicitada para {{clientName}}.\n\nFecha de cotización: {{quoteDate}}\nVálida hasta: {{validUntil}}\nTotal de cotización: {{total}}\n\nSaludos,\nLegumex",
                 "error": "No se pudo generar el PDF. Intenta de nuevo."
             },
             "document": {
@@ -1095,7 +1131,7 @@
             "value": "Valor",
             "valueLabelPerWeight": "Valor (Q por libra)",
             "valueLabelPercentage": "Valor (%)",
-            "valueHintPerWeight": "Se aplica sobre el peso total de materia prima de cada cotización (todas las unidades, sin importar el tipo de ingrediente).",
+            "valueHintPerWeight": "Se aplica sobre el peso total de materia prima de cada cotización (todas las unidades, sin importar el tipo de materia prima).",
             "valueHintPercentage": "Se aplica al final, sobre el subtotal completo del producto ya escalado a la cotización (materia prima, costos por peso, empaques y materiales de palet) -- el transporte NO forma parte de esa base. Ej. \"Imprevistos\" con valor 2 = 2%.",
             "calculationType": "Tipo de cálculo",
             "calculationTypeOptions": {

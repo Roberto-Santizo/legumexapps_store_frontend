@@ -9,7 +9,7 @@
 export const CHART_ACCENT_TREND = "#e9b93c" // --color-dorado
 export const CHART_ACCENT_PRODUCTS = "#1c4430" // --color-verde-tinta
 export const CHART_ACCENT_SALESPEOPLE = "#a8c544" // --color-brote
-export const CHART_ACCENT_INGREDIENTS = "#0f2e1e" // --color-verde-profundo
+export const CHART_ACCENT_RAW_MATERIALS = "#0f2e1e" // --color-verde-profundo
 
 // Paleta categórica para el único gráfico con varias series a la vez (pastel de participación
 // de ingresos por producto). Los acentos de marca de arriba NO pasan el validador de paleta

@@ -3,25 +3,25 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { createIngredientSchema } from "@/feature/ingredient/schema/ingredient.schema"
-import type { CreateIngredientInput, IngredientResponse } from "@/feature/ingredient/schema/ingredient.schema"
-import { createIngredientAPI } from "@/feature/ingredient/api/ingredient.api"
-import { IngredientForm } from "@/feature/ingredient/component/ingredientForm.component"
+import { createRawMaterialSchema } from "@/feature/rawMaterial/schema/rawMaterial.schema"
+import type { CreateRawMaterialInput, RawMaterialResponse } from "@/feature/rawMaterial/schema/rawMaterial.schema"
+import { createRawMaterialAPI } from "@/feature/rawMaterial/api/rawMaterial.api"
+import { RawMaterialForm } from "@/feature/rawMaterial/component/rawMaterialForm.component"
 import { Modal } from "@/shared/component/modal.component"
 import { Button } from "@/shared/component/button.component"
 
-type CreateIngredientModalProps = {
+type CreateRawMaterialModalProps = {
     initialDisplayName: string
-    onCreated: (ingredient: IngredientResponse) => void
+    onCreated: (rawMaterial: RawMaterialResponse) => void
     onClose: () => void
 }
 
-// Alta rápida que IngredientSelect abre cuando el usuario tipea un ingrediente que no existe en
-// el catálogo (ver ingredientSelect.component.tsx). Reusa IngredientForm tal cual -- misma
-// validación y mismos campos requeridos que la página de creación normal (costPerUnit/costUnitId
-// son obligatorios: sin ellos el ingrediente "costaría" $0 en el cotizador sin ningún aviso, ver
-// ingredient.schema.ts y el comentario en productIngredientSection.component.tsx).
-export function CreateIngredientModal({ initialDisplayName, onCreated, onClose }: Readonly<CreateIngredientModalProps>) {
+// Alta rápida que RawMaterialSelect abre cuando el usuario tipea una materia prima que no existe
+// en el catálogo (ver rawMaterialSelect.component.tsx). Reusa RawMaterialForm tal cual -- misma
+// validación y mismos campos requeridos que la página de creación normal (costPerUnit es
+// obligatorio: sin él la materia prima "costaría" $0 en el cotizador sin ningún aviso, ver
+// rawMaterial.schema.ts y el comentario en productRawMaterialSection.component.tsx).
+export function CreateRawMaterialModal({ initialDisplayName, onCreated, onClose }: Readonly<CreateRawMaterialModalProps>) {
     const { t } = useTranslation()
     const queryClient = useQueryClient()
 
@@ -29,15 +29,15 @@ export function CreateIngredientModal({ initialDisplayName, onCreated, onClose }
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<CreateIngredientInput>({
-        resolver: zodResolver(createIngredientSchema),
+    } = useForm<CreateRawMaterialInput>({
+        resolver: zodResolver(createRawMaterialSchema),
         defaultValues: { displayName: initialDisplayName },
     })
 
     const createMutation = useMutation({
-        mutationFn: createIngredientAPI,
+        mutationFn: createRawMaterialAPI,
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["ingredients"] })
+            queryClient.invalidateQueries({ queryKey: ["rawMaterials"] })
             toast.success(data.message)
             onCreated(data.data)
         },
@@ -49,9 +49,9 @@ export function CreateIngredientModal({ initialDisplayName, onCreated, onClose }
     })
 
     return (
-        <Modal title={t("ingredient.create.title")} onClose={onClose}>
+        <Modal title={t("rawMaterial.create.title")} onClose={onClose}>
             <form onSubmit={onSubmit}>
-                <IngredientForm register={register} errors={errors} />
+                <RawMaterialForm register={register} errors={errors} />
                 <div className="flex gap-3">
                     <Button type="submit" disabled={createMutation.isPending}>
                         {createMutation.isPending ? t("common.saving") : t("common.save")}

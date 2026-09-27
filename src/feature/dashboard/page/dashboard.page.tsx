@@ -14,7 +14,7 @@ import { RankedBarList } from "@/feature/dashboard/component/rankedBarList.compo
 import { ProductRevenueShareChart } from "@/feature/dashboard/component/productRevenueShareChart.component"
 import {
     CHART_ACCENT_SALESPEOPLE,
-    CHART_ACCENT_INGREDIENTS,
+    CHART_ACCENT_RAW_MATERIALS,
     CHART_ACCENT_PRODUCTS,
 } from "@/feature/dashboard/constant/chartColors"
 import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
@@ -119,16 +119,16 @@ export function DashboardPage() {
                     />
 
                     <RankedBarList
-                        title={t("dashboard.topIngredients.title")}
-                        subtitle={t("dashboard.topIngredients.subtitle")}
-                        emptyMessage={t("dashboard.topIngredients.empty")}
-                        accentColor={CHART_ACCENT_INGREDIENTS}
-                        items={summary.topIngredients.map((ingredient) => ({
-                            key: ingredient.ingredientId,
-                            label: ingredient.displayName,
-                            secondaryLabel: t("dashboard.topIngredients.secondary", { count: ingredient.quoteCount }),
-                            value: ingredient.totalCost,
-                            valueLabel: formatCurrency(ingredient.totalCost),
+                        title={t("dashboard.topRawMaterials.title")}
+                        subtitle={t("dashboard.topRawMaterials.subtitle")}
+                        emptyMessage={t("dashboard.topRawMaterials.empty")}
+                        accentColor={CHART_ACCENT_RAW_MATERIALS}
+                        items={summary.topRawMaterials.map((rawMaterial) => ({
+                            key: rawMaterial.rawMaterialId,
+                            label: rawMaterial.displayName,
+                            secondaryLabel: t("dashboard.topRawMaterials.secondary", { count: rawMaterial.quoteCount }),
+                            value: rawMaterial.totalCost,
+                            valueLabel: formatCurrency(rawMaterial.totalCost),
                         }))}
                     />
                 </div>

@@ -25,6 +25,12 @@ type QuoteResultCardProps = {
     showReferenceDisclaimer?: boolean
 }
 
+// Grupos de opciones (2026-09-24): una fila elegida de un grupo se muestra como "Caja: caja de
+// envío" en el desglose admin; una fila fija (optionGroup null) solo con su nombre.
+function materialLineLabel(line: { displayName: string; optionGroup: string | null }): string {
+    return line.optionGroup ? `${line.optionGroup}: ${line.displayName}` : line.displayName
+}
+
 function CostRow({
     label,
     quantityLabel,
@@ -167,7 +173,7 @@ export function QuoteResultCard({
                     >
                         {breakdown.rawMaterials.map((line) => (
                             <CostRow
-                                key={line.ingredientId}
+                                key={line.rawMaterialId}
                                 label={line.displayName}
                                 quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
                                     count: line.totalUnits.toLocaleString("es-MX"),
@@ -189,7 +195,7 @@ export function QuoteResultCard({
                         {breakdown.unitMaterials.map((line) => (
                             <CostRow
                                 key={line.packagingId}
-                                label={line.displayName}
+                                label={materialLineLabel(line)}
                                 quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
                                     count: line.totalUnits.toLocaleString("es-MX"),
                                 })}
@@ -200,21 +206,24 @@ export function QuoteResultCard({
                     </CostSection>
                 )}
 
-                {showCostBreakdown && breakdown.intermediatePackaging && (
+                {showCostBreakdown && breakdown.intermediateMaterials && breakdown.intermediateMaterials.length > 0 && (
                     <CostSection
                         icon={<PackagePlus size={15} />}
                         title={t("site.quoteRequest.result.intermediatePackaging")}
                         subtotal={result.intermediatePackagingCost}
                         format={format}
                     >
-                        <CostRow
-                            label={breakdown.intermediatePackaging.displayName}
-                            quantityLabel={t("site.quoteRequest.result.intermediatePackagesQuantity", {
-                                count: breakdown.intermediatePackaging.packagesNeeded.toLocaleString("es-MX"),
-                            })}
-                            lineTotal={breakdown.intermediatePackaging.lineTotal}
-                            format={format}
-                        />
+                        {breakdown.intermediateMaterials.map((line) => (
+                            <CostRow
+                                key={line.packagingId}
+                                label={materialLineLabel(line)}
+                                quantityLabel={t("site.quoteRequest.result.intermediatePackagesQuantity", {
+                                    count: line.packagesNeeded.toLocaleString("es-MX"),
+                                })}
+                                lineTotal={line.lineTotal}
+                                format={format}
+                            />
+                        ))}
                     </CostSection>
                 )}
 
@@ -241,7 +250,7 @@ export function QuoteResultCard({
                         {breakdown.palletMaterials.map((line) => (
                             <CostRow
                                 key={line.packagingId}
-                                label={line.displayName}
+                                label={materialLineLabel(line)}
                                 quantityLabel={t("site.quoteRequest.result.palletsQuantity", { count: line.requestedPallets })}
                                 lineTotal={line.lineTotal}
                                 format={format}

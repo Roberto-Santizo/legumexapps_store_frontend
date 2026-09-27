@@ -15,25 +15,21 @@ type QuotePalletsStepProps = {
     selectedVariant: QuotableVariant | undefined
     requestedPallets: number | undefined
     palletsField: ReactNode
+    materialsSection: ReactNode
     mixSection: ReactNode
     destinationSection: ReactNode
     liveTotal: ReactNode
-    // El paso "pallets" termina en el botón de submit real cuando el producto NO tiene paso de
-    // materiales (ver CLAUDE.md #6, "si el SKU no tiene opciones swappable en ningún nivel, se
-    // salta el paso de materiales y va directo pallets -> total") -- en ese caso isLastStep=true
-    // y el botón calcula/guarda; si hay paso de materiales después, es solo "Continuar".
-    isLastStep: boolean
-    canContinue: boolean
+    canSubmit: boolean
     isSubmitting: boolean
     onBack: () => void
-    onContinue: () => void
 }
 
-// Paso "pallets" (2026-09-22, ver CLAUDE.md #6): elige la presentación (si el producto tiene más
-// de un SKU), la cantidad de palets, y muestra cajas por palet + peso total del pedido -- ambos
-// derivados de datos que YA vienen en QuotableVariant (boxesPerPallet/bagsPerBox/netWeightGrams),
-// nunca inventados. Viene ANTES del paso de materiales porque las opciones de material dependen
-// del SKU elegido acá.
+// Paso combinado palets + materiales (2026-09-22, fusionado con "materiales" 2026-09-23 -- ver
+// CLAUDE.md #6): arriba la presentación (SKU), la cantidad de palets y los tiles de cajas por
+// palet + peso total del pedido (derivados de QuotableVariant, nunca inventados); debajo las
+// tarjetas de materiales de los niveles que tengan alternativas (materialsSection, vacío si no
+// hay); al pie UN solo "Total estimado" + el submit real del form. Es el último paso antes de
+// "total", así que el botón siempre calcula.
 export function QuotePalletsStep({
     header,
     fixedRecipe,
@@ -41,14 +37,13 @@ export function QuotePalletsStep({
     selectedVariant,
     requestedPallets,
     palletsField,
+    materialsSection,
     mixSection,
     destinationSection,
     liveTotal,
-    isLastStep,
-    canContinue,
+    canSubmit,
     isSubmitting,
     onBack,
-    onContinue,
 }: Readonly<QuotePalletsStepProps>) {
     const { t } = useTranslation()
     const totalWeightKg = selectedVariant ? calculateTotalOrderWeightKg(selectedVariant, requestedPallets) : null
@@ -68,6 +63,8 @@ export function QuotePalletsStep({
 
             {variantField}
 
+            {palletsField}
+
             {selectedVariant && (
                 <div className="mb-5 grid grid-cols-2 gap-3 text-center">
                     <div className="flex flex-col items-center gap-1 rounded-[10px] bg-crema p-3">
@@ -85,25 +82,16 @@ export function QuotePalletsStep({
                 </div>
             )}
 
-            {palletsField}
-
             {mixSection}
 
             {destinationSection}
 
+            {materialsSection}
+
             <div className="sticky bottom-3 z-10 mt-10 flex flex-col gap-4 rounded-2xl border-[1.5px] border-gris-campo bg-hueso/95 p-4 shadow-lg shadow-verde-profundo/10 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
                 <div className="sm:flex-1">{liveTotal}</div>
-                <Button
-                    type={isLastStep ? "submit" : "button"}
-                    disabled={!canContinue || isSubmitting}
-                    onClick={isLastStep ? undefined : onContinue}
-                    className="w-full sm:w-auto"
-                >
-                    {isLastStep
-                        ? isSubmitting
-                            ? t("common.loading")
-                            : t("site.quoteRequest.form.submit")
-                        : t("site.quoteRequest.form.wizard.pallets.continue")}
+                <Button type="submit" disabled={!canSubmit || isSubmitting} className="w-full sm:w-auto">
+                    {isSubmitting ? t("common.loading") : t("site.quoteRequest.form.submit")}
                 </Button>
             </div>
         </div>

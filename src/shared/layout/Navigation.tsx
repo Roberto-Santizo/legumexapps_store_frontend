@@ -56,7 +56,7 @@ const NAV_GROUPS: NavGroup[] = [
             { url: "/admin/products", labelKey: "product.list.title", icon: ShoppingBag, permission: "products:view" },
             { url: "/admin/categories", labelKey: "category.list.title", icon: FolderTree, permission: "categories:view" },
             { url: "/admin/sub-categories", labelKey: "subCategory.list.title", icon: Layers, permission: "subCategories:view" },
-            { url: "/admin/ingredients", labelKey: "ingredient.list.title", icon: Carrot, permission: "ingredients:view" },
+            { url: "/admin/raw-materials", labelKey: "rawMaterial.list.title", icon: Carrot, permission: "rawMaterials:view" },
             { url: "/admin/packagings", labelKey: "packaging.list.title", icon: Package, permission: "packagings:view" },
             { url: "/admin/presentations", labelKey: "presentation.list.title", icon: PackageOpen, permission: "presentations:view" },
             { url: "/admin/units", labelKey: "unit.list.title", icon: Ruler, permission: "units:view" },
@@ -186,3 +186,5 @@ export function Navigation() {
         </nav>
     )
 }
+
+//lo decia por el tema de 

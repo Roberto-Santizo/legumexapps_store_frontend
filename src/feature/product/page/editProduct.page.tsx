@@ -10,7 +10,7 @@ import type { ProductResponse, UpdateProductInput } from "@/feature/product/sche
 import { getProductByIdAPI, updateProductAPI } from "@/feature/product/api/product.api"
 import { ProductForm } from "@/feature/product/component/productForm.component"
 import { ProductVariantSection } from "@/feature/product/component/productVariantSection.component"
-import { ProductIngredientSection } from "@/feature/product/component/productIngredientSection.component"
+import { ProductRawMaterialSection } from "@/feature/product/component/productRawMaterialSection.component"
 import { ProductVariantPalletMaterialSection } from "@/feature/product/component/productVariantPalletMaterialSection.component"
 import { ProductVariantUnitMaterialSection } from "@/feature/product/component/productVariantUnitMaterialSection.component"
 import { ProductVariantIntermediateMaterialSection } from "@/feature/product/component/productVariantIntermediateMaterialSection.component"
@@ -121,10 +121,10 @@ export function EditProductPage() {
                     <Card>
                         <h2 className="mb-4 text-lg font-semibold text-verde-profundo">
                             {productQuery.data.data.isCustomizable
-                                ? t("productIngredient.list.titleCustomizable")
-                                : t("productIngredient.list.title")}
+                                ? t("productRawMaterial.list.titleCustomizable")
+                                : t("productRawMaterial.list.title")}
                         </h2>
-                        <ProductIngredientSection
+                        <ProductRawMaterialSection
                             productId={productId}
                             isCustomizable={productQuery.data.data.isCustomizable}
                             isOrganic={productQuery.data.data.isOrganic}

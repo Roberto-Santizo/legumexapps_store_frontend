@@ -1166,7 +1166,14 @@
                 "referenceDisclaimer": "Cotización de referencia. Los valores son estimados y no constituyen una oferta final. Al contactarte confirmaremos disponibilidad, especificaciones y el precio definitivo.",
                 "restrictionsTitle": "Restricciones",
                 "restrictionsText": "Esta cotización es válida únicamente por {{days}} días a partir de su fecha de emisión. Transcurrido este período, los precios pueden variar y deberá solicitarse una nueva cotización.",
-                "generatedAt": "Documento generado el {{date}}"
+                "generatedAt": "Documento generado el {{date}}",
+                "packagingConfig": {
+                    "title": "Configuración de empaque",
+                    "unit": "Empaque individual",
+                    "intermediate": "Empaque intermedio",
+                    "pallet": "Paletizado",
+                    "includes": "Incluye: {{materials}}"
+                }
             }
         }
     },

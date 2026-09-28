@@ -1166,7 +1166,14 @@
                 "referenceDisclaimer": "Reference quote only. Prices are estimates, not a final offer. We'll confirm details and final pricing when we contact you.",
                 "restrictionsTitle": "Restrictions",
                 "restrictionsText": "This quote is valid for {{days}} days only from its issue date. After this period prices may change and a new quote must be requested.",
-                "generatedAt": "Document generated on {{date}}"
+                "generatedAt": "Document generated on {{date}}",
+                "packagingConfig": {
+                    "title": "Packaging configuration",
+                    "unit": "Individual packaging",
+                    "intermediate": "Intermediate packaging",
+                    "pallet": "Palletizing",
+                    "includes": "Includes: {{materials}}"
+                }
             }
         }
     },

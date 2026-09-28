@@ -9,9 +9,58 @@ import {
     calculateQuoteValidUntil,
     quotePdfDateFormatter as pdfDateFormatter,
 } from "@/feature/quote/component/quotePdfSummary"
+import { buildPackagingConfiguration } from "@/feature/quote/component/quotePackagingConfig"
 import { formatCurrency } from "@/shared/format/currency"
 
 const pdfDateTimeFormatter = new Intl.DateTimeFormat("es-GT", { dateStyle: "short", timeStyle: "short" })
+
+// Configuración de empaque de la línea: qué material quedó en cada grupo + los fijos ("Incluye").
+// Solo nombres, nunca costos -- por eso va en ambas variantes, sin gate de showCostBreakdown.
+// Nombres tal como están guardados (el empaque no tiene traducciones). Sin filas → no se renderiza.
+function PackagingConfigSection({ breakdown }: Readonly<{ breakdown: QuoteCalculation["breakdown"] }>) {
+    const { t } = useTranslation()
+    const levels = buildPackagingConfiguration(breakdown)
+    if (levels.length === 0) return null
+
+    return (
+        <View style={styles.packagingConfigSection}>
+            <View style={styles.packagingConfigTitleRow}>
+                <View style={styles.packagingConfigTitleMark} />
+                <Text style={styles.packagingConfigTitle}>{t("quote.pdf.document.packagingConfig.title")}</Text>
+            </View>
+            <View style={styles.packagingConfigColumns}>
+                {levels.map((level, index) => (
+                    <View
+                        key={level.level}
+                        style={index > 0
+                            ? [styles.packagingConfigColumn, styles.packagingConfigColumnDivided]
+                            : styles.packagingConfigColumn}
+                    >
+                        <View style={styles.packagingConfigLevelRow}>
+                            <View style={styles.packagingConfigLevelBadge}>
+                                <Text style={styles.packagingConfigLevelBadgeText}>{level.number}</Text>
+                            </View>
+                            <Text style={styles.packagingConfigLevelName}>
+                                {t(`quote.pdf.document.packagingConfig.${level.level}`)}
+                            </Text>
+                        </View>
+                        {level.groups.map((group) => (
+                            <View key={group.group} style={styles.packagingConfigGroup}>
+                                <Text style={styles.packagingConfigGroupLabel}>{group.group}</Text>
+                                <Text style={styles.packagingConfigGroupValue}>{group.material}</Text>
+                            </View>
+                        ))}
+                        {level.fixed.length > 0 && (
+                            <Text style={styles.packagingConfigFixed}>
+                                {t("quote.pdf.document.packagingConfig.includes", { materials: level.fixed.join(", ") })}
+                            </Text>
+                        )}
+                    </View>
+                ))}
+            </View>
+        </View>
+    )
+}
 
 type QuotePdfDocumentProps = {
     clientName: string
@@ -138,6 +187,8 @@ export function QuotePdfDocument({
                                 <Text style={styles.lineStatLabel}>{t("quote.pdf.document.perPallet")}</Text>
                             </View>
                         </View>
+
+                        <PackagingConfigSection breakdown={line.breakdown} />
 
                         {showCostBreakdown && (
                             <View style={styles.breakdownSection}>

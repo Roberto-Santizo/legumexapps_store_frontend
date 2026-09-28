@@ -153,6 +153,86 @@ export const quotePdfStyles = StyleSheet.create({
         textTransform: "uppercase",
     },
 
+    // Configuración de empaque (ambas variantes, solo nombres -- nunca costos)
+    packagingConfigSection: {
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderBottomWidth: 1,
+        borderBottomColor: GRIS_CAMPO,
+    },
+    packagingConfigTitleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 4,
+    },
+    packagingConfigTitleMark: {
+        width: 6,
+        height: 6,
+        backgroundColor: DORADO,
+        marginRight: 4,
+    },
+    packagingConfigTitle: {
+        fontSize: 7,
+        fontFamily: "Helvetica-Bold",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        color: TEXTO_SUAVE,
+    },
+    packagingConfigColumns: {
+        flexDirection: "row",
+    },
+    packagingConfigColumn: {
+        flex: 1,
+        paddingHorizontal: 6,
+    },
+    packagingConfigColumnDivided: {
+        borderLeftWidth: 0.5,
+        borderLeftColor: GRIS_CAMPO,
+    },
+    packagingConfigLevelRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 3,
+    },
+    packagingConfigLevelBadge: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: VERDE_PROFUNDO,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 4,
+    },
+    packagingConfigLevelBadgeText: {
+        fontSize: 7,
+        fontFamily: "Helvetica-Bold",
+        color: HUESO,
+    },
+    packagingConfigLevelName: {
+        fontSize: 7.5,
+        fontFamily: "Helvetica-Bold",
+        color: VERDE_PROFUNDO,
+    },
+    packagingConfigGroup: {
+        marginBottom: 2,
+    },
+    packagingConfigGroupLabel: {
+        fontSize: 6.5,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        color: TEXTO_SUAVE,
+    },
+    packagingConfigGroupValue: {
+        fontSize: 8.5,
+        fontFamily: "Helvetica-Bold",
+        color: VERDE_PROFUNDO,
+    },
+    packagingConfigFixed: {
+        fontSize: 7.5,
+        color: TEXTO_SUAVE,
+        marginTop: 1,
+    },
+
     // Desglose de costos (solo admin, showCostBreakdown)
     breakdownSection: {
         paddingHorizontal: 10,

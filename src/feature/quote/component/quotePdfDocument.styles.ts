@@ -11,8 +11,8 @@ const TEXTO_SUAVE = "#5a6154"
 const AVISO_FG = "#9a6b12"
 const AVISO_BG = "#fbeecb"
 const AVISO_BD = "#ead5a0"
-// Mismos tokens que --color-error-fg/bg/bd en index.css (2026-09-13, aviso "cotización de
-// referencia") -- rojo, distinto del aviso ámbar de "Restricciones" (vigencia) de más abajo.
+// Mismos tokens que --color-error-fg/bg/bd en index.css (aviso "cotización de referencia") --
+// rojo, distinto del aviso ámbar de "Restricciones" (vigencia) de más abajo.
 const ERROR_FG = "#b3261e"
 const ERROR_BG = "#fae7e5"
 const ERROR_BD = "#edc4c0"
@@ -223,7 +223,7 @@ export const quotePdfStyles = StyleSheet.create({
     },
 
     // ===============================
-    // Aviso "cotización de referencia" (2026-09-13, solo cliente)
+    // Aviso "cotización de referencia" (solo cliente)
     // ===============================
     disclaimerBox: {
         borderWidth: 1,

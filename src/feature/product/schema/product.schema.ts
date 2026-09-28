@@ -13,7 +13,7 @@ export const createProductSchema = z.object({
     // Código manual del producto, editable, único (case-insensitive -- validado en el backend).
     codigo: z.string().trim().min(1).max(60),
     subCategoryId: z.number().int().positive(),
-    // Requerido (2026-09-16): cada Producto pertenece a exactamente un Cliente real (ver
+    // Requerido: cada Producto pertenece a exactamente un Cliente real (ver
     // feature/client/ -- no confundir con salesperson/, la cuenta que cotiza).
     clientId: z.number().int().positive(),
     displayName: z.string().trim().min(1).max(120),
@@ -27,7 +27,7 @@ export const createProductSchema = z.object({
 })
 
 // codigo se recupera como requerido -- no puede quedar vacío ni siquiera al editar (mismo
-// patrón que el resto de campos críticos del repo, ver memoria del proyecto).
+// patrón que el resto de campos críticos del repo).
 export const updateProductSchema = createProductSchema.partial().extend({
     codigo: createProductSchema.shape.codigo,
     clientId: createProductSchema.shape.clientId,

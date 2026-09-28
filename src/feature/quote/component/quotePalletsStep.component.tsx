@@ -24,8 +24,8 @@ type QuotePalletsStepProps = {
     onBack: () => void
 }
 
-// Paso combinado palets + materiales (2026-09-22, fusionado con "materiales" 2026-09-23 -- ver
-// CLAUDE.md #6): arriba la presentación (SKU), la cantidad de palets y los tiles de cajas por
+// Paso combinado palets + materiales: arriba la presentación (SKU), la cantidad de palets y los
+// tiles de cajas por
 // palet + peso total del pedido (derivados de QuotableVariant, nunca inventados); debajo las
 // tarjetas de materiales de los niveles que tengan alternativas (materialsSection, vacío si no
 // hay); al pie UN solo "Total estimado" + el submit real del form. Es el último paso antes de

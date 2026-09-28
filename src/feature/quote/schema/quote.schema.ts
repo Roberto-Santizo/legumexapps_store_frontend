@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { responseDestinationSchema } from "@/feature/destination/schema/destination.schema"
 
-// Grupos de opciones (2026-09-24, ver CLAUDE.md #4): `id` es el id de la FILA del join
+// Grupos de opciones: `id` es el id de la FILA del join
 // (ProductVariantUnitMaterial/IntermediateMaterial/PalletMaterial), el mismo que
 // calculateQuoteSchema.selectedXMaterialIds espera al cotizar -- no el packagingId.
 const quotableMaterialOptionSchema = z.object({
@@ -24,8 +24,8 @@ const quotableVariantSchema = z.object({
     boxesPerPallet: z.number().int(),
     bagsPerBox: z.number().int(),
     presentationLabel: z.string().nullable(),
-    // Peso neto por bolsa/unidad en gramos (2026-09-22, paso "pallets" del wizard -- ver
-    // CLAUDE.md #6) -- solo lectura, usado para calcular el peso total del pedido en el cliente
+    // Peso neto por bolsa/unidad en gramos (paso "pallets" del wizard) -- solo lectura, usado
+    // para calcular el peso total del pedido en el cliente
     // (boxesPerPallet × bagsPerBox × netWeightGrams × requestedPallets). No participa en
     // calculateQuoteSchema ni en el cálculo de dinero.
     netWeightGrams: z.number().nullable(),
@@ -75,13 +75,13 @@ const rawMaterialMixLineSchema = z.object({
 
 export const calculateQuoteSchema = z.object({
     productVariantId: z.number().int().positive(),
-    // Opcional (2026-09-10): transporte "apagado" temporalmente -- el cliente ya no elige
+    // Opcional: transporte "apagado" temporalmente -- el cliente ya no elige
     // destino en el wizard (ver quoteCalculatorForm.component.tsx, prop showDestination), mismo
     // criterio que el schema espejo del backend.
     destinationId: z.number().int().positive().optional(),
     requestedPallets: z.number().int().min(1),
     rawMaterialMix: z.array(rawMaterialMixLineSchema).optional(),
-    // Grupos de opciones (2026-09-24, ver CLAUDE.md #4) -- mismo schema espejo del backend: por
+    // Grupos de opciones -- mismo schema espejo del backend: por
     // nivel, los ids de FILA elegidos en el wizard (uno por grupo), no el packagingId. El backend
     // lee el grupo de cada fila; un grupo sin id enviado usa su default.
     selectedUnitMaterialIds: z.array(z.number().int().positive()).max(50).optional(),
@@ -98,7 +98,21 @@ const rawMaterialLineSchema = z.object({
     lineTotal: z.number(),
 })
 
-// optionGroup (2026-09-24): grupo de opciones de la fila costeada, null = fila fija. Solo lo usa el
+// Ingrediente agregado (sal, azúcar...) -- línea aparte de la materia prima, fuera del 100% de la
+// receta (ver quote.service.ts::buildIngredientLines en el backend). Solo lo usa el desglose admin.
+const ingredientLineSchema = z.object({
+    ingredientId: z.number().int(),
+    displayName: z.string(),
+    grams: z.number(),
+    referenceNetWeightGrams: z.number(),
+    gramsPerUnit: z.number(),
+    unitCost: z.number(),
+    quantityPerUnit: z.number(),
+    totalUnits: z.number(),
+    lineTotal: z.number(),
+})
+
+// optionGroup: grupo de opciones de la fila costeada, null = fila fija. Solo lo usa el
 // desglose admin ("Caja: caja de envío").
 const unitMaterialLineSchema = z.object({
     packagingId: z.number().int(),
@@ -169,7 +183,7 @@ export const quoteCalculationSchema = z.object({
     variantLabel: z.string().nullable(),
     requestedPallets: z.number().int(),
     totalUnits: z.number(),
-    // Cajas por palet (2026-09-12) -- optional por el mismo motivo que processingCostTotal/
+    // Cajas por palet -- optional por el mismo motivo que processingCostTotal/
     // percentageCostTotal/adjustmentCost más abajo: NO se persiste como columna propia de Quote
     // (vive derivado en el cálculo en vivo, ver quote.service.ts), así que una fila histórica
     // leída directo de la BD (GET /admin/quotes) no la trae. Solo lo necesita el reporte del
@@ -177,6 +191,10 @@ export const quoteCalculationSchema = z.object({
     // es la respuesta en vivo de calcular/guardar, donde este campo sí viene siempre presente.
     boxesPerPallet: z.number().int().optional(),
     rawMaterialCost: z.coerce.number(),
+    // Optional + coerce: columna DECIMAL de Quote (string al releer de la BD, número en vivo) que no
+    // existía en cotizaciones guardadas antes de los ingredientes -- mismo criterio que
+    // processingCostTotal/adjustmentCost más abajo.
+    ingredientCost: z.coerce.number().optional(),
     unitPackagingCost: z.coerce.number(),
     intermediatePackagingCost: z.coerce.number(),
     // Optional para no romper cotizaciones guardadas antes de este campo (mismo criterio que
@@ -192,13 +210,15 @@ export const quoteCalculationSchema = z.object({
     totalCost: z.coerce.number(),
     breakdown: z.object({
         rawMaterials: z.array(rawMaterialLineSchema),
-        // Optional para no romper cotizaciones guardadas antes de este campo (2026-09-11, el
+        // Optional por el mismo motivo que ingredientCost arriba.
+        ingredients: z.array(ingredientLineSchema).optional(),
+        // Optional para no romper cotizaciones guardadas antes de este campo (cuando el
         // FK único ProductVariant.packagingId se reemplazó por un join de N materiales) --
         // mismo criterio que intermediatePackaging/processingCosts. Una cotización vieja
         // simplemente no trae esta clave; unitPackagingCost (el total) sigue presente e intacto.
         unitMaterials: z.array(unitMaterialLineSchema).optional(),
-        // Array desde 2026-09-24 (antes un objeto único o null): el nivel intermedio admite N filas
-        // fijas + N grupos, igual que unit/pallet.
+        // Array (no un objeto único o null): el nivel intermedio admite N filas fijas + N grupos,
+        // igual que unit/pallet.
         intermediateMaterials: z.array(intermediateMaterialLineSchema).optional(),
         // Optional para no romper cotizaciones guardadas antes de este campo -- mismo criterio
         // que intermediatePackaging arriba.

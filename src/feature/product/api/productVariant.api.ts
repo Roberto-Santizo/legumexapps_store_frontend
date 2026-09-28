@@ -45,7 +45,7 @@ export async function deleteProductVariantAPI(id: number) {
 }
 
 // Reusan el plumbing genérico de shared/api/bulkImport.api.ts -- mismo diseño para todos los
-// catálogos con carga masiva (ver esa entrada de memoria del proyecto); lo único específico de
+// catálogos con carga masiva; lo único específico de
 // SKUs/Variantes acá es la URL.
 export const bulkImportProductVariantsAPI = (file: File) => postBulkImportFile("/product-variants/bulk-import", file)
 export const downloadProductVariantImportTemplateAPI = () => getBulkImportTemplate("/product-variants/bulk-import/template")

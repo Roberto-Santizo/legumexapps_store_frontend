@@ -225,6 +225,8 @@
                 "boxesPerPallet": "Cajas por palet",
                 "perPallet": "Por palet",
                 "rawMaterials": "Materia prima",
+                "ingredients": "Ingredientes",
+                "ingredientLabel": "{{name}} ({{grams}} g por unidad)",
                 "unitPackaging": "Empaque unitario",
                 "intermediatePackaging": "Empaque intermedio",
                 "processingCosts": "Costos adicionales",
@@ -614,6 +616,39 @@
             "rowErrorItem": "Fila {{row}}: {{message}}"
         }
     },
+    "ingredient": {
+        "form": {
+            "code": "Código",
+            "displayName": "Nombre",
+            "costPerUnit": "Costo por libra",
+            "translationSectionTitle": "Traducción al inglés",
+            "translationSectionHint": "Opcional. Si se deja vacío, el sitio en inglés muestra el nombre en español.",
+            "displayNameEn": "Nombre (inglés)"
+        },
+        "list": {
+            "title": "Ingredientes",
+            "createLink": "Crear ingrediente"
+        },
+        "create": {
+            "title": "Crear ingrediente"
+        },
+        "edit": {
+            "title": "Editar ingrediente"
+        },
+        "table": {
+            "searchPlaceholder": "Buscar por nombre...",
+            "empty": "No hay ingredientes registrados"
+        },
+        "bulkImport": {
+            "title": "Carga masiva desde Excel",
+            "description": "Descarga la plantilla, complétala con tus ingredientes (sal, azúcar, pimienta...) y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se importa nada -- corrige el archivo y vuelve a subirlo. El \"Código\" debe ser único. El \"Costo por libra\" siempre se costea en libras.",
+            "downloadTemplate": "Descargar plantilla",
+            "importButton": "Importar archivo",
+            "importing": "Importando...",
+            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún ingrediente:",
+            "rowErrorItem": "Fila {{row}}: {{message}}"
+        }
+    },
     "subCategory": {
         "form": {
             "categoryId": "Categoría",
@@ -749,10 +784,11 @@
         },
         "bulkImportSteps": {
             "title": "Carga masiva por Excel",
-            "intro": "Crea productos completos (todo menos la imagen) con tres archivos, subidos en este orden. Cada archivo se valida completo y es todo-o-nada: si falla, corrígelo y súbelo de nuevo, los pasos anteriores quedan guardados. La imagen se sube después desde la pantalla de edición de cada producto.",
+            "intro": "Crea productos completos (todo menos la imagen) con cuatro archivos, subidos en este orden (el paso 3, Ingredientes, es opcional). Cada archivo se valida completo y es todo-o-nada: si falla, corrígelo y súbelo de nuevo, los pasos anteriores quedan guardados. La imagen se sube después desde la pantalla de edición de cada producto.",
             "requires1": "Paso 1 · Productos — requiere que ya existan sus Subcategorías y Clientes.",
             "requires2": "Paso 2 · Recetas — requiere los Productos del paso 1 y las Materias Primas en su catálogo.",
-            "requires3": "Paso 3 · SKUs y empaque — requiere los Productos con su receta completa (paso 2), las Presentaciones y los Empaques en sus catálogos."
+            "requires3": "Paso 3 · Ingredientes (opcional) — requiere los Productos del paso 1 y los Ingredientes en su catálogo.",
+            "requires4": "Paso 4 · SKUs y empaque — requiere los Productos con su receta completa (paso 2), las Presentaciones y los Empaques en sus catálogos."
         }
     },
     "productVariant": {
@@ -808,6 +844,39 @@
             "importButton": "Importar archivo",
             "importing": "Importando...",
             "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ninguna receta:",
+            "rowErrorItem": "Fila {{row}}: {{message}}"
+        }
+    },
+    "productIngredient": {
+        "list": {
+            "title": "Ingredientes agregados",
+            "hint": "Opcional. Sal, azúcar, pimienta... se cobran aparte, encima de la receta (no cuentan para el 100%). Escribe los gramos que lleva una presentación de referencia: el costo escala solo con cada presentación que se cotice."
+        },
+        "form": {
+            "ingredientId": "Ingrediente",
+            "grams": "Gramos",
+            "referenceNetWeightGrams": "Peso de referencia (g)",
+            "referenceFromSku": "Tomar el peso de un SKU (opcional)",
+            "referenceFromSkuPlaceholder": "Elegir SKU...",
+            "skuOption": "{{label}} — {{grams}} g",
+            "gramsExceedReference": "Los gramos no pueden ser mayores que el peso de referencia.",
+            "preview": "= {{percentage}} % del peso neto → {{scaledGrams}} g en una presentación de {{netWeight}} g",
+            "previewNoSku": "= {{percentage}} % del peso neto",
+            "addButton": "Agregar ingrediente"
+        },
+        "table": {
+            "grams": "Gramos",
+            "referenceNetWeightGrams": "Peso de referencia (g)",
+            "percentage": "≈ % del peso neto",
+            "empty": "Este producto no tiene ingredientes agregados"
+        },
+        "bulkImport": {
+            "title": "Carga masiva de Ingredientes por producto desde Excel",
+            "description": "Opcional. Descarga la plantilla, llénala con los ingredientes agregados de cada producto (una fila por ingrediente) y súbela. Los productos ya deben existir (paso 1) y cada ingrediente se busca por su código. \"Gramos\" son los gramos en una presentación de \"Peso de referencia (g)\" (ej. 40 g en 2000 g) y no pueden ser mayores que ese peso. El archivo se valida completo primero: si una sola fila tiene un error, no se crea nada. Solo CREA: un producto que ya tiene ingredientes se rechaza (edítalos desde su pantalla).",
+            "downloadTemplate": "Descargar plantilla",
+            "importButton": "Importar archivo",
+            "importing": "Importando...",
+            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún ingrediente:",
             "rowErrorItem": "Fila {{row}}: {{message}}"
         }
     },
@@ -1084,6 +1153,7 @@
                 "boxesPerPallet": "Cajas por palet",
                 "perPallet": "Por palet",
                 "rawMaterials": "Materia prima",
+                "ingredients": "Ingredientes",
                 "unitPackaging": "Empaque unitario",
                 "intermediatePackaging": "Empaque intermedio",
                 "processingCosts": "Costos adicionales",

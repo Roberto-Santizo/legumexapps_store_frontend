@@ -9,7 +9,7 @@ import { formatCurrency } from "@/shared/format/currency"
 
 export type MaterialLevel = "unit" | "intermediate" | "pallet"
 export type MaterialOption = QuotableProduct["variants"][number]["unitMaterialOptionGroups"][number]["options"][number]
-// Un grupo de opciones de un nivel (2026-09-24, ver CLAUDE.md #4) -- el cliente elige exactamente
+// Un grupo de opciones de un nivel -- el cliente elige exactamente
 // una opción por grupo; `key` ("nivel:grupo") identifica la elección en el estado del wizard.
 export type MaterialGroup = {
     key: string
@@ -27,8 +27,8 @@ const LEVEL_ICON: Record<MaterialLevel, ReactNode> = {
     pallet: <Layers size={22} />,
 }
 
-// Solo el NOMBRE del material se muestra en las tarjetas -- nunca su costo (decisión de negocio
-// 2026-09-21): el precio del cliente se ve únicamente reflejado en el "Total estimado" en vivo.
+// Solo el NOMBRE del material se muestra en las tarjetas -- nunca su costo (decisión de
+// negocio): el precio del cliente se ve únicamente reflejado en el "Total estimado" en vivo.
 function toCardOptions(group: MaterialGroup, defaultBadge: string): CardOption[] {
     return group.options.map((option) => ({
         value: option.id,
@@ -83,9 +83,9 @@ type QuoteMaterialGroupsProps = {
     onSelect: (groupKey: string, materialId: number) => void
 }
 
-// Sección de materiales del paso combinado palets + materiales (2026-09-23, ver CLAUDE.md #6):
-// una sección por nivel que tenga grupos de opciones en el SKU elegido, y dentro de cada nivel un
-// chooser por grupo (2026-09-24 -- ej. "Caja" y "Esquinero" bajo paletización), cada uno con su
+// Sección de materiales del paso combinado palets + materiales: una sección por nivel que tenga
+// grupos de opciones en el SKU elegido, y dentro de cada nivel un chooser por grupo (ej. "Caja" y
+// "Esquinero" bajo paletización), cada uno con su
 // default preseleccionado. Sin grupos no renderiza nada -- el paso sigue sirviendo para palets/peso.
 export function QuoteMaterialGroups({ groups, onSelect }: Readonly<QuoteMaterialGroupsProps>) {
     const { t } = useTranslation()

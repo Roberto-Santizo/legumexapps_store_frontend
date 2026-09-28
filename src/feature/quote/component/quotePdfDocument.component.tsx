@@ -20,11 +20,11 @@ type QuotePdfDocumentProps = {
     // Mismo criterio que QuoteResultCard/QuotedOrderSummary: el cliente final no ve el desglose
     // interno de costos, solo el admin (ver adminQuoteCalculator.page.tsx vs quoteRequest.page.tsx).
     showCostBreakdown?: boolean
-    // Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- default false,
+    // Transporte apagado para TODOS por ahora -- default false,
     // independiente de showCostBreakdown (que el admin sigue necesitando en true para ver el
     // resto del desglose). Ver el mismo prop en quoteResultCard.component.tsx.
     showTransport?: boolean
-    // Aviso "cotización de referencia" (2026-09-13) -- default false, solo cliente. Un bloque
+    // Aviso "cotización de referencia" -- default false, solo cliente. Un bloque
     // único a nivel de documento (no por línea), cerca del total del PEDIDO -- ver el mismo
     // criterio que el aviso de "Restricciones" (vigencia), que tampoco se repite por línea.
     showReferenceDisclaimer?: boolean
@@ -106,7 +106,7 @@ export function QuotePdfDocument({
                                 {line.productDisplayName}
                                 {line.variantLabel && <Text style={styles.lineHeaderVariant}> · {line.variantLabel}</Text>}
                             </Text>
-                            {/* Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- gateado por
+                            {/* Transporte apagado para TODOS por ahora -- gateado por
                             showTransport (no showCostBreakdown), igual que la fila de transporte más abajo. */}
                             {showTransport && (
                                 <Text style={styles.lineHeaderDestination}>{line.breakdown.transport.displayName}</Text>
@@ -145,6 +145,12 @@ export function QuotePdfDocument({
                                     <View style={styles.breakdownRow}>
                                         <Text style={styles.breakdownLabel}>{t("quote.pdf.document.rawMaterials")}</Text>
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.rawMaterialCost)}</Text>
+                                    </View>
+                                )}
+                                {line.breakdown.ingredients && line.breakdown.ingredients.length > 0 && (
+                                    <View style={styles.breakdownRow}>
+                                        <Text style={styles.breakdownLabel}>{t("quote.pdf.document.ingredients")}</Text>
+                                        <Text style={styles.breakdownValue}>{formatCurrency(line.ingredientCost ?? 0)}</Text>
                                     </View>
                                 )}
                                 {line.breakdown.unitMaterials && line.breakdown.unitMaterials.length > 0 && (
@@ -205,7 +211,7 @@ export function QuotePdfDocument({
                     <Text style={styles.orderTotalValue}>{formatCurrency(orderTotal)}</Text>
                 </View>
 
-                {/* Aviso "cotización de referencia" (2026-09-13, solo cliente) */}
+                {/* Aviso "cotización de referencia" (solo cliente) */}
                 {showReferenceDisclaimer && (
                     <View style={styles.disclaimerBox}>
                         <Text style={styles.disclaimerText}>{t("quote.pdf.document.referenceDisclaimer")}</Text>

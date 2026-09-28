@@ -15,7 +15,7 @@ type MaterialOptionGroupFieldsProps = {
     isDefaultField: UseFormRegisterReturn
 }
 
-// Grupos de opciones (2026-09-24, ver CLAUDE.md #4) -- mismo bloque en las tres secciones de
+// Grupos de opciones -- mismo bloque en las tres secciones de
 // materiales (unit / intermediate / pallet). "El cliente elige" es solo de formulario: al marcarlo
 // aparece el nombre del grupo (requerido, con sugerencias de los grupos ya usados en este SKU y
 // nivel) y el checkbox de predeterminado del grupo. Filas con el mismo grupo son alternativas;

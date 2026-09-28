@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Truck, Wheat, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent } from "lucide-react"
+import { Truck, Wheat, FlaskConical, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent } from "lucide-react"
 import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
 import { Card } from "@/shared/component/card.component"
 import { Spinner } from "@/shared/component/spinner.component"
@@ -10,7 +10,7 @@ type QuoteResultCardProps = {
     result: QuoteCalculation | null
     isPending: boolean
     showCostBreakdown?: boolean
-    // Transporte "apagado" para TODOS por ahora (2026-09-10, fase 2 -- ver quoteCalculatorForm
+    // Transporte "apagado" para TODOS por ahora (ver quoteCalculatorForm
     // showDestination): default false a propósito, independiente de showCostBreakdown -- ese
     // flag sigue gobernando el resto de líneas del desglose (materia prima, empaques, costos
     // adicionales, etc.), que el admin SÍ debe seguir viendo. No reusar showCostBreakdown acá
@@ -18,14 +18,14 @@ type QuoteResultCardProps = {
     // apagar transporte para el admin, que sigue con showCostBreakdown=true. Reversión futura:
     // volver el default a true (o pasarlo explícito) donde se quiera reactivar.
     showTransport?: boolean
-    // Aviso "cotización de referencia" (2026-09-13) -- default false, SOLO el cliente
+    // Aviso "cotización de referencia" -- default false, SOLO el cliente
     // (quoteRequest.page.tsx) lo activa. El admin (AdminQuoteListPage/adminQuoteCalculatorPage)
     // no lo pasa: internamente el staff SÍ conoce el desglose real, el aviso es para quien
     // recibe el precio desde afuera sin ver cómo se armó.
     showReferenceDisclaimer?: boolean
 }
 
-// Grupos de opciones (2026-09-24): una fila elegida de un grupo se muestra como "Caja: caja de
+// Grupos de opciones: una fila elegida de un grupo se muestra como "Caja: caja de
 // envío" en el desglose admin; una fila fija (optionGroup null) solo con su nombre.
 function materialLineLabel(line: { displayName: string; optionGroup: string | null }): string {
     return line.optionGroup ? `${line.optionGroup}: ${line.displayName}` : line.displayName
@@ -83,7 +83,7 @@ export function QuoteResultCard({
     showReferenceDisclaimer = false,
 }: Readonly<QuoteResultCardProps>) {
     const { t } = useTranslation()
-    // Sistema USD-only (2026-09-10): ya no hay toggle de moneda ni conversión -- todo se muestra
+    // Sistema USD-only: no hay toggle de moneda ni conversión -- todo se muestra
     // en dólares con el formatter compartido. `format` se mantiene como alias para no tener que
     // tocar la firma de CostRow/CostSection (siguen recibiendo un formatter por prop).
     const format = formatCurrency
@@ -127,7 +127,7 @@ export function QuoteResultCard({
                 </div>
             </div>
 
-            {/* Aviso "cotización de referencia" (2026-09-13) -- solo cliente, ver
+            {/* Aviso "cotización de referencia" -- solo cliente, ver
             showReferenceDisclaimer arriba. Un bloque corto, en rojo, cerca del total -- nunca en
             el cotizador interno del admin. */}
             {showReferenceDisclaimer && (
@@ -175,6 +175,30 @@ export function QuoteResultCard({
                             <CostRow
                                 key={line.rawMaterialId}
                                 label={line.displayName}
+                                quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
+                                    count: line.totalUnits.toLocaleString("es-MX"),
+                                })}
+                                lineTotal={line.lineTotal}
+                                format={format}
+                            />
+                        ))}
+                    </CostSection>
+                )}
+
+                {showCostBreakdown && breakdown.ingredients && breakdown.ingredients.length > 0 && (
+                    <CostSection
+                        icon={<FlaskConical size={15} />}
+                        title={t("site.quoteRequest.result.ingredients")}
+                        subtotal={result.ingredientCost ?? 0}
+                        format={format}
+                    >
+                        {breakdown.ingredients.map((line) => (
+                            <CostRow
+                                key={line.ingredientId}
+                                label={t("site.quoteRequest.result.ingredientLabel", {
+                                    name: line.displayName,
+                                    grams: line.gramsPerUnit.toLocaleString("es-MX", { maximumFractionDigits: 3 }),
+                                })}
                                 quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
                                     count: line.totalUnits.toLocaleString("es-MX"),
                                 })}

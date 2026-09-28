@@ -7,7 +7,7 @@ export const createProductVariantPalletMaterialSchema = z.object({
     // Requerido: quantityPerPallet * requestedPallets es la fórmula directa del costo de esta
     // línea de paletización. Si queda vacío, el material "cuesta" $0 en cada cotización.
     quantityValue: z.number().positive(),
-    // Grupos de opciones (2026-09-24) -- sin .default(), ver el comentario en
+    // Grupos de opciones -- sin .default(), ver el comentario en
     // productVariantUnitMaterial.schema.ts.
     optionGroup: z.string().trim().min(1).max(60).nullable(),
     isDefault: z.boolean(),

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { ProductTable } from "@/feature/product/component/productTable.component"
 import { bulkImportProductsAPI, downloadProductImportTemplateAPI } from "@/feature/product/api/product.api"
 import { bulkImportProductRawMaterialsAPI, downloadProductRawMaterialImportTemplateAPI } from "@/feature/product/api/productRawMaterial.api"
+import { bulkImportProductIngredientsAPI, downloadProductIngredientImportTemplateAPI } from "@/feature/product/api/productIngredient.api"
 import { bulkImportProductVariantsAPI, downloadProductVariantImportTemplateAPI } from "@/feature/product/api/productVariant.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
@@ -14,11 +15,12 @@ export function ProductListPage() {
     const { t } = useTranslation()
     const { hasPermission } = usePermission()
 
-    // Carga masiva en 3 pasos, en orden de dependencia (2026-09-25): Productos -> Recetas -> SKUs.
-    // Cada paso usa el mismo permiso que su CRUD manual (crear producto = products:create; filas de
-    // receta y SKUs = products:edit). El número del paso es fijo aunque alguno quede oculto por
-    // permisos: indica el orden real de carga, no la posición en pantalla. Los SKUs (paso 3) viven
-    // acá y no en la edición de un producto porque un archivo puede traer SKUs de varios productos.
+    // Carga masiva en 4 pasos, en orden de dependencia: Productos -> Recetas -> Ingredientes
+    // (opcional) -> SKUs. Cada paso usa el mismo permiso que su CRUD manual (crear producto =
+    // products:create; filas de receta, ingredientes y SKUs = products:edit). El número del paso es
+    // fijo aunque alguno quede oculto por permisos: indica el orden real de carga, no la posición en
+    // pantalla. Los SKUs (paso 4) viven acá y no en la edición de un producto porque un archivo
+    // puede traer SKUs de varios productos.
     const importSteps: { step: number; permission: string; panel: ComponentProps<typeof BulkImportPanel> }[] = [
         {
             step: 1,
@@ -44,6 +46,17 @@ export function ProductListPage() {
         },
         {
             step: 3,
+            permission: "products:edit",
+            panel: {
+                translationNamespace: "productIngredient.bulkImport",
+                templateFilename: "plantilla-ingredientes-producto.xlsx",
+                downloadTemplate: downloadProductIngredientImportTemplateAPI,
+                bulkImport: bulkImportProductIngredientsAPI,
+                invalidateQueryKey: ["productIngredients"],
+            },
+        },
+        {
+            step: 4,
             permission: "products:edit",
             panel: {
                 translationNamespace: "productVariant.bulkImport",

@@ -13,15 +13,15 @@ type QuotedOrderSummaryProps = {
     onQuoteAnother: () => void
     onClear: () => void
     showCostBreakdown?: boolean
-    // Transporte apagado para todos por ahora (2026-09-10, fase 2) -- default false,
+    // Transporte apagado para todos por ahora -- default false,
     // independiente de showCostBreakdown. Ver el mismo prop en quoteResultCard.component.tsx
     // para el motivo de no reusar showCostBreakdown acá (admin sigue viendo el resto del
     // desglose con showCostBreakdown=true, pero ya no debe ver transporte).
     showTransport?: boolean
-    // Aviso "cotización de referencia" (2026-09-13) -- default false, ver el mismo prop en
+    // Aviso "cotización de referencia" -- default false, ver el mismo prop en
     // quoteResultCard.component.tsx (acá solo se reenvía al detalle expandido de cada línea).
     showReferenceDisclaimer?: boolean
-    // Slot para <QuotePdfButton> (2026-09-22, paso "total" del wizard -- ver CLAUDE.md #6): se
+    // Slot para <QuotePdfButton> (paso "total" del wizard): se
     // renderiza en la MISMA fila que "Nueva cotización" para que ambas acciones queden juntas,
     // en vez de que el botón de PDF viva suelto en el encabezado de la página.
     pdfAction?: ReactNode
@@ -91,7 +91,7 @@ export function QuotedOrderSummary({
                                         )}
                                     </p>
                                     <p className="text-xs text-texto-suave">
-                                        {/* Transporte apagado para todos por ahora (2026-09-10, fase 2) -- gateado
+                                        {/* Transporte apagado para todos por ahora -- gateado
                                         por showTransport (no showCostBreakdown, ver ese prop arriba). */}
                                         {showTransport
                                             ? t("quote.orderSummary.lineSummary", {

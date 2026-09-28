@@ -58,7 +58,7 @@ export async function updateRawMaterialAPI(id: number, formData: UpdateRawMateri
     }
 }
 
-// Reusan el plumbing genérico de shared/api/bulkImport.api.ts (mismo diseño que Empaques -- ver
-// esa entrada de memoria del proyecto); lo único específico de Materias Primas acá es la URL.
+// Reusan el plumbing genérico de shared/api/bulkImport.api.ts (mismo diseño que Empaques); lo
+// único específico de Materias Primas acá es la URL.
 export const bulkImportRawMaterialsAPI = (file: File) => postBulkImportFile("/raw-materials/bulk-import", file)
 export const downloadRawMaterialImportTemplateAPI = () => getBulkImportTemplate("/raw-materials/bulk-import/template")

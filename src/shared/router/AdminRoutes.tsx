@@ -46,6 +46,15 @@ const CreateRawMaterialPage = lazyWithRetry(() =>
 const EditRawMaterialPage = lazyWithRetry(() =>
     import("@/feature/rawMaterial/page/editRawMaterial.page").then((module) => ({ default: module.EditRawMaterialPage }))
 )
+const IngredientListPage = lazyWithRetry(() =>
+    import("@/feature/ingredient/page/ingredient.page").then((module) => ({ default: module.IngredientListPage }))
+)
+const CreateIngredientPage = lazyWithRetry(() =>
+    import("@/feature/ingredient/page/createIngredient.page").then((module) => ({ default: module.CreateIngredientPage }))
+)
+const EditIngredientPage = lazyWithRetry(() =>
+    import("@/feature/ingredient/page/editIngredient.page").then((module) => ({ default: module.EditIngredientPage }))
+)
 
 const PackagingListPage = lazyWithRetry(() =>
     import("@/feature/packaging/page/packaging.page").then((module) => ({ default: module.PackagingListPage }))
@@ -168,6 +177,9 @@ const routes = [
     { path: "raw-materials", component: RawMaterialListPage, permission: "rawMaterials:view" },
     { path: "raw-materials/create", component: CreateRawMaterialPage, permission: "rawMaterials:create" },
     { path: "raw-materials/:rawMaterialId/edit", component: EditRawMaterialPage, permission: "rawMaterials:edit" },
+    { path: "ingredients", component: IngredientListPage, permission: "ingredients:view" },
+    { path: "ingredients/create", component: CreateIngredientPage, permission: "ingredients:create" },
+    { path: "ingredients/:ingredientId/edit", component: EditIngredientPage, permission: "ingredients:edit" },
 
     { path: "packagings", component: PackagingListPage, permission: "packagings:view" },
     { path: "packagings/create", component: CreatePackagingPage, permission: "packagings:create" },

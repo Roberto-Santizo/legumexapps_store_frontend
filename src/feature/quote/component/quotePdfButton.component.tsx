@@ -20,10 +20,10 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 type QuotePdfButtonProps = {
     lines: QuoteCalculation[]
     showCostBreakdown?: boolean
-    // Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- default false,
+    // Transporte apagado para TODOS por ahora -- default false,
     // solo se reenvía a QuotePdfDocument. Ver el mismo prop ahí.
     showTransport?: boolean
-    // Aviso "cotización de referencia" (2026-09-13) -- default false, solo se reenvía a
+    // Aviso "cotización de referencia" -- default false, solo se reenvía a
     // QuotePdfDocument. Ver el mismo prop ahí.
     showReferenceDisclaimer?: boolean
     sendEmailAPI: (formData: FormData) => Promise<{ message: string } | undefined>

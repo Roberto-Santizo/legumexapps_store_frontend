@@ -86,7 +86,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
     )
     const existingOptionGroups = listMaterialOptionGroups(palletMaterials)
 
-    // "Cajas por palet" (2026-09-12) ya NO se deriva acá -- es un input directo de la variante
+    // "Cajas por palet" NO se deriva acá -- es un input directo de la variante
     // (ProductVariant.boxesPerPallet, ver productVariantSection.component.tsx), así que este
     // hint solo lo muestra, no lo calcula. Antes había que bajar de unidades a bolsas grandes y
     // de ahí a cajas (dos significados distintos de "unitsPerBox" según hubiera o no empaque

@@ -26,7 +26,7 @@ const variantFormSchema = createProductVariantSchema.omit({ productId: true })
 type VariantFormInput = z.infer<typeof variantFormSchema>
 
 // Partial<VariantFormInput>, no VariantFormInput a secas -- mismo patrón que el resto de campos
-// críticos vueltos requeridos en este repo (ver memoria del proyecto): una variante vieja creada
+// críticos vueltos requeridos en este repo: una variante vieja creada
 // antes de este cambio puede no tener boxesPerPallet/bagsPerBox (columnas nuevas/reinterpretadas),
 // así que se precarga vacío para poder abrir el registro a editar, pero no se puede volver a
 // GUARDAR sin completarlo (el schema sí los exige).

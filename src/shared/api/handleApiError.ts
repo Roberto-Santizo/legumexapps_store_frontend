@@ -10,7 +10,7 @@ export function handleApiError(error: unknown): never {
     }
 
     if (error instanceof ZodError) {
-        // Log en dev (2026-09-22): el mensaje que sí ve el usuario es el genérico de abajo, a
+        // Log en dev: el mensaje que sí ve el usuario es el genérico de abajo, a
         // propósito -- pero sin esto, un body que no matchea el schema (ej. un 304 Not Modified
         // sin body, ver server.ts::server.set("etag", false)) fallaba en silencio y solo dejaba
         // "no se pudo cargar" en pantalla, sin pista de la causa real en la consola.

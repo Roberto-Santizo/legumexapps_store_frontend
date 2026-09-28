@@ -30,14 +30,14 @@ type QuoteCalculatorFormProps = {
     onSubmit: (formData: CalculateQuoteInput) => void
     isSubmitting: boolean
     onStepChange?: (step: QuoteWizardStep) => void
-    // Transporte "apagado" temporalmente para el cliente (2026-09-10): este mismo form lo reusa
+    // Transporte "apagado" temporalmente para el cliente: este mismo form lo reusa
     // también el cotizador interno del admin (ver adminQuoteCalculator.page.tsx), que SÍ sigue
     // pudiendo elegir destino -- por eso es un prop con default true (nada cambia para el admin)
     // en vez de borrar los campos del form. quoteRequest.page.tsx (cliente) es el único
     // consumidor que lo pasa en false. destinationId ya es opcional en calculateQuoteSchema, así
     // que no enviarlo nunca no rompe la validación.
     showDestination?: boolean
-    // Recalculo en vivo (2026-09-21, ver CLAUDE.md #6) -- default undefined a propósito, mismo
+    // Recalculo en vivo -- default undefined a propósito, mismo
     // criterio inverso que showDestination: SOLO el cliente (quoteRequest.page.tsx) lo pasa
     // (previewQuoteAPI). El admin (adminQuoteCalculatorPage) no lo pasa -- su propio submit YA es
     // un cálculo sin persistir (previewAdminQuoteAPI), así que esta feature no le aporta nada
@@ -54,7 +54,7 @@ const MIX_PERCENTAGE_TOLERANCE = 0.5
 
 type QuoteMode = "finished" | "customizable"
 
-// Orden del wizard (2026-09-23, ver CLAUDE.md #6): mode -> category -> product -> pallets ->
+// Orden del wizard: mode -> category -> product -> pallets ->
 // total. "pallets" es el paso combinado palets + materiales: SKU/presentación, cantidad de palets,
 // cajas/peso y, debajo, las tarjetas de los niveles de material que tengan alternativas swappable
 // en el SKU elegido (ninguna -> solo palets/peso), con UN solo total en vivo al pie. "total" es
@@ -72,7 +72,7 @@ const MATERIAL_LEVELS: { level: MaterialLevel; groupsKey: MaterialGroupsKey; pay
     { level: "pallet", groupsKey: "palletMaterialOptionGroups", payloadKey: "selectedPalletMaterialIds" },
 ]
 
-// Clave de la elección del cliente por grupo de opciones (2026-09-24): "nivel:grupo". El nombre ya
+// Clave de la elección del cliente por grupo de opciones: "nivel:grupo". El nombre ya
 // viene normalizado del backend; se baja a minúsculas por la misma regla insensible a mayúsculas.
 function materialGroupKey(level: MaterialLevel, group: string): string {
     return `${level}:${group.toLowerCase()}`
@@ -103,14 +103,14 @@ function resolveSelectedMaterialId(
     return options.find((option) => option.isDefault)?.id
 }
 
-// Etiqueta del selector de SKU (2026-09-13) -- compuesta 100% de datos que ya existen en
+// Etiqueta del selector de SKU -- compuesta 100% de datos que ya existen en
 // QuotableVariant/QuotableProduct, nunca de un campo de texto libre nuevo ni de Excel: nombre del
 // Producto (para que la opción sea autocontenida, aunque el producto ya se eligió en el paso
 // anterior del wizard) + bagsPerBox × presentationLabel (tamaño por unidad) + boxesPerPallet.
 // boxesPerPallet/bagsPerBox/presentationId nunca vienen null acá: listQuotableProducts
 // (quote.service.ts, backend) ya filtra con `WHERE boxesPerPallet IS NOT NULL AND bagsPerBox IS
 // NOT NULL AND presentationId IS NOT NULL` -- una variante sin esos datos ni siquiera llega a
-// esta lista (presentationId es requerido a nivel de columna desde 2026-09-16, ver context.md).
+// esta lista (presentationId es requerido a nivel de columna).
 // El fallback de presentationLabel null de abajo queda como defensa adicional, ya no debería
 // poder ocurrir en la práctica.
 function variantLabel(productName: string, variant: QuotableProduct["variants"][number], t: TFunction): string {
@@ -208,7 +208,7 @@ export function QuoteCalculatorForm({
     const variants = selectedProduct?.variants ?? []
     const rawMaterialPool = selectedProduct?.rawMaterialPool ?? []
 
-    // Default + opcional por nivel (2026-09-21, ver CLAUDE.md #4) -- el menú de alternativas de
+    // Default + opcional por nivel -- el menú de alternativas de
     // cada nivel viene ya resuelto en el SKU elegido (QuotableVariant.*MaterialOptionGroups), nunca se
     // arma acá. watch("productVariantId") en vez de selectedProductId/variants porque lo que
     // importa es la VARIANTE (SKU) elegida en el propio <select>, no el producto del paso
@@ -218,7 +218,7 @@ export function QuoteCalculatorForm({
     const watchedRequestedPallets = watch("requestedPallets")
     const totalWeightKg = selectedVariant ? calculateTotalOrderWeightKg(selectedVariant, watchedRequestedPallets) : null
 
-    // Grupos de opciones (2026-09-24, ver CLAUDE.md #4): un chooser por grupo de cada nivel (ej.
+    // Grupos de opciones: un chooser por grupo de cada nivel (ej.
     // "Caja" y "Esquinero" en paletización), cada uno con su propia elección vigente.
     const materialGroups: MaterialGroup[] = selectedVariant
         ? MATERIAL_LEVELS.flatMap(({ level, groupsKey }) =>
@@ -236,7 +236,7 @@ export function QuoteCalculatorForm({
         : []
     const selectedMaterialIdsKey = JSON.stringify(buildSelectedMaterialIds(materialGroups))
 
-    // Recalculo en vivo (2026-09-21, ver CLAUDE.md #6) -- llama a previewAPI (NUNCA guarda, ver
+    // Recalculo en vivo -- llama a previewAPI (NUNCA guarda, ver
     // el comentario de la prop) con debounce cada vez que cambia la elección de un material, de
     // variante o de palets (cualquiera de los dos inputs del paso combinado dispara el recálculo),
     // SOLO mientras el cliente está en el paso "pallets" (el único previo al cálculo real --
@@ -662,7 +662,7 @@ export function QuoteCalculatorForm({
                         </div>
                     )}
 
-                    {/* Paso combinado palets + materiales (2026-09-23, ver CLAUDE.md #6): SKU +
+                    {/* Paso combinado palets + materiales: SKU +
                     cantidad de palets + cajas/peso arriba, tarjetas de materiales debajo (solo los
                     niveles con alternativas en el SKU elegido), un único total en vivo al pie. */}
                     {step === "pallets" && selectedProduct && (
@@ -708,7 +708,7 @@ export function QuoteCalculatorForm({
                         />
                     )}
 
-                    {/* Paso "total" (2026-09-22, ver CLAUDE.md #6): solo resumen de lo elegido --
+                    {/* Paso "total": solo resumen de lo elegido --
                     el total real y las acciones ("Nueva cotización" / "Enviar por correo") las
                     muestra el padre (QuoteResultCard/QuotedOrderSummary), este paso solo existe
                     tras un submit exitoso (ver hasReachedTotal). */}

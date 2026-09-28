@@ -78,7 +78,7 @@ export function AdminQuoteListPage() {
                                         {` · ${quote.quotingSalesperson.email}`}
                                     </p>
                                     <p className="mt-1 text-xs text-texto-suave">
-                                        {/* Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- ya no se
+                                        {/* Transporte apagado para TODOS por ahora -- ya no se
                                         interpola el destino acá tampoco. Reversión futura: volver a
                                         "adminQuote.list.summary" con el destination. */}
                                         {t("adminQuote.list.summaryNoDestination", {

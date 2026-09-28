@@ -59,7 +59,7 @@ export async function updatePresentationAPI(id: number, formData: UpdatePresenta
 }
 
 // Reusan el plumbing genérico de shared/api/bulkImport.api.ts -- mismo diseño para todos los
-// catálogos con carga masiva (ver esa entrada de memoria del proyecto); lo único específico de
+// catálogos con carga masiva; lo único específico de
 // Presentaciones acá es la URL.
 export const bulkImportPresentationsAPI = (file: File) => postBulkImportFile("/presentations/bulk-import", file)
 export const downloadPresentationImportTemplateAPI = () => getBulkImportTemplate("/presentations/bulk-import/template")

@@ -44,6 +44,6 @@ export async function deleteProductRawMaterialAPI(id: number) {
     }
 }
 
-// Carga masiva de Recetas (2026-09-25, paso 2 de 3: Productos -> Recetas -> SKUs).
+// Carga masiva de Recetas (paso 2 de 4: Productos -> Recetas -> Ingredientes -> SKUs).
 export const bulkImportProductRawMaterialsAPI = (file: File) => postBulkImportFile("/product-raw-materials/bulk-import", file)
 export const downloadProductRawMaterialImportTemplateAPI = () => getBulkImportTemplate("/product-raw-materials/bulk-import/template")

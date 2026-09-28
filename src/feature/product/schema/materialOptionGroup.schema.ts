@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-// Grupos de opciones de empaque (2026-09-24, ver CLAUDE.md #4) -- compartido por las tres secciones
+// Grupos de opciones de empaque -- compartido por las tres secciones
 // admin de materiales (unit / intermediate / pallet). En la API la fila solo tiene `optionGroup`
 // (string | null; null = fila fija). En el FORM se desdobla en un checkbox "el cliente elige"
 // (isOptional, solo de formulario) + el nombre del grupo como texto, para que el admin siga

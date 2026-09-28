@@ -5,7 +5,7 @@ type QuotableVariant = QuotableProduct["variants"][number]
 const GRAMS_PER_KG = 1000
 const KG_PER_LB = 0.45359237
 
-// Peso total del pedido (paso "pallets" del wizard, ver CLAUDE.md #6) -- boxesPerPallet ×
+// Peso total del pedido (paso "pallets" del wizard) -- boxesPerPallet ×
 // bagsPerBox × netWeightGrams(por bolsa) × requestedPallets, puramente display-side: no toca
 // calculateQuote ni ningún campo que el backend valide. null si la variante no trae
 // netWeightGrams (defensa adicional, ver el comentario del campo en quote.schema.ts) o si

@@ -212,6 +212,8 @@
                 "boxesPerPallet": "Boxes per pallet",
                 "perPallet": "Per pallet",
                 "rawMaterials": "Raw materials",
+                "ingredients": "Ingredients",
+                "ingredientLabel": "{{name}} ({{grams}} g per unit)",
                 "unitPackaging": "Unit packaging",
                 "intermediatePackaging": "Intermediate packaging",
                 "processingCosts": "Additional costs",
@@ -614,6 +616,39 @@
             "rowErrorItem": "Row {{row}}: {{message}}"
         }
     },
+    "ingredient": {
+        "form": {
+            "code": "Code",
+            "displayName": "Name",
+            "costPerUnit": "Cost per pound",
+            "translationSectionTitle": "English translation",
+            "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name.",
+            "displayNameEn": "Name (English)"
+        },
+        "list": {
+            "title": "Ingredients",
+            "createLink": "Create ingredient"
+        },
+        "create": {
+            "title": "Create ingredient"
+        },
+        "edit": {
+            "title": "Edit ingredient"
+        },
+        "table": {
+            "searchPlaceholder": "Search by name...",
+            "empty": "No ingredients registered"
+        },
+        "bulkImport": {
+            "title": "Bulk upload from Excel",
+            "description": "Download the template, fill it in with your ingredients (salt, sugar, pepper...) and upload it. The whole file is validated first: if a single row has an error, nothing is imported -- fix the file and upload it again. The \"Código\" (code) must be unique. The \"Costo por libra\" (cost per pound) is always costed in pounds.",
+            "downloadTemplate": "Download template",
+            "importButton": "Import file",
+            "importing": "Importing...",
+            "rowErrorsTitle": "The file has {{count}} error(s). No ingredient was imported:",
+            "rowErrorItem": "Row {{row}}: {{message}}"
+        }
+    },
     "subCategory": {
         "form": {
             "categoryId": "Category",
@@ -749,10 +784,11 @@
         },
         "bulkImportSteps": {
             "title": "Bulk upload from Excel",
-            "intro": "Create complete products (everything except the image) with three files, uploaded in this order. Each file is fully validated and all-or-nothing: if it fails, fix it and upload it again, the previous steps stay saved. The image is uploaded afterward from each product's edit screen.",
+            "intro": "Create complete products (everything except the image) with four files, uploaded in this order (step 3, Ingredients, is optional). Each file is fully validated and all-or-nothing: if it fails, fix it and upload it again, the previous steps stay saved. The image is uploaded afterward from each product's edit screen.",
             "requires1": "Step 1 · Products — requires their Subcategories and Clients to already exist.",
             "requires2": "Step 2 · Recipes — requires the Products from step 1 and the Raw Materials in their catalog.",
-            "requires3": "Step 3 · SKUs & packaging — requires the Products with a complete recipe (step 2), and the Presentations and Packaging in their catalogs."
+            "requires3": "Step 3 · Ingredients (optional) — requires the Products from step 1 and the Ingredients in their catalog.",
+            "requires4": "Step 4 · SKUs & packaging — requires the Products with a complete recipe (step 2), and the Presentations and Packaging in their catalogs."
         }
     },
     "productVariant": {
@@ -808,6 +844,39 @@
             "importButton": "Import file",
             "importing": "Importing...",
             "rowErrorsTitle": "The file has {{count}} error(s). No recipe was imported:",
+            "rowErrorItem": "Row {{row}}: {{message}}"
+        }
+    },
+    "productIngredient": {
+        "list": {
+            "title": "Added ingredients",
+            "hint": "Optional. Salt, sugar, pepper... are charged separately, on top of the recipe (they don't count toward the 100%). Enter the grams in a reference presentation: the cost scales automatically with each presentation quoted."
+        },
+        "form": {
+            "ingredientId": "Ingredient",
+            "grams": "Grams",
+            "referenceNetWeightGrams": "Reference weight (g)",
+            "referenceFromSku": "Use a SKU's weight (optional)",
+            "referenceFromSkuPlaceholder": "Choose SKU...",
+            "skuOption": "{{label}} — {{grams}} g",
+            "gramsExceedReference": "The grams can't be greater than the reference weight.",
+            "preview": "= {{percentage}} % of net weight → {{scaledGrams}} g in a {{netWeight}} g presentation",
+            "previewNoSku": "= {{percentage}} % of net weight",
+            "addButton": "Add ingredient"
+        },
+        "table": {
+            "grams": "Grams",
+            "referenceNetWeightGrams": "Reference weight (g)",
+            "percentage": "≈ % of net weight",
+            "empty": "This product has no added ingredients"
+        },
+        "bulkImport": {
+            "title": "Bulk upload product Ingredients from Excel",
+            "description": "Optional. Download the template, fill it in with each product's added ingredients (one row per ingredient) and upload it. The products must already exist (step 1) and each ingredient is looked up by its code. \"Gramos\" (grams) are the grams in a \"Peso de referencia (g)\" (reference weight) presentation (e.g. 40 g in 2000 g) and can't exceed that weight. The whole file is validated first: if a single row has an error, nothing is created. This importer only CREATES: a product that already has ingredients is rejected (edit them from its screen).",
+            "downloadTemplate": "Download template",
+            "importButton": "Import file",
+            "importing": "Importing...",
+            "rowErrorsTitle": "The file has {{count}} error(s). No ingredient was imported:",
             "rowErrorItem": "Row {{row}}: {{message}}"
         }
     },
@@ -1084,6 +1153,7 @@
                 "boxesPerPallet": "Boxes per pallet",
                 "perPallet": "Per pallet",
                 "rawMaterials": "Raw materials",
+                "ingredients": "Ingredients",
                 "unitPackaging": "Unit packaging",
                 "intermediatePackaging": "Intermediate packaging",
                 "processingCosts": "Additional costs",

@@ -46,7 +46,7 @@ export async function saveQuoteAPI(formData: CalculateQuoteInput) {
     }
 }
 
-// Recalculo en vivo (2026-09-21, ver CLAUDE.md #6) -- mirrors previewAdminQuoteAPI exactamente:
+// Recalculo en vivo -- mirrors previewAdminQuoteAPI exactamente:
 // solo calcula, nunca guarda (POST /quotes/preview, no POST /quotes). El wizard lo llama con
 // debounce cada vez que el representante cambia de material swappable en un nivel.
 export async function previewQuoteAPI(formData: CalculateQuoteInput) {

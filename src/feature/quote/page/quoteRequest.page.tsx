@@ -27,7 +27,7 @@ export function QuoteRequestPage() {
     const [formResetKey, setFormResetKey] = useState(0)
 
     const productsQuery = useQuery({ queryKey: ["quoteProducts"], queryFn: getQuoteProductsAPI })
-    // Transporte "apagado" temporalmente (2026-09-10): el cliente ya no elige destino (ver
+    // Transporte "apagado" temporalmente: el cliente ya no elige destino (ver
     // QuoteCalculatorForm showDestination={false} abajo), así que ya no hace falta traer el
     // catálogo de destinos para este flujo -- se deja de llamar GET /quotes/destinations acá.
     // El endpoint sigue existiendo intacto (lo sigue usando el cotizador interno del admin).

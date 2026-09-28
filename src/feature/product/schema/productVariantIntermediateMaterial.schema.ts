@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 
-// Reemplaza ProductVariant.intermediatePackagingId (FK único, ver CLAUDE.md #4) -- join N-filas
+// Reemplaza el viejo FK único ProductVariant.intermediatePackagingId -- join N-filas
 // con grupos de opciones (optionGroup/isDefault), mismo criterio que productVariantUnitMaterial.schema.ts, pero sin
 // cantidad propia (el motor sigue leyendo ProductVariant.unitsPerIntermediatePackage).
 export const createProductVariantIntermediateMaterialSchema = z.object({

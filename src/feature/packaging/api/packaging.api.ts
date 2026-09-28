@@ -60,7 +60,7 @@ export async function updatePackagingAPI(id: number, formData: UpdatePackagingIn
 }
 
 // Ambas reusan el plumbing genérico de shared/api/bulkImport.api.ts (mismo diseño para todos los
-// catálogos con carga masiva -- ver esa entrada de memoria del proyecto); lo único específico de
+// catálogos con carga masiva); lo único específico de
 // Empaques acá es la URL.
 export const bulkImportPackagingsAPI = (file: File) => postBulkImportFile("/packagings/bulk-import", file)
 export const downloadPackagingImportTemplateAPI = () => getBulkImportTemplate("/packagings/bulk-import/template")

@@ -8,7 +8,7 @@ export const createProductVariantUnitMaterialSchema = z.object({
     // esta línea. Si quedara vacío, el material "costaría" $0 en cada cotización -- mismo
     // criterio que ProductVariantPalletMaterial.quantityValue.
     quantityPerUnit: z.number().positive(),
-    // Grupos de opciones (2026-09-24, ver CLAUDE.md #4) -- espejo del backend: null = fila fija;
+    // Grupos de opciones -- espejo del backend: null = fila fija;
     // un nombre = alternativa dentro de ese grupo (el cliente elige una por grupo). Sin .default()
     // (a diferencia del backend): el form siempre manda el campo resuelto vía
     // toMaterialOptionGroupPayload (materialOptionGroup.schema.ts), y .default() acá rompe la

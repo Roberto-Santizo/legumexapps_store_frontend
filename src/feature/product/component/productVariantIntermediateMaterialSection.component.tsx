@@ -53,7 +53,7 @@ function toFormValues(item: ProductVariantIntermediateMaterialResponse): Partial
 
 // Reemplaza el viejo campo único ProductVariant.intermediatePackagingId (FK, ver
 // productVariantSection.component.tsx) -- mismo diseño mini-CRUD que
-// ProductVariantUnitMaterialSection/ProductVariantPalletMaterialSection (2026-09-21), con
+// ProductVariantUnitMaterialSection/ProductVariantPalletMaterialSection, con
 // grupos de opciones (optionGroup/isDefault) para que el cliente pueda elegir entre alternativas
 // al cotizar. Sin campo de cantidad propio: el motor sigue usando
 // ProductVariant.unitsPerIntermediatePackage, compartido entre cualquier alternativa elegida.

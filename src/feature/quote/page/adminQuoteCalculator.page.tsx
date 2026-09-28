@@ -15,7 +15,7 @@ import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
 import type { CalculateQuoteInput, QuoteCalculation } from "@/feature/quote/schema/quote.schema"
 
-// Cotizador interno del admin (2026-08-24, permiso "quotes:calculate") -- mismo wizard y mismo
+// Cotizador interno del admin (permiso "quotes:calculate") -- mismo wizard y mismo
 // QuoteResultCard que usa el cliente en site/quoteRequest.page.tsx, pero: (1) usa las rutas
 // /admin/quotes/* (JWT staff, ver adminQuote.api.ts) en vez de /quotes/* (JWT customer); (2)
 // llama a previewAdminQuoteAPI, que NUNCA persiste -- no hay botón de guardar, no se crea
@@ -24,7 +24,7 @@ import type { CalculateQuoteInput, QuoteCalculation } from "@/feature/quote/sche
 // showCostBreakdown={false} -- el admin SÍ ve el desglose completo (materia prima, empaque,
 // costos adicionales, materiales de palet, cargos porcentuales), a diferencia del cliente final.
 //
-// Transporte apagado para TODOS por ahora (2026-09-10, fase 2 -- antes solo se había apagado
+// Transporte apagado para TODOS por ahora (antes solo se había apagado
 // para el cliente, ver quoteRequest.page.tsx). El motor sigue intacto: QuoteCalculatorForm
 // recibe showDestination={false} igual que el cliente (el admin ya no elige destino tampoco), y
 // showTransport ya no se pasa en ningún componente de este archivo -- todos quedan en su
@@ -32,8 +32,8 @@ import type { CalculateQuoteInput, QuoteCalculation } from "@/feature/quote/sche
 // desglose. Reversión futura: pasar showDestination/showTransport en true donde corresponda.
 export function AdminQuoteCalculatorPage() {
     const { t } = useTranslation()
-    // Mismo patrón "pedido en curso" que quoteRequest.page.tsx (cliente, ver esa entrada de
-    // memoria del proyecto) -- currentResult es lo recién calculado en este paso, quotedLines es
+    // Mismo patrón "pedido en curso" que quoteRequest.page.tsx (cliente) -- currentResult es lo
+    // recién calculado en este paso, quotedLines es
     // todo lo acumulado en la sesión. Acá con más razón es 100% de pantalla: previewAdminQuoteAPI
     // no guarda nada, así que quotedLines nunca tuvo una contraparte persistida que vincular.
     const [currentResult, setCurrentResult] = useState<QuoteCalculation | null>(null)
@@ -42,7 +42,7 @@ export function AdminQuoteCalculatorPage() {
     const [formResetKey, setFormResetKey] = useState(0)
 
     const productsQuery = useQuery({ queryKey: ["adminQuoteProducts"], queryFn: getAdminQuoteProductsAPI })
-    // Transporte apagado para todos por ahora (2026-09-10, fase 2): el admin ya no elige destino
+    // Transporte apagado para todos por ahora: el admin ya no elige destino
     // (ver QuoteCalculatorForm showDestination={false} abajo), así que ya no hace falta traer el
     // catálogo de destinos acá tampoco -- se deja de llamar GET /admin/quotes/destinations. El
     // endpoint y getAdminQuoteDestinationsAPI siguen intactos, listos para reactivarse.

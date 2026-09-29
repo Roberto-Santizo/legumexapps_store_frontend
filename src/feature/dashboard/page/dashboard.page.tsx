@@ -22,11 +22,13 @@ import { formatCurrency } from "@/shared/format/currency"
 import { formatNumber } from "@/shared/format/number"
 
 export function DashboardPage() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const [range, setRange] = useState<DashboardDateRange>(() => presetRange(30))
 
     const summaryQuery = useQuery({
-        queryKey: ["dashboardSummary", range.startDate, range.endDate],
+        // El idioma va en la clave: el backend resuelve los nombres de productos/materias primas en el
+        // idioma del admin (Accept-Language), así que cambiarlo debe volver a pedir el resumen.
+        queryKey: ["dashboardSummary", range.startDate, range.endDate, i18n.language],
         queryFn: () => getDashboardSummaryAPI(range),
         placeholderData: keepPreviousData,
     })
@@ -86,15 +88,15 @@ export function DashboardPage() {
                             label: product.productDisplayName,
                             secondaryLabel: t("dashboard.topProducts.secondary", {
                                 count: product.quoteCount,
-                                revenue: formatCurrency(product.totalRevenue),
+                                pallets: formatNumber(product.totalPallets),
                             }),
-                            value: product.totalUnits,
-                            valueLabel: t("dashboard.topProducts.unitsLabel", { units: formatNumber(product.totalUnits) }),
+                            value: product.totalRevenue,
+                            valueLabel: formatCurrency(product.totalRevenue),
                         }))}
                     />
 
                     <ProductRevenueShareChart
-                        productsByRevenue={summary.topProductsByRevenue}
+                        productsByRevenue={summary.topProducts}
                         totalRevenue={summary.overview.totalRevenue}
                         emptyMessage={t("dashboard.productRevenueShare.empty")}
                     />

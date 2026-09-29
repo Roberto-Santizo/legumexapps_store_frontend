@@ -49,8 +49,8 @@ export const dashboardSummarySchema = z.object({
     overview: dashboardOverviewSchema,
     trend: z.array(dashboardTrendPointSchema),
     trendGranularity: z.enum(["day", "week"]),
+    // Ordenado por valor cotizado (backend); alimenta la lista y la dona de participación.
     topProducts: z.array(dashboardTopProductSchema),
-    topProductsByRevenue: z.array(dashboardTopProductSchema),
     topSalespeople: z.array(dashboardTopSalespersonSchema),
     topRawMaterials: z.array(dashboardTopRawMaterialSchema),
 })

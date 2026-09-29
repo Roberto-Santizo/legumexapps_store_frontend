@@ -9,6 +9,7 @@ import {
     ClipboardList,
     Cog,
     Contact,
+    FileClock,
     FolderTree,
     Image,
     Inbox,
@@ -47,6 +48,7 @@ const NAV_GROUPS: NavGroup[] = [
         labelKey: "nav.groups.quotes",
         items: [
             { url: "/admin/quotes", labelKey: "adminQuote.list.title", icon: ClipboardList, permission: "quotes:view" },
+            { url: "/admin/quote-drafts", labelKey: "quoteDraft.list.title", icon: FileClock, permission: "quoteDrafts:view" },
             { url: "/admin/quotes/calculator", labelKey: "adminQuoteCalculator.title", icon: Calculator, permission: "quotes:calculate" },
         ],
     },

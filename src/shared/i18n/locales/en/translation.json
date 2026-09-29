@@ -1065,14 +1065,13 @@
             "empty": "No quotes in the selected range."
         },
         "topProducts": {
-            "title": "Best-selling products",
-            "subtitle": "Ranked by units quoted (based on saved quotes).",
+            "title": "Most-quoted products",
+            "subtitle": "Ranked by quoted value (based on saved quotes).",
             "empty": "No product data for this range.",
-            "secondary": "{{count}} quotes · {{revenue}}",
-            "unitsLabel": "{{units}} units"
+            "secondary": "{{count}} quotes · {{pallets}} pallets"
         },
         "productRevenueShare": {
-            "title": "Revenue share by product",
+            "title": "Share of quoted value by product",
             "subtitle": "Share of total quoted value, top products in this range.",
             "empty": "No revenue data for this range.",
             "other": "Other products"
@@ -1099,6 +1098,29 @@
             "noMatches": "No quote matches the search.",
             "summary": "{{date}} · {{pallets}} pallets · {{destination}}",
             "summaryNoDestination": "{{date}} · {{pallets}} pallets"
+        }
+    },
+    "quoteDraft": {
+        "list": {
+            "title": "Unfinished quotes",
+            "description": "The last thing each salesperson calculated in the quoting tool without saving it, so you can follow up. A quote is marked as abandoned after 24 hours without activity. These drafts are not counted in \"Quotes\" or on the dashboard."
+        },
+        "state": {
+            "in_progress": "In progress",
+            "abandoned": "Abandoned"
+        },
+        "table": {
+            "state": "Status",
+            "salesperson": "Salesperson",
+            "product": "Product · presentation",
+            "pallets": "Pallets",
+            "lastTotal": "Last total",
+            "materials": "Chosen materials",
+            "previewCount": "Recalculations",
+            "activity": "Activity",
+            "startedAt": "Started",
+            "lastActivityAt": "Last activity",
+            "empty": "No unfinished quotes in this range."
         }
     },
     "adminQuoteCalculator": {

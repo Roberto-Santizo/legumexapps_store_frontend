@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
 import type { TFunction } from "i18next"
 import { ChevronRight, Package, SlidersHorizontal } from "lucide-react"
 import { calculateQuoteSchema } from "@/feature/quote/schema/quote.schema"
-import type { CalculateQuoteInput, QuotableProduct, QuoteDestination } from "@/feature/quote/schema/quote.schema"
+import type { CalculateQuoteInput, QuotableProduct, QuoteDestination, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 import type { DestinationCountry } from "@/feature/destination/schema/destination.schema"
 import { Card } from "@/shared/component/card.component"
 import { Chip } from "@/shared/component/chip.component"
@@ -27,7 +27,7 @@ import { calculateTotalOrderWeightKg, formatTotalOrderWeight } from "@/feature/q
 type QuoteCalculatorFormProps = {
     products: QuotableProduct[]
     destinations: QuoteDestination[]
-    onSubmit: (formData: CalculateQuoteInput) => void
+    onSubmit: (formData: SalespersonQuoteInput) => void
     isSubmitting: boolean
     onStepChange?: (step: QuoteWizardStep) => void
     // Transporte "apagado" temporalmente para el cliente: este mismo form lo reusa
@@ -45,7 +45,14 @@ type QuoteCalculatorFormProps = {
     // Cuando está presente, el form llama a este preview con debounce cada vez que cambia la
     // selección de un material, de variante o de palets, y muestra UN total estimado antes del
     // submit final.
-    previewAPI?: (formData: CalculateQuoteInput) => Promise<{ data: { totalCost: number } } | undefined>
+    previewAPI?: (formData: SalespersonQuoteInput) => Promise<{ data: { totalCost: number } } | undefined>
+    // Seguimiento de cotizaciones sin finalizar -- solo el wizard del representante lo pasa: la
+    // página dueña genera/rota la clave y el form solo la reenvía en cada preview y en el submit
+    // (mismo intento = misma clave mientras cambian SKU/palets/materiales). onProductChange avisa
+    // cuando se elige OTRO producto para que la página rote la clave (nuevo intento). El admin no
+    // pasa ninguno de los dos: sus cálculos nunca generan borradores.
+    draftKey?: string
+    onProductChange?: () => void
 }
 
 const LIVE_PREVIEW_DEBOUNCE_MS = 500
@@ -134,6 +141,8 @@ export function QuoteCalculatorForm({
     onStepChange,
     showDestination = true,
     previewAPI,
+    draftKey,
+    onProductChange,
 }: Readonly<QuoteCalculatorFormProps>) {
     const { t } = useTranslation()
     const [step, setStep] = useState<QuoteWizardStep>("mode")
@@ -246,6 +255,12 @@ export function QuoteCalculatorForm({
     // mostrarla. Silencioso ante errores: un total que no se puede calcular todavía simplemente
     // no se muestra, el submit real sigue siendo la fuente de verdad de errores visibles.
     const isLiveTotalAvailable = !!previewAPI && mode !== "customizable" && step === "pallets"
+    // draftKey se lee por ref dentro del efecto (no es dependencia): rotar la clave no debe disparar
+    // un recálculo por sí solo -- el siguiente preview que igual ocurra ya viaja con la clave nueva.
+    const draftKeyRef = useRef(draftKey)
+    useEffect(() => {
+        draftKeyRef.current = draftKey
+    }, [draftKey])
     useEffect(() => {
         if (!isLiveTotalAvailable || !previewAPI || !selectedVariantId || !watchedRequestedPallets) {
             setLivePreviewTotal(null)
@@ -261,6 +276,7 @@ export function QuoteCalculatorForm({
                 productVariantId: selectedVariantId,
                 requestedPallets: watchedRequestedPallets,
                 ...selectedMaterialIds,
+                ...(draftKeyRef.current ? { draftKey: draftKeyRef.current } : {}),
             })
                 .then((response) => {
                     if (cancelled) return
@@ -318,6 +334,7 @@ export function QuoteCalculatorForm({
         // Con un único SKU no hay nada que elegir en el paso "pallets": se preselecciona para que
         // ya muestre cajas/peso/materiales de una vez. Con más de un SKU, el cliente elige ahí.
         const onlyVariant = product?.variants.length === 1 ? product.variants[0] : undefined
+        if (productId !== selectedProductId) onProductChange?.()
         setSelectedProductId(productId)
         setValue("productVariantId", (onlyVariant?.id ?? undefined) as unknown as number)
         setMixPercentages({})
@@ -350,7 +367,11 @@ export function QuoteCalculatorForm({
         // Igual que rawMaterialMix: la elección de materiales vive en estado local (no
         // es un campo registrado), se mergea acá. El backend igual la revalida contra las opciones
         // reales del SKU -- este paso solo cambia DÓNDE elige el cliente, no la validación.
-        const withMaterials = { ...formData, ...buildSelectedMaterialIds(materialGroups) }
+        const withMaterials: SalespersonQuoteInput = {
+            ...formData,
+            ...buildSelectedMaterialIds(materialGroups),
+            ...(draftKey ? { draftKey } : {}),
+        }
 
         // Avanza al paso "total" apenas la validación del propio form pasa (sin esperar la
         // respuesta async de onSubmit) -- QuoteResultCard ya sabe mostrar su propio spinner

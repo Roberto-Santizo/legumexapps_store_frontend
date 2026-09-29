@@ -3,6 +3,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import type { TooltipContentProps } from "recharts"
 import { Card } from "@/shared/component/card.component"
 import { formatCompactCurrency, formatCurrency } from "@/shared/format/currency"
+import { formatIsoDateLabel } from "@/shared/format/businessDate"
 import { CHART_ACCENT_TREND, CHART_AXIS_TEXT_COLOR, CHART_GRID_COLOR, CHART_TOOLTIP_BG, CHART_TOOLTIP_TEXT } from "@/feature/dashboard/constant/chartColors"
 import type { DashboardTrendPoint } from "@/feature/dashboard/schema/dashboard.schema"
 
@@ -12,8 +13,10 @@ interface QuotesTrendChartProps {
     emptyMessage: string
 }
 
+// bucketStart ya es un día de Guatemala ("YYYY-MM-DD", el lunes en la vista semanal): se etiqueta
+// ese día calendario tal cual, sin pasar por la zona horaria del navegador.
 function formatBucketDate(bucketStart: string): string {
-    return new Date(`${bucketStart}T00:00:00Z`).toLocaleDateString("es-GT", { day: "2-digit", month: "short" })
+    return formatIsoDateLabel(bucketStart, { day: "2-digit", month: "short" })
 }
 
 function TrendTooltip({ active, payload }: Readonly<TooltipContentProps>) {

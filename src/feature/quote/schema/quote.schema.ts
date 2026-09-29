@@ -89,6 +89,14 @@ export const calculateQuoteSchema = z.object({
     selectedPalletMaterialIds: z.array(z.number().int().positive()).max(50).optional(),
 })
 
+// Solo el wizard del representante (POST /quotes/preview y POST /quotes): draftKey identifica el
+// intento de cotización en curso para el seguimiento de cotizaciones sin finalizar -- mismo schema
+// espejo del backend (salespersonQuoteSchema). Lo genera y rota quoteRequest.page.tsx; el cotizador
+// del admin nunca lo manda.
+export const salespersonQuoteSchema = calculateQuoteSchema.extend({
+    draftKey: z.string().uuid().optional(),
+})
+
 const rawMaterialLineSchema = z.object({
     rawMaterialId: z.number().int(),
     displayName: z.string(),
@@ -252,4 +260,5 @@ export const adminQuoteSchema = savedQuoteSchema.extend({
 export type QuotableProduct = z.infer<typeof quotableProductSchema>
 export type QuoteDestination = z.infer<typeof quoteDestinationSchema>
 export type CalculateQuoteInput = z.infer<typeof calculateQuoteSchema>
+export type SalespersonQuoteInput = z.infer<typeof salespersonQuoteSchema>
 export type QuoteCalculation = z.infer<typeof quoteCalculationSchema>

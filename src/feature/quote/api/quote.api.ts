@@ -12,7 +12,7 @@ import {
     quoteDestinationSchema,
     savedQuoteSchema,
 } from "@/feature/quote/schema/quote.schema"
-import type { CalculateQuoteInput } from "@/feature/quote/schema/quote.schema"
+import type { SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 
 const quoteProductListResponseSchema = apiListResponseSchema(quotableProductSchema)
 const quoteDestinationListResponseSchema = apiListResponseSchema(quoteDestinationSchema)
@@ -37,7 +37,7 @@ export async function getQuoteDestinationsAPI() {
     }
 }
 
-export async function saveQuoteAPI(formData: CalculateQuoteInput) {
+export async function saveQuoteAPI(formData: SalespersonQuoteInput) {
     try {
         const { data } = await salespersonApi.post("/quotes", formData)
         return saveQuoteResponseSchema.parse(data)
@@ -46,10 +46,11 @@ export async function saveQuoteAPI(formData: CalculateQuoteInput) {
     }
 }
 
-// Recalculo en vivo -- mirrors previewAdminQuoteAPI exactamente:
-// solo calcula, nunca guarda (POST /quotes/preview, no POST /quotes). El wizard lo llama con
-// debounce cada vez que el representante cambia de material swappable en un nivel.
-export async function previewQuoteAPI(formData: CalculateQuoteInput) {
+// Recalculo en vivo -- misma respuesta que previewAdminQuoteAPI: solo calcula, nunca guarda una
+// cotización (POST /quotes/preview, no POST /quotes). El wizard lo llama con debounce cada vez que
+// el representante cambia SKU/palets/material. Con draftKey, el backend además registra el borrador
+// del intento (seguimiento de cotizaciones sin finalizar).
+export async function previewQuoteAPI(formData: SalespersonQuoteInput) {
     try {
         const { data } = await salespersonApi.post("/quotes/preview", formData)
         return quotePreviewResponseSchema.parse(data)

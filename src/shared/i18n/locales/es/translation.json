@@ -1065,14 +1065,13 @@
             "empty": "No hay cotizaciones en el rango seleccionado."
         },
         "topProducts": {
-            "title": "Productos más vendidos",
-            "subtitle": "Ordenados por unidades cotizadas (según cotizaciones guardadas).",
+            "title": "Productos más cotizados",
+            "subtitle": "Ordenados por valor cotizado (según cotizaciones guardadas).",
             "empty": "No hay datos de productos para este rango.",
-            "secondary": "{{count}} cotizaciones · {{revenue}}",
-            "unitsLabel": "{{units}} unidades"
+            "secondary": "{{count}} cotizaciones · {{pallets}} palets"
         },
         "productRevenueShare": {
-            "title": "Participación de ingresos por producto",
+            "title": "Participación del valor cotizado por producto",
             "subtitle": "Proporción del valor total cotizado, productos principales de este rango.",
             "empty": "No hay datos de ingresos para este rango.",
             "other": "Otros productos"
@@ -1099,6 +1098,29 @@
             "noMatches": "Ninguna cotización coincide con la búsqueda.",
             "summary": "{{date}} · {{pallets}} palets · {{destination}}",
             "summaryNoDestination": "{{date}} · {{pallets}} palets"
+        }
+    },
+    "quoteDraft": {
+        "list": {
+            "title": "Cotizaciones sin finalizar",
+            "description": "Lo último que calculó cada representante en el cotizador sin llegar a guardarlo, para darle seguimiento. Una cotización se marca como abandonada tras 24 horas sin actividad. Estos borradores no cuentan en \"Cotizaciones\" ni en el panel de indicadores."
+        },
+        "state": {
+            "in_progress": "En progreso",
+            "abandoned": "Abandonada"
+        },
+        "table": {
+            "state": "Estado",
+            "salesperson": "Representante",
+            "product": "Producto · presentación",
+            "pallets": "Palets",
+            "lastTotal": "Último total",
+            "materials": "Materiales elegidos",
+            "previewCount": "Recálculos",
+            "activity": "Actividad",
+            "startedAt": "Iniciada",
+            "lastActivityAt": "Última actividad",
+            "empty": "No hay cotizaciones sin finalizar en este rango."
         }
     },
     "adminQuoteCalculator": {

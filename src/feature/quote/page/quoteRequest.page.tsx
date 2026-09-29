@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { useQuery, useMutation } from "@tanstack/react-query"
@@ -14,7 +14,7 @@ import { WIZARD_DETAILS_LAYOUT_CLASSNAME, WIZARD_STEP_LAYOUT_CLASSNAME } from "@
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary.component"
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
-import type { CalculateQuoteInput, QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import type { QuoteCalculation, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 
 export function QuoteRequestPage() {
     const { t } = useTranslation()
@@ -25,6 +25,11 @@ export function QuoteRequestPage() {
     const [wizardStep, setWizardStep] = useState<QuoteWizardStep>("mode")
 
     const [formResetKey, setFormResetKey] = useState(0)
+    // Seguimiento de cotizaciones sin finalizar: una clave por intento de cotización. Se mantiene
+    // mientras cambian SKU/palets/materiales (los previews actualizan el mismo borrador) y se rota
+    // al elegir otro producto, después de guardar con éxito y en "Nueva cotización".
+    const [draftKey, setDraftKey] = useState(() => crypto.randomUUID())
+    const rotateDraftKey = useCallback(() => setDraftKey(crypto.randomUUID()), [])
 
     const productsQuery = useQuery({ queryKey: ["quoteProducts"], queryFn: getQuoteProductsAPI })
     // Transporte "apagado" temporalmente: el cliente ya no elige destino (ver
@@ -38,6 +43,8 @@ export function QuoteRequestPage() {
             if (!response) return
             setCurrentResult(response.data)
             setQuotedLines((lines) => [...lines, response.data])
+            // El borrador de este intento ya quedó convertido: lo que se toque después es un intento nuevo.
+            rotateDraftKey()
             toast.success(response.message)
         },
         onError: (error) => {
@@ -51,7 +58,7 @@ export function QuoteRequestPage() {
     const hasCatalogError = productsQuery.isError
 
 
-    const handleSubmit = (formData: CalculateQuoteInput) => {
+    const handleSubmit = (formData: SalespersonQuoteInput) => {
         setCurrentResult(null)
         calculateMutation.mutate(formData)
     }
@@ -68,6 +75,7 @@ export function QuoteRequestPage() {
         setCurrentResult(null)
         setWizardStep("mode")
         setFormResetKey((key) => key + 1)
+        rotateDraftKey()
     }
 
     const handleClearOrder = () => {
@@ -92,6 +100,8 @@ export function QuoteRequestPage() {
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}
                     previewAPI={previewQuoteAPI}
+                    draftKey={draftKey}
+                    onProductChange={rotateDraftKey}
                 />
                 <div className="space-y-6">
                     <QuoteResultCard
@@ -126,6 +136,8 @@ export function QuoteRequestPage() {
                     isSubmitting={calculateMutation.isPending}
                     onStepChange={handleStepChange}
                     previewAPI={previewQuoteAPI}
+                    draftKey={draftKey}
+                    onProductChange={rotateDraftKey}
                 />
                 {quotedLines.length > 0 && (
                     <QuotedOrderSummary

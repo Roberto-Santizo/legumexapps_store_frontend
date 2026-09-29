@@ -1,5 +1,3 @@
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
-
 export type PackagingConfigLevel = "unit" | "intermediate" | "pallet"
 
 export type PackagingConfigGroup = {
@@ -18,14 +16,22 @@ export type PackagingConfigLevelSummary = {
 
 type MaterialLine = { displayName: string; optionGroup: string | null }
 
+// Lo único que el helper lee de un snapshot (Quote.breakdown o el de un borrador).
+export type PackagingMaterialsSnapshot = {
+    unitMaterials?: MaterialLine[]
+    intermediateMaterials?: MaterialLine[]
+    palletMaterials?: MaterialLine[]
+}
+
 // Configuración de empaque de una línea cotizada, SOLO nombres (nunca costos): el snapshot ya
 // trae exactamente las filas costeadas -- las fijas (optionGroup null) + una por grupo (la elegida
 // por el cliente o el default), ver quote.service.ts::resolveMaterialsForQuote en el backend.
-// Función pura para que QuoteResultCard pueda reusarla si algún día se muestra en pantalla.
+// Función pura: la usan el PDF y el seguimiento de cotizaciones sin finalizar (feature/quoteDraft),
+// que solo recibe los tres arrays de materiales -- por eso el parámetro pide solo esos campos.
 // Niveles ausentes (cotizaciones viejas sin unitMaterials/intermediateMaterials) o sin filas se
 // omiten.
 export function buildPackagingConfiguration(
-    breakdown: QuoteCalculation["breakdown"],
+    breakdown: PackagingMaterialsSnapshot,
 ): PackagingConfigLevelSummary[] {
     const levels: { level: PackagingConfigLevel; number: number; lines: MaterialLine[] | undefined }[] = [
         { level: "unit", number: 1, lines: breakdown.unitMaterials },

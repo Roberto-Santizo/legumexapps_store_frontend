@@ -945,6 +945,80 @@
             "fixed": "Fijo"
         }
     },
+    "customQuoteConfig": {
+        "title": "Configuración de cotizaciones a la medida",
+        "navTitle": "Config. a la medida",
+        "description": "Define qué puede elegir un representante al cotizar un producto que todavía no existe (sin SKU) y con qué números se cotiza. Nada de esto modifica los productos definidos.",
+        "tabs": {
+            "rawMaterials": "Materias primas",
+            "ingredients": "Ingredientes",
+            "presentations": "Presentaciones",
+            "packagings": "Empaques"
+        },
+        "rawMaterials": {
+            "description": "Materias primas que se pueden mezclar en un producto a la medida, por subcategoría. Los límites de porcentaje son opcionales: sin límite, la materia prima puede ir de 0 % a 100 %.",
+            "subCategory": "Subcategoría",
+            "chooseSubCategory": "Elige una subcategoría para ver y configurar sus materias primas.",
+            "rawMaterial": "Materia prima",
+            "mixable": "Mezclable",
+            "minPercentage": "% mínimo",
+            "maxPercentage": "% máximo",
+            "empty": "Esta subcategoría todavía no tiene materias primas configuradas.",
+            "limitsHint": "Deja un límite vacío para no restringirlo. Una receta con más de una materia prima solo acepta materias primas mezclables.",
+            "addButton": "Agregar materia prima",
+            "notMixableTag": "no mezclable",
+            "minGreaterThanMax": "El mínimo no puede ser mayor que el máximo"
+        },
+        "ingredients": {
+            "description": "Ingredientes agregados (sal, azúcar…) que el representante puede sumar a un producto a la medida, fuera del 100 % de la receta.",
+            "ingredient": "Ingrediente",
+            "maxGramsPerKg": "Tope (g por kg de peso neto)",
+            "noCap": "Sin tope",
+            "gramsPerKgValue": "{{value}} g/kg",
+            "empty": "Todavía no hay ingredientes configurados.",
+            "capHint": "El tope se expresa por kg de peso neto, así vale igual para cualquier presentación (20 g/kg = 10 g en una bolsa de 500 g).",
+            "addButton": "Agregar ingrediente"
+        },
+        "presentations": {
+            "description": "Presentaciones que se pueden cotizar a la medida y la composición de palet con la que se cotizan. Solo aparecen presentaciones activas con peso neto.",
+            "presentation": "Presentación",
+            "netWeight": "Peso neto",
+            "boxesPerPallet": "Cajas por palet",
+            "bagsPerBox": "Bolsas por caja",
+            "unitsPerIntermediatePackage": "Unidades por empaque intermedio",
+            "noIntermediate": "Sin empaque intermedio",
+            "empty": "Todavía no hay presentaciones configuradas.",
+            "bagsPerPalletHint": "= {{bagsPerPallet}} bolsas por palet",
+            "intermediateHint": "Deja vacío \"Unidades por empaque intermedio\" si esta presentación no lleva empaque intermedio.",
+            "addButton": "Agregar presentación"
+        },
+        "packagings": {
+            "description": "Materiales de empaque que se ofrecen, por nivel. Un material fijo se incluye siempre; los materiales con el mismo grupo son alternativas y el representante elige uno por grupo.",
+            "level": "Nivel",
+            "levels": {
+                "unit": "Empaque individual",
+                "intermediate": "Empaque intermedio",
+                "pallet": "Paletización"
+            },
+            "packaging": "Material",
+            "quantity": "Cantidad",
+            "quantityPerUnit": "Cantidad por unidad",
+            "quantityBasis": "La cantidad es",
+            "basis": {
+                "per_pallet": "Por palet",
+                "per_box": "Por caja (se multiplica por las cajas por palet)"
+            },
+            "quantityValue": {
+                "per_unit": "{{quantity}} por unidad",
+                "per_pallet": "{{quantity}} por palet",
+                "per_box": "{{quantity}} por caja"
+            },
+            "quantityRequired": "Escribe la cantidad de este material",
+            "intermediateHint": "El empaque intermedio no lleva cantidad: se calcula con las unidades por empaque intermedio de la presentación elegida.",
+            "empty": "Este nivel todavía no tiene materiales configurados.",
+            "addButton": "Agregar material"
+        }
+    },
     "salesperson": {
         "form": {
             "name": "Nombre",

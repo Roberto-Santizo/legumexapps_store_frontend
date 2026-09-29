@@ -128,6 +128,9 @@ const AdminQuoteListPage = lazyWithRetry(() =>
 const QuoteDraftListPage = lazyWithRetry(() =>
     import("@/feature/quoteDraft/page/quoteDraft.page").then((module) => ({ default: module.QuoteDraftListPage }))
 )
+const CustomQuoteConfigPage = lazyWithRetry(() =>
+    import("@/feature/customQuote/page/customQuoteConfig.page").then((module) => ({ default: module.CustomQuoteConfigPage }))
+)
 const AdminQuoteCalculatorPage = lazyWithRetry(() =>
     import("@/feature/quote/page/adminQuoteCalculator.page").then((module) => ({ default: module.AdminQuoteCalculatorPage }))
 )
@@ -164,6 +167,7 @@ const routes = [
 
     { path: "quotes", component: AdminQuoteListPage, permission: "quotes:view" },
     { path: "quote-drafts", component: QuoteDraftListPage, permission: "quoteDrafts:view" },
+    { path: "custom-quote-config", component: CustomQuoteConfigPage, permission: "customQuoteConfig:edit" },
     { path: "quotes/calculator", component: AdminQuoteCalculatorPage, permission: "quotes:calculate" },
 
     { path: "categories", component: CategoryListPage, permission: "categories:view" },

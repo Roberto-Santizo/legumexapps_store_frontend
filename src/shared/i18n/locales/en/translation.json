@@ -945,6 +945,80 @@
             "fixed": "Fixed"
         }
     },
+    "customQuoteConfig": {
+        "title": "Custom-quote configuration",
+        "navTitle": "Custom-quote setup",
+        "description": "Define what a salesperson can choose when quoting a product that doesn't exist yet (no SKU) and which numbers it is quoted with. None of this changes the defined products.",
+        "tabs": {
+            "rawMaterials": "Raw materials",
+            "ingredients": "Ingredients",
+            "presentations": "Presentations",
+            "packagings": "Packaging"
+        },
+        "rawMaterials": {
+            "description": "Raw materials that can be mixed into a custom product, per subcategory. Percentage limits are optional: without a limit the raw material can go from 0% to 100%.",
+            "subCategory": "Subcategory",
+            "chooseSubCategory": "Choose a subcategory to view and configure its raw materials.",
+            "rawMaterial": "Raw material",
+            "mixable": "Mixable",
+            "minPercentage": "Min %",
+            "maxPercentage": "Max %",
+            "empty": "This subcategory has no raw materials configured yet.",
+            "limitsHint": "Leave a limit empty to not restrict it. A recipe with more than one raw material only accepts mixable raw materials.",
+            "addButton": "Add raw material",
+            "notMixableTag": "not mixable",
+            "minGreaterThanMax": "The minimum cannot be greater than the maximum"
+        },
+        "ingredients": {
+            "description": "Added ingredients (salt, sugar…) the salesperson can add to a custom product, outside the 100% recipe.",
+            "ingredient": "Ingredient",
+            "maxGramsPerKg": "Cap (g per kg of net weight)",
+            "noCap": "No cap",
+            "gramsPerKgValue": "{{value}} g/kg",
+            "empty": "No ingredients configured yet.",
+            "capHint": "The cap is per kg of net weight, so it works for any presentation (20 g/kg = 10 g in a 500 g bag).",
+            "addButton": "Add ingredient"
+        },
+        "presentations": {
+            "description": "Presentations that can be custom-quoted and the pallet composition they are quoted with. Only active presentations with a net weight are listed.",
+            "presentation": "Presentation",
+            "netWeight": "Net weight",
+            "boxesPerPallet": "Boxes per pallet",
+            "bagsPerBox": "Bags per box",
+            "unitsPerIntermediatePackage": "Units per intermediate package",
+            "noIntermediate": "No intermediate packaging",
+            "empty": "No presentations configured yet.",
+            "bagsPerPalletHint": "= {{bagsPerPallet}} bags per pallet",
+            "intermediateHint": "Leave \"Units per intermediate package\" empty if this presentation has no intermediate packaging.",
+            "addButton": "Add presentation"
+        },
+        "packagings": {
+            "description": "Packaging materials offered, per level. A fixed material is always included; materials with the same group are alternatives and the salesperson picks one per group.",
+            "level": "Level",
+            "levels": {
+                "unit": "Unit packaging",
+                "intermediate": "Intermediate packaging",
+                "pallet": "Palletizing"
+            },
+            "packaging": "Material",
+            "quantity": "Quantity",
+            "quantityPerUnit": "Quantity per unit",
+            "quantityBasis": "Quantity is",
+            "basis": {
+                "per_pallet": "Per pallet",
+                "per_box": "Per box (multiplied by boxes per pallet)"
+            },
+            "quantityValue": {
+                "per_unit": "{{quantity}} per unit",
+                "per_pallet": "{{quantity}} per pallet",
+                "per_box": "{{quantity}} per box"
+            },
+            "quantityRequired": "Enter this material's quantity",
+            "intermediateHint": "Intermediate packaging has no quantity: it is calculated from the chosen presentation's units per intermediate package.",
+            "empty": "This level has no materials configured yet.",
+            "addButton": "Add material"
+        }
+    },
     "salesperson": {
         "form": {
             "name": "Name",

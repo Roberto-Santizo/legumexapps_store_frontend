@@ -21,6 +21,7 @@ import {
     Ruler,
     ShieldCheck,
     ShoppingBag,
+    SlidersHorizontal,
     UserCog,
     Users,
 } from "lucide-react"
@@ -66,6 +67,7 @@ const NAV_GROUPS: NavGroup[] = [
             { url: "/admin/units", labelKey: "unit.list.title", icon: Ruler, permission: "units:view" },
             { url: "/admin/destinations", labelKey: "destination.list.title", icon: MapPin, permission: "destinations:view" },
             { url: "/admin/processing-costs", labelKey: "processingCost.list.title", icon: Cog, permission: "processingCosts:view" },
+            { url: "/admin/custom-quote-config", labelKey: "customQuoteConfig.navTitle", icon: SlidersHorizontal, permission: "customQuoteConfig:edit" },
         ],
     },
     {

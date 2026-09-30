@@ -183,8 +183,11 @@ const adjustmentLineSchema = z.object({
     lineTotal: z.number(),
 })
 
-export const quoteCalculationSchema = z.object({
-    productVariantId: z.number().int(),
+// Línea cotizada COMPARTIDA por los dos mundos: una cotización de producto definido (quoteCalculationSchema,
+// que agrega productVariantId) y una cotización a la medida (feature/customQuote, que agrega su propia
+// configuración y no tiene SKU). Es todo lo que necesitan QuoteResultCard, QuotedOrderSummary, el PDF y
+// buildPackagingConfiguration -- ninguno lee productVariantId, así que aceptan cualquiera de las dos.
+export const quoteLineSchema = z.object({
     // null cuando no se mandó destino -- ver transportLineSchema.destinationId arriba.
     destinationId: z.number().int().nullable(),
     productDisplayName: z.string(),
@@ -240,6 +243,10 @@ export const quoteCalculationSchema = z.object({
     }),
 })
 
+export const quoteCalculationSchema = quoteLineSchema.extend({
+    productVariantId: z.number().int(),
+})
+
 export const savedQuoteSchema = quoteCalculationSchema.extend({
     id: z.number().int(),
     createdAt: z.coerce.date(),
@@ -261,4 +268,16 @@ export type QuotableProduct = z.infer<typeof quotableProductSchema>
 export type QuoteDestination = z.infer<typeof quoteDestinationSchema>
 export type CalculateQuoteInput = z.infer<typeof calculateQuoteSchema>
 export type SalespersonQuoteInput = z.infer<typeof salespersonQuoteSchema>
+export type QuoteLine = z.infer<typeof quoteLineSchema>
 export type QuoteCalculation = z.infer<typeof quoteCalculationSchema>
+
+// Composición que el PDF muestra para una línea A LA MEDIDA (la receta la armó el representante, así que
+// es parte de lo que se cotiza): nombres + % de materia prima y gramos por unidad de cada ingrediente,
+// NUNCA costos. Las líneas de productos definidos no la traen (su receta es del producto, no del pedido).
+export type QuoteLineComposition = {
+    rawMaterials: { displayName: string; percentage: number }[]
+    ingredients: { displayName: string; gramsPerUnit: number }[]
+}
+
+// Lo que acepta el PDF: cualquier línea cotizada, con composición opcional.
+export type QuoteDocumentLine = QuoteLine & { composition?: QuoteLineComposition }

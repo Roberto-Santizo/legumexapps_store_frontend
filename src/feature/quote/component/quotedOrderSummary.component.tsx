@@ -2,14 +2,14 @@ import { useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react"
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import type { QuoteLine } from "@/feature/quote/schema/quote.schema"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
 import { formatCurrency } from "@/shared/format/currency"
 
 type QuotedOrderSummaryProps = {
-    lines: QuoteCalculation[]
+    lines: QuoteLine[]
     onQuoteAnother: () => void
     onClear: () => void
     showCostBreakdown?: boolean
@@ -42,8 +42,8 @@ export function QuotedOrderSummary({
     const total = lines.reduce((sum, line) => sum + line.totalCost, 0)
 
 
-    const lineIdsRef = useRef(new WeakMap<QuoteCalculation, string>())
-    const getLineId = (line: QuoteCalculation) => {
+    const lineIdsRef = useRef(new WeakMap<QuoteLine, string>())
+    const getLineId = (line: QuoteLine) => {
         const existingId = lineIdsRef.current.get(line)
         if (existingId) return existingId
         const newId = crypto.randomUUID()

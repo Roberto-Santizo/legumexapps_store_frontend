@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import type { TFunction } from "i18next"
-import { ChevronRight, Package, SlidersHorizontal } from "lucide-react"
+import { ChevronRight, Package, Sparkles, SlidersHorizontal } from "lucide-react"
 import { calculateQuoteSchema } from "@/feature/quote/schema/quote.schema"
 import type { CalculateQuoteInput, QuotableProduct, QuoteDestination, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 import type { DestinationCountry } from "@/feature/destination/schema/destination.schema"
@@ -53,6 +54,10 @@ type QuoteCalculatorFormProps = {
     // pasa ninguno de los dos: sus cálculos nunca generan borradores.
     draftKey?: string
     onProductChange?: () => void
+    // Cotización a la medida (producto que no existe, sin SKU): si viene, el paso "mode" muestra una
+    // tercera tarjeta "Producto a la medida" que navega a esa ruta -- un flujo APARTE
+    // (feature/customQuote), nunca un modo más de este form. Solo el wizard del representante lo pasa.
+    customQuoteHref?: string
 }
 
 const LIVE_PREVIEW_DEBOUNCE_MS = 500
@@ -143,8 +148,10 @@ export function QuoteCalculatorForm({
     previewAPI,
     draftKey,
     onProductChange,
+    customQuoteHref,
 }: Readonly<QuoteCalculatorFormProps>) {
     const { t } = useTranslation()
+    const navigate = useNavigate()
     const [step, setStep] = useState<QuoteWizardStep>("mode")
     const [mode, setMode] = useState<QuoteMode>("finished")
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
@@ -626,10 +633,26 @@ export function QuoteCalculatorForm({
                                         subtitle: t("site.quoteRequest.form.modeCustomizableHint"),
                                         icon: <SlidersHorizontal size={22} />,
                                     },
+                                    ...(customQuoteHref
+                                        ? [
+                                              {
+                                                  value: "custom",
+                                                  text: t("site.quoteRequest.form.modeCustom"),
+                                                  subtitle: t("site.quoteRequest.form.modeCustomHint"),
+                                                  icon: <Sparkles size={22} />,
+                                              },
+                                          ]
+                                        : []),
                                 ]}
                                 value={mode}
-                                onChange={(value) => handleModeChange(value as QuoteMode)}
-                                columnsClassName="grid-cols-1 sm:grid-cols-2"
+                                onChange={(value) => {
+                                    if (value === "custom" && customQuoteHref) {
+                                        navigate(customQuoteHref)
+                                        return
+                                    }
+                                    handleModeChange(value as QuoteMode)
+                                }}
+                                columnsClassName={customQuoteHref ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"}
                                 imageHeightClassName="h-16 sm:h-20"
                             />
                         </div>

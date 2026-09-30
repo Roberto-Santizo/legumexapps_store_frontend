@@ -1,13 +1,13 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Truck, Wheat, FlaskConical, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent } from "lucide-react"
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import type { QuoteLine } from "@/feature/quote/schema/quote.schema"
 import { Card } from "@/shared/component/card.component"
 import { Spinner } from "@/shared/component/spinner.component"
 import { formatCurrency } from "@/shared/format/currency"
 
 type QuoteResultCardProps = {
-    result: QuoteCalculation | null
+    result: QuoteLine | null
     isPending: boolean
     showCostBreakdown?: boolean
     // Transporte "apagado" para TODOS por ahora (ver quoteCalculatorForm
@@ -142,7 +142,7 @@ export function QuoteResultCard({
                     <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.pallets")}</p>
                 </div>
                 {/* El cliente final ve CAJAS por palet, no el conteo crudo de bolsas (totalUnits
-                es un dato interno) -- ver boxesPerPallet en QuoteCalculation, calculado por
+                es un dato interno) -- ver boxesPerPallet en quoteLineSchema, calculado por
                 quoteService y solo optional en el schema por compatibilidad con cotizaciones
                 históricas releídas de la BD (que el admin sí puede ver, ver quote.schema.ts).
                 El admin (showCostBreakdown=true) sigue viendo el total de unidades como siempre. */}

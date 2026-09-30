@@ -16,6 +16,9 @@ import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
 import type { QuoteCalculation, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 
+// Flujo aparte de cotización a la medida (producto que no existe, sin SKU) -- ver feature/customQuote.
+const CUSTOM_QUOTE_PATH = "/solicitud/a-la-medida"
+
 export function QuoteRequestPage() {
     const { t } = useTranslation()
     const { salesperson, logout } = useSalespersonAuth()
@@ -102,6 +105,7 @@ export function QuoteRequestPage() {
                     previewAPI={previewQuoteAPI}
                     draftKey={draftKey}
                     onProductChange={rotateDraftKey}
+                    customQuoteHref={CUSTOM_QUOTE_PATH}
                 />
                 <div className="space-y-6">
                     <QuoteResultCard
@@ -138,6 +142,7 @@ export function QuoteRequestPage() {
                     previewAPI={previewQuoteAPI}
                     draftKey={draftKey}
                     onProductChange={rotateDraftKey}
+                    customQuoteHref={CUSTOM_QUOTE_PATH}
                 />
                 {quotedLines.length > 0 && (
                     <QuotedOrderSummary

@@ -1,6 +1,8 @@
 import type { QuotableProduct } from "@/feature/quote/schema/quote.schema"
 
-type QuotableVariant = QuotableProduct["variants"][number]
+// Solo los tres datos que usa el cálculo: sirve para un SKU (QuotableVariant) y para una presentación
+// ofrecida en cotizaciones a la medida (feature/customQuote), que traen las mismas tres cuentas.
+type PalletWeightSource = Pick<QuotableProduct["variants"][number], "netWeightGrams" | "bagsPerBox" | "boxesPerPallet">
 
 const GRAMS_PER_KG = 1000
 const KG_PER_LB = 0.45359237
@@ -10,7 +12,7 @@ const KG_PER_LB = 0.45359237
 // calculateQuote ni ningún campo que el backend valide. null si la variante no trae
 // netWeightGrams (defensa adicional, ver el comentario del campo en quote.schema.ts) o si
 // requestedPallets todavía no es un número válido.
-export function calculateTotalOrderWeightKg(variant: QuotableVariant, requestedPallets: number | undefined): number | null {
+export function calculateTotalOrderWeightKg(variant: PalletWeightSource, requestedPallets: number | undefined): number | null {
     if (!variant.netWeightGrams || variant.netWeightGrams <= 0) return null
     if (!requestedPallets || requestedPallets <= 0) return null
 

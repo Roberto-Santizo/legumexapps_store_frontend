@@ -128,6 +128,12 @@ const AdminQuoteListPage = lazyWithRetry(() =>
 const QuoteDraftListPage = lazyWithRetry(() =>
     import("@/feature/quoteDraft/page/quoteDraft.page").then((module) => ({ default: module.QuoteDraftListPage }))
 )
+const AdminCustomQuoteListPage = lazyWithRetry(() =>
+    import("@/feature/customQuote/page/adminCustomQuoteList.page").then((module) => ({ default: module.AdminCustomQuoteListPage }))
+)
+const AdminCustomQuoteDetailPage = lazyWithRetry(() =>
+    import("@/feature/customQuote/page/adminCustomQuoteDetail.page").then((module) => ({ default: module.AdminCustomQuoteDetailPage }))
+)
 const CustomQuoteConfigPage = lazyWithRetry(() =>
     import("@/feature/customQuote/page/customQuoteConfig.page").then((module) => ({ default: module.CustomQuoteConfigPage }))
 )
@@ -167,6 +173,8 @@ const routes = [
 
     { path: "quotes", component: AdminQuoteListPage, permission: "quotes:view" },
     { path: "quote-drafts", component: QuoteDraftListPage, permission: "quoteDrafts:view" },
+    { path: "custom-quotes", component: AdminCustomQuoteListPage, permission: "customQuotes:view" },
+    { path: "custom-quotes/:customQuoteId", component: AdminCustomQuoteDetailPage, permission: "customQuotes:view" },
     { path: "custom-quote-config", component: CustomQuoteConfigPage, permission: "customQuoteConfig:edit" },
     { path: "quotes/calculator", component: AdminQuoteCalculatorPage, permission: "quotes:calculate" },
 

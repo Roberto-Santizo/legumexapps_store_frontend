@@ -200,7 +200,9 @@
                         "title": "Products in {{category}}",
                         "subtitle": "Choose the product you want to quote."
                     }
-                }
+                },
+                "modeCustom": "Custom product",
+                "modeCustomHint": "Build a product that doesn't exist yet: you choose the raw materials, ingredients, presentation and packaging."
             },
             "result": {
                 "empty": "Fill out the form and calculate your quote to see the cost breakdown here.",
@@ -1269,6 +1271,12 @@
                     "intermediate": "Intermediate packaging",
                     "pallet": "Palletizing",
                     "includes": "Includes: {{materials}}"
+                },
+                "composition": {
+                    "title": "Composition",
+                    "rawMaterial": "{{percentage}}% {{name}}",
+                    "ingredients": "Added ingredients: {{ingredients}}",
+                    "ingredient": "{{name}} ({{grams}} g per unit)"
                 }
             }
         }
@@ -1374,6 +1382,122 @@
             "line_shelf": "Shelf Stable",
             "line_foodservice": "Food Service",
             "line_privatelabel": "Private Label"
+        }
+    },
+    "customQuote": {
+        "page": {
+            "title": "Custom product",
+            "description": "Hi {{name}}, build a product we don't have yet and get its reference quote.",
+            "backToDefined": "Back to defined products"
+        },
+        "wizard": {
+            "title": "Build your product",
+            "continue": "Continue",
+            "steps": {
+                "category": "Category",
+                "subCategory": "Type",
+                "recipe": "Recipe",
+                "presentation": "Presentation",
+                "packaging": "Packaging",
+                "total": "Total"
+            },
+            "category": {
+                "title": "Which product category do you want to build?",
+                "subtitle": "Choose the category; you'll pick the product type next.",
+                "empty": "No custom products are configured yet. Contact the administrator."
+            },
+            "subCategory": {
+                "title": "Which type of {{category}} product?",
+                "subtitle": "Each type offers its own raw materials.",
+                "rawMaterialCount": "Available raw materials: {{count}}"
+            },
+            "recipe": {
+                "title": "Recipe: {{subCategory}}",
+                "subtitle": "Enter the percentage of each raw material you want to use; the mix must total 100%. Added ingredients are optional.",
+                "organic": "Organic product",
+                "organicHint": "Only organic raw materials (or inputs like water or salt) are shown.",
+                "mixTitle": "Raw materials (% of net weight)",
+                "noRawMaterials": "No raw materials are available with the chosen filters.",
+                "onlyAlone": "Only at 100%",
+                "notMixableInMix": "One raw material can't be mixed: use it alone at 100% or remove it from the mix.",
+                "ingredientsTitle": "Added ingredients (optional)",
+                "ingredientsSubtitle": "Grams in each unit (bag), on top of the 100% recipe.",
+                "maxGramsPerKg": "Maximum {{max}} g per kg of product",
+                "gramsPerUnitSuffix": "g / unit",
+                "exceedsNetWeight": "It can't exceed the presentation's net weight ({{netWeightGrams}} g).",
+                "exceedsCap": "Exceeds the maximum of {{max}} g per kg: in {{presentation}} that's at most {{grams}} g."
+            },
+            "presentation": {
+                "title": "Presentation and pallets",
+                "subtitle": "Choose the presentation and how many pallets you want. Boxes per pallet come with the presentation.",
+                "empty": "No presentations are available yet. Contact the administrator.",
+                "cardSubtitle": "{{boxes}} boxes per pallet × {{bags}} bags per box",
+                "ingredientIssues": "An ingredient exceeds what's allowed for this presentation. Go back to the recipe to adjust it."
+            },
+            "packaging": {
+                "title": "Packaging",
+                "subtitle": "Some materials are included; where there are alternatives, choose one.",
+                "includes": "Includes {{materials}}"
+            },
+            "total": {
+                "summaryTitle": "Your custom product",
+                "composition": "Composition",
+                "ingredients": "Ingredients",
+                "ingredientLine": "{{name}} {{grams}} g/unit"
+            }
+        }
+    },
+    "adminCustomQuote": {
+        "list": {
+            "title": "Custom quotes",
+            "description": "Products that don't exist yet (no SKU or client) built by the salespeople. Follow them up here; they don't count in \"Quotes\" or in the dashboard.",
+            "statusFilter": "Status",
+            "allStatuses": "All statuses"
+        },
+        "status": {
+            "new": "New",
+            "reviewed": "Reviewed",
+            "in_development": "In development",
+            "discarded": "Discarded"
+        },
+        "table": {
+            "status": "Status",
+            "createdAt": "Date",
+            "salesperson": "Salesperson",
+            "product": "Product · presentation",
+            "subCategory": "Type",
+            "pallets": "Pallets",
+            "total": "Total",
+            "view": "View details",
+            "empty": "No custom quotes in this range."
+        },
+        "detail": {
+            "title": "Custom quote #{{id}}",
+            "status": "Status",
+            "saveStatus": "Save status",
+            "salesperson": "Salesperson",
+            "createdAt": "Date",
+            "subCategory": "Product type",
+            "destination": "Destination"
+        },
+        "spec": {
+            "recipe": "Recipe",
+            "ingredients": "Added ingredients",
+            "noIngredients": "No added ingredients.",
+            "gramsPerUnit": "{{grams}} g per unit",
+            "presentation": "Presentation and pallet",
+            "presentationLabel": "Presentation",
+            "bagsPerBox": "Bags per box",
+            "unitsPerIntermediatePackage": "Units per intermediate package",
+            "noIntermediate": "No intermediate packaging",
+            "totalUnits": "Total units",
+            "packaging": "Packaging",
+            "packagingMaterial": "Material",
+            "packagingQuantity": "Quantity",
+            "perUnit": "{{quantity}} per unit",
+            "perIntermediate": "1 per {{units}} units ({{packages}} in total)",
+            "perPallet": "{{quantity}} per pallet",
+            "perBox": "{{quantity}} per box × {{boxes}} boxes = {{perPallet}} per pallet"
         }
     }
 }

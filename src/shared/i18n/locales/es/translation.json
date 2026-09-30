@@ -213,7 +213,9 @@
                         "title": "Productos en {{category}}",
                         "subtitle": "Elige el producto que quieres cotizar."
                     }
-                }
+                },
+                "modeCustom": "Producto a la medida",
+                "modeCustomHint": "Arma un producto que todavía no existe: eliges las materias primas, ingredientes, presentación y empaques."
             },
             "result": {
                 "empty": "Completa el formulario y calcula tu cotización para ver el desglose de costos aquí.",
@@ -1269,6 +1271,12 @@
                     "intermediate": "Empaque intermedio",
                     "pallet": "Paletizado",
                     "includes": "Incluye: {{materials}}"
+                },
+                "composition": {
+                    "title": "Composición",
+                    "rawMaterial": "{{percentage}} % {{name}}",
+                    "ingredients": "Ingredientes agregados: {{ingredients}}",
+                    "ingredient": "{{name}} ({{grams}} g por unidad)"
                 }
             }
         }
@@ -1374,6 +1382,122 @@
             "line_shelf": "Anaquel estable",
             "line_foodservice": "Food Service",
             "line_privatelabel": "Marca propia"
+        }
+    },
+    "customQuote": {
+        "page": {
+            "title": "Producto a la medida",
+            "description": "Hola {{name}}, arma un producto que todavía no tenemos y obtén su cotización de referencia.",
+            "backToDefined": "Volver a productos definidos"
+        },
+        "wizard": {
+            "title": "Arma tu producto",
+            "continue": "Continuar",
+            "steps": {
+                "category": "Categoría",
+                "subCategory": "Tipo",
+                "recipe": "Receta",
+                "presentation": "Presentación",
+                "packaging": "Empaques",
+                "total": "Total"
+            },
+            "category": {
+                "title": "¿Qué categoría de producto quieres armar?",
+                "subtitle": "Elige la categoría; en el siguiente paso eliges el tipo de producto.",
+                "empty": "Todavía no hay productos a la medida configurados. Contacta al administrador."
+            },
+            "subCategory": {
+                "title": "¿Qué tipo de producto de {{category}}?",
+                "subtitle": "Cada tipo ofrece sus propias materias primas.",
+                "rawMaterialCount": "Materias primas disponibles: {{count}}"
+            },
+            "recipe": {
+                "title": "Receta: {{subCategory}}",
+                "subtitle": "Escribe el porcentaje de cada materia prima que quieras usar; la mezcla debe sumar 100 %. Los ingredientes agregados son opcionales.",
+                "organic": "Producto orgánico",
+                "organicHint": "Solo se muestran materias primas orgánicas (o insumos como agua o sal).",
+                "mixTitle": "Materias primas (% del peso neto)",
+                "noRawMaterials": "No hay materias primas disponibles con los filtros elegidos.",
+                "onlyAlone": "Solo al 100 %",
+                "notMixableInMix": "Hay una materia prima que no se puede mezclar: úsala sola al 100 % o quítala de la mezcla.",
+                "ingredientsTitle": "Ingredientes agregados (opcional)",
+                "ingredientsSubtitle": "Gramos en cada unidad (bolsa), por encima del 100 % de la receta.",
+                "maxGramsPerKg": "Máximo {{max}} g por kg de producto",
+                "gramsPerUnitSuffix": "g / unidad",
+                "exceedsNetWeight": "No puede superar el peso neto de la presentación ({{netWeightGrams}} g).",
+                "exceedsCap": "Supera el máximo de {{max}} g por kg: en {{presentation}} son como mucho {{grams}} g."
+            },
+            "presentation": {
+                "title": "Presentación y palets",
+                "subtitle": "Elige la presentación y cuántos palets quieres. Las cajas por palet vienen con la presentación.",
+                "empty": "Todavía no hay presentaciones disponibles. Contacta al administrador.",
+                "cardSubtitle": "{{boxes}} cajas por palet × {{bags}} bolsas por caja",
+                "ingredientIssues": "Algún ingrediente supera lo permitido para esta presentación. Vuelve a la receta para ajustarlo."
+            },
+            "packaging": {
+                "title": "Empaques",
+                "subtitle": "Algunos materiales vienen incluidos; donde hay alternativas, elige una.",
+                "includes": "Incluye {{materials}}"
+            },
+            "total": {
+                "summaryTitle": "Tu producto a la medida",
+                "composition": "Composición",
+                "ingredients": "Ingredientes",
+                "ingredientLine": "{{name}} {{grams}} g/unidad"
+            }
+        }
+    },
+    "adminCustomQuote": {
+        "list": {
+            "title": "Cotizaciones a la medida",
+            "description": "Productos que todavía no existen (sin SKU ni cliente) que armaron los representantes. Aquí se les da seguimiento; no cuentan en \"Cotizaciones\" ni en el panel de indicadores.",
+            "statusFilter": "Estado",
+            "allStatuses": "Todos los estados"
+        },
+        "status": {
+            "new": "Nueva",
+            "reviewed": "Revisada",
+            "in_development": "En desarrollo",
+            "discarded": "Descartada"
+        },
+        "table": {
+            "status": "Estado",
+            "createdAt": "Fecha",
+            "salesperson": "Representante",
+            "product": "Producto · presentación",
+            "subCategory": "Tipo",
+            "pallets": "Palets",
+            "total": "Total",
+            "view": "Ver detalle",
+            "empty": "No hay cotizaciones a la medida en este rango."
+        },
+        "detail": {
+            "title": "Cotización a la medida #{{id}}",
+            "status": "Estado",
+            "saveStatus": "Guardar estado",
+            "salesperson": "Representante",
+            "createdAt": "Fecha",
+            "subCategory": "Tipo de producto",
+            "destination": "Destino"
+        },
+        "spec": {
+            "recipe": "Receta",
+            "ingredients": "Ingredientes agregados",
+            "noIngredients": "Sin ingredientes agregados.",
+            "gramsPerUnit": "{{grams}} g por unidad",
+            "presentation": "Presentación y palet",
+            "presentationLabel": "Presentación",
+            "bagsPerBox": "Bolsas por caja",
+            "unitsPerIntermediatePackage": "Unidades por empaque intermedio",
+            "noIntermediate": "Sin empaque intermedio",
+            "totalUnits": "Unidades totales",
+            "packaging": "Empaques",
+            "packagingMaterial": "Material",
+            "packagingQuantity": "Cantidad",
+            "perUnit": "{{quantity}} por unidad",
+            "perIntermediate": "1 por cada {{units}} unidades ({{packages}} en total)",
+            "perPallet": "{{quantity}} por palet",
+            "perBox": "{{quantity}} por caja × {{boxes}} cajas = {{perPallet}} por palet"
         }
     }
 }

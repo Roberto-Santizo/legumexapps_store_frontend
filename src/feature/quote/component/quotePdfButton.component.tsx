@@ -12,13 +12,13 @@ import { FormField } from "@/shared/component/formField.component"
 import { QuotePdfDocument } from "@/feature/quote/component/quotePdfDocument.component"
 import { calculateQuoteOrderTotal, calculateQuoteValidUntil, quotePdfDateFormatter } from "@/feature/quote/component/quotePdfSummary"
 import { formatCurrency } from "@/shared/format/currency"
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import type { QuoteDocumentLine } from "@/feature/quote/schema/quote.schema"
 
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 type QuotePdfButtonProps = {
-    lines: QuoteCalculation[]
+    lines: QuoteDocumentLine[]
     showCostBreakdown?: boolean
     // Transporte apagado para TODOS por ahora -- default false,
     // solo se reenvía a QuotePdfDocument. Ver el mismo prop ahí.

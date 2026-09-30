@@ -1,7 +1,7 @@
 import { useRef } from "react"
 import { Document, Page, View, Text, Image } from "@react-pdf/renderer"
 import { useTranslation } from "react-i18next"
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import type { QuoteDocumentLine, QuoteLine, QuoteLineComposition } from "@/feature/quote/schema/quote.schema"
 import { quotePdfStyles as styles } from "@/feature/quote/component/quotePdfDocument.styles"
 import {
     QUOTE_VALIDITY_DAYS,
@@ -17,7 +17,7 @@ const pdfDateTimeFormatter = new Intl.DateTimeFormat("es-GT", { dateStyle: "shor
 // Configuración de empaque de la línea: qué material quedó en cada grupo + los fijos ("Incluye").
 // Solo nombres, nunca costos -- por eso va en ambas variantes, sin gate de showCostBreakdown.
 // Nombres tal como están guardados (el empaque no tiene traducciones). Sin filas → no se renderiza.
-function PackagingConfigSection({ breakdown }: Readonly<{ breakdown: QuoteCalculation["breakdown"] }>) {
+function PackagingConfigSection({ breakdown }: Readonly<{ breakdown: QuoteLine["breakdown"] }>) {
     const { t } = useTranslation()
     const levels = buildPackagingConfiguration(breakdown)
     if (levels.length === 0) return null
@@ -62,10 +62,55 @@ function PackagingConfigSection({ breakdown }: Readonly<{ breakdown: QuoteCalcul
     )
 }
 
+const compositionNumberFormatter = new Intl.NumberFormat("es-GT", { maximumFractionDigits: 3 })
+
+// Composición de una línea A LA MEDIDA (solo esas la traen, ver QuoteLineComposition): la receta que
+// armó el representante -- % de cada materia prima y gramos por unidad de cada ingrediente agregado.
+// Solo nombres y cantidades, NUNCA costos, así que va en ambas variantes (sin gate de
+// showCostBreakdown), igual que la configuración de empaque.
+function CompositionSection({ composition }: Readonly<{ composition: QuoteLineComposition }>) {
+    const { t } = useTranslation()
+    if (composition.rawMaterials.length === 0) return null
+
+    return (
+        <View style={styles.packagingConfigSection}>
+            <View style={styles.packagingConfigTitleRow}>
+                <View style={styles.packagingConfigTitleMark} />
+                <Text style={styles.packagingConfigTitle}>{t("quote.pdf.document.composition.title")}</Text>
+            </View>
+            <Text style={styles.packagingConfigGroupValue}>
+                {composition.rawMaterials
+                    .map((rawMaterial) =>
+                        t("quote.pdf.document.composition.rawMaterial", {
+                            percentage: compositionNumberFormatter.format(rawMaterial.percentage),
+                            name: rawMaterial.displayName,
+                        })
+                    )
+                    .join(" · ")}
+            </Text>
+            {composition.ingredients.length > 0 && (
+                <Text style={styles.packagingConfigFixed}>
+                    {t("quote.pdf.document.composition.ingredients", {
+                        ingredients: composition.ingredients
+                            .map((ingredient) =>
+                                t("quote.pdf.document.composition.ingredient", {
+                                    name: ingredient.displayName,
+                                    grams: compositionNumberFormatter.format(ingredient.gramsPerUnit),
+                                })
+                            )
+                            .join(", "),
+                    })}
+                </Text>
+            )}
+        </View>
+    )
+}
+
 type QuotePdfDocumentProps = {
     clientName: string
     quoteDate: Date
-    lines: QuoteCalculation[]
+    // Cualquier línea cotizada (producto definido o a la medida); las a la medida traen composición.
+    lines: QuoteDocumentLine[]
     // Mismo criterio que QuoteResultCard/QuotedOrderSummary: el cliente final no ve el desglose
     // interno de costos, solo el admin (ver adminQuoteCalculator.page.tsx vs quoteRequest.page.tsx).
     showCostBreakdown?: boolean
@@ -94,12 +139,12 @@ export function QuotePdfDocument({
 }: Readonly<QuotePdfDocumentProps>) {
     const { t } = useTranslation()
 
-    // Mismo criterio que QuotedOrderSummary: las líneas no tienen id propio (QuoteCalculation es
+    // Mismo criterio que QuotedOrderSummary: las líneas no tienen id propio (una línea cotizada es
     // una vista previa de cálculo, no una entidad persistida), así que se identifican por
     // identidad de objeto en vez de por índice -- estable aunque el pedido crezca, y no colisiona
     // entre dos líneas con contenido idéntico (mismo producto cotizado dos veces).
-    const lineIdsRef = useRef(new WeakMap<QuoteCalculation, string>())
-    const getLineId = (line: QuoteCalculation) => {
+    const lineIdsRef = useRef(new WeakMap<QuoteLine, string>())
+    const getLineId = (line: QuoteLine) => {
         const existingId = lineIdsRef.current.get(line)
         if (existingId) return existingId
         const newId = crypto.randomUUID()
@@ -187,6 +232,8 @@ export function QuotePdfDocument({
                                 <Text style={styles.lineStatLabel}>{t("quote.pdf.document.perPallet")}</Text>
                             </View>
                         </View>
+
+                        {line.composition && <CompositionSection composition={line.composition} />}
 
                         <PackagingConfigSection breakdown={line.breakdown} />
 

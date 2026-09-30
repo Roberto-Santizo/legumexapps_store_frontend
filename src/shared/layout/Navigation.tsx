@@ -22,6 +22,7 @@ import {
     ShieldCheck,
     ShoppingBag,
     SlidersHorizontal,
+    Sparkles,
     UserCog,
     Users,
 } from "lucide-react"
@@ -50,6 +51,7 @@ const NAV_GROUPS: NavGroup[] = [
         items: [
             { url: "/admin/quotes", labelKey: "adminQuote.list.title", icon: ClipboardList, permission: "quotes:view" },
             { url: "/admin/quote-drafts", labelKey: "quoteDraft.list.title", icon: FileClock, permission: "quoteDrafts:view" },
+            { url: "/admin/custom-quotes", labelKey: "adminCustomQuote.list.title", icon: Sparkles, permission: "customQuotes:view" },
             { url: "/admin/quotes/calculator", labelKey: "adminQuoteCalculator.title", icon: Calculator, permission: "quotes:calculate" },
         ],
     },

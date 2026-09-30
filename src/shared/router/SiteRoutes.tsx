@@ -9,6 +9,9 @@ const HomePage = lazyWithRetry(() => import("@/feature/home/page/home.page").the
 const QuoteRequestPage = lazyWithRetry(() =>
     import("@/feature/quote/page/quoteRequest.page").then((m) => ({ default: m.QuoteRequestPage }))
 )
+const CustomQuoteRequestPage = lazyWithRetry(() =>
+    import("@/feature/customQuote/page/customQuoteRequest.page").then((m) => ({ default: m.CustomQuoteRequestPage }))
+)
 
 export default function SiteRoutes() {
     return (
@@ -27,6 +30,16 @@ export default function SiteRoutes() {
                     <SalespersonProtectedRoute>
                         <Suspense fallback={<Spinner />}>
                             <QuoteRequestPage />
+                        </Suspense>
+                    </SalespersonProtectedRoute>
+                }
+            />
+            <Route
+                path="/solicitud/a-la-medida"
+                element={
+                    <SalespersonProtectedRoute>
+                        <Suspense fallback={<Spinner />}>
+                            <CustomQuoteRequestPage />
                         </Suspense>
                     </SalespersonProtectedRoute>
                 }

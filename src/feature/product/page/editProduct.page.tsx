@@ -24,7 +24,6 @@ function toFormValues(product: ProductResponse): UpdateProductInput {
     // Ver el mismo comentario en editCategory.page.tsx::toFormValues.
     const englishTranslation = product.translations.find((translation) => translation.language === "en")
     return {
-        codigo: product.codigo,
         subCategoryId: product.subCategoryId,
         clientId: product.clientId,
         displayName: product.displayName,

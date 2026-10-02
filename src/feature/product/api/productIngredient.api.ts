@@ -44,6 +44,6 @@ export async function deleteProductIngredientAPI(id: number) {
     }
 }
 
-// Carga masiva de Ingredientes por producto (paso 3, opcional, de 4: Productos -> Recetas -> Ingredientes -> SKUs).
+// Ingredientes por producto referenciado mediante el SKU de una variante (paso 3 de 3, opcional).
 export const bulkImportProductIngredientsAPI = (file: File) => postBulkImportFile("/product-ingredients/bulk-import", file)
 export const downloadProductIngredientImportTemplateAPI = () => getBulkImportTemplate("/product-ingredients/bulk-import/template")

@@ -743,7 +743,6 @@
     },
     "product": {
         "form": {
-            "codigo": "SKU/Item Number",
             "image": "Product photo",
             "subCategoryId": "Subcategory",
             "clientId": "Client",
@@ -776,21 +775,20 @@
             "empty": "No products registered"
         },
         "bulkImport": {
-            "title": "Bulk upload Products from Excel",
-            "description": "Download the template, fill it in with your products (one row per product) and upload it. Each product needs a Code, Subcategory, Client, Name and Recipe type (Fija/fixed or Personalizable/customizable); Category, English name, Organic and Additional cost are optional. Subcategory and Client are looked up by their exact name (ignoring case and accents) and must exist and be active. The whole file is validated first: if a single row has an error, no product is created. This importer only CREATES new products. The image is not loaded from Excel: upload it afterward from each product's edit screen.",
+            "title": "Products and Variants",
+            "description": "Download the template and fill in one row per variant. Product group combines rows of the same product within this file: repeat all product data consistently. Each variant requires a globally unique SKU/Item Number, Presentation, Boxes per pallet and Bags per box; Units per intermediate package is optional. Each product requires Subcategory, Client, Name and Recipe type; Category, English name, Organic and Additional cost are optional. Catalog entries must already exist and be active. Creates new products and variants only: never updates or attaches variants to existing products. The whole file is validated and imported in one transaction. Configure images and packaging materials afterward in the product editor.",
             "downloadTemplate": "Download template",
             "importButton": "Import file",
             "importing": "Importing...",
-            "rowErrorsTitle": "The file has {{count}} error(s). No product was imported:",
+            "rowErrorsTitle": "The file has {{count}} error(s). No product or variant was imported:",
             "rowErrorItem": "Row {{row}}: {{message}}"
         },
         "bulkImportSteps": {
             "title": "Bulk upload from Excel",
-            "intro": "Create complete products (everything except the image) with four files, uploaded in this order (step 3, Ingredients, is optional). Each file is fully validated and all-or-nothing: if it fails, fix it and upload it again, the previous steps stay saved. The image is uploaded afterward from each product's edit screen.",
-            "requires1": "Step 1 · Products — requires their Subcategories and Clients to already exist.",
-            "requires2": "Step 2 · Recipes — requires the Products from step 1 and the Raw Materials in their catalog.",
-            "requires3": "Step 3 · Ingredients (optional) — requires the Products from step 1 and the Ingredients in their catalog.",
-            "requires4": "Step 4 · SKUs & packaging — requires the Products with a complete recipe (step 2), and the Presentations and Packaging in their catalogs."
+            "intro": "Upload three files in this order: Products and Variants, Recipes, and Ingredients (optional). Each file is validated in full and is all-or-nothing; earlier steps remain saved if a later one fails. Configure images and packaging materials manually in the product editor. Complete recipes and packaging before quoting.",
+            "requires1": "Step 1 · Products and Variants — requires active Subcategories, Clients and Presentations.",
+            "requires2": "Step 2 · Recipes — references each product through a variant SKU from step 1; requires Raw Materials in their catalog.",
+            "requires3": "Step 3 · Ingredients (optional) — references each product through a variant SKU from step 1; requires Ingredients in their catalog."
         }
     },
     "productVariant": {
@@ -802,22 +800,15 @@
             "bagsPerBoxHint": "How many bags/pieces fit in one box. Together with \"Boxes per pallet\" above, this defines the total bags per pallet (boxes × bags per box) -- it DOES affect cost.",
             "unitsPerIntermediatePackage": "Units per intermediate package",
             "unitsPerIntermediatePackageHint": "Only if this product uses nested packaging (e.g. several small bags inside one large bag, which then goes into the box). How many small units fit inside one large bag -- this DOES affect cost.",
-            "addButton": "Add variant"
+            "addButton": "Add variant",
+            "skuCode": "SKU/Item Number",
+            "skuCodeHint": "Required, 1–60 characters. Globally unique across all variants, including inactive ones, regardless of case."
         },
         "list": {
             "title": "Variants"
         },
         "table": {
             "empty": "No variants registered"
-        },
-        "bulkImport": {
-            "title": "Bulk upload SKUs from Excel",
-            "description": "Download the template, fill it in with your SKUs (one row per packaging-recipe material) and upload it. The whole file is validated first: if a single row has an error, no SKU is created -- fix the file and upload it again. Before using this upload, these must already exist in their catalogs: Packaging materials (with their role assigned), Presentations, and the base Products the SKUs belong to. This importer only CREATES new SKUs, it never updates one that already exists, and it excludes by design any SKU without \"Boxes per pallet\" configured. The optional \"Grupo\" (group) and \"Predeterminado\" (default) columns define the options the client picks when quoting (one per group); without them, every material is imported as fixed. Each product must already have a complete recipe (step 2): fixed totaling 100%, or customizable with at least one raw material; otherwise its SKUs are rejected.",
-            "downloadTemplate": "Download template",
-            "importButton": "Import file",
-            "importing": "Importing...",
-            "rowErrorsTitle": "The file has {{count}} error(s). No SKU was imported:",
-            "rowErrorItem": "Row {{row}}: {{message}}"
         }
     },
     "productRawMaterial": {
@@ -841,7 +832,7 @@
         },
         "bulkImport": {
             "title": "Bulk upload Recipes from Excel",
-            "description": "Download the template, fill it in with each product's recipe (one row per raw material) and upload it. The products must already exist (step 1) and each raw material is looked up by its code. Fixed recipe: fill in only \"Porcentaje\" (percentage) and the product's rows must total 100%. Customizable recipe: leave \"Porcentaje\" empty and optionally use \"% mínimo\"/\"% máximo\" (min/max); the raw materials must be mixable and the ranges must allow reaching 100%. The whole file is validated first: if a single row has an error, no recipe is created. This importer only CREATES recipes: a product that already has one is rejected (edit it from its screen).",
+            "description": "Download the template, fill it in with each product's recipe (one row per raw material) and upload it. The products must already exist (step 1) and each raw material is looked up by its code. Fixed recipe: fill in only \"Porcentaje\" (percentage) and the product's rows must total 100%. Customizable recipe: leave \"Porcentaje\" empty and optionally use \"% mínimo\"/\"% máximo\" (min/max); the raw materials must be mixable and the ranges must allow reaching 100%. The whole file is validated first: if a single row has an error, no recipe is created. This importer only CREATES recipes: a product that already has one is rejected (edit it from its screen). Identify each product using \"SKU de una variante del producto\" (SKU of a product variant). Recipes and ingredients are shared by all its variants; using different SKUs of the same product does not allow duplicate rows.",
             "downloadTemplate": "Download template",
             "importButton": "Import file",
             "importing": "Importing...",
@@ -874,7 +865,7 @@
         },
         "bulkImport": {
             "title": "Bulk upload product Ingredients from Excel",
-            "description": "Optional. Download the template, fill it in with each product's added ingredients (one row per ingredient) and upload it. The products must already exist (step 1) and each ingredient is looked up by its code. \"Gramos\" (grams) are the grams in a \"Peso de referencia (g)\" (reference weight) presentation (e.g. 40 g in 2000 g) and can't exceed that weight. The whole file is validated first: if a single row has an error, nothing is created. This importer only CREATES: a product that already has ingredients is rejected (edit them from its screen).",
+            "description": "Optional. Download the template, fill it in with each product's added ingredients (one row per ingredient) and upload it. The products must already exist (step 1) and each ingredient is looked up by its code. \"Gramos\" (grams) are the grams in a \"Peso de referencia (g)\" (reference weight) presentation (e.g. 40 g in 2000 g) and can't exceed that weight. The whole file is validated first: if a single row has an error, nothing is created. This importer only CREATES: a product that already has ingredients is rejected (edit them from its screen). Identify each product using \"SKU de una variante del producto\" (SKU of a product variant). Recipes and ingredients are shared by all its variants; using different SKUs of the same product does not allow duplicate rows.",
             "downloadTemplate": "Download template",
             "importButton": "Import file",
             "importing": "Importing...",

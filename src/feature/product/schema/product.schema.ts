@@ -10,8 +10,6 @@ const productTranslationInputSchema = z.object({
 })
 
 export const createProductSchema = z.object({
-    // Código manual del producto, editable, único (case-insensitive -- validado en el backend).
-    codigo: z.string().trim().min(1).max(60),
     subCategoryId: z.number().int().positive(),
     // Requerido: cada Producto pertenece a exactamente un Cliente real (ver
     // feature/client/ -- no confundir con salesperson/, la cuenta que cotiza).
@@ -26,15 +24,11 @@ export const createProductSchema = z.object({
     translations: z.object({ en: productTranslationInputSchema.optional() }).optional(),
 })
 
-// codigo se recupera como requerido -- no puede quedar vacío ni siquiera al editar (mismo
-// patrón que el resto de campos críticos del repo).
 export const updateProductSchema = createProductSchema.partial().extend({
-    codigo: createProductSchema.shape.codigo,
     clientId: createProductSchema.shape.clientId,
 })
 
 export const responseProductSchema = baseCatalogSchema.extend({
-    codigo: z.string(),
     subCategoryId: z.number().int(),
     clientId: z.number().int(),
     // Solo lectura -- viene del include del backend (product.service.ts::CLIENT_INCLUDE), para

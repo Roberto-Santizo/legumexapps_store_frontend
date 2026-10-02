@@ -36,29 +36,6 @@ export function ProductForm<T extends UpdateProductInput>({
 
     return (
         <div>
-            <Controller
-                name={"image" as Path<T>}
-                control={control}
-                render={({ field }) => (
-                    <ImageUploadField
-                        label={t("product.form.image")}
-                        value={field.value as string | null | undefined}
-                        onChange={field.onChange}
-                        initialImageUrl={currentImageUrl}
-                        errorMessage={getFieldErrorMessage(t, errors.image as FieldError | undefined)}
-                    />
-                )}
-            />
-
-            <FormField
-                label={t("product.form.codigo")}
-                htmlFor="codigo"
-                error={getFieldErrorMessage(t, errors.codigo as FieldError | undefined)}
-                required
-            >
-                <Input id="codigo" hasError={!!errors.codigo} {...register("codigo" as Path<T>)} />
-            </FormField>
-
             <FormField
                 label={t("product.form.subCategoryId")}
                 htmlFor="subCategoryId"
@@ -146,6 +123,20 @@ export function ProductForm<T extends UpdateProductInput>({
                 />
             </FormField>
             <p className="mb-5 -mt-3 text-sm text-texto-suave">{t("product.form.additionalCostPerUnitHint")}</p>
+
+            <Controller
+                name={"image" as Path<T>}
+                control={control}
+                render={({ field }) => (
+                    <ImageUploadField
+                        label={t("product.form.image")}
+                        value={field.value as string | null | undefined}
+                        onChange={field.onChange}
+                        initialImageUrl={currentImageUrl}
+                        errorMessage={getFieldErrorMessage(t, errors.image as FieldError | undefined)}
+                    />
+                )}
+            />
 
             <TranslationSection
                 register={register}

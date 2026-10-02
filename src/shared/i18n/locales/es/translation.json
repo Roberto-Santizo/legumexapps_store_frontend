@@ -743,7 +743,6 @@
     },
     "product": {
         "form": {
-            "codigo": "SKU / Número de artículo",
             "image": "Foto del producto",
             "subCategoryId": "Subcategoría",
             "clientId": "Cliente",
@@ -776,21 +775,20 @@
             "empty": "No hay productos registrados"
         },
         "bulkImport": {
-            "title": "Carga masiva de Productos desde Excel",
-            "description": "Descarga la plantilla, llénala con tus productos (una fila por producto) y súbela. Cada producto necesita Código, Subcategoría, Cliente, Nombre y Tipo de receta (Fija o Personalizable); Categoría, nombre en inglés, Orgánico y Costo adicional son opcionales. Subcategoría y Cliente se buscan por su nombre exacto (sin importar mayúsculas ni acentos) y deben existir y estar activos. El archivo se valida completo primero: si una sola fila tiene un error, no se crea ningún producto. Solo CREA productos nuevos. La imagen no se carga por Excel: súbela después desde la pantalla de edición de cada producto.",
+            "title": "Productos y Variantes",
+            "description": "Descarga la plantilla y completa una fila por variante. Grupo de producto reúne las filas del mismo producto dentro del archivo: repite todos sus datos de forma consistente. Cada variante necesita un SKU / Número de artículo globalmente único, Presentación, Cajas por palet y Bolsas por caja; Unidades por empaque intermedio es opcional. Cada producto necesita Subcategoría, Cliente, Nombre y Tipo de receta; Categoría, nombre en inglés, Orgánico y Costo adicional son opcionales. Los catálogos deben existir y estar activos. Solo crea productos y variantes nuevos: no actualiza ni agrega variantes a productos existentes. El archivo se valida completo y se importa en una sola transacción. La imagen y los materiales de empaque se configuran después en la edición del producto.",
             "downloadTemplate": "Descargar plantilla",
             "importButton": "Importar archivo",
             "importing": "Importando...",
-            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún producto:",
+            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún producto ni variante:",
             "rowErrorItem": "Fila {{row}}: {{message}}"
         },
         "bulkImportSteps": {
             "title": "Carga masiva por Excel",
-            "intro": "Crea productos completos (todo menos la imagen) con cuatro archivos, subidos en este orden (el paso 3, Ingredientes, es opcional). Cada archivo se valida completo y es todo-o-nada: si falla, corrígelo y súbelo de nuevo, los pasos anteriores quedan guardados. La imagen se sube después desde la pantalla de edición de cada producto.",
-            "requires1": "Paso 1 · Productos — requiere que ya existan sus Subcategorías y Clientes.",
-            "requires2": "Paso 2 · Recetas — requiere los Productos del paso 1 y las Materias Primas en su catálogo.",
-            "requires3": "Paso 3 · Ingredientes (opcional) — requiere los Productos del paso 1 y los Ingredientes en su catálogo.",
-            "requires4": "Paso 4 · SKUs y empaque — requiere los Productos con su receta completa (paso 2), las Presentaciones y los Empaques en sus catálogos."
+            "intro": "Carga tres archivos en este orden: Productos y Variantes, Recetas e Ingredientes (opcional). Cada archivo se valida completo y es todo-o-nada; los pasos anteriores quedan guardados si falla uno posterior. Configura la imagen y los materiales de empaque manualmente en la edición del producto. Completa la receta y los empaques antes de cotizar.",
+            "requires1": "Paso 1 · Productos y Variantes — requiere Subcategorías, Clientes y Presentaciones activos.",
+            "requires2": "Paso 2 · Recetas — referencia cada producto mediante el SKU de una variante del paso 1; requiere Materias Primas en su catálogo.",
+            "requires3": "Paso 3 · Ingredientes (opcional) — referencia cada producto mediante el SKU de una variante del paso 1; requiere Ingredientes en su catálogo."
         }
     },
     "productVariant": {
@@ -802,22 +800,15 @@
             "bagsPerBoxHint": "Cuántas bolsas/piezas entran en una caja. Junto con \"Cajas por palet\" arriba, define el total de bolsas por palet (cajas × bolsas por caja) -- SÍ afecta el costo.",
             "unitsPerIntermediatePackage": "Unidades por empaque intermedio",
             "unitsPerIntermediatePackageHint": "Solo si este producto usa empaque anidado (ej. varias bolsitas dentro de una bolsa grande, que a su vez va en la caja). Cuántas unidades pequeñas entran en una bolsa grande -- este dato SÍ afecta el costo.",
-            "addButton": "Agregar variante"
+            "addButton": "Agregar variante",
+            "skuCode": "SKU / Número de artículo",
+            "skuCodeHint": "Obligatorio, de 1 a 60 caracteres. Único entre todas las variantes, incluidas las inactivas, sin distinguir mayúsculas."
         },
         "list": {
             "title": "Variantes"
         },
         "table": {
             "empty": "No hay variantes registradas"
-        },
-        "bulkImport": {
-            "title": "Carga masiva de SKUs desde Excel",
-            "description": "Descarga la plantilla, complétala con tus SKUs (una fila por cada material de su receta de empaque) y súbela. Se valida todo el archivo primero: si una sola fila tiene un error, no se crea ningún SKU -- corrige el archivo y vuelve a subirlo. Antes de usar esta carga, ya deben existir en sus catálogos: los materiales de Empaque (con su rol asignado), las Presentaciones, y los Productos base a los que pertenecen los SKUs. Este importador solo CREA SKUs nuevos, nunca actualiza uno que ya existe, y excluye por diseño cualquier SKU sin \"Cajas por palet\" configurado. Las columnas opcionales \"Grupo\" y \"Predeterminado\" definen las opciones que el cliente elige al cotizar (una por grupo); sin ellas, todos los materiales se importan como fijos. Cada producto ya debe tener su receta completa (paso 2): fija sumando 100% o personalizable con al menos una materia prima; si no, sus SKUs se rechazan.",
-            "downloadTemplate": "Descargar plantilla",
-            "importButton": "Importar archivo",
-            "importing": "Importando...",
-            "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún SKU:",
-            "rowErrorItem": "Fila {{row}}: {{message}}"
         }
     },
     "productRawMaterial": {
@@ -841,7 +832,7 @@
         },
         "bulkImport": {
             "title": "Carga masiva de Recetas desde Excel",
-            "description": "Descarga la plantilla, llénala con la receta de cada producto (una fila por materia prima) y súbela. Los productos ya deben existir (paso 1) y cada materia prima se busca por su código. Receta fija: llena solo \"Porcentaje\" y las filas del producto deben sumar 100%. Receta personalizable: deja vacío \"Porcentaje\" y usa, si quieres, \"% mínimo\"/\"% máximo\"; las materias primas deben ser mezclables y los rangos deben permitir llegar a 100%. El archivo se valida completo primero: si una sola fila tiene un error, no se crea ninguna receta. Solo CREA recetas: un producto que ya tiene receta se rechaza (edítala desde su pantalla).",
+            "description": "Descarga la plantilla, llénala con la receta de cada producto (una fila por materia prima) y súbela. Los productos ya deben existir (paso 1) y cada materia prima se busca por su código. Receta fija: llena solo \"Porcentaje\" y las filas del producto deben sumar 100%. Receta personalizable: deja vacío \"Porcentaje\" y usa, si quieres, \"% mínimo\"/\"% máximo\"; las materias primas deben ser mezclables y los rangos deben permitir llegar a 100%. El archivo se valida completo primero: si una sola fila tiene un error, no se crea ninguna receta. Solo CREA recetas: un producto que ya tiene receta se rechaza (edítala desde su pantalla). Los productos se identifican mediante «SKU de una variante del producto», no mediante un código de producto. La receta y los ingredientes se comparten entre todas sus variantes; usar distintos SKUs del mismo producto no permite duplicar filas.",
             "downloadTemplate": "Descargar plantilla",
             "importButton": "Importar archivo",
             "importing": "Importando...",
@@ -874,7 +865,7 @@
         },
         "bulkImport": {
             "title": "Carga masiva de Ingredientes por producto desde Excel",
-            "description": "Opcional. Descarga la plantilla, llénala con los ingredientes agregados de cada producto (una fila por ingrediente) y súbela. Los productos ya deben existir (paso 1) y cada ingrediente se busca por su código. \"Gramos\" son los gramos en una presentación de \"Peso de referencia (g)\" (ej. 40 g en 2000 g) y no pueden ser mayores que ese peso. El archivo se valida completo primero: si una sola fila tiene un error, no se crea nada. Solo CREA: un producto que ya tiene ingredientes se rechaza (edítalos desde su pantalla).",
+            "description": "Opcional. Descarga la plantilla, llénala con los ingredientes agregados de cada producto (una fila por ingrediente) y súbela. Los productos ya deben existir (paso 1) y cada ingrediente se busca por su código. \"Gramos\" son los gramos en una presentación de \"Peso de referencia (g)\" (ej. 40 g en 2000 g) y no pueden ser mayores que ese peso. El archivo se valida completo primero: si una sola fila tiene un error, no se crea nada. Solo CREA: un producto que ya tiene ingredientes se rechaza (edítalos desde su pantalla). Los productos se identifican mediante «SKU de una variante del producto», no mediante un código de producto. La receta y los ingredientes se comparten entre todas sus variantes; usar distintos SKUs del mismo producto no permite duplicar filas.",
             "downloadTemplate": "Descargar plantilla",
             "importButton": "Importar archivo",
             "importing": "Importando...",

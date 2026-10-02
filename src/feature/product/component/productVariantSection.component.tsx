@@ -32,6 +32,7 @@ type VariantFormInput = z.infer<typeof variantFormSchema>
 // GUARDAR sin completarlo (el schema sí los exige).
 function toFormValues(variant: ProductVariantResponse): Partial<VariantFormInput> {
     return {
+        skuCode: variant.skuCode,
         presentationId: variant.presentationId ?? undefined,
         boxesPerPallet: variant.boxesPerPallet ?? undefined,
         bagsPerBox: variant.bagsPerBox ?? undefined,
@@ -118,6 +119,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <Th>{t("productVariant.form.skuCode")}</Th>
                             <Th>{t("productVariant.form.presentationId")}</Th>
                             <Th>{t("productVariant.form.boxesPerPallet")}</Th>
                             <Th>{t("productVariant.form.bagsPerBox")}</Th>
@@ -128,6 +130,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                     <TableBody>
                         {variants.map((variant) => (
                             <TableRow key={variant.id}>
+                                <Td>{variant.skuCode}</Td>
                                 <Td>{variant.presentationId ? presentationNameById.get(variant.presentationId) ?? "-" : "-"}</Td>
                                 <Td>{variant.boxesPerPallet ?? "-"}</Td>
                                 <Td>{variant.bagsPerBox ?? "-"}</Td>
@@ -150,12 +153,22 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                                 </Td>
                             </TableRow>
                         ))}
-                        {variants.length === 0 && <TableEmpty message={t("productVariant.table.empty")} colSpan={5} />}
+                        {variants.length === 0 && <TableEmpty message={t("productVariant.table.empty")} colSpan={6} />}
                     </TableBody>
                 </Table>
             </TableContainer>
 
             <form key={formResetKey} onSubmit={onSubmit} className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+                <FormField
+                    label={t("productVariant.form.skuCode")}
+                    htmlFor="skuCode"
+                    error={getFieldErrorMessage(t, errors.skuCode)}
+                    required
+                >
+                    <Input id="skuCode" hasError={!!errors.skuCode} {...register("skuCode")} />
+                    <p className="mt-1.5 text-sm text-texto-suave">{t("productVariant.form.skuCodeHint")}</p>
+                </FormField>
+
                 <FormField
                     label={t("productVariant.form.presentationId")}
                     htmlFor="presentationId"

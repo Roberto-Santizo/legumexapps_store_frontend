@@ -1,11 +1,11 @@
 import type { ComponentProps } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { ProductTable } from "@/feature/product/component/productTable.component"
 import { bulkImportProductsAPI, downloadProductImportTemplateAPI } from "@/feature/product/api/product.api"
 import { bulkImportProductRawMaterialsAPI, downloadProductRawMaterialImportTemplateAPI } from "@/feature/product/api/productRawMaterial.api"
 import { bulkImportProductIngredientsAPI, downloadProductIngredientImportTemplateAPI } from "@/feature/product/api/productIngredient.api"
-import { bulkImportProductVariantsAPI, downloadProductVariantImportTemplateAPI } from "@/feature/product/api/productVariant.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
@@ -14,13 +14,10 @@ import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 export function ProductListPage() {
     const { t } = useTranslation()
     const { hasPermission } = usePermission()
+    const queryClient = useQueryClient()
 
-    // Carga masiva en 4 pasos, en orden de dependencia: Productos -> Recetas -> Ingredientes
-    // (opcional) -> SKUs. Cada paso usa el mismo permiso que su CRUD manual (crear producto =
-    // products:create; filas de receta, ingredientes y SKUs = products:edit). El número del paso es
-    // fijo aunque alguno quede oculto por permisos: indica el orden real de carga, no la posición en
-    // pantalla. Los SKUs (paso 4) viven acá y no en la edición de un producto porque un archivo
-    // puede traer SKUs de varios productos.
+    // Tres pasos: Productos y Variantes -> Recetas -> Ingredientes (opcional).
+    // Los números mantienen el orden de dependencia aunque un permiso oculte un paso.
     const importSteps: { step: number; permission: string; panel: ComponentProps<typeof BulkImportPanel> }[] = [
         {
             step: 1,
@@ -29,7 +26,11 @@ export function ProductListPage() {
                 translationNamespace: "product.bulkImport",
                 templateFilename: "plantilla-productos.xlsx",
                 downloadTemplate: downloadProductImportTemplateAPI,
-                bulkImport: bulkImportProductsAPI,
+                bulkImport: async (file) => {
+                    const result = await bulkImportProductsAPI(file)
+                    if (result) await queryClient.invalidateQueries({ queryKey: ["productVariants"] })
+                    return result
+                },
                 invalidateQueryKey: ["products"],
             },
         },
@@ -53,17 +54,6 @@ export function ProductListPage() {
                 downloadTemplate: downloadProductIngredientImportTemplateAPI,
                 bulkImport: bulkImportProductIngredientsAPI,
                 invalidateQueryKey: ["productIngredients"],
-            },
-        },
-        {
-            step: 4,
-            permission: "products:edit",
-            panel: {
-                translationNamespace: "productVariant.bulkImport",
-                templateFilename: "plantilla-skus.xlsx",
-                downloadTemplate: downloadProductVariantImportTemplateAPI,
-                bulkImport: bulkImportProductVariantsAPI,
-                invalidateQueryKey: ["productVariants"],
             },
         },
     ]

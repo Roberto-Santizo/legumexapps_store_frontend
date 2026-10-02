@@ -56,7 +56,6 @@ export async function updateProductStatusAPI(id: number, isActive: boolean) {
     }
 }
 
-// Carga masiva de Productos base (paso 1 de 4: Productos -> Recetas -> Ingredientes -> SKUs) --
-// mismo plumbing genérico de shared/api/bulkImport.api.ts que el resto de cargas masivas.
+// Carga unificada de Productos y Variantes (paso 1 de 3).
 export const bulkImportProductsAPI = (file: File) => postBulkImportFile("/products/bulk-import", file)
 export const downloadProductImportTemplateAPI = () => getBulkImportTemplate("/products/bulk-import/template")

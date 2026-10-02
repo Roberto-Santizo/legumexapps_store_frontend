@@ -1,7 +1,6 @@
 import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 import { apiListResponseSchema, apiMessageResponseSchema, apiMutationResponseSchema } from "@/shared/api/apiResponse.schema"
-import { getBulkImportTemplate, postBulkImportFile } from "@/shared/api/bulkImport.api"
 import { responseProductVariantSchema } from "@/feature/product/schema/productVariant.schema"
 import type { CreateProductVariantInput, UpdateProductVariantInput } from "@/feature/product/schema/productVariant.schema"
 
@@ -43,9 +42,3 @@ export async function deleteProductVariantAPI(id: number) {
         handleApiError(error)
     }
 }
-
-// Reusan el plumbing genérico de shared/api/bulkImport.api.ts -- mismo diseño para todos los
-// catálogos con carga masiva; lo único específico de
-// SKUs/Variantes acá es la URL.
-export const bulkImportProductVariantsAPI = (file: File) => postBulkImportFile("/product-variants/bulk-import", file)
-export const downloadProductVariantImportTemplateAPI = () => getBulkImportTemplate("/product-variants/bulk-import/template")

@@ -21,6 +21,7 @@ import {
     Ruler,
     ShieldCheck,
     ShoppingBag,
+    GlassWater,
     SlidersHorizontal,
     Sparkles,
     UserCog,
@@ -60,6 +61,8 @@ const NAV_GROUPS: NavGroup[] = [
         labelKey: "nav.groups.catalog",
         items: [
             { url: "/admin/products", labelKey: "product.list.title", icon: ShoppingBag, permission: "products:view" },
+            { url: "/admin/juices", labelKey: "juice.title", icon: GlassWater, permission: "juices:view" },
+            { url: "/admin/juice-config", labelKey: "juice.configTitle", icon: SlidersHorizontal, permission: "juiceConfig:edit" },
             { url: "/admin/categories", labelKey: "category.list.title", icon: FolderTree, permission: "categories:view" },
             { url: "/admin/sub-categories", labelKey: "subCategory.list.title", icon: Layers, permission: "subCategories:view" },
             { url: "/admin/raw-materials", labelKey: "rawMaterial.list.title", icon: Carrot, permission: "rawMaterials:view" },

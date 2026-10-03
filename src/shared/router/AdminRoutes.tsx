@@ -168,6 +168,11 @@ const SiteImageListPage = lazyWithRetry(() =>
     import("@/feature/siteImage/page/siteImage.page").then((module) => ({ default: module.SiteImageListPage }))
 )
 
+const JuiceListPage = lazyWithRetry(() => import("@/feature/juice/page/juice.page").then(module => ({ default: module.JuiceListPage })))
+const JuiceEditorPage = lazyWithRetry(() => import("@/feature/juice/page/juiceEditor.page").then(module => ({ default: module.JuiceEditorPage })))
+const JuiceMaterialsPage = lazyWithRetry(() => import("@/feature/juice/page/juiceMaterials.page").then(module => ({ default: module.JuiceMaterialsPage })))
+const JuiceConfigPage = lazyWithRetry(() => import("@/feature/juice/page/juiceConfig.page").then(module => ({ default: module.JuiceConfigPage })))
+
 const routes = [
     { path: "dashboard", component: DashboardPage, permission: "dashboard:view" },
 
@@ -212,6 +217,13 @@ const routes = [
     { path: "presentations", component: PresentationListPage, permission: "presentations:view" },
     { path: "presentations/create", component: CreatePresentationPage, permission: "presentations:create" },
     { path: "presentations/:presentationId/edit", component: EditPresentationPage, permission: "presentations:edit" },
+
+    { path: "juices", component: JuiceListPage, permission: "juices:view" },
+    { path: "juices/create", component: JuiceEditorPage, permission: "juices:create" },
+    { path: "juices/materials", component: JuiceMaterialsPage, permission: "juices:view" },
+    { path: "juices/:juiceId", component: JuiceEditorPage, permission: "juices:view" },
+    { path: "juices/:juiceId/edit", component: JuiceEditorPage, permission: "juices:edit" },
+    { path: "juice-config", component: JuiceConfigPage, permission: "juiceConfig:edit" },
 
     { path: "products", component: ProductListPage, permission: "products:view" },
     { path: "products/create", component: CreateProductPage, permission: "products:create" },

@@ -25,7 +25,7 @@ export function FormField({ label, htmlFor, error, required = false, children }:
             <Label htmlFor={htmlFor}>
                 {label}
                 {required && (
-                    <span className="ml-0.5 text-error-fg" aria-hidden="true">
+                    <span className="ml-0.5 text-danger" aria-hidden="true">
                         *
                     </span>
                 )}

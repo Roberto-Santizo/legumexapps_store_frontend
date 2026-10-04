@@ -22,21 +22,21 @@ export function Modal({ title, onClose, children }: Readonly<ModalProps>) {
     }, [onClose])
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-verde-profundo/40 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-900/40 p-4">
             <button
                 type="button"
                 aria-label={t("common.close")}
                 className="absolute inset-0 cursor-default"
                 onClick={onClose}
             />
-            <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-card bg-hueso p-6 shadow-card">
+            <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-panel border border-line bg-surface p-6 shadow-panel">
                 <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-verde-profundo">{title}</h2>
+                    <h2 className="text-lg font-semibold text-ink-900">{title}</h2>
                     <button
                         type="button"
                         onClick={onClose}
                         aria-label={t("common.close")}
-                        className="text-xl leading-none text-texto-suave hover:text-verde-profundo"
+                        className="flex h-10 w-10 items-center justify-center rounded-action text-xl leading-none text-ink-600 transition-colors hover:bg-canvas hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                     >
                         ✕
                     </button>

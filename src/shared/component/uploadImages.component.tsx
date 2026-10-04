@@ -51,15 +51,15 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
     }
 
     return (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-verde-profundo/50 p-3 sm:p-4">
-            <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-2xl bg-crema p-4 shadow-solid sm:p-6">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-brand-900/50 p-3 sm:p-4">
+            <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-panel border border-line bg-surface p-4 shadow-panel sm:p-6">
                 <div className="mb-4 flex items-center justify-between">
-                    <h2 className="font-display text-lg font-bold text-verde-profundo">{t("common.imageUpload.title")}</h2>
+                    <h2 className="font-display text-lg font-bold text-ink-900">{t("common.imageUpload.title")}</h2>
                     <button
                         type="button"
                         onClick={onClose}
                         aria-label={t("common.cancel")}
-                        className="text-texto-suave transition hover:text-verde-profundo"
+                        className="flex h-10 w-10 items-center justify-center text-ink-600 rounded-action transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface hover:text-ink-900"
                     >
                         <X size={20} />
                     </button>
@@ -67,7 +67,7 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
 
                 {preview ? (
                     <>
-                        <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-hueso sm:h-72">
+                        <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-surface sm:h-72">
                             <img src={preview} alt="" className="h-full w-full object-contain" />
                         </div>
 
@@ -84,11 +84,11 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
                 ) : (
                     <>
                         {isCameraUnavailable ? (
-                            <div className="flex h-56 w-full items-center justify-center rounded-lg border border-gris-campo bg-hueso px-4 text-center text-sm text-texto-suave sm:h-72">
+                            <div className="flex h-56 w-full items-center justify-center rounded-lg border border-line bg-surface px-4 text-center text-sm text-ink-600 sm:h-72">
                                 {t("common.imageUpload.cameraUnavailable")}
                             </div>
                         ) : (
-                            <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-hueso sm:h-72">
+                            <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-surface sm:h-72">
                                 <Webcam
                                     ref={webcamRef}
                                     screenshotFormat="image/jpeg"

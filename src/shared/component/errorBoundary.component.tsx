@@ -14,8 +14,8 @@ function ErrorFallback() {
     const { t } = useTranslation()
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-crema px-4 text-center">
-            <p className="max-w-sm text-lg font-semibold text-verde-profundo">{t("errorBoundary.message")}</p>
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-canvas px-4 text-center">
+            <p className="max-w-sm text-lg font-semibold text-ink-900">{t("errorBoundary.message")}</p>
             <button type="button" onClick={() => window.location.reload()} className={buttonClassName("primary")}>
                 {t("errorBoundary.reload")}
             </button>

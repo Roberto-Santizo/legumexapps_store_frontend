@@ -75,9 +75,9 @@ export function BulkImportPanel({
     }
 
     return (
-        <div className="mb-4 rounded-card border border-gris-campo bg-crema/60 p-4">
-            <p className="mb-3 text-sm font-semibold text-verde-profundo">{t(key("title"))}</p>
-            <p className="mb-3 text-sm text-texto-suave">{t(key("description"))}</p>
+        <div className="mb-4 rounded-panel border border-line bg-surface shadow-panel p-4">
+            <p className="mb-3 text-sm font-semibold text-ink-900">{t(key("title"))}</p>
+            <p className="mb-3 text-sm text-ink-600">{t(key("description"))}</p>
 
             <div className="flex flex-wrap items-center gap-3">
                 <Button
@@ -95,7 +95,7 @@ export function BulkImportPanel({
                     type="file"
                     accept=".xlsx,.xls"
                     onChange={handleFileChange}
-                    className="text-sm text-texto-suave file:mr-3 file:rounded-full file:border-0 file:bg-verde-profundo file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-crema hover:file:bg-verde-tinta"
+                    className="text-sm text-ink-600 file:mr-3 file:rounded-action file:border-0 file:bg-action-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-action-primary-text hover:file:bg-action-primary-hover"
                 />
 
                 <Button type="button" onClick={handleImport} disabled={!selectedFile || importMutation.isPending}>
@@ -105,11 +105,11 @@ export function BulkImportPanel({
             </div>
 
             {rowErrors.length > 0 && (
-                <div className="mt-4 rounded-[10px] border border-error-bd bg-error-bg p-3">
-                    <p className="mb-2 text-sm font-semibold text-error-fg">
+                <div className="mt-4 rounded-control border border-danger-border bg-danger-bg p-3">
+                    <p className="mb-2 text-sm font-semibold text-danger">
                         {t(key("rowErrorsTitle"), { count: rowErrors.length })}
                     </p>
-                    <ul className="max-h-56 space-y-1 overflow-y-auto text-sm text-error-fg">
+                    <ul className="max-h-56 space-y-1 overflow-y-auto text-sm text-danger">
                         {rowErrors.map((issue, index) => (
                             <li key={`${issue.row}-${issue.field}-${index}`}>
                                 {t(key("rowErrorItem"), { row: issue.row, message: issue.message })}

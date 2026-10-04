@@ -5,10 +5,10 @@ export function StatusBadge({ isActive }: Readonly<{ isActive: boolean }>) {
 
     return (
         <span
-            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium whitespace-nowrap ${
+            className={`inline-flex items-center rounded-badge border px-2.5 py-1 text-xs font-medium whitespace-nowrap ${
                 isActive
-                    ? "border-exito-bd bg-exito-bg text-exito-fg"
-                    : "border-error-bd bg-error-bg text-error-fg"
+                    ? "border-success-border bg-success-bg text-success"
+                    : "border-danger-border bg-danger-bg text-danger"
             }`}
         >
             {isActive ? t("common.active") : t("common.inactive")}

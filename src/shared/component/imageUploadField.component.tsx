@@ -25,18 +25,18 @@ export function ImageUploadField({ label, value, onChange, initialImageUrl, erro
 
     return (
         <div className="mb-5">
-            <p className="mb-2 text-sm font-medium text-verde-profundo">
+            <p className="mb-2 text-sm font-medium text-ink-900">
                 {label}
                 {required && (
-                    <span className="ml-0.5 text-error-fg" aria-hidden="true">
+                    <span className="ml-0.5 text-danger" aria-hidden="true">
                         *
                     </span>
                 )}
             </p>
 
             <div
-                className={`relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-[10px] border-[1.5px] bg-hueso ${
-                    errorMessage ? "border-error-bd" : "border-gris-campo"
+                className={`relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-control border bg-surface ${
+                    errorMessage ? "border-danger-border" : "border-line"
                 }`}
             >
                 {previewSrc ? (
@@ -46,7 +46,7 @@ export function ImageUploadField({ label, value, onChange, initialImageUrl, erro
                             type="button"
                             onClick={handleRemove}
                             aria-label={t("common.remove")}
-                            className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-verde-profundo text-crema shadow-sm transition hover:bg-error-bd"
+                            className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-action bg-danger text-surface transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface hover:bg-danger/90"
                         >
                             <X size={16} />
                         </button>
@@ -55,7 +55,7 @@ export function ImageUploadField({ label, value, onChange, initialImageUrl, erro
                     <button
                         type="button"
                         onClick={() => setIsPickerOpen(true)}
-                        className="flex h-full w-full flex-col items-center justify-center gap-2 text-texto-suave transition hover:text-verde-profundo"
+                        className="flex h-full w-full flex-col items-center justify-center gap-2 text-ink-600 rounded-action transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface hover:text-ink-900"
                     >
                         <ImagePlus size={26} />
                         <span className="text-xs font-medium">{t("common.uploadImage")}</span>
@@ -67,7 +67,7 @@ export function ImageUploadField({ label, value, onChange, initialImageUrl, erro
                 <button
                     type="button"
                     onClick={() => setIsPickerOpen(true)}
-                    className="mt-2 text-xs font-semibold text-verde-profundo underline-offset-2 hover:underline"
+                    className="mt-2 text-xs font-semibold text-ink-900 underline-offset-2 hover:underline"
                 >
                     {t("common.changeImage")}
                 </button>
@@ -75,7 +75,7 @@ export function ImageUploadField({ label, value, onChange, initialImageUrl, erro
 
             {isPickerOpen && <UploadImages onClose={() => setIsPickerOpen(false)} onSave={(base64) => onChange(base64)} />}
 
-            {errorMessage && <p className="mt-1.5 text-sm text-error-fg">{errorMessage}</p>}
+            {errorMessage && <p className="mt-1.5 text-sm text-danger">{errorMessage}</p>}
         </div>
     )
 }

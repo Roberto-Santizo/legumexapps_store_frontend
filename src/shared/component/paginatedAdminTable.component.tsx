@@ -44,8 +44,8 @@ export function PaginatedAdminTable<T extends { id: number }>({
         retry: false,
     })
 
-    if (itemsQuery.isLoading) return <p className="text-texto-suave">{t("common.loading")}</p>
-    if (itemsQuery.isError) return <p className="text-error-fg">{t("common.loadError")}</p>
+    if (itemsQuery.isLoading) return <p className="text-ink-600">{t("common.loading")}</p>
+    if (itemsQuery.isError) return <p className="text-danger">{t("common.loadError")}</p>
 
     const items = itemsQuery.data?.data ?? []
     const totalPages = itemsQuery.data?.meta.totalPages ?? 1

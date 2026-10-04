@@ -14,10 +14,10 @@ export function StatusToggleButton({ isActive, isPending, onToggle }: Readonly<S
             type="button"
             disabled={isPending}
             onClick={onToggle}
-            className={`font-medium underline underline-offset-4 disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`rounded-action font-medium underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50 ${
                 isActive
-                    ? "text-error-fg decoration-error-fg hover:text-error-fg/80"
-                    : "text-exito-fg decoration-exito-fg hover:text-exito-fg/80"
+                    ? "text-danger decoration-danger hover:text-danger/80"
+                    : "text-success decoration-success hover:text-success/80"
             }`}
         >
             {isActive ? t("common.deactivate") : t("common.activate")}

@@ -1,3 +1,4 @@
+import { getBulkImportTemplate, postBulkImportFile } from "@/shared/api/bulkImport.api"
 import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 import { apiItemResponseSchema, apiListResponseSchema, apiMutationResponseSchema, apiPaginatedListResponseSchema } from "@/shared/api/apiResponse.schema"
@@ -67,3 +68,6 @@ export async function updateClientStatusAPI(id: number, isActive: boolean) {
         handleApiError(error)
     }
 }
+
+export const downloadClientImportTemplateAPI = () => getBulkImportTemplate("/admin/clients/bulk-import/template")
+export const bulkImportClientsAPI = (file: File) => postBulkImportFile("/admin/clients/bulk-import", file)

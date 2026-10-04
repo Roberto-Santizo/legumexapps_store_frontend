@@ -1053,8 +1053,17 @@
       "title": "Editar cliente"
     },
     "table": {
-      "searchPlaceholder": "Buscar por nombre o correo...",
+      "searchPlaceholder": "Buscar por nombre",
       "empty": "No hay clientes registrados"
+    },
+    "bulkImport": {
+      "title": "Carga masiva de clientes",
+      "description": "Nombre obligatorio (1–100 caracteres). No requiere otros catálogos. Solo crea clientes nuevos; nunca actualiza. Los nombres repetidos están permitidos. Una fila inválida cancela todo el archivo. Reemplace o elimine el ejemplo de la plantilla.",
+      "downloadTemplate": "Descargar plantilla",
+      "importButton": "Importar archivo",
+      "importing": "Importando...",
+      "rowErrorsTitle": "El archivo tiene {{count}} error(es). No se importó ningún cliente:",
+      "rowErrorItem": "Fila {{row}}: {{message}}"
     }
   },
   "user": {

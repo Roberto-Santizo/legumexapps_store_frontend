@@ -1053,8 +1053,17 @@
       "title": "Edit client"
     },
     "table": {
-      "searchPlaceholder": "Search by name or email...",
+      "searchPlaceholder": "Search by name",
       "empty": "No clients registered"
+    },
+    "bulkImport": {
+      "title": "Bulk client import",
+      "description": "Name is required (maximum 100 characters). Creates new clients only; repeated names are allowed. If any row fails, nothing is imported. Replace the template example before importing.",
+      "downloadTemplate": "Download template",
+      "importButton": "Import file",
+      "importing": "Importing...",
+      "rowErrorsTitle": "The file has {{count}} error(s). No clients were imported:",
+      "rowErrorItem": "Row {{row}}: {{message}}"
     }
   },
   "user": {

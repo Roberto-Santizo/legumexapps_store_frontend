@@ -1,3 +1,5 @@
+import { bulkImportClientsAPI, downloadClientImportTemplateAPI } from "@/feature/client/api/client.api"
+import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { ClientTable } from "@/feature/client/component/clientTable.component"
@@ -19,6 +21,16 @@ export function ClientListPage() {
                     </Link>
                 )}
             </div>
+            {hasPermission("clients:create") && (
+                <BulkImportPanel
+                    translationNamespace="client.bulkImport"
+                    templateFilename="plantilla-clientes.xlsx"
+                    downloadTemplate={downloadClientImportTemplateAPI}
+                    bulkImport={bulkImportClientsAPI}
+                    invalidateQueryKey={["clients"]}
+                />
+            )}
+
             <ClientTable />
         </PageContainer>
     )

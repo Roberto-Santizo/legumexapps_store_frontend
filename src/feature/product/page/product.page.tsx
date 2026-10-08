@@ -1,9 +1,8 @@
 import type { ComponentProps } from "react"
-import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { ProductTable } from "@/feature/product/component/productTable.component"
-import { bulkImportProductsAPI, downloadProductImportTemplateAPI } from "@/feature/product/api/product.api"
+import { InitialProductImportPanel } from "@/feature/product/component/initialProductImportPanel.component"
 import { bulkImportProductRawMaterialsAPI, downloadProductRawMaterialImportTemplateAPI } from "@/feature/product/api/productRawMaterial.api"
 import { bulkImportProductIngredientsAPI, downloadProductIngredientImportTemplateAPI } from "@/feature/product/api/productIngredient.api"
 import { usePermission } from "@/shared/auth/usePermission"
@@ -14,25 +13,14 @@ import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 export function ProductListPage() {
     const { t } = useTranslation()
     const { hasPermission } = usePermission()
-    const queryClient = useQueryClient()
 
     // Tres pasos: Productos y Variantes -> Recetas -> Ingredientes (opcional).
     // Los números mantienen el orden de dependencia aunque un permiso oculte un paso.
-    const importSteps: { step: number; permission: string; panel: ComponentProps<typeof BulkImportPanel> }[] = [
+    const importSteps: { step: number; permission: string; panel: ComponentProps<typeof BulkImportPanel> | null }[] = [
         {
             step: 1,
             permission: "products:create",
-            panel: {
-                translationNamespace: "product.bulkImport",
-                templateFilename: "plantilla-productos.xlsx",
-                downloadTemplate: downloadProductImportTemplateAPI,
-                bulkImport: async (file) => {
-                    const result = await bulkImportProductsAPI(file)
-                    if (result) await queryClient.invalidateQueries({ queryKey: ["productVariants"] })
-                    return result
-                },
-                invalidateQueryKey: ["products"],
-            },
+            panel: null,
         },
         {
             step: 2,
@@ -62,7 +50,7 @@ export function ProductListPage() {
     return (
         <PageContainer wide>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("product.list.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("product.list.title")}</h1>
                 {hasPermission("products:create") && (
                     <Link to="/admin/products/create" className={buttonClassName("primary")}>
                         {t("product.list.createLink")}
@@ -71,18 +59,18 @@ export function ProductListPage() {
             </div>
             {visibleImportSteps.length > 0 && (
                 <section className="mb-6">
-                    <h2 className="mb-1 text-lg font-semibold text-verde-profundo">{t("product.bulkImportSteps.title")}</h2>
-                    <p className="mb-4 text-sm text-texto-suave">{t("product.bulkImportSteps.intro")}</p>
+                    <h2 className="mb-1 text-lg font-semibold text-ink-900">{t("product.bulkImportSteps.title")}</h2>
+                    <p className="mb-4 text-sm text-ink-600">{t("product.bulkImportSteps.intro")}</p>
                     <ol>
                         {visibleImportSteps.map(({ step, panel }) => (
                             <li key={step}>
                                 <div className="mb-2 flex items-center gap-2">
-                                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-verde-profundo text-sm font-semibold text-crema">
+                                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink-900 text-sm font-semibold text-canvas">
                                         {step}
                                     </span>
-                                    <p className="text-sm text-texto-suave">{t(`product.bulkImportSteps.requires${step}`)}</p>
+                                    <p className="text-sm text-ink-600">{t(`product.bulkImportSteps.requires${step}`)}</p>
                                 </div>
-                                <BulkImportPanel {...panel} />
+                                {panel ? <BulkImportPanel {...panel} /> : <InitialProductImportPanel />}
                             </li>
                         ))}
                     </ol>

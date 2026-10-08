@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -25,11 +26,8 @@ import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 const variantFormSchema = createProductVariantSchema.omit({ productId: true })
 type VariantFormInput = z.infer<typeof variantFormSchema>
 
-// Partial<VariantFormInput>, no VariantFormInput a secas -- mismo patrón que el resto de campos
-// críticos vueltos requeridos en este repo: una variante vieja creada
-// antes de este cambio puede no tener boxesPerPallet/bagsPerBox (columnas nuevas/reinterpretadas),
-// así que se precarga vacío para poder abrir el registro a editar, pero no se puede volver a
-// GUARDAR sin completarlo (el schema sí los exige).
+// Partial: una variante antigua puede no tener boxesPerPallet/bagsPerBox; se precarga vacía para
+// poder editarla, pero el schema exige completarlos antes de guardar.
 function toFormValues(variant: ProductVariantResponse): Partial<VariantFormInput> {
     return {
         skuCode: variant.skuCode,
@@ -60,7 +58,10 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
         formState: { errors },
     } = useForm<VariantFormInput>({ resolver: zodResolver(variantFormSchema) })
 
-    const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariants"] })
+    const invalidate = () => Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["productVariants"] }),
+        queryClient.invalidateQueries({ queryKey: ["products"] }),
+    ])
 
     const createMutation = useMutation({
         mutationFn: createProductVariantAPI,
@@ -70,7 +71,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
             reset({})
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const updateMutation = useMutation({
@@ -83,7 +84,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
             reset({})
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const deleteMutation = useMutation({
@@ -92,7 +93,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
             invalidate()
             toast.success(data.message)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {
@@ -139,14 +140,14 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                                     <button
                                         type="button"
                                         onClick={() => startEdit(variant)}
-                                        className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.edit")}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => deleteMutation.mutate(variant.id)}
-                                        className="font-medium text-error-fg underline underline-offset-4"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-danger underline underline-offset-4 transition-colors hover:bg-danger-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.delete")}
                                     </button>
@@ -166,7 +167,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                     required
                 >
                     <Input id="skuCode" hasError={!!errors.skuCode} {...register("skuCode")} />
-                    <p className="mt-1.5 text-sm text-texto-suave">{t("productVariant.form.skuCodeHint")}</p>
+                    <p className="mt-1.5 text-sm text-ink-600">{t("productVariant.form.skuCodeHint")}</p>
                 </FormField>
 
                 <FormField
@@ -189,7 +190,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                         )}
                     />
                     {editingId && (
-                        <p className="mt-1.5 text-sm text-texto-suave">{t("productVariant.form.presentationImmutableHint")}</p>
+                        <p className="mt-1.5 text-sm text-ink-600">{t("productVariant.form.presentationImmutableHint")}</p>
                     )}
                 </FormField>
 
@@ -220,7 +221,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                         {...register("bagsPerBox", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
-                <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
+                <p className="mb-5 -mt-3 text-sm text-ink-600 sm:col-span-2">
                     {t("productVariant.form.bagsPerBoxHint")}
                 </p>
 
@@ -236,7 +237,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                         {...register("unitsPerIntermediatePackage", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
-                <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">
+                <p className="mb-5 -mt-3 text-sm text-ink-600 sm:col-span-2">
                     {t("productVariant.form.unitsPerIntermediatePackageHint")}
                 </p>
 

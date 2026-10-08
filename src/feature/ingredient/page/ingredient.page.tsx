@@ -14,7 +14,7 @@ export function IngredientListPage() {
     return (
         <PageContainer wide>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("ingredient.list.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("ingredient.list.title")}</h1>
                 {hasPermission("ingredients:create") && (
                     <Link to="/admin/ingredients/create" className={buttonClassName("primary")}>
                         {t("ingredient.list.createLink")}

@@ -12,7 +12,7 @@ export function ProcessingCostListPage() {
     return (
         <PageContainer wide>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("processingCost.list.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("processingCost.list.title")}</h1>
                 {hasPermission("processingCosts:create") && (
                     <Link to="/admin/processing-costs/create" className={buttonClassName("primary")}>
                         {t("processingCost.list.createLink")}

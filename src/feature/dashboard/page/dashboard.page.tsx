@@ -39,7 +39,7 @@ export function DashboardPage() {
     if (summaryQuery.isLoading) {
         content = <Spinner />
     } else if (hasLoadError) {
-        content = <p className="text-error-fg">{t("common.loadError")}</p>
+        content = <p className="text-danger">{t("common.loadError")}</p>
     } else {
         content = (
             <div className="space-y-6">
@@ -141,8 +141,8 @@ export function DashboardPage() {
     return (
         <PageContainer className="max-w-6xl">
             <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("dashboard.title")}</h1>
-                <p className="mt-1 text-texto-suave">{t("dashboard.subtitle")}</p>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("dashboard.title")}</h1>
+                <p className="mt-1 text-ink-600">{t("dashboard.subtitle")}</p>
             </div>
 
             <div className="mb-6">

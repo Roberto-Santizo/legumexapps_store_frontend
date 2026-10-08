@@ -1,6 +1,6 @@
 # Sistema de diseño Legumex — identidad visual
 
-Basado en el logo real de Agroindustria Legumex ("Growing Quality. Delivering Trust."). Colores extraídos directamente del logo. Este documento es la base del rediseño; Codex lo aplicará por fases.
+Basado en el logo real de Agroindustria Legumex ("Growing Quality. Delivering Trust."). Colores extraídos directamente del logo. Este documento es la base del rediseño.
 
 ## Personalidad de marca
 Natural, fresco, confiable, profesional. Agroindustria de exportación (frutas, vegetales, jugos). El diseño debe sentirse **limpio y premium**, con mucho espacio en blanco y el verde de marca como protagonista — NO recargado, NO colorido de más. Serio pero con vida (es campo, es fresco).

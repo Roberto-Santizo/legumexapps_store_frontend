@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/shared/auth/ProtectedRoute"
 import { AccessDenied, PermissionGate } from "@/shared/auth/PermissionGate"
 import { usePermission } from "@/shared/auth/usePermission"
 import { lazyWithRetry } from "@/shared/router/lazyWithRetry"
+const PackagingGroupPage = lazyWithRetry(() => import("@/feature/packagingGroup/page/packagingGroup.page").then(module => ({ default: module.PackagingGroupPage })))
 
 const CategoryListPage = lazyWithRetry(() =>
     import("@/feature/category/page/category.page").then((module) => ({ default: module.CategoryListPage }))
@@ -123,19 +124,16 @@ const DashboardPage = lazyWithRetry(() =>
 )
 
 const AdminQuoteListPage = lazyWithRetry(() =>
-    import("@/feature/quote/page/adminQuote.page").then((module) => ({ default: module.AdminQuoteListPage }))
+    import("@/feature/quote/page/adminQuotes.page").then((module) => ({ default: module.AdminQuotesPage }))
 )
 const QuoteDraftListPage = lazyWithRetry(() =>
     import("@/feature/quoteDraft/page/quoteDraft.page").then((module) => ({ default: module.QuoteDraftListPage }))
 )
 const AdminCustomQuoteListPage = lazyWithRetry(() =>
-    import("@/feature/customQuote/page/adminCustomQuoteList.page").then((module) => ({ default: module.AdminCustomQuoteListPage }))
+    import("@/feature/quote/page/adminQuotes.page").then((module) => ({ default: module.AdminCustomQuoteListRedirect }))
 )
 const AdminCustomQuoteDetailPage = lazyWithRetry(() =>
     import("@/feature/customQuote/page/adminCustomQuoteDetail.page").then((module) => ({ default: module.AdminCustomQuoteDetailPage }))
-)
-const CustomQuoteConfigPage = lazyWithRetry(() =>
-    import("@/feature/customQuote/page/customQuoteConfig.page").then((module) => ({ default: module.CustomQuoteConfigPage }))
 )
 const AdminQuoteCalculatorPage = lazyWithRetry(() =>
     import("@/feature/quote/page/adminQuoteCalculator.page").then((module) => ({ default: module.AdminQuoteCalculatorPage }))
@@ -176,11 +174,10 @@ const JuiceConfigPage = lazyWithRetry(() => import("@/feature/juice/page/juiceCo
 const routes = [
     { path: "dashboard", component: DashboardPage, permission: "dashboard:view" },
 
-    { path: "quotes", component: AdminQuoteListPage, permission: "quotes:view" },
+    { path: "quotes", component: AdminQuoteListPage, permission: ["quotes:view", "customQuotes:view"] },
     { path: "quote-drafts", component: QuoteDraftListPage, permission: "quoteDrafts:view" },
     { path: "custom-quotes", component: AdminCustomQuoteListPage, permission: "customQuotes:view" },
     { path: "custom-quotes/:customQuoteId", component: AdminCustomQuoteDetailPage, permission: "customQuotes:view" },
-    { path: "custom-quote-config", component: CustomQuoteConfigPage, permission: "customQuoteConfig:edit" },
     { path: "quotes/calculator", component: AdminQuoteCalculatorPage, permission: "quotes:calculate" },
 
     { path: "categories", component: CategoryListPage, permission: "categories:view" },
@@ -203,6 +200,7 @@ const routes = [
     { path: "ingredients/:ingredientId/edit", component: EditIngredientPage, permission: "ingredients:edit" },
 
     { path: "packagings", component: PackagingListPage, permission: "packagings:view" },
+    { path: "packaging-groups", component: PackagingGroupPage, permission: "packagingGroups:view" },
     { path: "packagings/create", component: CreatePackagingPage, permission: "packagings:create" },
     { path: "packagings/:packagingId/edit", component: EditPackagingPage, permission: "packagings:edit" },
 
@@ -254,7 +252,7 @@ const routes = [
 function AdminIndexRedirect() {
     const { hasPermission } = usePermission()
     const firstAccessibleSection = routes.find(
-        (route) => route.permission.endsWith(":view") && hasPermission(route.permission)
+        (route) => Array.isArray(route.permission) ? route.permission.some(hasPermission) : route.permission.endsWith(":view") && hasPermission(route.permission)
     )
 
     if (!firstAccessibleSection) {

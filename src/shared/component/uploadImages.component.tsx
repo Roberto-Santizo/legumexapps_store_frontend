@@ -1,3 +1,4 @@
+import { TranslatedMessage } from "@/shared/i18n/translatedMessage.component"
 import { useCallback, useRef, useState } from "react"
 import type { ChangeEvent } from "react"
 import Webcam from "react-webcam"
@@ -9,11 +10,12 @@ import { Button } from "@/shared/component/button.component"
 type Props = {
     onClose: () => void
     onSave: (imageBase64: string) => void
+    allowedMimeTypes?: readonly string[]
 }
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5MB -- mismo límite que el resto del catálogo de fotos (ver imageUploadField.component.tsx)
 
-export function UploadImages({ onClose, onSave }: Readonly<Props>) {
+export function UploadImages({ onClose, onSave, allowedMimeTypes }: Readonly<Props>) {
     const { t } = useTranslation()
     const webcamRef = useRef<Webcam>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -30,12 +32,12 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
         event.target.value = "" 
 
         if (!file) return
-        if (!file.type.startsWith("image/")) {
-            toast.error(t("common.imageUpload.invalidType"))
+        if (allowedMimeTypes ? !allowedMimeTypes.includes(file.type) : !file.type.startsWith("image/")) {
+            toast.error(<TranslatedMessage translationKey="common.imageUpload.invalidType" />)
             return
         }
         if (file.size > MAX_FILE_SIZE_BYTES) {
-            toast.error(t("common.imageUpload.invalidSize"))
+            toast.error(<TranslatedMessage translationKey="common.imageUpload.invalidSize" />)
             return
         }
 
@@ -99,7 +101,7 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
                             </div>
                         )}
 
-                        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+                        <input ref={fileInputRef} type="file" accept={allowedMimeTypes?.join(",") ?? "image/*"} className="hidden" onChange={handleFileSelect} />
 
                         <div className="mt-4 flex flex-wrap justify-center gap-3">
                             {!isCameraUnavailable && (

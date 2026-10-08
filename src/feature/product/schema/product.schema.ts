@@ -3,8 +3,7 @@ import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 
 const imageInputSchema = z.string().nullable().optional()
 
-// Traducción a inglés -- opcional. Product no tiene descripción larga (solo displayName). Ver
-// category.schema.ts (mismo contrato) y shared/utils/translation.util.ts en el backend.
+// Traducción a inglés opcional; Product solo tiene displayName.
 const productTranslationInputSchema = z.object({
     displayName: z.string().trim().max(120).optional(),
 })
@@ -49,3 +48,8 @@ export const responseProductSchema = baseCatalogSchema.extend({
 export type CreateProductInput = z.infer<typeof createProductSchema>
 export type UpdateProductInput = z.infer<typeof updateProductSchema>
 export type ProductResponse = z.infer<typeof responseProductSchema>
+
+export const productListItemSchema = responseProductSchema.extend({
+    productVariants: z.array(z.object({ id: z.number().int(), skuCode: z.string() })),
+})
+export type ProductListItem = z.infer<typeof productListItemSchema>

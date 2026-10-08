@@ -8,7 +8,7 @@ import { rawMaterialsResource, spiceMaterialsResource } from "../constant/juiceF
 export function JuiceMaterialsPage() {
     const { t } = useTranslation()
     return <PageContainer>
-        <div className="mb-6 flex items-center justify-between gap-3"><h1 className="text-2xl font-semibold text-verde-profundo">{t("juice.materials")}</h1><Link to="/admin/juices" className={buttonClassName("secondary")}>{t("common.back")}</Link></div>
+        <div className="mb-6 flex items-center justify-between gap-3"><h1 className="text-2xl font-semibold text-ink-900">{t("juice.materials")}</h1><Link to="/admin/juices" className={buttonClassName("secondary")}>{t("common.back")}</Link></div>
         <div className="space-y-6"><JuiceSection resource={rawMaterialsResource} /><JuiceSection resource={spiceMaterialsResource} /></div>
     </PageContainer>
 }

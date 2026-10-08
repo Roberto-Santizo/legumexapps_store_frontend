@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -25,14 +26,14 @@ function toFormValues(lead: LeadResponse): UpdateLeadInput {
 function ReadOnlyField({ label, value }: Readonly<{ label: string; value: string }>) {
     return (
         <div>
-            <p className="text-xs font-medium tracking-wide text-texto-suave uppercase">{label}</p>
-            <p className="text-verde-profundo">{value}</p>
+            <p className="text-xs font-medium tracking-wide text-ink-600 uppercase">{label}</p>
+            <p className="text-ink-900">{value}</p>
         </div>
     )
 }
 
 export function EditLeadPage() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const params = useParams()
@@ -67,7 +68,7 @@ export function EditLeadPage() {
             navigate("/admin/leads")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -78,19 +79,19 @@ export function EditLeadPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("lead.edit.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("lead.edit.title")}</h1>
                 <Link to="/admin/leads" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             <Card>
-                {leadQuery.isLoading && <p className="text-texto-suave">{t("common.loading")}</p>}
-                {leadQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+                {leadQuery.isLoading && <p className="text-ink-600">{t("common.loading")}</p>}
+                {leadQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
                 {leadQuery.data && (
                     <>
-                        <div className="mb-6 grid grid-cols-1 gap-4 border-b border-gris-campo pb-6 sm:grid-cols-2">
+                        <div className="mb-6 grid grid-cols-1 gap-4 border-b border-line pb-6 sm:grid-cols-2">
                             <ReadOnlyField label={t("lead.form.fullName")} value={leadQuery.data.data.fullName} />
                             <ReadOnlyField label={t("lead.form.companyName")} value={leadQuery.data.data.companyName} />
                             <ReadOnlyField label={t("lead.form.phone")} value={leadQuery.data.data.phone ?? "—"} />
@@ -99,7 +100,7 @@ export function EditLeadPage() {
                                 label={t("lead.form.productLineInterest")}
                                 value={leadQuery.data.data.productLineInterest ?? "—"}
                             />
-                            <ReadOnlyField label={t("lead.table.receivedAt")} value={formatDateTime(leadQuery.data.data.createdAt)} />
+                            <ReadOnlyField label={t("lead.table.receivedAt")} value={formatDateTime(leadQuery.data.data.createdAt, i18n.language)} />
                         </div>
 
                         <form onSubmit={onSubmit}>

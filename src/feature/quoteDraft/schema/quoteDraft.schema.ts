@@ -5,7 +5,7 @@ const draftMaterialLineSchema = z.object({
     optionGroup: z.string().nullable(),
 })
 
-export const quoteDraftStateSchema = z.enum(["in_progress", "abandoned"])
+const quoteDraftStateSchema = z.enum(["in_progress", "abandoned"])
 
 // Espejo de quoteDraft.service.ts::QuoteDraftListItem (backend). "abandoned" lo calcula el backend al
 // leer (in_progress + más de 24h sin actividad); las convertidas nunca llegan acá.

@@ -4,8 +4,7 @@ import { UNIT_CATALOG_KEYS } from "@/feature/unit/constant/unitCatalog"
 
 const unitTypeEnum = z.enum(["weight", "volume", "count"])
 
-// El admin ya no escribe displayName/unitType/baseFactor a mano: elige unitKey del catálogo
-// fijo (ver constant/unitCatalog.ts) y el backend resuelve los 3 valores desde ahí.
+// El admin elige unitKey del catálogo fijo; el backend resuelve displayName/unitType/baseFactor.
 export const createUnitSchema = z.object({
     unitKey: z.enum(UNIT_CATALOG_KEYS),
 })

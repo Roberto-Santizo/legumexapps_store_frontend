@@ -8,7 +8,7 @@ import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
 
 export function RawMaterialTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <PaginatedAdminTable<RawMaterialResponse>
@@ -42,7 +42,7 @@ export function RawMaterialTable() {
                 {
                     key: "updatedAt",
                     header: t("common.updatedAt"),
-                    render: (rawMaterial) => formatDateTime(rawMaterial.updatedAt),
+                    render: (rawMaterial) => formatDateTime(rawMaterial.updatedAt, i18n.language),
                 },
             ]}
         />

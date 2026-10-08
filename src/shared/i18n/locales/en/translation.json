@@ -45,7 +45,33 @@
       "previous": "Previous",
       "next": "Next",
       "searchPlaceholder": "Search..."
-    }
+    },
+    "chooseFile": "Choose File",
+    "noFileChosen": "No file chosen",
+    "logoAlt": "Legumex logo",
+    "selectLanguage": "Select language",
+    "languages": {
+      "es": "Spanish",
+      "en": "English"
+    },
+    "selectA11y": {
+      "menu": "Use Up and Down to browse options, Enter to select, and Escape to close the menu. {{tab}}",
+      "tab": "Tab selects the option and exits the menu.",
+      "value": "Use the arrow keys to browse selected values and Backspace to remove them.",
+      "inputSearch": "Type to filter options or press Down to open the menu.",
+      "input": "Press Down to open the menu.",
+      "disabled": "{{label}} is unavailable.",
+      "cleared": "Selection cleared.",
+      "removed": "{{label}} removed.",
+      "selected": "{{label}} selected.",
+      "focused": "{{label}}, option {{position}} of {{count}}. {{state}} {{selected}}",
+      "disabledState": "Unavailable.",
+      "selectedState": "Selected.",
+      "filtered": "{{results}} Search: {{input}}.",
+      "results_one": "{{count}} result available.",
+      "results_other": "{{count}} results available."
+    },
+    "notifications": "Notifications"
   },
   "nav": {
     "groups": {
@@ -63,7 +89,13 @@
       "invalid_format": "The format is invalid",
       "invalid_value": "Value not allowed",
       "custom": "Invalid value"
-    }
+    },
+    "packaging_consumption_defaults": "Configure both consumption fields or leave both blank; they apply only to pallet materials.",
+    "packaging_consumption_missing": "Material {{code}} has no consumption rule configured in the packaging catalog.",
+    "pallet_consumption_invalid": "Specify a consumption basis and a positive quantity with at most two decimal places.",
+    "pallet_boxes_required": "The variant must have a valid number of boxes per pallet.",
+    "network": "Could not connect to the server. Check your connection and try again.",
+    "timeout": "The request timed out. Please try again."
   },
   "auth": {
     "adminLogin": {
@@ -147,7 +179,7 @@
         "modeFinished": "Ready-made product",
         "modeCustomizable": "Customize my product",
         "modeFinishedHint": "Choose from our ready-made presentations, with a fixed recipe.",
-        "modeCustomizableHint": "Build your own mix: pick the % of each raw material until it adds up to 100%.",
+        "modeCustomizableHint": "Build your own mix using our available packaging and logistics configurations.",
         "noProductsFinished": "There are no ready-made products available to quote yet.",
         "noProductsCustomizable": "There are no customizable products available to quote yet.",
         "organicBadge": "100% Organic",
@@ -163,6 +195,7 @@
           "steps": {
             "mode": "Type",
             "category": "Category",
+            "subCategory": "Subcategory",
             "product": "Product",
             "pallets": "Pallets & materials",
             "total": "Total"
@@ -196,13 +229,18 @@
             "title": "Choose a category",
             "subtitle": "Select the product category you want to quote."
           },
+          "subCategory": {
+            "title": "Subcategories in {{category}}",
+            "subtitle": "Choose a subcategory to continue."
+          },
           "product": {
-            "title": "Products in {{category}}",
-            "subtitle": "Choose the product you want to quote."
+            "title": "Products in {{subcategory}}",
+            "subtitle": "Choose the product you want to quote.",
+            "searchPlaceholder": "Search product by name...",
+            "noResults": "No products found for \"{{search}}\".",
+            "clearSearch": "Clear search"
           }
-        },
-        "modeCustom": "Custom product",
-        "modeCustomHint": "Build a product that doesn't exist yet: you choose the raw materials, ingredients, presentation and packaging."
+        }
       },
       "result": {
         "empty": "Fill out the form and calculate your quote to see the cost breakdown here.",
@@ -260,7 +298,9 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Fresh & IQF vegetables for export",
+      "showcasePause": "Pause product animation",
+      "showcaseResume": "Resume product animation",
+      "eyebrow": "Fresh & IQF vegetables",
       "titleLineOne": "From our fields",
       "titleLineTwo": "to the world",
       "tagline": "Growing Quality. Delivering Trust.",
@@ -493,7 +533,8 @@
       "sendAnother": "Send another request",
       "contact": {
         "whatsappCta": "Open a chat",
-        "hours": "Monday to Friday, 7:00 – 17:00 (GMT-6)"
+        "hours": "Monday to Friday, 7:00 – 17:00 (GMT-6)",
+        "address": "Guatemala, El Tejar, Chimaltenango"
       },
       "form": {
         "name": "Full name",
@@ -571,6 +612,18 @@
     "table": {
       "searchPlaceholder": "Search by name...",
       "empty": "No units registered"
+    },
+    "catalog": {
+      "gram": "Gram",
+      "kilogram": "Kilogram",
+      "pound": "Pound",
+      "ounce": "Ounce",
+      "ton": "Ton",
+      "milliliter": "Milliliter",
+      "liter": "Liter",
+      "gallon": "Gallon",
+      "piece": "Piece",
+      "dozen": "Dozen"
     }
   },
   "rawMaterial": {
@@ -653,6 +706,8 @@
   },
   "subCategory": {
     "form": {
+      "image": "Subcategory image (optional)",
+      "imageHint": "PNG, JPG or WEBP. Maximum 5 MB.",
       "categoryId": "Category",
       "displayName": "Name",
       "fullDescription": "Description",
@@ -686,7 +741,7 @@
         "intermediate": "Intermediate packaging (large bag)",
         "pallet": "Palletizing material."
       },
-      "unitCost": "Cost per unit (Q)"
+      "unitCost": "Cost per unit (USD)"
     },
     "list": {
       "title": "Packagings",
@@ -699,7 +754,7 @@
       "title": "Edit packaging"
     },
     "table": {
-      "searchPlaceholder": "Search by name...",
+      "searchPlaceholder": "Search by name or code...",
       "empty": "No packagings registered"
     },
     "bulkImport": {
@@ -710,6 +765,20 @@
       "importing": "Importing...",
       "rowErrorsTitle": "The file has {{count}} error(s). No material was imported:",
       "rowErrorItem": "Row {{row}}: {{message}}"
+    },
+    "consumption": {
+      "basis": "Consumption basis",
+      "quantity": "Quantity",
+      "per_box": "Per box",
+      "per_pallet": "Per pallet",
+      "unconfigured": "Not configured",
+      "help": "This rule is copied when creating new associations. Existing associations remain unchanged. Complete both fields or leave both blank; configure consumption before associating this material.",
+      "rule": "Consumption rule",
+      "missing": "Configure consumption for this material in the catalog.",
+      "existing": "The effective rule of this association is preserved.",
+      "customize": "Customize rule for this variant",
+      "overrideWarning": "This exception changes only this association and its future costs; it does not change the catalog.",
+      "unitRule": "1 per unit"
     }
   },
   "presentation": {
@@ -771,22 +840,18 @@
       "title": "Edit product"
     },
     "table": {
-      "searchPlaceholder": "Search by name...",
-      "empty": "No products registered"
+      "searchPlaceholder": "Search by name or SKU...",
+      "empty": "No products registered",
+      "sku": "SKU",
+      "noSku": "No SKU"
     },
     "bulkImport": {
-      "title": "Products and Variants",
-      "description": "Download the template and fill in one row per variant. Product group combines rows of the same product within this file: repeat all product data consistently. Each variant requires a globally unique SKU/Item Number, Presentation, Boxes per pallet and Bags per box; Units per intermediate package is optional. Each product requires Subcategory, Client, Name and Recipe type; Category, English name, Organic and Additional cost are optional. Catalog entries must already exist and be active. Creates new products and variants only: never updates or attaches variants to existing products. The whole file is validated and imported in one transaction. Configure images and packaging materials afterward in the product editor.",
-      "downloadTemplate": "Download template",
-      "importButton": "Import file",
-      "importing": "Importing...",
-      "rowErrorsTitle": "The file has {{count}} error(s). No product or variant was imported:",
-      "rowErrorItem": "Row {{row}}: {{message}}"
+      "title": "Products and Variants"
     },
     "bulkImportSteps": {
       "title": "Bulk upload from Excel",
-      "intro": "Upload three files in this order: Products and Variants, Recipes, and Ingredients (optional). Each file is validated in full and is all-or-nothing; earlier steps remain saved if a later one fails. Configure images and packaging materials manually in the product editor. Complete recipes and packaging before quoting.",
-      "requires1": "Step 1 · Products and Variants — requires active Subcategories, Clients and Presentations.",
+      "intro": "Import Products and Variants together with their packaging materials in one Excel file, then import Recipes and Ingredients (optional). Each file is fully validated and saved atomically. Configure images in the product editor. Complete recipes and packaging before quoting.",
+      "requires1": "Step 1 · Products, Variants and materials — requires active Subcategories, Clients and Presentations; existing packaging codes and groups when materials are included.",
       "requires2": "Step 2 · Recipes — references each product through a variant SKU from step 1; requires Raw Materials in their catalog.",
       "requires3": "Step 3 · Ingredients (optional) — references each product through a variant SKU from step 1; requires Ingredients in their catalog."
     }
@@ -899,7 +964,8 @@
     "form": {
       "packagingId": "Pallet material",
       "quantityValue": "Quantity",
-      "addButton": "Add material"
+      "addButton": "Add material",
+      "quantityBasis": "Quantity basis"
     },
     "createModal": {
       "title": "Create pallet material"
@@ -909,7 +975,9 @@
     },
     "table": {
       "empty": "No palletizing materials registered"
-    }
+    },
+    "perBox": "per box",
+    "perPallet": "per pallet"
   },
   "productVariantIntermediateMaterial": {
     "selectVariant": "Variant",
@@ -936,80 +1004,6 @@
       "group": "Group",
       "default": "Group default",
       "fixed": "Fixed"
-    }
-  },
-  "customQuoteConfig": {
-    "title": "Custom-quote configuration",
-    "navTitle": "Custom-quote setup",
-    "description": "Define what a salesperson can choose when quoting a product that doesn't exist yet (no SKU) and which numbers it is quoted with. None of this changes the defined products.",
-    "tabs": {
-      "rawMaterials": "Raw materials",
-      "ingredients": "Ingredients",
-      "presentations": "Presentations",
-      "packagings": "Packaging"
-    },
-    "rawMaterials": {
-      "description": "Raw materials that can be mixed into a custom product, per subcategory. Percentage limits are optional: without a limit the raw material can go from 0% to 100%.",
-      "subCategory": "Subcategory",
-      "chooseSubCategory": "Choose a subcategory to view and configure its raw materials.",
-      "rawMaterial": "Raw material",
-      "mixable": "Mixable",
-      "minPercentage": "Min %",
-      "maxPercentage": "Max %",
-      "empty": "This subcategory has no raw materials configured yet.",
-      "limitsHint": "Leave a limit empty to not restrict it. A recipe with more than one raw material only accepts mixable raw materials.",
-      "addButton": "Add raw material",
-      "notMixableTag": "not mixable",
-      "minGreaterThanMax": "The minimum cannot be greater than the maximum"
-    },
-    "ingredients": {
-      "description": "Added ingredients (salt, sugar…) the salesperson can add to a custom product, outside the 100% recipe.",
-      "ingredient": "Ingredient",
-      "maxGramsPerKg": "Cap (g per kg of net weight)",
-      "noCap": "No cap",
-      "gramsPerKgValue": "{{value}} g/kg",
-      "empty": "No ingredients configured yet.",
-      "capHint": "The cap is per kg of net weight, so it works for any presentation (20 g/kg = 10 g in a 500 g bag).",
-      "addButton": "Add ingredient"
-    },
-    "presentations": {
-      "description": "Presentations that can be custom-quoted and the pallet composition they are quoted with. Only active presentations with a net weight are listed.",
-      "presentation": "Presentation",
-      "netWeight": "Net weight",
-      "boxesPerPallet": "Boxes per pallet",
-      "bagsPerBox": "Bags per box",
-      "unitsPerIntermediatePackage": "Units per intermediate package",
-      "noIntermediate": "No intermediate packaging",
-      "empty": "No presentations configured yet.",
-      "bagsPerPalletHint": "= {{bagsPerPallet}} bags per pallet",
-      "intermediateHint": "Leave \"Units per intermediate package\" empty if this presentation has no intermediate packaging.",
-      "addButton": "Add presentation"
-    },
-    "packagings": {
-      "description": "Packaging materials offered, per level. A fixed material is always included; materials with the same group are alternatives and the salesperson picks one per group.",
-      "level": "Level",
-      "levels": {
-        "unit": "Unit packaging",
-        "intermediate": "Intermediate packaging",
-        "pallet": "Palletizing"
-      },
-      "packaging": "Material",
-      "quantity": "Quantity",
-      "quantityPerUnit": "Quantity per unit",
-      "quantityBasis": "Quantity is",
-      "basis": {
-        "per_pallet": "Per pallet",
-        "per_box": "Per box (multiplied by boxes per pallet)"
-      },
-      "quantityValue": {
-        "per_unit": "{{quantity}} per unit",
-        "per_pallet": "{{quantity}} per pallet",
-        "per_box": "{{quantity}} per box"
-      },
-      "quantityRequired": "Enter this material's quantity",
-      "intermediateHint": "Intermediate packaging has no quantity: it is calculated from the chosen presentation's units per intermediate package.",
-      "empty": "This level has no materials configured yet.",
-      "addButton": "Add material"
     }
   },
   "salesperson": {
@@ -1167,13 +1161,21 @@
   },
   "adminQuote": {
     "list": {
+      "emptyRange": "No fixed product quotes for this date range.",
       "title": "Quotes",
       "description": "All quotes representatives have saved, regardless of which representative.",
       "searchPlaceholder": "Search by representative, company, email or product...",
-      "empty": "No quote has been saved yet.",
+      "empty": "No fixed product quotes.",
       "noMatches": "No quote matches the search.",
       "summary": "{{date}} · {{pallets}} pallets · {{destination}}",
       "summaryNoDestination": "{{date}} · {{pallets}} pallets"
+    },
+    "types": {
+      "label": "Quote type",
+      "fixed": "Fixed products",
+      "customizable": "Customizable products",
+      "fixedTitle": "Fixed product quotes",
+      "customizableTitle": "Customizable product quotes"
     }
   },
   "quoteDraft": {
@@ -1201,6 +1203,8 @@
   },
   "adminQuoteCalculator": {
     "title": "Internal calculator",
+    "customizableTitle": "Internal customizable product calculator",
+    "calculatedHint": "Internal calculation complete. No request was saved and received quotes and the dashboard remain unchanged.",
     "description": "Calculate quotes with the full cost breakdown (raw materials, packaging and pallet materials). Nothing is saved -- it's just a lookup tool, it doesn't appear in \"Quotes\" and it doesn't affect the dashboard."
   },
   "quote": {
@@ -1238,7 +1242,8 @@
         "sendSuccess": "Email sent to {{email}} with the PDF attached.",
         "emailSubject": "Legumex Quote – {{clientName}}",
         "emailBody": "Hello,\n\nPlease find attached the quote requested for {{clientName}}.\n\nQuote date: {{quoteDate}}\nValid until: {{validUntil}}\nQuote Total: {{total}}\n\nBest regards,\nLegumex",
-        "error": "The PDF could not be generated. Please try again."
+        "error": "The PDF could not be generated. Please try again.",
+        "emailUnavailable": "Email delivery is unavailable"
       },
       "document": {
         "title": "Legumex",
@@ -1265,6 +1270,16 @@
         "restrictionsTitle": "Restrictions",
         "restrictionsText": "This quote is valid for {{days}} days only from its issue date. After this period prices may change and a new quote must be requested.",
         "generatedAt": "Document generated on {{date}}",
+        "packaging": {
+          "title": "Packaging",
+          "unit": "Unit packaging",
+          "intermediate": "Inner / master packaging",
+          "box": "Box",
+          "pallet": "Pallet",
+          "corner": "Corner protectors",
+          "stretch": "Stretch wrap",
+          "other": "Pallet material"
+        },
         "packagingConfig": {
           "title": "Packaging configuration",
           "unit": "Individual packaging",
@@ -1310,7 +1325,7 @@
     "form": {
       "displayName": "Name",
       "value": "Value",
-      "valueLabelPerWeight": "Value (Q per pound)",
+      "valueLabelPerWeight": "Value (USD per pound)",
       "valueLabelPercentage": "Value (%)",
       "valueHintPerWeight": "Applied over the total raw-material weight of each quote (all units, regardless of raw material type).",
       "valueHintPercentage": "Applied at the end, over the product's full subtotal already scaled to the quote (raw material, per-weight costs, packaging, and pallet materials) -- transport is NOT part of that base. E.g. \"Contingency\" with value 2 = 2%.",
@@ -1321,7 +1336,8 @@
       },
       "translationSectionTitle": "English translation",
       "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name.",
-      "displayNameEn": "Name (English)"
+      "displayNameEn": "Name (English)",
+      "percentageLimit": "A percentage cost cannot exceed 100"
     },
     "list": {
       "title": "Additional costs",
@@ -1386,65 +1402,7 @@
   },
   "customQuote": {
     "page": {
-      "title": "Custom product",
-      "description": "Hi {{name}}, build a product we don't have yet and get its reference quote.",
       "backToDefined": "Back to defined products"
-    },
-    "wizard": {
-      "title": "Build your product",
-      "continue": "Continue",
-      "steps": {
-        "category": "Category",
-        "subCategory": "Type",
-        "recipe": "Recipe",
-        "presentation": "Presentation",
-        "packaging": "Packaging",
-        "total": "Total"
-      },
-      "category": {
-        "title": "Which product category do you want to build?",
-        "subtitle": "Choose the category; you'll pick the product type next.",
-        "empty": "No custom products are configured yet. Contact the administrator."
-      },
-      "subCategory": {
-        "title": "Which type of {{category}} product?",
-        "subtitle": "Each type offers its own raw materials.",
-        "rawMaterialCount": "Available raw materials: {{count}}"
-      },
-      "recipe": {
-        "title": "Recipe: {{subCategory}}",
-        "subtitle": "Enter the percentage of each raw material you want to use; the mix must total 100%. Added ingredients are optional.",
-        "organic": "Organic product",
-        "organicHint": "Only organic raw materials (or inputs like water or salt) are shown.",
-        "mixTitle": "Raw materials (% of net weight)",
-        "noRawMaterials": "No raw materials are available with the chosen filters.",
-        "onlyAlone": "Only at 100%",
-        "notMixableInMix": "One raw material can't be mixed: use it alone at 100% or remove it from the mix.",
-        "ingredientsTitle": "Added ingredients (optional)",
-        "ingredientsSubtitle": "Grams in each unit (bag), on top of the 100% recipe.",
-        "maxGramsPerKg": "Maximum {{max}} g per kg of product",
-        "gramsPerUnitSuffix": "g / unit",
-        "exceedsNetWeight": "It can't exceed the presentation's net weight ({{netWeightGrams}} g).",
-        "exceedsCap": "Exceeds the maximum of {{max}} g per kg: in {{presentation}} that's at most {{grams}} g."
-      },
-      "presentation": {
-        "title": "Presentation and pallets",
-        "subtitle": "Choose the presentation and how many pallets you want. Boxes per pallet come with the presentation.",
-        "empty": "No presentations are available yet. Contact the administrator.",
-        "cardSubtitle": "{{boxes}} boxes per pallet × {{bags}} bags per box",
-        "ingredientIssues": "An ingredient exceeds what's allowed for this presentation. Go back to the recipe to adjust it."
-      },
-      "packaging": {
-        "title": "Packaging",
-        "subtitle": "Some materials are included; where there are alternatives, choose one.",
-        "includes": "Includes {{materials}}"
-      },
-      "total": {
-        "summaryTitle": "Your custom product",
-        "composition": "Composition",
-        "ingredients": "Ingredients",
-        "ingredientLine": "{{name}} {{grams}} g/unit"
-      }
     }
   },
   "adminCustomQuote": {
@@ -1469,7 +1427,7 @@
       "pallets": "Pallets",
       "total": "Total",
       "view": "View details",
-      "empty": "No custom quotes in this range."
+      "empty": "No customizable product quotes."
     },
     "detail": {
       "title": "Custom quote #{{id}}",
@@ -1497,7 +1455,8 @@
       "perUnit": "{{quantity}} per unit",
       "perIntermediate": "1 per {{units}} units ({{packages}} in total)",
       "perPallet": "{{quantity}} per pallet",
-      "perBox": "{{quantity}} per box × {{boxes}} boxes = {{perPallet}} per pallet"
+      "perBox": "{{quantity}} per box × {{boxes}} boxes = {{perPallet}} per pallet",
+      "sku": "SKU"
     }
   },
   "juice": {
@@ -1524,6 +1483,13 @@
     "mixIncomplete": "Must total 100% to calculate costs",
     "validationError": "Check the highlighted fields.",
     "createHelp": "Save the juice details first, then add its recipe, spices and presentations. Each section saves separately.",
+    "constantSections": {
+      "production": "Production costs (USD per pound)",
+      "logistics": "Logistics costs (USD per container)",
+      "percentages": "Percentages (decimal fraction)",
+      "container": "Container configuration",
+      "fractionHelp": "Enter the decimal fraction: 0.065 = 6.5%. For 6.5%, enter 0.065."
+    },
     "constantsHelp": "Enter nonnegative costs in USD. All global values are required.",
     "rateHelp": "Rates are fractions: 0.02 = 2%.",
     "initialize": "Constants have not been initialized. Complete every field to create them.",
@@ -1595,5 +1561,174 @@
     "mixCeiling": "The active total cannot exceed 100%.",
     "viewDetails": "View details",
     "selectUnit": "Select a unit"
+  },
+  "adminLayout": {
+    "openMenu": "Open menu",
+    "navigation": "Admin navigation",
+    "lightMode": "Switch to light mode",
+    "darkMode": "Switch to dark mode"
+  },
+  "packagingGroup": {
+    "title": "Packaging option groups",
+    "name": "Group name",
+    "add": "Add group",
+    "empty": "No groups configured.",
+    "select": "Select a group",
+    "noOptions": "No active groups. Create one in Packaging option groups.",
+    "hint": "Groups for individual packaging. Deactivation prevents new assignments; existing alternatives keep working."
+  },
+  "initialProductImport": {
+    "description": "One Excel: Products and Variants plus optional Packaging Materials sheet. Validate both sheets, review preview and confirm together. Configure images, recipes and ingredients afterward. For maintenance, find the product/SKU and edit its variant and materials from Products → Edit.",
+    "products": "Products and Variants",
+    "materials": "Packaging Materials",
+    "summary": "{{products}} products · {{variants}} variants · {{unit}} unit · {{intermediate}} intermediate · {{pallet}} pallet · {{errors}} errors · {{warnings}} warnings",
+    "confirmation": "Confirmation creates products, variants and all materials in one transaction. Revalidate if configuration changes.",
+    "confirm": "Confirm initial import",
+    "ready": "READY",
+    "error": "ERROR",
+    "columns": {
+      "row": "Row",
+      "sku": "SKU",
+      "productGroup": "Product group",
+      "name": "Product",
+      "boxes": "Boxes per pallet",
+      "units": "Units per box",
+      "intermediate": "Units per intermediate package",
+      "material": "Material",
+      "type": "Type",
+      "level": "Level",
+      "group": "Group",
+      "default": "Default",
+      "rule": "Effective rule",
+      "state": "State",
+      "presentation": "Presentation"
+    },
+    "types": {
+      "INDIVIDUAL": "Unit",
+      "INTERMEDIO": "Intermediate",
+      "CAJA": "Box",
+      "ESQUINERO": "Corner protector",
+      "TARIMA": "Pallet",
+      "STRETCH": "Stretch",
+      "OTRO PALETIZACIÓN": "Other pallet material"
+    },
+    "fileError": "Select a nonempty .xlsx file up to 5 MiB.",
+    "downloadTemplate": "Download template",
+    "selectFile": "Select variant packaging workbook",
+    "validating": "Validating…",
+    "validate": "Validate file",
+    "rowError": "Row {{row}}: {{message}}",
+    "levels": {
+      "unit": "Unit",
+      "intermediate": "Intermediate",
+      "pallet": "Pallet"
+    },
+    "fixed": "Fixed",
+    "importing": "Importing…",
+    "bases": {
+      "per_pallet": "Per pallet"
+    }
+  },
+  "catalogQuote": {
+    "ui": {
+      "intro": "Create a custom mix with the composition and configuration that best suits your needs.",
+      "progress": "Customization progress",
+      "stepCount": "Step {{current}} of {{total}}",
+      "completed": "Completed",
+      "previous": "Previous",
+      "selectionHint": "Select an option to continue.",
+      "materialType": "Raw material type",
+      "certification": "Certification",
+      "mixHint": "Add raw materials and adjust their percentages to reach exactly 100.00%.",
+      "mixEmpty": "Your mix starts here. Add your first raw material.",
+      "add": "Add raw material",
+      "search": "Search by name",
+      "searchTitle": "Find and add raw materials",
+      "searchPlaceholder": "Search raw material...",
+      "clearSearch": "Clear search",
+      "resultCount": "Showing {{shown}} of {{total}} results",
+      "showMore": "Show more",
+      "addShort": "Add",
+      "addName": "Add {{name}}",
+      "added": "Added",
+      "addedName": "{{name}} is already added",
+      "noMatches": "We couldn’t find raw materials with that name.",
+      "remove": "Remove {{name}}",
+      "decrease": "Decrease {{name}} percentage",
+      "increase": "Increase {{name}} percentage",
+      "mixSummary": "Your mix summary",
+      "total": "Total",
+      "valid": "Valid composition",
+      "validHint": "Your mix totals 100%.",
+      "remaining": "{{amount}}% remaining",
+      "over": "{{amount}}% over",
+      "precision": "Check percentages: use up to two decimal places.",
+      "included": "Included",
+      "default": "Default option",
+      "quantity": "Quantity",
+      "pallets": "Pallets",
+      "boxes": "Boxes",
+      "units": "Units",
+      "decreasePallets": "Decrease pallet quantity",
+      "increasePallets": "Increase pallet quantity",
+      "invalidQuantity": "Enter a whole number from 1 to 100,000 pallets.",
+      "yourMix": "Your mix",
+      "configuration": "Configuration",
+      "packaging": "Packaging",
+      "costSummary": "Cost summary · Total",
+      "successHint": "Your quote is confirmed. View the details and download the summary below.",
+      "levels": {
+        "unit": "Product packaging",
+        "intermediate": "Intermediate packaging",
+        "pallet": "Box and palletization"
+      },
+      "stepper": {
+        "category": "Category",
+        "subCategory": "Subcategory",
+        "profile": "Type & certification",
+        "mix": "Mix",
+        "configuration": "Configuration",
+        "packaging": "Packaging & pallets",
+        "result": "Result"
+      }
+    },
+    "title": "Customize my product",
+    "organic": "Organic",
+    "conventional": "Conventional",
+    "continue": "Continue",
+    "another": "Build another mix",
+    "retry": "Retry",
+    "empty": "No complete configurations and compatible raw materials are available yet.",
+    "noMaterials": "No raw materials are available for this selection.",
+    "mixProgress": "Mix completion",
+    "mixTotal": "TOTAL: {{total}}% / 100.00%",
+    "logistics": "{{units}} units per box · {{boxes}} boxes per pallet",
+    "previewError": "Unable to calculate this configuration. Check your choices and try again.",
+    "confirmError": "Unable to confirm. Retry to recover the same quotation safely.",
+    "changed": "Quote data changed. Check the updated total before continuing again.",
+    "context": "Request context",
+    "audit": "Internal configuration trace",
+    "sourceVariant": "Source variant",
+    "quantities": "{{boxes}} boxes · {{units}} units · {{weight}} kg",
+    "steps": {
+      "category": "Choose a category",
+      "subCategory": "Choose a subcategory",
+      "profile": "Material type and certification",
+      "mix": "Build your mix",
+      "configuration": "Choose your configuration",
+      "packaging": "Packaging & pallets",
+      "result": "Your custom quote"
+    },
+    "types": {
+      "fruit": "Fruit",
+      "vegetable": "Vegetable",
+      "pulp": "Pulp",
+      "other": "Other raw materials"
+    },
+    "totalWeight": "Total weight: {{weight}} kg",
+    "generating": "Generating quote...",
+    "quantityHint": "Complete packaging and quantity to generate your quote.",
+    "confirmedHint": "Confirmed total · USD",
+    "updatedTotal": "Updated total. Check the new price and press Continue again."
   }
 }

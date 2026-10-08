@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -51,12 +52,8 @@ function toFormValues(item: ProductVariantIntermediateMaterialResponse): Partial
     }
 }
 
-// Reemplaza el viejo campo único ProductVariant.intermediatePackagingId (FK, ver
-// productVariantSection.component.tsx) -- mismo diseño mini-CRUD que
-// ProductVariantUnitMaterialSection/ProductVariantPalletMaterialSection, con
-// grupos de opciones (optionGroup/isDefault) para que el cliente pueda elegir entre alternativas
-// al cotizar. Sin campo de cantidad propio: el motor sigue usando
-// ProductVariant.unitsPerIntermediatePackage, compartido entre cualquier alternativa elegida.
+// Empaques intermedios de la variante, con grupos de opciones para que el cliente elija entre
+// alternativas. Sin cantidad propia: el motor usa ProductVariant.unitsPerIntermediatePackage.
 export function ProductVariantIntermediateMaterialSection({ productId }: Readonly<{ productId: number }>) {
     const { t } = useTranslation()
     const queryClient = useQueryClient()
@@ -110,7 +107,7 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
             reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const updateMutation = useMutation({
@@ -123,7 +120,7 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
             reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const deleteMutation = useMutation({
@@ -132,7 +129,7 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
             invalidate()
             toast.success(data.message)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {
@@ -156,7 +153,7 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
     }
 
     if (variants.length === 0) {
-        return <p className="text-texto-suave">{t("productVariantIntermediateMaterial.noVariants")}</p>
+        return <p className="text-ink-600">{t("productVariantIntermediateMaterial.noVariants")}</p>
     }
 
     return (
@@ -198,14 +195,14 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
                                     <button
                                         type="button"
                                         onClick={() => startEdit(item)}
-                                        className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.edit")}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => deleteMutation.mutate(item.id)}
-                                        className="font-medium text-error-fg underline underline-offset-4"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-danger underline underline-offset-4 transition-colors hover:bg-danger-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.delete")}
                                     </button>

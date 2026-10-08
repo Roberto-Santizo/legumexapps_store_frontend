@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -62,11 +63,13 @@ export function EditSubCategoryPage() {
         mutationFn: (formData: UpdateSubCategoryInput) => updateSubCategoryAPI(subCategoryId, formData),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["subCategories"] })
+            queryClient.invalidateQueries({ queryKey: ["quoteProducts"] })
+            queryClient.invalidateQueries({ queryKey: ["adminQuoteProducts"] })
             toast.success(data.message)
             navigate("/admin/sub-categories")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -77,19 +80,19 @@ export function EditSubCategoryPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("subCategory.edit.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("subCategory.edit.title")}</h1>
                 <Link to="/admin/sub-categories" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             <Card>
-                {subCategoryQuery.isLoading && <p className="text-texto-suave">{t("common.loading")}</p>}
-                {subCategoryQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+                {subCategoryQuery.isLoading && <p className="text-ink-600">{t("common.loading")}</p>}
+                {subCategoryQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
                 {subCategoryQuery.data && (
                     <form onSubmit={onSubmit}>
-                        <SubCategoryForm register={register} control={control} errors={errors} />
+                        <SubCategoryForm register={register} control={control} errors={errors} currentImageUrl={subCategoryQuery.data.data.imageUrl} />
                         <Button type="submit" disabled={updateSubCategoryMutation.isPending}>
                             {updateSubCategoryMutation.isPending ? t("common.saving") : t("common.save")}
                         </Button>

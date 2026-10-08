@@ -1,12 +1,15 @@
+import { FrontendI18nError } from "@/shared/i18n/frontendI18nError"
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
+import { TranslatedMessage } from "@/shared/i18n/translatedMessage.component"
 import { useState } from "react"
 import type { ChangeEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { pdf } from "@react-pdf/renderer"
-import { Download, FileDown, Mail, X } from "lucide-react"
+import { Download, FileDown, Mail } from "lucide-react"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { Modal } from "@/shared/component/modal.component"
 import { Input } from "@/shared/component/input.component"
 import { FormField } from "@/shared/component/formField.component"
 import { QuotePdfDocument } from "@/feature/quote/component/quotePdfDocument.component"
@@ -20,13 +23,12 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 type QuotePdfButtonProps = {
     lines: QuoteDocumentLine[]
     showCostBreakdown?: boolean
-    // Transporte apagado para TODOS por ahora -- default false,
-    // solo se reenvía a QuotePdfDocument. Ver el mismo prop ahí.
+    // Transporte apagado para todos por ahora; solo se reenvía a QuotePdfDocument.
     showTransport?: boolean
-    // Aviso "cotización de referencia" -- default false, solo se reenvía a
-    // QuotePdfDocument. Ver el mismo prop ahí.
+    // Aviso "cotización de referencia"; solo se reenvía a QuotePdfDocument.
     showReferenceDisclaimer?: boolean
-    sendEmailAPI: (formData: FormData) => Promise<{ message: string } | undefined>
+    sendEmailAPI?: (formData: FormData) => Promise<{ message: string } | undefined>
+    quoteDate?: Date
 }
 
 // Pasos del modal: primero solo el nombre (obligatorio siempre), luego una elección entre
@@ -46,11 +48,13 @@ type ConfirmedPdfRequest = {
 const fileNameDateFormatter = new Intl.DateTimeFormat("en-CA") // YYYY-MM-DD, seguro para nombres de archivo
 
 function buildFileName(clientName: string, quoteDate: Date): string {
-    const safeName = clientName
+    let safeName = clientName
         .trim()
         .toUpperCase()
         .replace(/[^A-Z0-9]+/g, "_")
-        .replace(/^_+|_+$/g, "")
+    // The replacement above collapses each run to one underscore, including at the edges.
+    if (safeName.startsWith("_")) safeName = safeName.slice(1)
+    if (safeName.endsWith("_")) safeName = safeName.slice(0, -1)
     return `Cotizacion_${safeName || "CLIENTE"}_${fileNameDateFormatter.format(quoteDate)}.pdf`
 }
 
@@ -74,6 +78,7 @@ export function QuotePdfButton({
     showTransport = false,
     showReferenceDisclaimer = false,
     sendEmailAPI,
+    quoteDate,
 }: Readonly<QuotePdfButtonProps>) {
     const { t } = useTranslation()
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -88,14 +93,14 @@ export function QuotePdfButton({
     const [emailSent, setEmailSent] = useState(false)
 
     const sendEmailMutation = useMutation({
-        mutationFn: sendEmailAPI,
+        mutationFn: (formData: FormData) => sendEmailAPI ? sendEmailAPI(formData) : Promise.reject(new FrontendI18nError("quote.pdf.modal.emailUnavailable", () => t("quote.pdf.modal.emailUnavailable"))),
         onSuccess: (response) => {
             if (!response) return
             setEmailSent(true)
             toast.success(response.message)
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -134,10 +139,10 @@ export function QuotePdfButton({
     const handleNameContinue = () => {
         const trimmedName = clientName.trim()
         if (!trimmedName) {
-            setNameError(t("quote.pdf.modal.required"))
+            setNameError("quote.pdf.modal.required")
             return
         }
-        setConfirmed({ clientName: trimmedName, quoteDate: new Date() })
+        setConfirmed({ clientName: trimmedName, quoteDate: quoteDate ?? new Date() })
         setStep("choice")
     }
 
@@ -173,26 +178,24 @@ export function QuotePdfButton({
             ).toBlob()
 
             triggerBrowserDownload(blob, buildFileName(confirmed.clientName, confirmed.quoteDate))
-            toast.success(t("quote.pdf.modal.downloadSuccess"))
+            toast.success(<TranslatedMessage translationKey="quote.pdf.modal.downloadSuccess" />)
             handleClose()
         } catch {
-            toast.error(t("quote.pdf.modal.error"))
+            toast.error(<TranslatedMessage translationKey="quote.pdf.modal.error" />)
         } finally {
             setIsDownloading(false)
         }
     }
 
-    // Enviar por correo: valida el correo y, en el mismo paso, genera el PDF y lo envía --
-    // ya no hay un "Continuar" que regrese a la pantalla de elección ni un segundo clic para
-    // disparar el envío.
+    // Enviar por correo: valida el correo y, en el mismo paso, genera el PDF y lo envía.
     const handleSendEmail = async () => {
         const trimmedEmail = clientEmail.trim()
         if (!trimmedEmail) {
-            setEmailError(t("quote.pdf.modal.emailRequired"))
+            setEmailError("quote.pdf.modal.emailRequired")
             return
         }
         if (!EMAIL_PATTERN.test(trimmedEmail)) {
-            setEmailError(t("quote.pdf.modal.emailInvalid"))
+            setEmailError("quote.pdf.modal.emailInvalid")
             return
         }
         if (!confirmed) return
@@ -211,7 +214,7 @@ export function QuotePdfButton({
                 />
             ).toBlob()
         } catch {
-            toast.error(t("quote.pdf.modal.error"))
+            toast.error(<TranslatedMessage translationKey="quote.pdf.modal.error" />)
             return
         } finally {
             setIsBuildingPdfForEmail(false)
@@ -245,27 +248,14 @@ export function QuotePdfButton({
             </Button>
 
             {isModalOpen && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center bg-verde-profundo/50 p-3 sm:p-4">
-                    <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-2xl bg-crema p-4 shadow-solid sm:p-6">
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="font-display text-lg font-bold text-verde-profundo">{t("quote.pdf.modal.title")}</h2>
-                            <button
-                                type="button"
-                                onClick={handleClose}
-                                aria-label={t("common.cancel")}
-                                className="text-texto-suave transition hover:text-verde-profundo"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
+                <Modal title={t("quote.pdf.modal.title")} onClose={handleClose}>
                         {step === "name" && (
                             <>
-                                <p className="mb-4 text-sm text-texto-suave">{t("quote.pdf.modal.description")}</p>
+                                <p className="mb-4 text-sm text-ink-600">{t("quote.pdf.modal.description")}</p>
                                 <FormField
                                     label={t("quote.pdf.modal.clientNameLabel")}
                                     htmlFor="quote-pdf-client-name"
-                                    error={nameError}
+                                    error={nameError ? t(nameError) : undefined}
                                     required
                                 >
                                     <Input
@@ -290,27 +280,27 @@ export function QuotePdfButton({
 
                         {step === "choice" && (
                             <>
-                                <p className="mb-1 text-sm font-medium text-verde-profundo">{t("quote.pdf.modal.chooseTitle")}</p>
-                                <p className="mb-4 text-sm text-texto-suave">{t("quote.pdf.modal.chooseDescription")}</p>
+                                <p className="mb-1 text-sm font-medium text-ink-900">{t("quote.pdf.modal.chooseTitle")}</p>
+                                <p className="mb-4 text-sm text-ink-600">{t("quote.pdf.modal.chooseDescription")}</p>
                                 <div className="flex flex-col gap-3">
-                                    <button
+                                    <Button
                                         type="button"
                                         onClick={handleDownload}
                                         disabled={isDownloading}
-                                        className={buttonClassName("primary")}
+                                        variant="primary"
                                     >
                                         <Download size={16} />
                                         {isDownloading ? t("quote.pdf.modal.generating") : t("quote.pdf.modal.downloadOption")}
-                                    </button>
-                                    <button
+                                    </Button>
+                                    {sendEmailAPI && <Button
                                         type="button"
                                         onClick={handleChooseEmail}
                                         disabled={isDownloading}
-                                        className={buttonClassName("secondary")}
+                                        variant="secondary"
                                     >
                                         <Mail size={16} />
                                         {t("quote.pdf.modal.emailOption")}
-                                    </button>
+                                    </Button>}
                                 </div>
                                 <div className="mt-4 flex justify-start">
                                     <Button type="button" variant="secondary" onClick={handleBackToName}>
@@ -323,7 +313,7 @@ export function QuotePdfButton({
                         {step === "email" && (
                             emailSent ? (
                                 <div className="flex flex-col gap-3 py-1">
-                                    <p className="rounded-lg bg-brote/15 px-3 py-2 text-center text-sm font-medium text-verde-profundo">
+                                    <p className="rounded-panel border border-success-border bg-success-bg px-3 py-2 text-center text-sm font-medium text-success">
                                         {t("quote.pdf.modal.sendSuccess", { email: clientEmail.trim() })}
                                     </p>
                                     <Button type="button" onClick={handleClose}>
@@ -332,11 +322,11 @@ export function QuotePdfButton({
                                 </div>
                             ) : (
                                 <>
-                                    <p className="mb-4 text-sm text-texto-suave">{t("quote.pdf.modal.emailStepDescription")}</p>
+                                    <p className="mb-4 text-sm text-ink-600">{t("quote.pdf.modal.emailStepDescription")}</p>
                                     <FormField
                                         label={t("quote.pdf.modal.clientEmailLabel")}
                                         htmlFor="quote-pdf-client-email"
-                                        error={emailError}
+                                        error={emailError ? t(emailError) : undefined}
                                         required
                                     >
                                         <Input
@@ -361,8 +351,7 @@ export function QuotePdfButton({
                                 </>
                             )
                         )}
-                    </div>
-                </div>
+                </Modal>
             )}
         </>
     )

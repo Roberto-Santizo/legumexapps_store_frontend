@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { Button } from "@/shared/component/button.component"
 import { Card } from "@/shared/component/card.component"
 import { Input } from "@/shared/component/input.component"
 import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
@@ -27,24 +28,20 @@ export function DateRangeFilter({ value, onChange }: Readonly<DateRangeFilterPro
         <Card className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-wrap gap-2">
                 {presets.map((preset) => (
-                    <button
+                    <Button
                         key={preset.labelKey}
                         type="button"
                         onClick={() => onChange(preset.range)}
-                        className={`rounded-btn px-4 py-2 text-sm font-semibold transition ${
-                            isActivePreset(preset.range)
-                                ? "bg-verde-tinta text-dorado"
-                                : "bg-crema text-verde-profundo hover:bg-gris-campo"
-                        }`}
+                        variant={isActivePreset(preset.range) ? "primary" : "secondary"}
                     >
                         {t(preset.labelKey)}
-                    </button>
+                    </Button>
                 ))}
             </div>
 
             <div className="flex flex-wrap items-end gap-3">
                 <label className="text-sm">
-                    <span className="mb-1 block font-medium text-texto-suave">{t("dashboard.filters.startDate")}</span>
+                    <span className="mb-1 block font-medium text-ink-600">{t("dashboard.filters.startDate")}</span>
                     <Input
                         type="date"
                         preserveCase
@@ -55,7 +52,7 @@ export function DateRangeFilter({ value, onChange }: Readonly<DateRangeFilterPro
                     />
                 </label>
                 <label className="text-sm">
-                    <span className="mb-1 block font-medium text-texto-suave">{t("dashboard.filters.endDate")}</span>
+                    <span className="mb-1 block font-medium text-ink-600">{t("dashboard.filters.endDate")}</span>
                     <Input
                         type="date"
                         preserveCase

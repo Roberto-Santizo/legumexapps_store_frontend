@@ -12,7 +12,7 @@ export const createProductIngredientSchema = z.object({
     referenceNetWeightGrams: z.number().positive(),
 })
 
-export const updateProductIngredientSchema = createProductIngredientSchema.partial().extend({
+const updateProductIngredientSchema = createProductIngredientSchema.partial().extend({
     grams: createProductIngredientSchema.shape.grams,
     referenceNetWeightGrams: createProductIngredientSchema.shape.referenceNetWeightGrams,
 })

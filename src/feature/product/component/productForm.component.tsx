@@ -18,14 +18,11 @@ type ProductFormProps<T extends UpdateProductInput> = {
     register: UseFormRegister<T>
     control: Control<T>
     errors: FieldErrors<T>
-    // Solo aplica en edición -- ver imageUploadField.component.tsx (previewSrc). Crear un
-    // producto nuevo simplemente no lo pasa.
+    // Solo aplica en edición; al crear no se pasa.
     currentImageUrl?: string | null
 }
 
-// Un solo componente para crear/editar -- ver roleForm.component.tsx para la justificación del
-// patrón (Create/Update comparten los mismos campos, solo cambia la opcionalidad). currentImageUrl
-// es la única asimetría real entre los dos casos de uso, así que queda como prop opcional.
+// currentImageUrl es la única diferencia entre crear y editar, por eso es opcional.
 export function ProductForm<T extends UpdateProductInput>({
     register,
     control,
@@ -88,7 +85,7 @@ export function ProductForm<T extends UpdateProductInput>({
             <div className="mb-1 flex gap-6">
                 <Checkbox id="isOrganic" label={t("product.form.isOrganic")} {...register("isOrganic" as Path<T>)} />
             </div>
-            <p className="mb-5 text-sm text-texto-suave">{t("product.form.isOrganicHint")}</p>
+            <p className="mb-5 text-sm text-ink-600">{t("product.form.isOrganicHint")}</p>
 
             <FormField
                 label={t("product.form.isCustomizable")}
@@ -105,7 +102,7 @@ export function ProductForm<T extends UpdateProductInput>({
                     <option value="true">{t("product.form.isCustomizableCustom")}</option>
                 </Select>
             </FormField>
-            <p className="mb-5 -mt-3 text-sm text-texto-suave">{t("product.form.isCustomizableHint")}</p>
+            <p className="mb-5 -mt-3 text-sm text-ink-600">{t("product.form.isCustomizableHint")}</p>
 
             <FormField
                 label={t("product.form.additionalCostPerUnit")}
@@ -122,7 +119,7 @@ export function ProductForm<T extends UpdateProductInput>({
                     {...register("additionalCostPerUnit" as Path<T>, { setValueAs: toNullableNumber })}
                 />
             </FormField>
-            <p className="mb-5 -mt-3 text-sm text-texto-suave">{t("product.form.additionalCostPerUnitHint")}</p>
+            <p className="mb-5 -mt-3 text-sm text-ink-600">{t("product.form.additionalCostPerUnitHint")}</p>
 
             <Controller
                 name={"image" as Path<T>}

@@ -10,6 +10,12 @@ export function toCustomQuoteDocumentLine(line: CustomQuoteCalculation): QuoteDo
     return {
         ...line,
         composition: {
+            context: line.configuration.snapshot ? {
+                categoryName: line.configuration.snapshot.category.displayName,
+                subCategoryName: line.configuration.snapshot.subCategory.displayName,
+                isOrganic: line.configuration.snapshot.isOrganic,
+                ingredientType: line.configuration.snapshot.ingredientType,
+            } : undefined,
             rawMaterials: line.configuration.rawMaterialMix.map((mixLine) => ({
                 displayName: rawMaterialNames.get(mixLine.rawMaterialId) ?? `#${mixLine.rawMaterialId}`,
                 percentage: mixLine.percentage,

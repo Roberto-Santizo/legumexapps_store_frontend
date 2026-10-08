@@ -1,6 +1,7 @@
 import CreatableSelect from "react-select/creatable"
 import type { GroupBase, Props as ReactSelectProps } from "react-select"
 import { useTranslation } from "react-i18next"
+import { searchableSelectMessages } from "@/shared/i18n/searchableSelectMessages"
 import { buildSearchableSelectClassNames } from "@/shared/component/searchableSelectClassNames"
 import type { SearchableSelectOption } from "@/shared/component/searchableSelect.component"
 
@@ -19,6 +20,7 @@ export function CreatableSearchableSelect({ hasError = false, ...props }: Readon
         <CreatableSelect<SearchableSelectOption, false, GroupBase<SearchableSelectOption>>
             unstyled
             classNames={buildSearchableSelectClassNames(hasError)}
+            {...searchableSelectMessages(t)}
             formatCreateLabel={(inputValue) => t("common.createOption", { value: inputValue })}
             {...props}
         />

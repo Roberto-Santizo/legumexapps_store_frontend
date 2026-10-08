@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -35,7 +36,7 @@ export function CreateSubCategoryPage() {
             navigate("/admin/sub-categories")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -46,7 +47,7 @@ export function CreateSubCategoryPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("subCategory.create.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("subCategory.create.title")}</h1>
                 <Link to="/admin/sub-categories" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>

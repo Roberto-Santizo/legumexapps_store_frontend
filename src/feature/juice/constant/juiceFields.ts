@@ -5,11 +5,17 @@ export type JuiceField = { name: string; kind?: "number" | "client" | "reference
 const text = (name: string, maxLength = 120): JuiceField => ({ name, maxLength })
 const number = (name: string, step = "0.000000000001"): JuiceField => ({ name, kind: "number", step })
 export const juiceFields: JuiceField[] = [text("code", 60), text("displayName"), { name: "clientId", kind: "client" }, number("pricePerPound"), { name: "image", kind: "image", optional: true }]
-export const rawMaterialFields: JuiceField[] = [text("code", 60), text("displayName"), { name: "purchaseUnit", kind: "unit" }, number("yieldPoundsPerLiter", "0.000001"), number("costPerUnit")]
-export const spiceMaterialFields = [text("code", 60), text("displayName"), number("costPerGram")]
-export const presentationFields = [text("displayLabel"), number("mlPerBottle", "0.001"), number("bottlesPerCase", "1"), number("casesPerPallet", "1"), number("boxUnitCost"), number("stickerUnitCost"), number("stickerQuantityPerCase", "0.000001"), number("secondStickerUnitCost"), number("secondStickerQuantityPerCase", "0.000001"), number("bottleUnitCost"), number("capUnitCost"), number("marginPerCase", "0.0001")]
-export const constantFields = Object.keys(schemas.constantsInputSchema.shape).map(name => number(name, name === "palletsPerContainer" ? "1" : name.endsWith("Rate") ? "0.000001" : "0.0001"))
-export const overrideFields: JuiceField[] = [{ name: "clientId", kind: "client" }, ...constantFields.map(field => ({ ...field, nullable: true, optional: true }))]
+const rawMaterialFields: JuiceField[] = [text("code", 60), text("displayName"), { name: "purchaseUnit", kind: "unit" }, number("yieldPoundsPerLiter", "0.000001"), number("costPerUnit")]
+const spiceMaterialFields = [text("code", 60), text("displayName"), number("costPerGram")]
+const presentationFields = [text("displayLabel"), number("mlPerBottle", "0.001"), number("bottlesPerCase", "1"), number("casesPerPallet", "1"), number("boxUnitCost"), number("stickerUnitCost"), number("stickerQuantityPerCase", "0.000001"), number("secondStickerUnitCost"), number("secondStickerQuantityPerCase", "0.000001"), number("bottleUnitCost"), number("capUnitCost"), number("marginPerCase", "0.0001")]
+// Pallets are whole units, rates are fractions with six decimals and every other constant is money (four decimals).
+function constantFieldStep(name: string): string {
+    if (name === "palletsPerContainer") return "1"
+    if (name.endsWith("Rate")) return "0.000001"
+    return "0.0001"
+}
+export const constantFields = Object.keys(schemas.constantsInputSchema.shape).map(name => number(name, constantFieldStep(name)))
+const overrideFields: JuiceField[] = [{ name: "clientId", kind: "client" }, ...constantFields.map(field => ({ ...field, nullable: true, optional: true }))]
 
 export type JuiceResource = { path: string; title: string; fields: JuiceField[]; create: z.ZodType; update: z.ZodType; response: z.ZodType<schemas.JuiceRow>; columns: string[]; referenceName?: string; referencePath?: string; referenceSchema?: z.ZodType<schemas.JuiceRow> }
 export const rawMaterialsResource: JuiceResource = { path: "/admin/juices/raw-materials", title: "rawMaterials", fields: rawMaterialFields, create: schemas.rawMaterialInputSchema, update: schemas.rawMaterialInputSchema, response: schemas.rawMaterialResponseSchema, columns: ["code", "displayName", "purchaseUnit", "yieldPoundsPerLiter", "costPerUnit", "costPerLiter"] }

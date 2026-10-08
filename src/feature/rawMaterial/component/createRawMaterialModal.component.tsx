@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -16,11 +17,8 @@ type CreateRawMaterialModalProps = {
     onClose: () => void
 }
 
-// Alta rápida que RawMaterialSelect abre cuando el usuario tipea una materia prima que no existe
-// en el catálogo (ver rawMaterialSelect.component.tsx). Reusa RawMaterialForm tal cual -- misma
-// validación y mismos campos requeridos que la página de creación normal (costPerUnit es
-// obligatorio: sin él la materia prima "costaría" $0 en el cotizador sin ningún aviso, ver
-// rawMaterial.schema.ts y el comentario en productRawMaterialSection.component.tsx).
+// Alta rápida desde RawMaterialSelect: reusa RawMaterialForm, con la misma validación que la página
+// de creación (costPerUnit es obligatorio: sin él la materia prima costaría $0 sin aviso).
 export function CreateRawMaterialModal({ initialDisplayName, onCreated, onClose }: Readonly<CreateRawMaterialModalProps>) {
     const { t } = useTranslation()
     const queryClient = useQueryClient()
@@ -41,7 +39,7 @@ export function CreateRawMaterialModal({ initialDisplayName, onCreated, onClose 
             toast.success(data.message)
             onCreated(data.data)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {

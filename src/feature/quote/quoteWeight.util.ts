@@ -7,11 +7,8 @@ type PalletWeightSource = Pick<QuotableProduct["variants"][number], "netWeightGr
 const GRAMS_PER_KG = 1000
 const KG_PER_LB = 0.45359237
 
-// Peso total del pedido (paso "pallets" del wizard) -- boxesPerPallet ×
-// bagsPerBox × netWeightGrams(por bolsa) × requestedPallets, puramente display-side: no toca
-// calculateQuote ni ningún campo que el backend valide. null si la variante no trae
-// netWeightGrams (defensa adicional, ver el comentario del campo en quote.schema.ts) o si
-// requestedPallets todavía no es un número válido.
+// Peso total del pedido (paso "pallets"): boxesPerPallet × bagsPerBox × netWeightGrams ×
+// requestedPallets. Solo display; null si falta netWeightGrams o los palets no son un número válido.
 export function calculateTotalOrderWeightKg(variant: PalletWeightSource, requestedPallets: number | undefined): number | null {
     if (!variant.netWeightGrams || variant.netWeightGrams <= 0) return null
     if (!requestedPallets || requestedPallets <= 0) return null
@@ -20,7 +17,7 @@ export function calculateTotalOrderWeightKg(variant: PalletWeightSource, request
     return totalGrams / GRAMS_PER_KG
 }
 
-export function kgToLb(kg: number): number {
+function kgToLb(kg: number): number {
     return kg / KG_PER_LB
 }
 

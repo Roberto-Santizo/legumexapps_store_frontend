@@ -65,7 +65,7 @@ export function MaterialOptionGroupFields({
                         <Checkbox id={`${idPrefix}IsDefault`} label={t("materialOptionGroup.isDefault")} {...isDefaultField} />
                     </div>
 
-                    <p className="mb-5 -mt-3 text-sm text-texto-suave sm:col-span-2">{t("materialOptionGroup.hint")}</p>
+                    <p className="mb-5 -mt-3 text-sm text-ink-600 sm:col-span-2">{t("materialOptionGroup.hint")}</p>
                 </>
             )}
         </>

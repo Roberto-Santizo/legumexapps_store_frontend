@@ -39,16 +39,15 @@ export function CreateUnitForm({ register, errors, watch }: Readonly<CreateUnitF
                     </option>
                     {availableCatalog.map((entry) => (
                         <option key={entry.key} value={entry.key}>
-                            {entry.displayName}
+                            {t(`unit.catalog.${entry.key}`)}
                         </option>
                     ))}
                 </Select>
             </FormField>
 
-            {/* Solo informativo: el admin ya no escribe estos valores, se muestran para que
-                confirme que eligió la unidad correcta antes de guardar. */}
+            {/* Solo informativo: se muestran para confirmar la unidad elegida antes de guardar. */}
             {selectedEntry && (
-                <p className="mb-5 -mt-3 text-sm text-texto-suave">
+                <p className="mb-5 -mt-3 text-sm text-ink-600">
                     {t("unit.form.autoFillHint", {
                         unitType: t(`unit.form.unitTypeOptions.${selectedEntry.unitType}`),
                         baseFactor: selectedEntry.baseFactor,

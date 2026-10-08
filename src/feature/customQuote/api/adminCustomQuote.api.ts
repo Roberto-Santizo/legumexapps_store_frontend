@@ -8,7 +8,6 @@ import {
 } from "@/feature/customQuote/schema/adminCustomQuote.schema"
 import type { AdminCustomQuoteListFilters, CustomQuoteStatus } from "@/feature/customQuote/schema/adminCustomQuote.schema"
 
-// Backend: /admin/custom-quotes (customQuotes:view para leer, customQuotes:edit para el estado).
 const listResponseSchema = apiListResponseSchema(adminCustomQuoteListItemSchema)
 const detailResponseSchema = apiItemResponseSchema(adminCustomQuoteDetailSchema)
 const statusResponseSchema = apiMutationResponseSchema(adminCustomQuoteStatusResultSchema)

@@ -37,7 +37,7 @@ function RevenueShareTooltip({ active, payload }: Readonly<TooltipContentProps>)
     const slice = (payload[0] as unknown as RevenueTooltipPayload).payload
 
     return (
-        <div className="rounded-lg px-3 py-2 text-xs shadow-card-hover" style={{ backgroundColor: CHART_TOOLTIP_BG, color: CHART_TOOLTIP_TEXT }}>
+        <div className="rounded-control border border-line px-3 py-2 text-xs shadow-panel" style={{ backgroundColor: CHART_TOOLTIP_BG, color: CHART_TOOLTIP_TEXT }}>
             <p className="font-semibold">{slice.name}</p>
             <p className="mt-0.5">{formatCurrency(slice.value)}</p>
             <p className="mt-0.5 opacity-80">{slice.percent.toFixed(1)}%</p>
@@ -70,11 +70,11 @@ export function ProductRevenueShareChart({ productsByRevenue, totalRevenue, empt
 
     return (
         <Card>
-            <h2 className="font-display text-lg font-bold text-verde-profundo">{t("dashboard.productRevenueShare.title")}</h2>
-            <p className="mt-0.5 text-sm text-texto-suave">{t("dashboard.productRevenueShare.subtitle")}</p>
+            <h2 className="font-display text-lg font-bold text-ink-900">{t("dashboard.productRevenueShare.title")}</h2>
+            <p className="mt-0.5 text-sm text-ink-600">{t("dashboard.productRevenueShare.subtitle")}</p>
 
             {slices.length === 0 ? (
-                <p className="mt-6 text-sm text-texto-suave">{emptyMessage}</p>
+                <p className="mt-6 text-sm text-ink-600">{emptyMessage}</p>
             ) : (
                 <div className="mt-2 flex flex-col items-center gap-4 sm:flex-row">
                     <div className="h-52 w-52 shrink-0">
@@ -101,8 +101,8 @@ export function ProductRevenueShareChart({ productsByRevenue, totalRevenue, empt
                         {slices.map((slice) => (
                             <li key={slice.key} className="flex items-center gap-2 text-sm">
                                 <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: slice.color }} />
-                                <span className="min-w-0 flex-1 truncate text-verde-profundo">{slice.name}</span>
-                                <span className="shrink-0 font-semibold text-verde-profundo">{formatCurrency(slice.value)}</span>
+                                <span className="min-w-0 flex-1 truncate text-ink-900">{slice.name}</span>
+                                <span className="shrink-0 font-semibold text-ink-900">{formatCurrency(slice.value)}</span>
                             </li>
                         ))}
                     </ul>

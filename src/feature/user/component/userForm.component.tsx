@@ -16,9 +16,7 @@ type UserFormProps<T extends UpdateUserInput> = {
     isEditing?: boolean
 }
 
-// Un solo componente para crear/editar -- ver roleForm.component.tsx para la justificación del
-// patrón. isEditing es la única asimetría real (el campo password se comporta distinto), así que
-// queda aislada en vez de forzar dos componentes separados por un solo campo.
+// isEditing es la única diferencia entre crear y editar: el password pasa a ser opcional.
 export function UserForm<T extends UpdateUserInput>({
     register,
     errors,

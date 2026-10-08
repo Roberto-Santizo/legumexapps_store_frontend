@@ -7,12 +7,11 @@ export function AppLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     return (
-        <div className="min-h-screen bg-crema lg:pl-64">
+        <div className="min-h-dvh bg-canvas text-ink-900 lg:pl-64">
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
-            <div className="flex min-h-screen flex-col">
+            <div className="flex min-h-dvh min-w-0 flex-col">
                 <Header onMenuClick={() => setIsSidebarOpen(true)} />
-                <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
+                <main id="admin-content" className="min-w-0 flex-1 px-[max(1rem,env(safe-area-inset-left))] py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-8">
                     <Outlet />
                 </main>
             </div>

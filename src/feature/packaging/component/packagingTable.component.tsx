@@ -7,7 +7,7 @@ import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
 
 export function PackagingTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <PaginatedAdminTable<PackagingResponse>
@@ -32,7 +32,7 @@ export function PackagingTable() {
                 {
                     key: "updatedAt",
                     header: t("common.updatedAt"),
-                    render: (packaging) => formatDateTime(packaging.updatedAt),
+                    render: (packaging) => formatDateTime(packaging.updatedAt, i18n.language),
                 },
             ]}
         />

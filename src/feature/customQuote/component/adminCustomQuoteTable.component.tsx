@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { AdminCustomQuoteListItem } from "@/feature/customQuote/schema/adminCustomQuote.schema"
 import { CustomQuoteStatusBadge } from "@/feature/customQuote/component/customQuoteStatusBadge.component"
 import { Chip } from "@/shared/component/chip.component"
+import { ProductSummary, SalespersonSummary } from "@/feature/quote/component/quoteListCells.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
@@ -10,7 +11,7 @@ import { formatDateTime } from "@/shared/format/date"
 const COLUMN_COUNT = 8
 
 export function AdminCustomQuoteTable({ customQuotes }: Readonly<{ customQuotes: AdminCustomQuoteListItem[] }>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <TableContainer>
@@ -36,20 +37,12 @@ export function AdminCustomQuoteTable({ customQuotes }: Readonly<{ customQuotes:
                                 <Td>
                                     <CustomQuoteStatusBadge status={customQuote.status} />
                                 </Td>
-                                <Td className="text-xs">{formatDateTime(customQuote.createdAt)}</Td>
+                                <Td className="text-xs">{formatDateTime(customQuote.createdAt, i18n.language)}</Td>
                                 <Td>
-                                    {customQuote.salesperson ? (
-                                        <>
-                                            <p className="font-medium">{customQuote.salesperson.name}</p>
-                                            <p className="text-xs text-texto-suave">{customQuote.salesperson.email}</p>
-                                        </>
-                                    ) : (
-                                        "—"
-                                    )}
+                                    <SalespersonSummary salesperson={customQuote.salesperson} />
                                 </Td>
                                 <Td className="whitespace-normal">
-                                    <p className="font-medium">{customQuote.productDisplayName}</p>
-                                    {customQuote.variantLabel && <p className="text-xs text-texto-suave">{customQuote.variantLabel}</p>}
+                                    <ProductSummary productDisplayName={customQuote.productDisplayName} variantLabel={customQuote.variantLabel} />
                                     {customQuote.isOrganic && (
                                         <div className="mt-1">
                                             <Chip tone="fresh">{t("site.quoteRequest.form.organicBadge")}</Chip>
@@ -62,7 +55,7 @@ export function AdminCustomQuoteTable({ customQuotes }: Readonly<{ customQuotes:
                                 <Td>
                                     <Link
                                         to={`/admin/custom-quotes/${customQuote.id}`}
-                                        className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("adminCustomQuote.table.view")}
                                     </Link>

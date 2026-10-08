@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next"
 import type { QuoteDraft } from "@/feature/quoteDraft/schema/quoteDraft.schema"
 import { QuoteDraftStateBadge } from "@/feature/quoteDraft/component/quoteDraftStateBadge.component"
 import { buildPackagingConfiguration } from "@/feature/quote/component/quotePackagingConfig"
+import { ProductSummary, SalespersonSummary } from "@/feature/quote/component/quoteListCells.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
@@ -12,13 +13,13 @@ const COLUMN_COUNT = 8
 // la sección "Configuración de empaque" del PDF. Las filas fijas no se listan: no son una elección.
 function ChosenMaterials({ draft }: Readonly<{ draft: QuoteDraft }>) {
     const groups = buildPackagingConfiguration(draft.packaging).flatMap((level) => level.groups)
-    if (groups.length === 0) return <span className="text-texto-suave">—</span>
+    if (groups.length === 0) return <span className="text-ink-600">—</span>
 
     return (
         <ul className="space-y-0.5 whitespace-normal">
             {groups.map(({ group, material }) => (
                 <li key={`${group}:${material}`} className="text-xs">
-                    <span className="font-semibold uppercase text-texto-suave">{group}:</span> {material}
+                    <span className="font-semibold uppercase text-ink-600">{group}:</span> {material}
                 </li>
             ))}
         </ul>
@@ -26,7 +27,7 @@ function ChosenMaterials({ draft }: Readonly<{ draft: QuoteDraft }>) {
 }
 
 export function QuoteDraftTable({ drafts }: Readonly<{ drafts: QuoteDraft[] }>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <TableContainer>
@@ -53,18 +54,10 @@ export function QuoteDraftTable({ drafts }: Readonly<{ drafts: QuoteDraft[] }>) 
                                     <QuoteDraftStateBadge state={draft.state} />
                                 </Td>
                                 <Td>
-                                    {draft.salesperson ? (
-                                        <>
-                                            <p className="font-medium">{draft.salesperson.name}</p>
-                                            <p className="text-xs text-texto-suave">{draft.salesperson.email}</p>
-                                        </>
-                                    ) : (
-                                        "—"
-                                    )}
+                                    <SalespersonSummary salesperson={draft.salesperson} />
                                 </Td>
                                 <Td>
-                                    <p className="font-medium">{draft.productDisplayName}</p>
-                                    {draft.variantLabel && <p className="text-xs text-texto-suave">{draft.variantLabel}</p>}
+                                    <ProductSummary productDisplayName={draft.productDisplayName} variantLabel={draft.variantLabel} />
                                 </Td>
                                 <Td className="text-right">{draft.requestedPallets}</Td>
                                 <Td className="text-right font-semibold">{formatCurrency(draft.totalCost)}</Td>
@@ -74,12 +67,12 @@ export function QuoteDraftTable({ drafts }: Readonly<{ drafts: QuoteDraft[] }>) 
                                 <Td className="text-right">{draft.previewCount}</Td>
                                 <Td>
                                     <p className="text-xs">
-                                        <span className="text-texto-suave">{t("quoteDraft.table.startedAt")}:</span>{" "}
-                                        {formatDateTime(draft.startedAt)}
+                                        <span className="text-ink-600">{t("quoteDraft.table.startedAt")}:</span>{" "}
+                                        {formatDateTime(draft.startedAt, i18n.language)}
                                     </p>
                                     <p className="text-xs">
-                                        <span className="text-texto-suave">{t("quoteDraft.table.lastActivityAt")}:</span>{" "}
-                                        {formatDateTime(draft.lastActivityAt)}
+                                        <span className="text-ink-600">{t("quoteDraft.table.lastActivityAt")}:</span>{" "}
+                                        {formatDateTime(draft.lastActivityAt, i18n.language)}
                                     </p>
                                 </Td>
                             </TableRow>

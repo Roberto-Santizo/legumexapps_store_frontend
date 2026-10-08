@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 // Sin baseCatalogSchema: un lead no tiene isActive (no se "desactiva", se le cambia el status).
-export const leadStatusEnum = z.enum(["new", "contacted"])
+const leadStatusEnum = z.enum(["new", "contacted"])
 
 export const updateLeadSchema = z.object({
     status: leadStatusEnum.optional(),

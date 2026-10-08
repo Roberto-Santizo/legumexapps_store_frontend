@@ -20,15 +20,15 @@ export function StatItem({ icon: Icon, value, suffix, label }: Readonly<StatItem
     return (
         <motion.div
             variants={fadeUp}
-            className="flex flex-col items-center gap-3 rounded-card border border-crema/10 bg-crema/5 p-6 text-center backdrop-blur-sm"
+            className="landing-stat-card flex min-h-60 min-w-0 flex-col items-center gap-4 rounded-panel border border-brand-300/40 bg-landing-cream p-6 text-center shadow-panel transition duration-300 hover:-translate-y-1 hover:border-brand-500 motion-reduce:hover:translate-y-0"
         >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-dorado/15 text-dorado">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-500/15 text-brand-700">
                 <Icon size={22} />
             </span>
-            <span className="font-display text-4xl font-extrabold text-crema sm:text-5xl">
+            <span className="font-display text-[clamp(2rem,2.8vw,2.5rem)] font-bold leading-tight tracking-tight text-brand-900">
                 <CountUp end={value} suffix={suffix} duration={2.4} autoAnimate autoAnimateOnce separator="," />
             </span>
-            <span className="max-w-48 text-sm leading-snug text-crema/70">{label}</span>
+            <span className="max-w-52 text-sm leading-relaxed text-ink-600">{label}</span>
         </motion.div>
     )
 }

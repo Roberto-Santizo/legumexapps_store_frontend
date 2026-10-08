@@ -2,12 +2,10 @@ import { z } from "zod"
 import { quoteLineSchema } from "@/feature/quote/schema/quote.schema"
 import { customQuoteConfigurationSchema } from "@/feature/customQuote/schema/customQuote.schema"
 
-// Seguimiento admin de cotizaciones a la medida -- espejo de backend
-// features/customQuote/services/adminCustomQuote.service.ts (CustomQuoteListItem / CustomQuoteDetail).
-// El backend ya castea los DECIMAL a número en el DTO (§8).
+// Espejo de los DTOs de backend adminCustomQuote.service.ts; los DECIMAL ya llegan como número.
 
 export const CUSTOM_QUOTE_STATUSES = ["new", "reviewed", "in_development", "discarded"] as const
-export const customQuoteStatusSchema = z.enum(CUSTOM_QUOTE_STATUSES)
+const customQuoteStatusSchema = z.enum(CUSTOM_QUOTE_STATUSES)
 export type CustomQuoteStatus = z.infer<typeof customQuoteStatusSchema>
 
 const salespersonSummarySchema = z.object({

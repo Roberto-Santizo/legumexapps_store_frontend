@@ -1,6 +1,6 @@
-export type PackagingConfigLevel = "unit" | "intermediate" | "pallet"
+type PackagingConfigLevel = "unit" | "intermediate" | "pallet"
 
-export type PackagingConfigGroup = {
+type PackagingConfigGroup = {
     group: string
     material: string
 }

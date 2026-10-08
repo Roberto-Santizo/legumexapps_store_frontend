@@ -1,13 +1,11 @@
 import { z } from "zod"
 import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 
-// Reemplaza el viejo FK único ProductVariant.intermediatePackagingId -- join N-filas
-// con grupos de opciones (optionGroup/isDefault), mismo criterio que productVariantUnitMaterial.schema.ts, pero sin
-// cantidad propia (el motor sigue leyendo ProductVariant.unitsPerIntermediatePackage).
+// Filas de empaque intermedio con grupos de opciones, sin cantidad propia (el motor usa
+// ProductVariant.unitsPerIntermediatePackage).
 export const createProductVariantIntermediateMaterialSchema = z.object({
     productVariantId: z.number().int().positive(),
     packagingId: z.number().int().positive(),
-    // Sin .default(), ver el comentario en productVariantUnitMaterial.schema.ts.
     optionGroup: z.string().trim().min(1).max(60).nullable(),
     isDefault: z.boolean(),
 })

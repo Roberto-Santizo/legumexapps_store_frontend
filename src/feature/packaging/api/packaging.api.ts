@@ -10,8 +10,6 @@ const packagingPaginatedListResponseSchema = apiPaginatedListResponseSchema(resp
 const packagingItemResponseSchema = apiItemResponseSchema(responsePackagingSchema)
 const packagingMutationResponseSchema = apiMutationResponseSchema(responsePackagingSchema)
 
-// Sin params -- también la usan PackagingSelect y PalletMaterialSelect (filtran por packagingRole
-// client-side). No tocar esta firma.
 export async function getPackagingsAPI() {
     try {
         const { data } = await api.get("/packagings")
@@ -59,8 +57,5 @@ export async function updatePackagingAPI(id: number, formData: UpdatePackagingIn
     }
 }
 
-// Ambas reusan el plumbing genérico de shared/api/bulkImport.api.ts (mismo diseño para todos los
-// catálogos con carga masiva); lo único específico de
-// Empaques acá es la URL.
 export const bulkImportPackagingsAPI = (file: File) => postBulkImportFile("/packagings/bulk-import", file)
 export const downloadPackagingImportTemplateAPI = () => getBulkImportTemplate("/packagings/bulk-import/template")

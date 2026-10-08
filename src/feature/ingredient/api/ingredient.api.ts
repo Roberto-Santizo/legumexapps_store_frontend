@@ -10,7 +10,6 @@ const ingredientPaginatedListResponseSchema = apiPaginatedListResponseSchema(res
 const ingredientItemResponseSchema = apiItemResponseSchema(responseIngredientSchema)
 const ingredientMutationResponseSchema = apiMutationResponseSchema(responseIngredientSchema)
 
-// Sin params -- la usa también IngredientSelect (y la sección de ingredientes del producto). No tocar esta firma.
 export async function getIngredientsAPI() {
     try {
         const { data } = await api.get("/ingredients")
@@ -58,7 +57,5 @@ export async function updateIngredientAPI(id: number, formData: UpdateIngredient
     }
 }
 
-// Reusan el plumbing genérico de shared/api/bulkImport.api.ts (mismo diseño que Empaques); lo
-// único específico de Ingredientes acá es la URL.
 export const bulkImportIngredientsAPI = (file: File) => postBulkImportFile("/ingredients/bulk-import", file)
 export const downloadIngredientImportTemplateAPI = () => getBulkImportTemplate("/ingredients/bulk-import/template")

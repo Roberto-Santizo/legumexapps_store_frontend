@@ -10,7 +10,7 @@ const QuoteRequestPage = lazyWithRetry(() =>
     import("@/feature/quote/page/quoteRequest.page").then((m) => ({ default: m.QuoteRequestPage }))
 )
 const CustomQuoteRequestPage = lazyWithRetry(() =>
-    import("@/feature/customQuote/page/customQuoteRequest.page").then((m) => ({ default: m.CustomQuoteRequestPage }))
+    import("@/feature/customQuote/page/catalogQuoteRequest.page").then((m) => ({ default: m.CatalogQuoteRequestPage }))
 )
 
 export default function SiteRoutes() {

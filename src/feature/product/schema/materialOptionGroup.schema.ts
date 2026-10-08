@@ -53,7 +53,7 @@ export function toMaterialOptionGroupFormValues(item: { optionGroup: string | nu
 // Misma regla de comparación que el backend (shared/utils/optionGroup.util.ts): sin mayúsculas y
 // con espacios colapsados.
 function optionGroupKey(value: string): string {
-    return value.trim().split(/\s+/).join(" ").toLowerCase()
+    return value.trim().replaceAll(/\s+/g, " ").toLowerCase()
 }
 
 // Nombres de grupo ya usados en las filas de la variante activa (sugerencias del <datalist>), sin

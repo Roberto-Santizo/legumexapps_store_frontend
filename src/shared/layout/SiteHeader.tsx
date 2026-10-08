@@ -7,9 +7,12 @@ import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { SiteNavigation } from "@/shared/layout/SiteNavigation"
 import { SiteHeaderActions } from "@/shared/layout/SiteHeaderActions"
 import { SiteMobileMenu } from "@/shared/layout/SiteMobileMenu"
+import greenLogo from "@/assets/legumex-logo.png"
 
 
 const CONDENSE_THRESHOLD = 72
+const whiteLogos = import.meta.glob<string>("/src/assets/legumex-logo-white.png", { eager: true, query: "?url", import: "default" })
+const whiteLogo = whiteLogos["/src/assets/legumex-logo-white.png"]
 
 export function SiteHeader() {
     const { t } = useTranslation()
@@ -27,7 +30,8 @@ export function SiteHeader() {
         }
 
         function handleScroll() {
-            setIsScrolled(window.scrollY > CONDENSE_THRESHOLD)
+            const hero = document.querySelector(".landing-hero")
+            setIsScrolled(hero ? hero.getBoundingClientRect().bottom <= CONDENSE_THRESHOLD : window.scrollY > CONDENSE_THRESHOLD)
         }
 
         handleScroll()
@@ -38,8 +42,8 @@ export function SiteHeader() {
     return (
         <header
             style={isHome ? { marginBottom: isTransparent ? "-5rem" : "-4rem" } : undefined}
-            className={`sticky top-0 z-40 transition-colors duration-300 ${
-                isTransparent ? "border-b border-transparent bg-transparent" : "border-b border-gris-campo bg-hueso shadow-sm"
+            className={`site-header sticky top-0 z-40 transition-colors duration-300 ${isTransparent ? "landing-header-glass" : ""} ${
+                isTransparent ? "border-b border-transparent bg-transparent" : "border-b border-line bg-surface shadow-panel"
             }`}
         >
             <SiteContainer
@@ -49,11 +53,15 @@ export function SiteHeader() {
             >
                 <Link
                     to="/"
-                    className={`font-display font-extrabold uppercase tracking-tight transition-all duration-300 ${
-                        isTransparent ? "text-2xl text-crema" : "text-xl text-verde-profundo"
+                    className={`landing-header-logo font-display font-bold uppercase tracking-tight transition-all duration-300 ${
+                        isTransparent ? "text-2xl text-white" : "text-xl text-ink-900"
                     }`}
                 >
-                    Legumex
+                    {isHome && !isTransparent ? (
+                        <img src={greenLogo} alt="Legumex" className="h-12 w-28 object-contain" />
+                    ) : isTransparent && whiteLogo ? (
+                        <img src={whiteLogo} alt="Legumex" className="h-11 w-auto max-w-36 object-contain" />
+                    ) : "Legumex"}
                 </Link>
 
                 <div className="hidden lg:block">
@@ -72,7 +80,7 @@ export function SiteHeader() {
                         type="button"
                         aria-label={t("site.header.openMenu")}
                         onClick={() => setIsMenuOpen(true)}
-                        className={isTransparent ? "text-crema" : "text-verde-profundo"}
+                        className={isTransparent ? "text-white" : "text-ink-900"}
                     >
                         <Menu size={22} />
                     </button>

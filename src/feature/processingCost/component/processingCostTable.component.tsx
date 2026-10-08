@@ -7,7 +7,7 @@ import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
 
 export function ProcessingCostTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <PaginatedAdminTable<ProcessingCostResponse>
@@ -28,9 +28,9 @@ export function ProcessingCostTable() {
                 {
                     key: "value",
                     header: t("processingCost.form.value"),
-                    // "value" significa algo distinto según el tipo (Q/libra vs %) -- mostrarlo
+                    // "value" significa algo distinto según el tipo (USD/libra vs %) -- mostrarlo
                     // siempre como moneda sería engañoso para una fila "percentage" (ej. "Imprevistos"
-                    // 2% se vería "Q2.00", no "2%").
+                    // 2% se vería "USD 2.00", no "2%").
                     render: (processingCost) =>
                         processingCost.calculationType === "percentage"
                             ? `${processingCost.value}%`
@@ -39,7 +39,7 @@ export function ProcessingCostTable() {
                 {
                     key: "updatedAt",
                     header: t("common.updatedAt"),
-                    render: (processingCost) => formatDateTime(processingCost.updatedAt),
+                    render: (processingCost) => formatDateTime(processingCost.updatedAt, i18n.language),
                 },
             ]}
         />

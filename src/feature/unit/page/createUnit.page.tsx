@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -35,7 +36,7 @@ export function CreateUnitPage() {
             navigate("/admin/units")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -46,7 +47,7 @@ export function CreateUnitPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("unit.create.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("unit.create.title")}</h1>
                 <Link to="/admin/units" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>

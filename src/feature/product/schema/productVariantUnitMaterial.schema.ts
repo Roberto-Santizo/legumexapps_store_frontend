@@ -4,24 +4,19 @@ import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 export const createProductVariantUnitMaterialSchema = z.object({
     productVariantId: z.number().int().positive(),
     packagingId: z.number().int().positive(),
-    // Requerido: quantityPerUnit * unitCost * totalUnits es la fórmula directa del costo de
-    // esta línea. Si quedara vacío, el material "costaría" $0 en cada cotización -- mismo
-    // criterio que ProductVariantPalletMaterial.quantityValue.
+    // Requerido: quantityPerUnit * unitCost * totalUnits es la fórmula directa del costo de esta
+    // línea; si quedara vacío, el material "costaría" $0 en cada cotización.
     quantityPerUnit: z.number().positive(),
-    // Grupos de opciones -- espejo del backend: null = fila fija;
-    // un nombre = alternativa dentro de ese grupo (el cliente elige una por grupo). Sin .default()
-    // (a diferencia del backend): el form siempre manda el campo resuelto vía
-    // toMaterialOptionGroupPayload (materialOptionGroup.schema.ts), y .default() acá rompe la
-    // inferencia de tipos de zodResolver/useForm.
-    optionGroup: z.string().trim().min(1).max(60).nullable(),
+    // ID estable del catálogo; null = fila fija. El nombre se obtiene en el backend.
+    optionGroupId: z.number().int().positive().nullable(),
     isDefault: z.boolean(),
 })
 
-// .partial() salvo quantityPerUnit/optionGroup/isDefault -- ninguno puede quedar vacío ni
+// .partial() salvo quantityPerUnit/optionGroupId/isDefault -- ninguno puede quedar vacío ni
 // siquiera al editar una fila existente.
 const updateProductVariantUnitMaterialSchema = createProductVariantUnitMaterialSchema.partial().extend({
     quantityPerUnit: createProductVariantUnitMaterialSchema.shape.quantityPerUnit,
-    optionGroup: createProductVariantUnitMaterialSchema.shape.optionGroup,
+    optionGroupId: createProductVariantUnitMaterialSchema.shape.optionGroupId,
     isDefault: createProductVariantUnitMaterialSchema.shape.isDefault,
 })
 
@@ -32,6 +27,7 @@ export const responseProductVariantUnitMaterialSchema = baseCatalogSchema.extend
     // número tras un .update() -- z.coerce.number() acepta ambos formatos.
     quantityPerUnit: z.coerce.number(),
     optionGroup: z.string().nullable(),
+    optionGroupId: z.number().int().nullable(),
     isDefault: z.boolean(),
 })
 

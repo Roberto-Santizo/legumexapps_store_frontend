@@ -4,13 +4,14 @@ import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 
 
-export const bulkImportResponseSchema = z.object({
+const bulkImportResponseSchema = z.object({
     message: z.string(),
     data: z.object({ created: z.number().int() }),
 })
 export type BulkImportResponse = z.infer<typeof bulkImportResponseSchema>
 
 export type BulkImportRowErrorDetail = {
+    sheet?: string
     row: number
     field: string
     message: string
@@ -49,6 +50,20 @@ export async function getBulkImportTemplate(url: string): Promise<Blob | undefin
         const { data } = await api.get(url, { responseType: "blob" })
         return data
     } catch (error) {
+        handleApiError(error)
+    }
+}
+
+// Preview and confirmation share multipart transport and preserve backend row errors.
+export async function postBulkImportPreviewFile(url: string, file: File, previewHash?: string) {
+    const form = new FormData()
+    form.append("file", file)
+    if (previewHash) form.append("previewHash", previewHash)
+    try { return (await api.post<unknown>(url, form)).data }
+    catch (error) {
+        if (isAxiosError<{ message: string; details?: BulkImportRowErrorDetail[] }>(error) && error.response) {
+            throw new BulkImportApiError(error.response.data.message, error.response.data.details ?? [])
+        }
         handleApiError(error)
     }
 }

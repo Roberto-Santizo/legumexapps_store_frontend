@@ -1,3 +1,4 @@
+import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
 import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -12,17 +13,16 @@ import { AdminCustomQuoteTable } from "@/feature/customQuote/component/adminCust
 import { CUSTOM_QUOTE_STATUSES } from "@/feature/customQuote/schema/adminCustomQuote.schema"
 import type { AdminCustomQuoteListFilters, CustomQuoteStatus } from "@/feature/customQuote/schema/adminCustomQuote.schema"
 
-// Cotizaciones a la medida guardadas por los representantes (productos que todavía no existen, sin SKU
-// ni Cliente) -- una lista APARTE de "Cotizaciones": no cuentan en esa lista ni en el panel de
-// indicadores. Rango sobre la fecha de guardado en días de Guatemala (mismo DateRangeFilter que el panel
-// y las cotizaciones sin finalizar, default "todo") + filtro por estado del seguimiento.
-export function AdminCustomQuoteListPage() {
+// DateRangeFilter filtra la fecha de guardado en días de Guatemala, inicialmente sin límite;
+// el estado de seguimiento se filtra por separado.
+export function AdminCustomQuoteListPage({ embedded = false, dateRange, onDateChange }: Readonly<{ embedded?: boolean; dateRange?: DashboardDateRange; onDateChange?: (range: DashboardDateRange) => void }> = {}) {
     const { t } = useTranslation()
     const [filters, setFilters] = useState<AdminCustomQuoteListFilters>({ startDate: null, endDate: null, status: null })
 
+    const range = dateRange ?? filters
     const customQuotesQuery = useQuery({
-        queryKey: ["adminCustomQuotes", filters.startDate, filters.endDate, filters.status],
-        queryFn: () => getAdminCustomQuotesAPI(filters),
+        queryKey: ["adminCustomQuotes", range.startDate, range.endDate, filters.status],
+        queryFn: () => getAdminCustomQuotesAPI({ ...filters, startDate: range.startDate, endDate: range.endDate }),
         placeholderData: keepPreviousData,
     })
     const customQuotes = customQuotesQuery.data?.data ?? []
@@ -31,22 +31,22 @@ export function AdminCustomQuoteListPage() {
     if (customQuotesQuery.isLoading) {
         content = <Spinner />
     } else if (customQuotesQuery.isError) {
-        content = <p className="text-error-fg">{t("common.loadError")}</p>
+        content = <p className="text-danger">{t("common.loadError")}</p>
     } else {
         content = <AdminCustomQuoteTable customQuotes={customQuotes} />
     }
 
-    return (
-        <PageContainer wide>
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("adminCustomQuote.list.title")}</h1>
-                <p className="mt-1 max-w-3xl text-texto-suave">{t("adminCustomQuote.list.description")}</p>
-            </div>
+    const view = (
+        <>
+            {!embedded && <div className="mb-6">
+                <h1 className="text-2xl font-semibold text-ink-900">{t("adminCustomQuote.list.title")}</h1>
+                <p className="mt-1 max-w-3xl text-ink-600">{t("adminCustomQuote.list.description")}</p>
+            </div>}
 
             <div className="mb-4">
                 <DateRangeFilter
-                    value={{ startDate: filters.startDate, endDate: filters.endDate }}
-                    onChange={(range) => setFilters((current) => ({ ...current, ...range }))}
+                    value={{ startDate: range.startDate, endDate: range.endDate }}
+                    onChange={(next) => { setFilters((current) => ({ ...current, ...next })); onDateChange?.(next) }}
                 />
             </div>
 
@@ -70,6 +70,7 @@ export function AdminCustomQuoteListPage() {
             </div>
 
             {content}
-        </PageContainer>
+        </>
     )
+    return embedded ? view : <PageContainer wide>{view}</PageContainer>
 }

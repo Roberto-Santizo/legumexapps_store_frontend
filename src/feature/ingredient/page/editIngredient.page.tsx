@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -16,7 +17,6 @@ import { buttonClassName } from "@/shared/component/buttonClassName"
 
 // costUnitId no es parte del form -- se fuerza server-side a la Libra, igual que materias primas.
 function toFormValues(ingredient: IngredientResponse): Partial<UpdateIngredientInput> {
-    // Ver el mismo comentario en editCategory.page.tsx::toFormValues.
     const englishTranslation = ingredient.translations.find((translation) => translation.language === "en")
     return {
         code: ingredient.code,
@@ -64,7 +64,7 @@ export function EditIngredientPage() {
             navigate("/admin/ingredients")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -75,15 +75,15 @@ export function EditIngredientPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("ingredient.edit.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("ingredient.edit.title")}</h1>
                 <Link to="/admin/ingredients" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             <Card>
-                {ingredientQuery.isLoading && <p className="text-texto-suave">{t("common.loading")}</p>}
-                {ingredientQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+                {ingredientQuery.isLoading && <p className="text-ink-600">{t("common.loading")}</p>}
+                {ingredientQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
                 {ingredientQuery.data && (
                     <form onSubmit={onSubmit}>

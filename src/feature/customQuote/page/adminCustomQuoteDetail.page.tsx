@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { Link, useParams } from "react-router-dom"
@@ -10,6 +11,9 @@ import type { AdminCustomQuoteDetail, CustomQuoteStatus } from "@/feature/custom
 import { CustomQuoteStatusBadge } from "@/feature/customQuote/component/customQuoteStatusBadge.component"
 import { CustomQuoteSpecification } from "@/feature/customQuote/component/customQuoteSpecification.component"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
+import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
+import { sendAdminQuotePdfEmailAPI } from "@/feature/quote/api/adminQuote.api"
+import { toCustomQuoteDocumentLine } from "@/feature/customQuote/component/customQuoteComposition"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
@@ -22,8 +26,8 @@ import { formatDateTime } from "@/shared/format/date"
 function ReadOnlyField({ label, children }: Readonly<{ label: string; children: ReactNode }>) {
     return (
         <div>
-            <p className="text-xs font-medium tracking-wide text-texto-suave uppercase">{label}</p>
-            <div className="text-verde-profundo">{children}</div>
+            <p className="text-xs font-medium tracking-wide text-ink-600 uppercase">{label}</p>
+            <div className="text-ink-900">{children}</div>
         </div>
     )
 }
@@ -46,7 +50,7 @@ function StatusControl({ customQuote }: Readonly<{ customQuote: AdminCustomQuote
             queryClient.invalidateQueries({ queryKey: ["adminCustomQuotes"] })
             if (response) toast.success(response.message)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     return (
@@ -75,11 +79,8 @@ function StatusControl({ customQuote }: Readonly<{ customQuote: AdminCustomQuote
     )
 }
 
-// Detalle de una cotización a la medida: quién la pidió y cuándo, su estado de seguimiento, la ficha de
-// fabricación (CustomQuoteSpecification) y el desglose completo de costos (el mismo QuoteResultCard del
-// cotizador interno, con showCostBreakdown).
 export function AdminCustomQuoteDetailPage() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const { hasPermission } = usePermission()
     const params = useParams()
     const customQuoteId = Number(params.customQuoteId)
@@ -95,20 +96,21 @@ export function AdminCustomQuoteDetailPage() {
         <PageContainer wide>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <p className="text-sm text-texto-suave">{t("adminCustomQuote.detail.title", { id: customQuoteId })}</p>
-                    <h1 className="text-2xl font-semibold text-verde-profundo">{customQuote?.productDisplayName ?? "…"}</h1>
-                    {customQuote?.variantLabel && <p className="text-texto-suave">{customQuote.variantLabel}</p>}
+                    <p className="text-sm text-ink-600">{t("adminCustomQuote.detail.title", { id: customQuoteId })}</p>
+                    <h1 className="text-2xl font-semibold text-ink-900">{customQuote?.productDisplayName ?? "…"}</h1>
+                    {customQuote?.variantLabel && <p className="text-ink-600">{customQuote.variantLabel}</p>}
                 </div>
-                <Link to="/admin/custom-quotes" className={buttonClassName("secondary")}>
+                <Link to="/admin/quotes?type=customizable" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             {customQuoteQuery.isLoading && <Spinner />}
-            {customQuoteQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+            {customQuoteQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
             {customQuote && (
                 <div className="space-y-6">
+                    <QuotePdfButton lines={[toCustomQuoteDocumentLine(customQuote)]} quoteDate={new Date(customQuote.createdAt)} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={hasPermission("quotes:calculate") ? sendAdminQuotePdfEmailAPI : undefined} />
                     <Card className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <ReadOnlyField label={t("adminCustomQuote.detail.status")}>
                             {hasPermission("customQuotes:edit") ? (
@@ -124,17 +126,17 @@ export function AdminCustomQuoteDetailPage() {
                                         {customQuote.salesperson.name}
                                         {customQuote.salesperson.companyName ? ` · ${customQuote.salesperson.companyName}` : ""}
                                     </p>
-                                    <p className="text-sm text-texto-suave">{customQuote.salesperson.email}</p>
+                                    <p className="text-sm text-ink-600">{customQuote.salesperson.email}</p>
                                 </>
                             ) : (
                                 "—"
                             )}
                         </ReadOnlyField>
-                        <ReadOnlyField label={t("adminCustomQuote.detail.createdAt")}>{formatDateTime(customQuote.createdAt)}</ReadOnlyField>
+                        <ReadOnlyField label={t("adminCustomQuote.detail.createdAt")}>{formatDateTime(customQuote.createdAt, i18n.language)}</ReadOnlyField>
                         <ReadOnlyField label={t("adminCustomQuote.detail.subCategory")}>
                             {customQuote.subCategoryName ?? "—"}
                             {customQuote.destinationName && (
-                                <p className="text-sm text-texto-suave">
+                                <p className="text-sm text-ink-600">
                                     {t("adminCustomQuote.detail.destination")}: {customQuote.destinationName}
                                 </p>
                             )}

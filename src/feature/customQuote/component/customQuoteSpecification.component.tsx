@@ -7,7 +7,7 @@ import { Chip } from "@/shared/component/chip.component"
 import { Table, TableBody, TableContainer, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 
 // Ficha de fabricación de una cotización a la medida: lo que el representante armó, tal como quedó
-// congelado al guardar (receta, ingredientes, presentación + palet, empaques con sus cantidades). Todo
+// congelado al guardar (receta, ingredientes, presentación + palet, empaques con sus cantidades). La información
 // sale del snapshot (breakdown + configuration), así que un cambio posterior en las listas de permitidos
 // no la altera. Sin costos -- el desglose de costos va aparte (QuoteResultCard).
 
@@ -15,8 +15,8 @@ const numberFormatter = new Intl.NumberFormat("es-GT", { maximumFractionDigits: 
 
 function SpecSection({ icon, title, children }: Readonly<{ icon: ReactNode; title: string; children: ReactNode }>) {
     return (
-        <section className="border-t border-gris-campo pt-5 first:border-t-0 first:pt-0">
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-wide text-texto-suave uppercase">
+        <section className="border-t border-line pt-5 first:border-t-0 first:pt-0">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-wide text-ink-600 uppercase">
                 {icon}
                 {title}
             </h2>
@@ -27,9 +27,9 @@ function SpecSection({ icon, title, children }: Readonly<{ icon: ReactNode; titl
 
 function SpecValue({ label, value }: Readonly<{ label: string; value: ReactNode }>) {
     return (
-        <div className="rounded-[10px] bg-crema p-3">
-            <p className="text-xs text-texto-suave">{label}</p>
-            <p className="font-semibold text-verde-profundo">{value}</p>
+        <div className="rounded-[10px] bg-canvas p-3">
+            <p className="text-xs text-ink-600">{label}</p>
+            <p className="font-semibold text-ink-900">{value}</p>
         </div>
     )
 }
@@ -42,7 +42,7 @@ function PackagingLevelTable({ title, icon, rows }: Readonly<{ title: string; ic
 
     return (
         <div className="mb-4 last:mb-0">
-            <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-verde-profundo">
+            <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-ink-900">
                 {icon}
                 {title}
             </p>
@@ -116,12 +116,18 @@ export function CustomQuoteSpecification({ customQuote }: Readonly<{ customQuote
 
     return (
         <Card className="space-y-5">
+            {configuration.snapshot && <SpecSection icon={<Layers size={15} />} title={t("catalogQuote.context")}>
+                <p>{configuration.snapshot.category.displayName} / {configuration.snapshot.subCategory.displayName}</p>
+                <p>{t(configuration.snapshot.isOrganic ? "catalogQuote.organic" : "catalogQuote.conventional")} · {t(`catalogQuote.types.${configuration.snapshot.ingredientType}`)}</p>
+                <p>{t("catalogQuote.quantities", { boxes: configuration.snapshot.quantity.totalBoxes, units: configuration.snapshot.quantity.totalUnits, weight: (Number(configuration.snapshot.quantity.totalWeightGrams) / 1000).toFixed(2) })}</p>
+                {configuration.snapshot.source && <details className="mt-3 text-sm text-ink-600"><summary>{t("catalogQuote.audit")}</summary><p>{t("adminCustomQuote.spec.sku")}: {configuration.snapshot.source.skuCode} · {t("catalogQuote.sourceVariant")}: {configuration.snapshot.source.productVariantId}</p></details>}
+            </SpecSection>}
             <SpecSection icon={<Wheat size={15} />} title={t("adminCustomQuote.spec.recipe")}>
                 <ul className="space-y-1.5">
                     {composition.map((line) => (
                         <li key={line.rawMaterialId} className="flex items-center justify-between gap-3 text-sm">
-                            <span className="text-verde-profundo">{line.name}</span>
-                            <span className="font-semibold text-verde-profundo">{numberFormatter.format(line.percentage)} %</span>
+                            <span className="text-ink-900">{line.name}</span>
+                            <span className="font-semibold text-ink-900">{numberFormatter.format(line.percentage)} %</span>
                         </li>
                     ))}
                 </ul>
@@ -134,13 +140,13 @@ export function CustomQuoteSpecification({ customQuote }: Readonly<{ customQuote
 
             <SpecSection icon={<FlaskConical size={15} />} title={t("adminCustomQuote.spec.ingredients")}>
                 {ingredients.length === 0 ? (
-                    <p className="text-sm text-texto-suave">{t("adminCustomQuote.spec.noIngredients")}</p>
+                    <p className="text-sm text-ink-600">{t("adminCustomQuote.spec.noIngredients")}</p>
                 ) : (
                     <ul className="space-y-1.5">
                         {ingredients.map((line) => (
                             <li key={line.ingredientId} className="flex items-center justify-between gap-3 text-sm">
-                                <span className="text-verde-profundo">{line.displayName}</span>
-                                <span className="font-semibold text-verde-profundo">
+                                <span className="text-ink-900">{line.displayName}</span>
+                                <span className="font-semibold text-ink-900">
                                     {t("adminCustomQuote.spec.gramsPerUnit", { grams: numberFormatter.format(line.gramsPerUnit) })}
                                 </span>
                             </li>

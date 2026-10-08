@@ -12,7 +12,7 @@ type QuotePalletsStepProps = {
     header: ReactNode
     fixedRecipe: ReactNode
     variantField: ReactNode
-    selectedVariant: QuotableVariant | undefined
+    selectedVariant: Pick<QuotableVariant, "boxesPerPallet" | "bagsPerBox" | "netWeightGrams"> | undefined
     requestedPallets: number | undefined
     palletsField: ReactNode
     materialsSection: ReactNode
@@ -54,10 +54,10 @@ export function QuotePalletsStep({
 
             {header}
 
-            <p className="mb-1 font-display text-lg font-bold text-verde-profundo sm:text-xl">
+            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
                 {t("site.quoteRequest.form.wizard.pallets.title")}
             </p>
-            <p className="mb-6 max-w-3xl text-sm text-texto-suave sm:text-base">{t("site.quoteRequest.form.wizard.pallets.subtitle")}</p>
+            <p className="mb-6 max-w-3xl text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.pallets.subtitle")}</p>
 
             {fixedRecipe}
 
@@ -67,17 +67,17 @@ export function QuotePalletsStep({
 
             {selectedVariant && (
                 <div className="mb-5 grid grid-cols-2 gap-3 text-center">
-                    <div className="flex flex-col items-center gap-1 rounded-[10px] bg-crema p-3">
-                        <Boxes size={18} className="text-dorado" />
-                        <p className="text-lg font-bold text-verde-profundo">{selectedVariant.boxesPerPallet}</p>
-                        <p className="text-xs text-texto-suave">{t("site.quoteRequest.form.wizard.pallets.boxesPerPallet")}</p>
+                    <div className="flex flex-col items-center gap-1 rounded-[10px] bg-canvas p-3">
+                        <Boxes size={18} className="text-brand-500" />
+                        <p className="text-lg font-bold text-ink-900">{selectedVariant.boxesPerPallet}</p>
+                        <p className="text-xs text-ink-600">{t("site.quoteRequest.form.wizard.pallets.boxesPerPallet")}</p>
                     </div>
-                    <div className="flex flex-col items-center gap-1 rounded-[10px] bg-crema p-3">
-                        <Scale size={18} className="text-dorado" />
-                        <p className="text-lg font-bold text-verde-profundo">
+                    <div className="flex flex-col items-center gap-1 rounded-[10px] bg-canvas p-3">
+                        <Scale size={18} className="text-brand-500" />
+                        <p className="text-lg font-bold text-ink-900">
                             {totalWeightKg !== null ? formatTotalOrderWeight(totalWeightKg) : "-"}
                         </p>
-                        <p className="text-xs text-texto-suave">{t("site.quoteRequest.form.wizard.pallets.totalWeight")}</p>
+                        <p className="text-xs text-ink-600">{t("site.quoteRequest.form.wizard.pallets.totalWeight")}</p>
                     </div>
                 </div>
             )}
@@ -88,7 +88,7 @@ export function QuotePalletsStep({
 
             {materialsSection}
 
-            <div className="sticky bottom-3 z-10 mt-10 flex flex-col gap-4 rounded-2xl border-[1.5px] border-gris-campo bg-hueso/95 p-4 shadow-lg shadow-verde-profundo/10 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
+            <div className="sticky bottom-3 z-10 mt-10 flex flex-col gap-4 rounded-panel border border-line bg-surface/95 p-4 shadow-panel backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
                 <div className="sm:flex-1">{liveTotal}</div>
                 <Button type="submit" disabled={!canSubmit || isSubmitting} className="w-full sm:w-auto">
                     {isSubmitting ? t("common.loading") : t("site.quoteRequest.form.submit")}

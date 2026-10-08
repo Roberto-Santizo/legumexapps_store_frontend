@@ -7,7 +7,7 @@ import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
 
 export function IngredientTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <PaginatedAdminTable<IngredientResponse>
@@ -27,7 +27,7 @@ export function IngredientTable() {
                 {
                     key: "updatedAt",
                     header: t("common.updatedAt"),
-                    render: (ingredient) => formatDateTime(ingredient.updatedAt),
+                    render: (ingredient) => formatDateTime(ingredient.updatedAt, i18n.language),
                 },
             ]}
         />

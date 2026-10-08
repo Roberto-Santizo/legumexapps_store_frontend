@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -14,12 +15,9 @@ import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
 
-// Partial<UpdateRawMaterialInput> y no UpdateRawMaterialInput: costPerUnit es requerido para
-// GUARDAR, pero un registro viejo de antes de esa regla puede seguir teniendo null en la BD --
-// hay que poder precargar el form vacío en ese campo para que el admin lo complete, no forzar un
-// valor que no existe. costUnitId no es parte del form -- se fuerza server-side a la Libra.
+// Partial: costPerUnit es requerido para guardar, pero un registro antiguo puede tener null; se
+// precarga vacío para que el admin lo complete. costUnitId lo fija el backend (libra).
 function toFormValues(rawMaterial: RawMaterialResponse): Partial<UpdateRawMaterialInput> {
-    // Ver el mismo comentario en editCategory.page.tsx::toFormValues.
     const englishTranslation = rawMaterial.translations.find((translation) => translation.language === "en")
     return {
         code: rawMaterial.code,
@@ -70,7 +68,7 @@ export function EditRawMaterialPage() {
             navigate("/admin/raw-materials")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -81,15 +79,15 @@ export function EditRawMaterialPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("rawMaterial.edit.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("rawMaterial.edit.title")}</h1>
                 <Link to="/admin/raw-materials" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             <Card>
-                {rawMaterialQuery.isLoading && <p className="text-texto-suave">{t("common.loading")}</p>}
-                {rawMaterialQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+                {rawMaterialQuery.isLoading && <p className="text-ink-600">{t("common.loading")}</p>}
+                {rawMaterialQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
                 {rawMaterialQuery.data && (
                     <form onSubmit={onSubmit}>

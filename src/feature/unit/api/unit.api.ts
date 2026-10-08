@@ -9,7 +9,6 @@ const unitPaginatedListResponseSchema = apiPaginatedListResponseSchema(responseU
 const unitItemResponseSchema = apiItemResponseSchema(responseUnitSchema)
 const unitMutationResponseSchema = apiMutationResponseSchema(responseUnitSchema)
 
-// Sin params -- también la usa UnitSelect. No tocar esta firma.
 export async function getUnitsAPI() {
     try {
         const { data } = await api.get("/units")

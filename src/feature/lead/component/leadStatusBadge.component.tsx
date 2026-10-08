@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next"
 import type { LeadStatus } from "@/feature/lead/schema/lead.schema"
 
 const STATUS_CLASSES: Record<LeadStatus, string> = {
-    new: "border-info-bd bg-info-bg text-info-fg",
-    contacted: "border-exito-bd bg-exito-bg text-exito-fg",
+    new: "border-info-border bg-info-bg text-info",
+    contacted: "border-success-border bg-success-bg text-success",
 }
 
 export function LeadStatusBadge({ status }: Readonly<{ status: LeadStatus }>) {

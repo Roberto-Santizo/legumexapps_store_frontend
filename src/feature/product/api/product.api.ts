@@ -1,11 +1,11 @@
 import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 import { apiItemResponseSchema, apiMutationResponseSchema, apiPaginatedListResponseSchema } from "@/shared/api/apiResponse.schema"
-import { getBulkImportTemplate, postBulkImportFile } from "@/shared/api/bulkImport.api"
-import { responseProductSchema } from "@/feature/product/schema/product.schema"
+import { getBulkImportTemplate } from "@/shared/api/bulkImport.api"
+import { productListItemSchema, responseProductSchema } from "@/feature/product/schema/product.schema"
 import type { CreateProductInput, UpdateProductInput } from "@/feature/product/schema/product.schema"
 
-const productPaginatedListResponseSchema = apiPaginatedListResponseSchema(responseProductSchema)
+const productPaginatedListResponseSchema = apiPaginatedListResponseSchema(productListItemSchema)
 const productItemResponseSchema = apiItemResponseSchema(responseProductSchema)
 const productMutationResponseSchema = apiMutationResponseSchema(responseProductSchema)
 
@@ -56,6 +56,4 @@ export async function updateProductStatusAPI(id: number, isActive: boolean) {
     }
 }
 
-// Carga unificada de Productos y Variantes (paso 1 de 3).
-export const bulkImportProductsAPI = (file: File) => postBulkImportFile("/products/bulk-import", file)
 export const downloadProductImportTemplateAPI = () => getBulkImportTemplate("/products/bulk-import/template")

@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useState } from "react"
 import { useForm, Controller, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -61,8 +62,7 @@ export function ProductIngredientSection({ productId }: Readonly<ProductIngredie
     const { t } = useTranslation()
     const queryClient = useQueryClient()
     const [editingId, setEditingId] = useState<number | null>(null)
-    // Mismo motivo que ProductRawMaterialSection: remonta el <form> tras guardar para que los
-    // <Input> numéricos no controlados queden realmente en blanco.
+    // Remonta el <form> tras guardar para que los <Input> numéricos no controlados queden en blanco.
     const [formResetKey, setFormResetKey] = useState(0)
 
     const productIngredientsQuery = useQuery({ queryKey: ["productIngredients"], queryFn: getProductIngredientsAPI })
@@ -100,6 +100,16 @@ export function ProductIngredientSection({ productId }: Readonly<ProductIngredie
     const gramsExceedReference = livePercentage !== null && livePercentage > 100
     const previewSku = skuWeightOptions[0]
 
+    function getPreviewMessage(percentage: number): string {
+        if (gramsExceedReference) return t("productIngredient.form.gramsExceedReference")
+        if (!previewSku) return t("productIngredient.form.previewNoSku", { percentage: percentageFormatter.format(percentage) })
+        return t("productIngredient.form.preview", {
+            percentage: percentageFormatter.format(percentage),
+            scaledGrams: numberFormatter.format((percentage / 100) * previewSku.netWeightGrams),
+            netWeight: numberFormatter.format(previewSku.netWeightGrams),
+        })
+    }
+
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productIngredients"] })
 
     const createMutation = useMutation({
@@ -110,7 +120,7 @@ export function ProductIngredientSection({ productId }: Readonly<ProductIngredie
             reset({})
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const updateMutation = useMutation({
@@ -122,7 +132,7 @@ export function ProductIngredientSection({ productId }: Readonly<ProductIngredie
             reset({})
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const deleteMutation = useMutation({
@@ -131,7 +141,7 @@ export function ProductIngredientSection({ productId }: Readonly<ProductIngredie
             invalidate()
             toast.success(data.message)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {
@@ -161,7 +171,7 @@ export function ProductIngredientSection({ productId }: Readonly<ProductIngredie
 
     return (
         <div>
-            <p className="mb-4 text-sm text-texto-suave">{t("productIngredient.list.hint")}</p>
+            <p className="mb-4 text-sm text-ink-600">{t("productIngredient.list.hint")}</p>
 
             <TableContainer className="mb-4">
                 <Table>
@@ -187,14 +197,14 @@ export function ProductIngredientSection({ productId }: Readonly<ProductIngredie
                                         <button
                                             type="button"
                                             onClick={() => startEdit(productIngredient)}
-                                            className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                            className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                         >
                                             {t("common.edit")}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => deleteMutation.mutate(productIngredient.id)}
-                                            className="font-medium text-error-fg underline underline-offset-4"
+                                            className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-danger underline underline-offset-4 transition-colors hover:bg-danger-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                         >
                                             {t("common.delete")}
                                         </button>
@@ -274,16 +284,8 @@ export function ProductIngredientSection({ productId }: Readonly<ProductIngredie
                 )}
 
                 {livePercentage !== null && (
-                    <p className={`mb-4 text-sm font-semibold sm:col-span-2 ${gramsExceedReference ? "text-error-fg" : "text-verde-profundo"}`}>
-                        {gramsExceedReference
-                            ? t("productIngredient.form.gramsExceedReference")
-                            : previewSku
-                              ? t("productIngredient.form.preview", {
-                                    percentage: percentageFormatter.format(livePercentage),
-                                    scaledGrams: numberFormatter.format((livePercentage / 100) * previewSku.netWeightGrams),
-                                    netWeight: numberFormatter.format(previewSku.netWeightGrams),
-                                })
-                              : t("productIngredient.form.previewNoSku", { percentage: percentageFormatter.format(livePercentage) })}
+                    <p className={`mb-4 text-sm font-semibold sm:col-span-2 ${gramsExceedReference ? "text-danger" : "text-ink-900"}`}>
+                        {getPreviewMessage(livePercentage)}
                     </p>
                 )}
 

@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -20,9 +21,11 @@ export function CreatePackagingPage() {
 
     const {
         register,
+        watch,
         handleSubmit,
         formState: { errors },
     } = useForm<CreatePackagingInput>({
+        shouldUnregister: true,
         resolver: zodResolver(createPackagingSchema),
     })
 
@@ -34,7 +37,7 @@ export function CreatePackagingPage() {
             navigate("/admin/packagings")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -45,7 +48,7 @@ export function CreatePackagingPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("packaging.create.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("packaging.create.title")}</h1>
                 <Link to="/admin/packagings" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
@@ -53,7 +56,7 @@ export function CreatePackagingPage() {
 
             <Card>
                 <form onSubmit={onSubmit}>
-                    <PackagingForm register={register} errors={errors} />
+                    <PackagingForm register={register} errors={errors} packagingRole={watch("packagingRole")} />
                     <Button type="submit" disabled={createPackagingMutation.isPending}>
                         {createPackagingMutation.isPending ? t("common.saving") : t("common.save")}
                     </Button>

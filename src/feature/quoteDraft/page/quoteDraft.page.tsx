@@ -27,7 +27,7 @@ export function QuoteDraftListPage() {
     if (draftsQuery.isLoading) {
         content = <Spinner />
     } else if (draftsQuery.isError) {
-        content = <p className="text-error-fg">{t("common.loadError")}</p>
+        content = <p className="text-danger">{t("common.loadError")}</p>
     } else {
         content = <QuoteDraftTable drafts={drafts} />
     }
@@ -35,8 +35,8 @@ export function QuoteDraftListPage() {
     return (
         <PageContainer>
             <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("quoteDraft.list.title")}</h1>
-                <p className="mt-1 max-w-3xl text-texto-suave">{t("quoteDraft.list.description")}</p>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("quoteDraft.list.title")}</h1>
+                <p className="mt-1 max-w-3xl text-ink-600">{t("quoteDraft.list.description")}</p>
             </div>
 
             <div className="mb-4">

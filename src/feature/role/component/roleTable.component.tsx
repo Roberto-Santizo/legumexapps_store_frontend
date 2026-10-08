@@ -20,8 +20,8 @@ export function RoleTable() {
         retry: false,
     })
 
-    if (rolesQuery.isLoading) return <p className="text-texto-suave">{t("common.loading")}</p>
-    if (rolesQuery.isError) return <p className="text-error-fg">{t("common.loadError")}</p>
+    if (rolesQuery.isLoading) return <p className="text-ink-600">{t("common.loading")}</p>
+    if (rolesQuery.isError) return <p className="text-danger">{t("common.loadError")}</p>
 
     const roles = rolesQuery.data?.data ?? []
     const totalPages = rolesQuery.data?.meta.totalPages ?? 1
@@ -52,7 +52,7 @@ export function RoleTable() {
                                     {hasPermission("roles:edit") && (
                                         <Link
                                             to={`/admin/roles/${role.id}/edit`}
-                                            className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                            className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                         >
                                             {t("common.edit")}
                                         </Link>

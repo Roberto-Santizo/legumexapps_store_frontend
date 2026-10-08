@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
@@ -12,8 +13,8 @@ type SiteImageSlotCardProps = {
     siteImage: SiteImageResponse
 }
 
-// undefined = "sin cambios pendientes" (el mismo contrato que ImageUploadField ya usa para
-// "no tocar" vs. base64 nueva vs. null para borrar -- ver resolveCatalogImage.ts en el backend).
+// undefined = sin cambios pendientes (mismo contrato que ImageUploadField: undefined no toca,
+// base64 reemplaza, null borra).
 function SiteImageSlotCard({ siteImage }: Readonly<SiteImageSlotCardProps>) {
     const { t } = useTranslation()
     const queryClient = useQueryClient()
@@ -27,7 +28,7 @@ function SiteImageSlotCard({ siteImage }: Readonly<SiteImageSlotCardProps>) {
             toast.success(data.message)
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -35,7 +36,7 @@ function SiteImageSlotCard({ siteImage }: Readonly<SiteImageSlotCardProps>) {
 
     return (
         <Card>
-            <h3 className="font-semibold text-verde-profundo">{t(`siteImage.slots.${siteImage.slotKey}`)}</h3>
+            <h3 className="font-semibold text-ink-900">{t(`siteImage.slots.${siteImage.slotKey}`)}</h3>
 
             <div className="mt-4">
                 <ImageUploadField
@@ -59,8 +60,8 @@ export function SiteImagePanel() {
     const { t } = useTranslation()
     const siteImagesQuery = useQuery({ queryKey: ["site-images", "admin"], queryFn: getSiteImagesAPI })
 
-    if (siteImagesQuery.isLoading) return <p className="text-texto-suave">{t("common.loading")}</p>
-    if (siteImagesQuery.isError) return <p className="text-error-fg">{t("common.loadError")}</p>
+    if (siteImagesQuery.isLoading) return <p className="text-ink-600">{t("common.loading")}</p>
+    if (siteImagesQuery.isError) return <p className="text-danger">{t("common.loadError")}</p>
 
     const siteImages = siteImagesQuery.data?.data ?? []
 

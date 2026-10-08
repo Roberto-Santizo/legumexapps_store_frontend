@@ -1,3 +1,5 @@
+import { DateRangeFilter } from "@/feature/dashboard/component/dateRangeFilter.component"
+import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
 import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -12,12 +14,14 @@ import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.compo
 import { formatCurrency } from "@/shared/format/currency"
 
 
-export function AdminQuoteListPage() {
+export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }: Readonly<{ embedded?: boolean; dateRange?: DashboardDateRange; onDateChange?: (range: DashboardDateRange) => void }> = {}) {
     const { t } = useTranslation()
     const [search, setSearch] = useState("")
     const [expandedId, setExpandedId] = useState<number | null>(null)
 
-    const quotesQuery = useQuery({ queryKey: ["adminQuotes"], queryFn: getAllQuotesAPI })
+    const [localRange, setLocalRange] = useState<DashboardDateRange>({ startDate: null, endDate: null })
+    const range = dateRange ?? localRange
+    const quotesQuery = useQuery({ queryKey: ["adminQuotes", range.startDate, range.endDate], queryFn: () => getAllQuotesAPI(range) })
     const quotes = quotesQuery.data?.data ?? []
 
     const normalizedSearch = search.trim().toLowerCase()
@@ -40,13 +44,13 @@ export function AdminQuoteListPage() {
     if (quotesQuery.isLoading) {
         content = <Spinner />
     } else if (quotesQuery.isError) {
-        content = <p className="text-error-fg">{t("common.loadError")}</p>
+        content = <p className="text-danger">{t("common.loadError")}</p>
     } else if (filteredQuotes.length === 0) {
         content = (
             <Card className="flex min-h-60 flex-col items-center justify-center gap-3 text-center">
-                <FileSpreadsheet className="h-10 w-10 text-gris-campo" />
-                <p className="max-w-xs text-texto-suave">
-                    {quotes.length === 0 ? t("adminQuote.list.empty") : t("adminQuote.list.noMatches")}
+                <FileSpreadsheet className="h-10 w-10 text-ink-400" />
+                <p className="max-w-xs text-ink-600">
+                    {quotes.length === 0 ? t(range.startDate || range.endDate ? "adminQuote.list.emptyRange" : "adminQuote.list.empty") : t("adminQuote.list.noMatches")}
                 </p>
             </Card>
         )
@@ -63,24 +67,22 @@ export function AdminQuoteListPage() {
                                 className="flex w-full items-center justify-between gap-4 p-4 text-left sm:p-6"
                             >
                                 <div className="min-w-0">
-                                    <p className="truncate font-display text-lg font-bold text-verde-profundo">
+                                    <p className="truncate font-display text-lg font-bold text-ink-900">
                                         {quote.productDisplayName}
                                         {quote.variantLabel && (
-                                            <span className="font-sans text-sm font-normal text-texto-suave">
+                                            <span className="font-sans text-sm font-normal text-ink-600">
                                                 {" "}
                                                 · {quote.variantLabel}
                                             </span>
                                         )}
                                     </p>
-                                    <p className="mt-1 truncate text-sm font-medium text-texto-suave">
+                                    <p className="mt-1 truncate text-sm font-medium text-ink-600">
                                         {quote.quotingSalesperson.name}
                                         {quote.quotingSalesperson.companyName && ` · ${quote.quotingSalesperson.companyName}`}
                                         {` · ${quote.quotingSalesperson.email}`}
                                     </p>
-                                    <p className="mt-1 text-xs text-texto-suave">
-                                        {/* Transporte apagado para TODOS por ahora -- ya no se
-                                        interpola el destino acá tampoco. Reversión futura: volver a
-                                        "adminQuote.list.summary" con el destination. */}
+                                    <p className="mt-1 text-xs text-ink-600">
+                                        {/* Transporte apagado por ahora: no se interpola el destino. */}
                                         {t("adminQuote.list.summaryNoDestination", {
                                             date: quote.createdAt.toLocaleDateString("es-GT"),
                                             pallets: quote.requestedPallets,
@@ -88,19 +90,19 @@ export function AdminQuoteListPage() {
                                     </p>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
-                                    <p className="font-display text-lg font-extrabold text-verde-profundo">
+                                    <p className="font-display text-lg font-extrabold text-ink-900">
                                         {formatCurrency(quote.totalCost)}
                                     </p>
                                     {isExpanded ? (
-                                        <ChevronUp size={20} className="text-texto-suave" />
+                                        <ChevronUp size={20} className="text-ink-600" />
                                     ) : (
-                                        <ChevronDown size={20} className="text-texto-suave" />
+                                        <ChevronDown size={20} className="text-ink-600" />
                                     )}
                                 </div>
                             </button>
 
                             {isExpanded && (
-                                <div className="border-t border-gris-campo p-4 sm:p-6">
+                                <div className="border-t border-line p-4 sm:p-6">
                                     <QuoteResultCard result={quote} isPending={false} />
                                 </div>
                             )}
@@ -111,13 +113,14 @@ export function AdminQuoteListPage() {
         )
     }
 
-    return (
-        <PageContainer className="max-w-5xl">
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("adminQuote.list.title")}</h1>
-                <p className="mt-1 text-texto-suave">{t("adminQuote.list.description")}</p>
-            </div>
+    const view = (
+        <>
+            {!embedded && <div className="mb-6">
+                <h1 className="text-2xl font-semibold text-ink-900">{t("adminQuote.list.title")}</h1>
+                <p className="mt-1 text-ink-600">{t("adminQuote.list.description")}</p>
+            </div>}
 
+            <div className="mb-4"><DateRangeFilter value={range} onChange={onDateChange ?? setLocalRange} /></div>
             <Input
                 type="text"
                 value={search}
@@ -127,6 +130,7 @@ export function AdminQuoteListPage() {
             />
 
             {content}
-        </PageContainer>
+        </>
     )
+    return embedded ? view : <PageContainer wide>{view}</PageContainer>
 }

@@ -18,8 +18,8 @@ export function StatBand() {
     const imageY = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"])
 
     return (
-        <section id="quienes-somos" className="relative overflow-hidden bg-verde-profundo py-24 sm:py-32">
-            <div className="pointer-events-none absolute top-0 right-0 h-96 w-96 rounded-full bg-brote/10 blur-3xl" />
+        <section id="quienes-somos" className="landing-about relative overflow-hidden bg-landing-sage py-20 sm:py-28">
+            <div className="pointer-events-none landing-about-shape" />
 
             <SiteContainer className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
                 <motion.div
@@ -28,7 +28,7 @@ export function StatBand() {
                     initial="hidden"
                     whileInView="show"
                     viewport={viewportOnce}
-                    className="relative h-88 overflow-hidden rounded-card shadow-card-hover sm:h-112"
+                    className="relative h-88 overflow-hidden rounded-panel border border-brand-300/40 shadow-panel sm:h-112"
                 >
                     <motion.img
                         src={imageSrc}
@@ -40,11 +40,11 @@ export function StatBand() {
                 </motion.div>
 
                 <motion.div variants={slideFromRight} initial="hidden" whileInView="show" viewport={viewportOnce}>
-                    <span className="font-mono text-xs uppercase tracking-[0.14em] text-dorado">{t("home.stats.eyebrow")}</span>
-                    <h2 className="mt-4 font-display text-3xl font-extrabold uppercase tracking-tight text-crema sm:text-4xl">
+                    <span className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">{t("home.stats.eyebrow")}</span>
+                    <h2 className="mt-4 font-display text-3xl font-bold uppercase tracking-tight text-brand-900 sm:text-4xl">
                         {t("home.stats.title")}
                     </h2>
-                    <p className="mt-5 max-w-xl text-base leading-relaxed text-crema/70 sm:text-lg">{t("home.stats.description")}</p>
+                    <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-600 sm:text-lg">{t("home.stats.description")}</p>
                 </motion.div>
             </SiteContainer>
 
@@ -53,7 +53,7 @@ export function StatBand() {
                 initial="hidden"
                 whileInView="show"
                 viewport={viewportOnce}
-                className="relative mx-auto mt-16 grid w-full max-w-site grid-cols-2 gap-4 px-6 sm:mt-20 sm:grid-cols-3 sm:px-10 lg:grid-cols-5"
+                className="relative mx-auto mt-16 grid w-full max-w-site grid-cols-1 gap-4 px-6 sm:mt-20 sm:grid-cols-2 sm:px-10 md:grid-cols-3 xl:grid-cols-5"
             >
                 {HOME_STATS.map((stat) => (
                     <StatItem

@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
 import { useTranslation } from "react-i18next"
 import { Send } from "lucide-react"
+import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
 import { Textarea } from "@/shared/component/textarea.component"
@@ -41,7 +42,7 @@ export function LeadCaptureForm() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex h-full flex-col items-center justify-center gap-5 py-16 text-center"
             >
-                <svg width="72" height="72" viewBox="0 0 100 100" className="text-exito-fg">
+                <svg width="72" height="72" viewBox="0 0 100 100" className="text-success">
                     <motion.circle
                         cx="50"
                         cy="50"
@@ -69,7 +70,7 @@ export function LeadCaptureForm() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
-                    className="font-display text-2xl font-extrabold uppercase tracking-tight text-verde-profundo"
+                    className="font-display text-2xl font-extrabold uppercase tracking-tight text-ink-900"
                 >
                     {t("home.leadCapture.successTitle")}
                 </motion.h3>
@@ -77,7 +78,7 @@ export function LeadCaptureForm() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8 }}
-                    className="max-w-sm text-texto-suave"
+                    className="max-w-sm text-ink-600"
                 >
                     {t("home.leadCapture.successMessage")}
                 </motion.p>
@@ -108,7 +109,7 @@ export function LeadCaptureForm() {
                 <FormField
                     label={t("home.leadCapture.form.name")}
                     htmlFor="lead-fullName"
-                    error={errors.fullName?.message}
+                    error={getFieldErrorMessage(t, errors.fullName)}
                     required
                 >
                     <Input id="lead-fullName" preserveCase hasError={!!errors.fullName} {...register("fullName")} />
@@ -117,14 +118,14 @@ export function LeadCaptureForm() {
                 <FormField
                     label={t("home.leadCapture.form.companyName")}
                     htmlFor="lead-company"
-                    error={errors.companyName?.message}
+                    error={getFieldErrorMessage(t, errors.companyName)}
                     required
                 >
                     <Input id="lead-company" preserveCase hasError={!!errors.companyName} {...register("companyName")} />
                 </FormField>
 
                 <div className="grid gap-x-4 sm:grid-cols-2">
-                    <FormField label={t("home.leadCapture.form.email")} htmlFor="lead-email" error={errors.email?.message} required>
+                    <FormField label={t("home.leadCapture.form.email")} htmlFor="lead-email" error={getFieldErrorMessage(t, errors.email)} required>
                         <Input
                             id="lead-email"
                             type="email"
@@ -134,7 +135,7 @@ export function LeadCaptureForm() {
                         />
                     </FormField>
 
-                    <FormField label={t("home.leadCapture.form.phone")} htmlFor="lead-phone" error={errors.phone?.message} required>
+                    <FormField label={t("home.leadCapture.form.phone")} htmlFor="lead-phone" error={getFieldErrorMessage(t, errors.phone)} required>
                         <Input id="lead-phone" preserveCase hasError={!!errors.phone} {...register("phone")} />
                     </FormField>
                 </div>
@@ -150,7 +151,7 @@ export function LeadCaptureForm() {
                     </Select>
                 </FormField>
 
-                <FormField label={t("home.leadCapture.form.message")} htmlFor="lead-notes" error={errors.notes?.message}>
+                <FormField label={t("home.leadCapture.form.message")} htmlFor="lead-notes" error={getFieldErrorMessage(t, errors.notes)}>
                     <Textarea id="lead-notes" preserveCase hasError={!!errors.notes} {...register("notes")} />
                 </FormField>
 

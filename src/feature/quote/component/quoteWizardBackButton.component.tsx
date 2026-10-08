@@ -2,9 +2,7 @@ import { useTranslation } from "react-i18next"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/shared/component/button.component"
 
-// "Atrás" del wizard de cotización: botón real del sistema de diseño (variante secundaria, h-12 =
-// 48px de alto, por encima del mínimo táctil de 44px) en vez del viejo enlace de texto con una
-// flecha diminuta. Compartido por todos los pasos (formulario y paso de materiales).
+// Botón "Atrás" del wizard (variante secundaria, 48px de alto, por encima del mínimo táctil).
 export function QuoteWizardBackButton({ onClick }: Readonly<{ onClick: () => void }>) {
     const { t } = useTranslation()
     return (

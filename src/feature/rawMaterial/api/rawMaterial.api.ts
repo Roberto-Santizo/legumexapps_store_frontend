@@ -10,7 +10,6 @@ const rawMaterialPaginatedListResponseSchema = apiPaginatedListResponseSchema(re
 const rawMaterialItemResponseSchema = apiItemResponseSchema(responseRawMaterialSchema)
 const rawMaterialMutationResponseSchema = apiMutationResponseSchema(responseRawMaterialSchema)
 
-// Sin params -- la usa también RawMaterialSelect. No tocar esta firma.
 export async function getRawMaterialsAPI() {
     try {
         const { data } = await api.get("/raw-materials")
@@ -58,7 +57,5 @@ export async function updateRawMaterialAPI(id: number, formData: UpdateRawMateri
     }
 }
 
-// Reusan el plumbing genérico de shared/api/bulkImport.api.ts (mismo diseño que Empaques); lo
-// único específico de Materias Primas acá es la URL.
 export const bulkImportRawMaterialsAPI = (file: File) => postBulkImportFile("/raw-materials/bulk-import", file)
 export const downloadRawMaterialImportTemplateAPI = () => getBulkImportTemplate("/raw-materials/bulk-import/template")

@@ -10,56 +10,56 @@ export function LeadCaptureSection() {
     const { t } = useTranslation()
 
     return (
-        <section id="contacto" className="bg-crema py-24 sm:py-32">
+        <section id="contacto" className="bg-landing-sage py-20 sm:py-28">
             <SiteContainer>
-                <div className="grid overflow-hidden rounded-card shadow-card-hover lg:grid-cols-2">
+                <div className="grid overflow-hidden rounded-panel border border-line shadow-panel lg:grid-cols-2">
                     <motion.div
                         variants={slideFromLeft}
                         initial="hidden"
                         whileInView="show"
                         viewport={viewportOnce}
-                        className="relative flex min-h-80 flex-col justify-between overflow-hidden bg-verde-profundo p-10 text-crema sm:p-12"
+                        className="relative flex min-h-80 flex-col justify-between overflow-hidden bg-brand-900 p-7 text-landing-cream sm:p-12"
                     >
                         <img
                             src={HOME_IMAGES.aboutField}
                             alt=""
-                            className="absolute inset-0 h-full w-full object-cover opacity-25"
+                            className="absolute inset-0 h-full w-full object-cover opacity-45"
                             loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-verde-profundo/70" />
+                        <div className="absolute inset-0 bg-brand-900/65" />
 
                         <div className="relative">
                             <span className="font-display text-2xl font-extrabold uppercase tracking-tight">Legumex</span>
-                            <h2 className="mt-6 font-display text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
+                            <h2 className="mt-6 font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">
                                 {t("home.leadCapture.title")}
                             </h2>
-                            <p className="mt-4 max-w-sm text-crema/75">{t("home.leadCapture.description")}</p>
+                            <p className="mt-4 max-w-sm text-landing-cream/75">{t("home.leadCapture.description")}</p>
                         </div>
 
-                        <div className="relative mt-10 flex flex-col gap-3 text-sm text-crema/80">
-                            <a href="mailto:kate@legumex.net" className="flex items-center gap-2 hover:text-crema">
-                                <Mail size={16} className="text-dorado" /> kate@legumex.net
+                        <div className="relative mt-10 flex flex-col gap-3 text-sm text-landing-cream/80">
+                            <a href="mailto:kate@legumex.net" className="flex items-center gap-2 hover:text-landing-cream">
+                                <Mail size={16} className="text-brand-500" /> kate@legumex.net
                             </a>
-                            <a href="tel:+50230425579" className="flex items-center gap-2 hover:text-crema">
-                                <Phone size={16} className="text-dorado" /> +502 3042 5579
+                            <a href="tel:+50230425579" className="flex items-center gap-2 hover:text-landing-cream">
+                                <Phone size={16} className="text-brand-500" /> +502 3042 5579
                             </a>
                             <a
                                 href="https://wa.me/50230425579"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-2 hover:text-crema"
+                                className="flex items-center gap-2 hover:text-landing-cream"
                             >
-                                <MessageCircle size={16} className="text-dorado" /> {t("home.leadCapture.contact.whatsappCta")}
+                                <MessageCircle size={16} className="text-brand-500" /> {t("home.leadCapture.contact.whatsappCta")}
                             </a>
                             <span className="flex items-center gap-2">
-                                <MapPin size={16} className="text-dorado" /> Guatemala, El Tejar, Chimaltenango
+                                <MapPin size={16} className="text-brand-500" /> {t("home.leadCapture.contact.address")}
                             </span>
                             <span className="flex items-center gap-2">
-                                <Clock size={16} className="text-dorado" /> {t("home.leadCapture.contact.hours")}
+                                <Clock size={16} className="text-brand-500" /> {t("home.leadCapture.contact.hours")}
                             </span>
                         </div>
 
-                        <Leaf className="pointer-events-none absolute right-4 bottom-4 rotate-12 text-crema/10" size={120} strokeWidth={1} />
+                        <Leaf className="pointer-events-none absolute right-4 bottom-4 rotate-12 text-landing-cream/10" size={120} strokeWidth={1} />
                     </motion.div>
 
                     <motion.div
@@ -67,7 +67,7 @@ export function LeadCaptureSection() {
                         initial="hidden"
                         whileInView="show"
                         viewport={viewportOnce}
-                        className="bg-hueso p-8 sm:p-12"
+                        className="bg-surface p-7 sm:p-12"
                     >
                         <motion.div variants={fadeUp}>
                             <LeadCaptureForm />

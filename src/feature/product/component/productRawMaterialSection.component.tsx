@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -25,11 +26,9 @@ import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 const baseRawMaterialFormSchema = createProductRawMaterialSchema.omit({ productId: true })
 type RawMaterialFormInput = z.infer<typeof baseRawMaterialFormSchema>
 
-// Receta fija (!isCustomizable): percentage es el % real que quote.service.ts convierte a gramos
-// sobre el peso neto de la presentación -- no puede quedar vacío, o esa materia prima "cuesta" $0
-// en cada cotización sin ningún aviso (mismo riesgo que tenía el viejo quantityValue). Producto
-// personalizable: este campo no se usa (se usa minPercentage/maxPercentage en su lugar), se queda
-// opcional a propósito.
+// Receta fija (!isCustomizable): percentage es el % real que el backend convierte a gramos sobre el
+// peso neto de la presentación -- no puede quedar vacío, o esa materia prima "cuesta" $0 sin aviso.
+// Producto personalizable: se usan minPercentage/maxPercentage y este campo queda opcional.
 function buildRawMaterialFormSchema(isCustomizable: boolean) {
     if (isCustomizable) return baseRawMaterialFormSchema
     return baseRawMaterialFormSchema.extend({ percentage: z.number().positive().max(100) })
@@ -120,7 +119,7 @@ export function ProductRawMaterialSection({ productId, isCustomizable, isOrganic
             reset({})
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const updateMutation = useMutation({
@@ -133,7 +132,7 @@ export function ProductRawMaterialSection({ productId, isCustomizable, isOrganic
             reset({})
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const deleteMutation = useMutation({
@@ -142,7 +141,7 @@ export function ProductRawMaterialSection({ productId, isCustomizable, isOrganic
             invalidate()
             toast.success(data.message)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {
@@ -166,7 +165,7 @@ export function ProductRawMaterialSection({ productId, isCustomizable, isOrganic
     return (
         <div>
             {isCustomizable && (
-                <p className="mb-4 text-sm text-texto-suave">{t("productRawMaterial.form.customizableHint")}</p>
+                <p className="mb-4 text-sm text-ink-600">{t("productRawMaterial.form.customizableHint")}</p>
             )}
 
             <TableContainer className="mb-4">
@@ -193,14 +192,14 @@ export function ProductRawMaterialSection({ productId, isCustomizable, isOrganic
                                     <button
                                         type="button"
                                         onClick={() => startEdit(productRawMaterial)}
-                                        className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.edit")}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => deleteMutation.mutate(productRawMaterial.id)}
-                                        className="font-medium text-error-fg underline underline-offset-4"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-danger underline underline-offset-4 transition-colors hover:bg-danger-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.delete")}
                                     </button>
@@ -215,7 +214,7 @@ export function ProductRawMaterialSection({ productId, isCustomizable, isOrganic
             </TableContainer>
 
             {!isCustomizable && productRawMaterials.length > 0 && (
-                <p className={`mb-4 text-sm font-semibold ${isFixedPercentageComplete ? "text-verde-profundo" : "text-error-fg"}`}>
+                <p className={`mb-4 text-sm font-semibold ${isFixedPercentageComplete ? "text-ink-900" : "text-danger"}`}>
                     {t("productRawMaterial.form.percentageTotal", { total: fixedPercentageTotal })}
                     {!isFixedPercentageComplete && ` — ${t("productRawMaterial.form.percentageTotalIncomplete")}`}
                 </p>

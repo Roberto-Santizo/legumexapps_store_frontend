@@ -10,9 +10,7 @@ const clientPaginatedListResponseSchema = apiPaginatedListResponseSchema(respons
 const clientItemResponseSchema = apiItemResponseSchema(responseClientSchema)
 const clientMutationResponseSchema = apiMutationResponseSchema(responseClientSchema)
 
-// Sin paginar -- mismo patrón que getSubCategoriesAPI: el consumidor es ClientSelect
-// (searchable-select del form de Producto), que necesita el catálogo completo para filtrar en
-// vivo, no una página. No manda `page`, así que paginate() (backend) devuelve todo en `{ data }`.
+// Sin paginar: ClientSelect necesita el catálogo completo para filtrar en vivo.
 export async function getClientsAPI() {
     try {
         const { data } = await api.get("/clients")

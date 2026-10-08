@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -59,7 +60,7 @@ export function EditSalespersonPage() {
             navigate("/admin/salespeople")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -70,15 +71,15 @@ export function EditSalespersonPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("salesperson.edit.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("salesperson.edit.title")}</h1>
                 <Link to="/admin/salespeople" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             <Card>
-                {salespersonQuery.isLoading && <p className="text-texto-suave">{t("common.loading")}</p>}
-                {salespersonQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+                {salespersonQuery.isLoading && <p className="text-ink-600">{t("common.loading")}</p>}
+                {salespersonQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
                 {salespersonQuery.data && (
                     <form onSubmit={onSubmit}>

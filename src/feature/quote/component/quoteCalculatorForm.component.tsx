@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import type { TFunction } from "i18next"
-import { ChevronRight, Package, Sparkles, SlidersHorizontal } from "lucide-react"
+import { ChevronRight, Package, Search, SlidersHorizontal } from "lucide-react"
 import { calculateQuoteSchema } from "@/feature/quote/schema/quote.schema"
 import type { CalculateQuoteInput, QuotableProduct, QuoteDestination, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 import type { DestinationCountry } from "@/feature/destination/schema/destination.schema"
@@ -17,6 +17,7 @@ import type { SearchableSelectOption } from "@/shared/component/searchableSelect
 import { OptionCards } from "@/shared/component/optionCards.component"
 import type { CardOption } from "@/shared/component/optionCards.component"
 import { Input } from "@/shared/component/input.component"
+import { Button } from "@/shared/component/button.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 import { QuoteLiveTotal, QuoteMaterialGroups } from "@/feature/quote/component/quoteMaterialGroups.component"
@@ -31,21 +32,11 @@ type QuoteCalculatorFormProps = {
     onSubmit: (formData: SalespersonQuoteInput) => void
     isSubmitting: boolean
     onStepChange?: (step: QuoteWizardStep) => void
-    // Transporte "apagado" temporalmente para el cliente: este mismo form lo reusa
-    // también el cotizador interno del admin (ver adminQuoteCalculator.page.tsx), que SÍ sigue
-    // pudiendo elegir destino -- por eso es un prop con default true (nada cambia para el admin)
-    // en vez de borrar los campos del form. quoteRequest.page.tsx (cliente) es el único
-    // consumidor que lo pasa en false. destinationId ya es opcional en calculateQuoteSchema, así
-    // que no enviarlo nunca no rompe la validación.
+    // Transporte apagado temporalmente para el representante; el admin usa el mismo form, por eso es
+    // una prop (default true) y no se borraron los campos.
     showDestination?: boolean
-    // Recalculo en vivo -- default undefined a propósito, mismo
-    // criterio inverso que showDestination: SOLO el cliente (quoteRequest.page.tsx) lo pasa
-    // (previewQuoteAPI). El admin (adminQuoteCalculatorPage) no lo pasa -- su propio submit YA es
-    // un cálculo sin persistir (previewAdminQuoteAPI), así que esta feature no le aporta nada
-    // nuevo (las tarjetas de materiales SÍ se muestran también al admin, solo sin total en vivo).
-    // Cuando está presente, el form llama a este preview con debounce cada vez que cambia la
-    // selección de un material, de variante o de palets, y muestra UN total estimado antes del
-    // submit final.
+    // Recálculo en vivo: solo lo pasa el wizard del representante. Si está presente, el form llama al
+    // preview con debounce al cambiar material, variante o palets y muestra un total estimado.
     previewAPI?: (formData: SalespersonQuoteInput) => Promise<{ data: { totalCost: number } } | undefined>
     // Seguimiento de cotizaciones sin finalizar -- solo el wizard del representante lo pasa: la
     // página dueña genera/rota la clave y el form solo la reenvía en cada preview y en el submit
@@ -54,9 +45,8 @@ type QuoteCalculatorFormProps = {
     // pasa ninguno de los dos: sus cálculos nunca generan borradores.
     draftKey?: string
     onProductChange?: () => void
-    // Cotización a la medida (producto que no existe, sin SKU): si viene, el paso "mode" muestra una
-    // tercera tarjeta "Producto a la medida" que navega a esa ruta -- un flujo APARTE
-    // (feature/customQuote), nunca un modo más de este form. Solo el wizard del representante lo pasa.
+    // Catalog-based Customize: the representative navigates to its independent wizard.
+    // Admin callers without this prop retain the established calculator contract.
     customQuoteHref?: string
 }
 
@@ -66,14 +56,14 @@ const MIX_PERCENTAGE_TOLERANCE = 0.5
 
 type QuoteMode = "finished" | "customizable"
 
-// Orden del wizard: mode -> category -> product -> pallets ->
+// Orden del wizard: mode -> category -> subCategory -> product -> pallets ->
 // total. "pallets" es el paso combinado palets + materiales: SKU/presentación, cantidad de palets,
 // cajas/peso y, debajo, las tarjetas de los niveles de material que tengan alternativas swappable
 // en el SKU elegido (ninguna -> solo palets/peso), con UN solo total en vivo al pie. "total" es
 // el paso final: solo lectura (resumen + total real, que muestra el padre vía
 // QuoteResultCard/QuotedOrderSummary), nunca antes de haber calculado con éxito -- ver
 // hasReachedTotal.
-export type QuoteWizardStep = "mode" | "category" | "product" | "pallets" | "total"
+export type QuoteWizardStep = "mode" | "category" | "subCategory" | "product" | "pallets" | "total"
 
 type MaterialGroupsKey = "unitMaterialOptionGroups" | "intermediateMaterialOptionGroups" | "palletMaterialOptionGroups"
 type SelectedMaterialIds = Pick<CalculateQuoteInput, "selectedUnitMaterialIds" | "selectedIntermediateMaterialIds" | "selectedPalletMaterialIds">
@@ -115,16 +105,8 @@ function resolveSelectedMaterialId(
     return options.find((option) => option.isDefault)?.id
 }
 
-// Etiqueta del selector de SKU -- compuesta 100% de datos que ya existen en
-// QuotableVariant/QuotableProduct, nunca de un campo de texto libre nuevo ni de Excel: nombre del
-// Producto (para que la opción sea autocontenida, aunque el producto ya se eligió en el paso
-// anterior del wizard) + bagsPerBox × presentationLabel (tamaño por unidad) + boxesPerPallet.
-// boxesPerPallet/bagsPerBox/presentationId nunca vienen null acá: listQuotableProducts
-// (quote.service.ts, backend) ya filtra con `WHERE boxesPerPallet IS NOT NULL AND bagsPerBox IS
-// NOT NULL AND presentationId IS NOT NULL` -- una variante sin esos datos ni siquiera llega a
-// esta lista (presentationId es requerido a nivel de columna).
-// El fallback de presentationLabel null de abajo queda como defensa adicional, ya no debería
-// poder ocurrir en la práctica.
+// Etiqueta del selector de SKU: nombre del producto + bagsPerBox × presentación + boxesPerPallet.
+// El backend solo envía variantes con esos datos; el fallback de presentationLabel es defensivo.
 function variantLabel(productName: string, variant: QuotableProduct["variants"][number], t: TFunction): string {
     const unitsPerBox = t("site.quoteRequest.form.variantLabel.unitsPerBox", { count: variant.bagsPerBox })
     const sizePart = variant.presentationLabel ? `${unitsPerBox} × ${variant.presentationLabel}` : unitsPerBox
@@ -133,9 +115,9 @@ function variantLabel(productName: string, variant: QuotableProduct["variants"][
 }
 
 function crumbClassName(isActive: boolean, enabled: boolean): string {
-    if (isActive) return "bg-verde-profundo text-crema"
-    if (enabled) return "text-texto-suave hover:bg-crema hover:text-verde-profundo"
-    return "cursor-not-allowed text-gris-campo"
+    if (isActive) return "border-focus bg-brand-300/20 text-focus"
+    if (enabled) return "border-transparent text-ink-600 hover:bg-canvas hover:text-ink-900"
+    return "border-transparent cursor-not-allowed text-ink-400"
 }
 
 export function QuoteCalculatorForm({
@@ -155,6 +137,8 @@ export function QuoteCalculatorForm({
     const [step, setStep] = useState<QuoteWizardStep>("mode")
     const [mode, setMode] = useState<QuoteMode>("finished")
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
+    const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | null>(null)
+    const [productSearch, setProductSearch] = useState("")
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
     const [mixPercentages, setMixPercentages] = useState<Record<number, string>>({})
     const [selectedCountry, setSelectedCountry] = useState<DestinationCountry>("GT")
@@ -175,12 +159,17 @@ export function QuoteCalculatorForm({
         onStepChange?.(step)
     }, [step, onStepChange])
 
+    useEffect(() => {
+        if (step === "product") setProductSearch("")
+    }, [step])
+
     const {
         register,
         handleSubmit,
         setValue,
         control,
         watch,
+        reset,
         formState: { errors },
     } = useForm<CalculateQuoteInput>({
         resolver: zodResolver(calculateQuoteSchema),
@@ -209,26 +198,40 @@ export function QuoteCalculatorForm({
         () => modeProducts.filter((product) => product.categoryId === selectedCategoryId),
         [modeProducts, selectedCategoryId]
     )
-    const productCardOptions: CardOption[] = categoryProducts.map((product) => ({
+    const subCategories = useMemo(() => {
+        const byId = new Map<number, CardOption>()
+        categoryProducts.forEach((product) => {
+            if (!byId.has(product.subCategoryId)) {
+                byId.set(product.subCategoryId, {
+                    value: product.subCategoryId, text: product.subCategoryName, imageUrl: product.subCategoryImageUrl,
+                })
+            }
+        })
+        return [...byId.values()].sort((a, b) => a.text.localeCompare(b.text))
+    }, [categoryProducts])
+    const selectedSubCategory = subCategories.find((subCategory) => subCategory.value === selectedSubCategoryId)
+    const subCategoryProducts = useMemo(
+        () => categoryProducts.filter((product) => product.subCategoryId === selectedSubCategoryId),
+        [categoryProducts, selectedSubCategoryId]
+    )
+    const visibleProducts = subCategoryProducts.filter((product) => product.displayName.toLocaleLowerCase().includes(productSearch.trim().toLocaleLowerCase()))
+    const productCardOptions: CardOption[] = visibleProducts.map((product) => ({
         value: product.id,
         text: product.displayName,
         imageUrl: product.imageUrl,
         badge: product.isOrganic ? (
-            <span className="inline-flex items-center rounded-chip bg-brote px-2 py-1 text-xs font-semibold text-verde-profundo shadow-sm">
+            <span className="inline-flex items-center rounded-badge border border-success-border bg-success-bg px-2 py-1 text-xs font-semibold text-success">
                 {t("site.quoteRequest.form.organicBadge")}
             </span>
         ) : undefined,
     }))
 
-    const selectedProduct = categoryProducts.find((product) => product.id === selectedProductId)
+    const selectedProduct = subCategoryProducts.find((product) => product.id === selectedProductId)
     const variants = selectedProduct?.variants ?? []
     const rawMaterialPool = selectedProduct?.rawMaterialPool ?? []
 
-    // Default + opcional por nivel -- el menú de alternativas de
-    // cada nivel viene ya resuelto en el SKU elegido (QuotableVariant.*MaterialOptionGroups), nunca se
-    // arma acá. watch("productVariantId") en vez de selectedProductId/variants porque lo que
-    // importa es la VARIANTE (SKU) elegida en el propio <select>, no el producto del paso
-    // anterior.
+    // El menú de alternativas de cada nivel ya viene resuelto en el SKU elegido
+    // (QuotableVariant.*MaterialOptionGroups). Se usa watch("productVariantId") porque importa la variante.
     const selectedVariantId = watch("productVariantId")
     const selectedVariant = variants.find((variant) => variant.id === selectedVariantId)
     const watchedRequestedPallets = watch("requestedPallets")
@@ -239,7 +242,7 @@ export function QuoteCalculatorForm({
     const materialGroups: MaterialGroup[] = selectedVariant
         ? MATERIAL_LEVELS.flatMap(({ level, groupsKey }) =>
               selectedVariant[groupsKey].map((optionGroup) => {
-                  const key = materialGroupKey(level, optionGroup.group)
+                  const key = optionGroup.groupId != null ? `${level}:id:${optionGroup.groupId}` : materialGroupKey(level, optionGroup.group)
                   return {
                       key,
                       level,
@@ -252,15 +255,9 @@ export function QuoteCalculatorForm({
         : []
     const selectedMaterialIdsKey = JSON.stringify(buildSelectedMaterialIds(materialGroups))
 
-    // Recalculo en vivo -- llama a previewAPI (NUNCA guarda, ver
-    // el comentario de la prop) con debounce cada vez que cambia la elección de un material, de
-    // variante o de palets (cualquiera de los dos inputs del paso combinado dispara el recálculo),
-    // SOLO mientras el cliente está en el paso "pallets" (el único previo al cálculo real --
-    // "total" ya muestra el resultado persistido, no una vista previa). No corre en modo
-    // personalizable: ahí el backend exige la mezcla de materias primas (que este preview no manda), así
-    // que el total nunca se podría calcular y la caja quedaría en "-" para siempre -- mejor no
-    // mostrarla. Silencioso ante errores: un total que no se puede calcular todavía simplemente
-    // no se muestra, el submit real sigue siendo la fuente de verdad de errores visibles.
+    // Recálculo en vivo con debounce mientras el cliente está en el paso "pallets". No corre en modo
+    // personalizable (el preview no manda la mezcla). Ante errores simplemente no se muestra el total;
+    // el submit real sigue siendo la fuente de verdad.
     const isLiveTotalAvailable = !!previewAPI && mode !== "customizable" && step === "pallets"
     // draftKey se lee por ref dentro del efecto (no es dependencia): rotar la clave no debe disparar
     // un recálculo por sí solo -- el siguiente preview que igual ocurra ya viaja con la clave nueva.
@@ -315,9 +312,13 @@ export function QuoteCalculatorForm({
 
     const resetProductSelection = () => {
         setSelectedProductId(null)
-        setValue("productVariantId", undefined as unknown as number)
+        reset({ requestedPallets: 1 })
+        setSelectedCountry("GT")
+        setProductSearch("")
         setMixPercentages({})
         setMaterialSelection({})
+        setLivePreviewTotal(null)
+        setIsLivePreviewLoading(false)
         setHasReachedTotal(false)
     }
 
@@ -325,23 +326,38 @@ export function QuoteCalculatorForm({
         if (nextMode !== mode) {
             setMode(nextMode)
             setSelectedCategoryId(null)
+            setSelectedSubCategoryId(null)
             resetProductSelection()
         }
         setStep("category")
     }
 
     const handleCategoryChange = (categoryId: number) => {
+        if (!categories.some((category) => category.value === categoryId)) return
         setSelectedCategoryId(categoryId)
+        setSelectedSubCategoryId(null)
         resetProductSelection()
+        setStep("subCategory")
+    }
+
+    const handleSubCategoryChange = (subCategoryId: number) => {
+        if (!subCategories.some((subCategory) => subCategory.value === subCategoryId)) return
+        if (subCategoryId !== selectedSubCategoryId) resetProductSelection()
+        setSelectedSubCategoryId(subCategoryId)
+        setProductSearch("")
         setStep("product")
     }
 
     const handleProductChange = (productId: number) => {
-        const product = categoryProducts.find((candidate) => candidate.id === productId)
+        const product = subCategoryProducts.find((candidate) => candidate.id === productId)
+        if (!product) return
         // Con un único SKU no hay nada que elegir en el paso "pallets": se preselecciona para que
         // ya muestre cajas/peso/materiales de una vez. Con más de un SKU, el cliente elige ahí.
         const onlyVariant = product?.variants.length === 1 ? product.variants[0] : undefined
-        if (productId !== selectedProductId) onProductChange?.()
+        if (productId !== selectedProductId) {
+            resetProductSelection()
+            onProductChange?.()
+        }
         setSelectedProductId(productId)
         setValue("productVariantId", (onlyVariant?.id ?? undefined) as unknown as number)
         setMixPercentages({})
@@ -371,9 +387,7 @@ export function QuoteCalculatorForm({
     }
 
     const submit = handleSubmit((formData) => {
-        // Igual que rawMaterialMix: la elección de materiales vive en estado local (no
-        // es un campo registrado), se mergea acá. El backend igual la revalida contra las opciones
-        // reales del SKU -- este paso solo cambia DÓNDE elige el cliente, no la validación.
+        // La elección de materiales vive en estado local y se agrega acá; el backend la revalida.
         const withMaterials: SalespersonQuoteInput = {
             ...formData,
             ...buildSelectedMaterialIds(materialGroups),
@@ -396,17 +410,15 @@ export function QuoteCalculatorForm({
         onSubmit({ ...withMaterials, rawMaterialMix })
     })
 
-    // "total" solo se habilita tras haber calculado con éxito -- ver hasReachedTotal.
     const crumbs: { key: QuoteWizardStep; label: string; enabled: boolean }[] = [
         { key: "mode", label: t("site.quoteRequest.form.wizard.steps.mode"), enabled: true },
         { key: "category", label: t("site.quoteRequest.form.wizard.steps.category"), enabled: true },
-        { key: "product", label: t("site.quoteRequest.form.wizard.steps.product"), enabled: selectedCategoryId !== null },
-        { key: "pallets", label: t("site.quoteRequest.form.wizard.steps.pallets"), enabled: selectedProductId !== null },
+        { key: "subCategory", label: t("site.quoteRequest.form.wizard.steps.subCategory"), enabled: !!selectedCategory },
+        { key: "product", label: t("site.quoteRequest.form.wizard.steps.product"), enabled: !!selectedSubCategory },
+        { key: "pallets", label: t("site.quoteRequest.form.wizard.steps.pallets"), enabled: !!selectedProduct },
         { key: "total", label: t("site.quoteRequest.form.wizard.steps.total"), enabled: hasReachedTotal },
     ]
 
-    // Selector de presentación (SKU): vive arriba del paso "pallets" (las tarjetas de materiales
-    // de más abajo dependen de él).
     const variantFieldProps = register("productVariantId", { setValueAs: toOptionalNumber })
     const renderVariantField = (product: QuotableProduct) => (
         <FormField
@@ -437,17 +449,17 @@ export function QuoteCalculatorForm({
 
     const renderProductHeader = (product: QuotableProduct) => (
         <>
-            <div className="mb-6 flex items-center gap-3 rounded-2xl border border-gris-campo bg-crema/40 p-3 sm:gap-4 sm:p-4">
+            <div className="mb-6 flex items-center gap-3 rounded-panel border border-line bg-canvas/40 p-3 sm:gap-4 sm:p-4">
                 {product.imageUrl ? (
                     <img src={product.imageUrl} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover sm:h-16 sm:w-16" />
                 ) : (
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gris-campo/20 text-texto-suave sm:h-16 sm:w-16">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-line/20 text-ink-600 sm:h-16 sm:w-16">
                         <Package size={20} />
                     </div>
                 )}
                 <div>
-                    <p className="text-xs text-texto-suave">{selectedCategory?.text}</p>
-                    <p className="font-semibold text-verde-profundo sm:text-lg">{product.displayName}</p>
+                    <p className="text-xs text-ink-600">{selectedCategory?.text}</p>
+                    <p className="font-semibold text-ink-900 sm:text-lg">{product.displayName}</p>
                 </div>
             </div>
 
@@ -459,9 +471,8 @@ export function QuoteCalculatorForm({
         </>
     )
 
-    // El botón de calcular depende solo de lo que la cotización realmente necesita: variante, palets,
-    // una elección vigente en CADA grupo de opciones (todos son obligatorios) y -- en modo personalizable -- una
-    // mezcla que sume 100%. (Ya no hay datos de prospecto en este flujo.)
+    // El botón de calcular depende solo de lo que la cotización necesita: variante, palets, una elección
+    // vigente en CADA grupo de opciones y -- en modo personalizable -- una mezcla que sume 100%.
     const canSubmit =
         !!selectedVariantId &&
         !!watchedRequestedPallets &&
@@ -474,9 +485,9 @@ export function QuoteCalculatorForm({
 
     const renderFixedRecipe = (product: QuotableProduct) =>
         !product.isCustomizable && product.fixedRecipe.length > 0 ? (
-            <div className="mb-6 rounded-2xl border border-gris-campo p-4 sm:p-5">
-                <p className="mb-2 text-sm font-semibold text-verde-profundo">{t("site.quoteRequest.form.fixedRecipeTitle")}</p>
-                <p className="text-sm text-texto-suave">
+            <div className="mb-6 rounded-panel border border-line p-4 sm:p-5">
+                <p className="mb-2 text-sm font-semibold text-ink-900">{t("site.quoteRequest.form.fixedRecipeTitle")}</p>
+                <p className="text-sm text-ink-600">
                     {product.fixedRecipe
                         .map((rawMaterial) =>
                             t("site.quoteRequest.form.fixedRecipeLine", {
@@ -491,28 +502,28 @@ export function QuoteCalculatorForm({
 
     const renderMixSection = () =>
         mode === "customizable" ? (
-            <div className="mb-6 rounded-2xl border border-gris-campo p-4 sm:p-5">
+            <div className="mb-6 rounded-panel border border-line p-4 sm:p-5">
                 <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-verde-profundo">{t("site.quoteRequest.form.mixTitle")}</p>
-                    <p className={`text-sm font-semibold ${isMixComplete ? "text-verde-profundo" : "text-error-fg"}`}>
+                    <p className="text-sm font-semibold text-ink-900">{t("site.quoteRequest.form.mixTitle")}</p>
+                    <p className={`text-sm font-semibold ${isMixComplete ? "text-ink-900" : "text-danger"}`}>
                         {t("site.quoteRequest.form.mixTotal", { total: mixTotal })}
                     </p>
                 </div>
 
                 {rawMaterialPool.length === 0 ? (
-                    <p className="text-sm text-texto-suave">{t("site.quoteRequest.form.mixEmpty")}</p>
+                    <p className="text-sm text-ink-600">{t("site.quoteRequest.form.mixEmpty")}</p>
                 ) : (
                     <div className="space-y-3">
                         {rawMaterialPool.map((option) => (
                             <div key={option.rawMaterialId} className="flex items-center justify-between gap-3">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm text-verde-profundo">{option.displayName}</p>
+                                        <p className="text-sm text-ink-900">{option.displayName}</p>
                                         <Chip tone={option.isOrganic ? "fresh" : "neutral"}>
                                             {option.isOrganic ? t("rawMaterial.organicTag") : t("rawMaterial.conventionalTag")}
                                         </Chip>
                                     </div>
-                                    <p className="text-xs text-texto-suave">
+                                    <p className="text-xs text-ink-600">
                                         {t("site.quoteRequest.form.mixRange", {
                                             min: option.minPercentage,
                                             max: option.maxPercentage,
@@ -528,14 +539,14 @@ export function QuoteCalculatorForm({
                                         value={mixPercentages[option.rawMaterialId] ?? ""}
                                         onChange={(event) => handleMixPercentageChange(option.rawMaterialId, event.target.value)}
                                     />
-                                    <span className="text-sm text-texto-suave">%</span>
+                                    <span className="text-sm text-ink-600">%</span>
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
                 {!isMixComplete && rawMaterialPool.length > 0 && (
-                    <p className="mt-3 text-xs text-error-fg">{t("site.quoteRequest.form.mixIncomplete")}</p>
+                    <p className="mt-3 text-xs text-danger">{t("site.quoteRequest.form.mixIncomplete")}</p>
                 )}
             </div>
         ) : null
@@ -560,7 +571,7 @@ export function QuoteCalculatorForm({
                     error={getFieldErrorMessage(t, errors.destinationId)}
                 >
                     {destinationOptions.length === 0 ? (
-                        <p className="text-sm text-texto-suave">{t("site.quoteRequest.form.noDestinationsForCountry")}</p>
+                        <p className="text-sm text-ink-600">{t("site.quoteRequest.form.noDestinationsForCountry")}</p>
                     ) : (
                         <Controller
                             name="destinationId"
@@ -589,22 +600,22 @@ export function QuoteCalculatorForm({
             agranda desde lg sin pelear contra sus clases. */}
             <div className="lg:p-3 xl:p-6">
                 <div className="mb-5 flex items-center gap-3">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-gris-campo bg-crema text-dorado">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-panel border border-line bg-canvas text-brand-500">
                         <Package className="h-5 w-5" />
                     </span>
-                    <h2 className="font-display text-xl font-bold text-verde-profundo sm:text-2xl">{t("site.quoteRequest.form.title")}</h2>
+                    <h2 className="font-display text-xl font-bold text-ink-900 sm:text-2xl">{t("site.quoteRequest.form.title")}</h2>
                 </div>
 
-                <nav className="mb-7 flex flex-wrap items-center gap-x-1 gap-y-2 border-b border-gris-campo pb-5 text-sm">
+                <nav className="mb-7 flex flex-wrap items-center gap-x-1 gap-y-2 border-b border-line pb-5 text-sm">
                     {crumbs.map((crumb, index) => (
-                        <div key={crumb.key} className="flex items-center gap-1">
-                            {index > 0 && <ChevronRight size={16} className="text-gris-campo" />}
+                        <div key={crumb.key} className="flex min-w-0 max-w-full items-center gap-1">
+                            {index > 0 && <ChevronRight size={16} className="text-ink-400" />}
                             <button
                                 type="button"
                                 disabled={!crumb.enabled}
                                 aria-current={step === crumb.key ? "step" : undefined}
                                 onClick={() => setStep(crumb.key)}
-                                className={`rounded-full px-3.5 py-2 font-semibold transition sm:px-4 ${crumbClassName(step === crumb.key, crumb.enabled)}`}
+                                className={`min-h-control rounded-action border-b-2 px-3.5 py-2 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface sm:px-4 ${crumbClassName(step === crumb.key, crumb.enabled)}`}
                             >
                                 {crumb.label}
                             </button>
@@ -615,10 +626,10 @@ export function QuoteCalculatorForm({
                 <form onSubmit={submit}>
                     {step === "mode" && (
                         <div>
-                            <p className="mb-1 font-display text-lg font-bold text-verde-profundo sm:text-xl">
+                            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
                                 {t("site.quoteRequest.form.wizard.mode.title")}
                             </p>
-                            <p className="mb-6 text-sm text-texto-suave sm:text-base">{t("site.quoteRequest.form.wizard.mode.subtitle")}</p>
+                            <p className="mb-6 text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.mode.subtitle")}</p>
                             <OptionCards
                                 options={[
                                     {
@@ -633,26 +644,16 @@ export function QuoteCalculatorForm({
                                         subtitle: t("site.quoteRequest.form.modeCustomizableHint"),
                                         icon: <SlidersHorizontal size={22} />,
                                     },
-                                    ...(customQuoteHref
-                                        ? [
-                                              {
-                                                  value: "custom",
-                                                  text: t("site.quoteRequest.form.modeCustom"),
-                                                  subtitle: t("site.quoteRequest.form.modeCustomHint"),
-                                                  icon: <Sparkles size={22} />,
-                                              },
-                                          ]
-                                        : []),
                                 ]}
                                 value={mode}
                                 onChange={(value) => {
-                                    if (value === "custom" && customQuoteHref) {
+                                    if (value === "customizable" && customQuoteHref) {
                                         navigate(customQuoteHref)
                                         return
                                     }
                                     handleModeChange(value as QuoteMode)
                                 }}
-                                columnsClassName={customQuoteHref ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"}
+                                columnsClassName="grid-cols-1 sm:grid-cols-2"
                                 imageHeightClassName="h-16 sm:h-20"
                             />
                         </div>
@@ -661,13 +662,13 @@ export function QuoteCalculatorForm({
                     {step === "category" && (
                         <div>
                             <QuoteWizardBackButton onClick={() => setStep("mode")} />
-                            <p className="mb-1 font-display text-lg font-bold text-verde-profundo sm:text-xl">
+                            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
                                 {t("site.quoteRequest.form.wizard.category.title")}
                             </p>
-                            <p className="mb-6 text-sm text-texto-suave sm:text-base">{t("site.quoteRequest.form.wizard.category.subtitle")}</p>
+                            <p className="mb-6 text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.category.subtitle")}</p>
 
                             {categories.length === 0 ? (
-                                <p className="text-sm text-texto-suave">
+                                <p className="text-sm text-ink-600">
                                     {mode === "finished" ? t("site.quoteRequest.form.noProductsFinished") : t("site.quoteRequest.form.noProductsCustomizable")}
                                 </p>
                             ) : (
@@ -682,18 +683,52 @@ export function QuoteCalculatorForm({
                         </div>
                     )}
 
-                    {step === "product" && selectedCategoryId !== null && (
+                    {step === "subCategory" && selectedCategory && (
                         <div>
                             <QuoteWizardBackButton onClick={() => setStep("category")} />
-                            <p className="mb-1 font-display text-lg font-bold text-verde-profundo sm:text-xl">
-                                {t("site.quoteRequest.form.wizard.product.title", { category: selectedCategory?.text ?? "" })}
+                            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
+                                {t("site.quoteRequest.form.wizard.subCategory.title", { category: selectedCategory.text })}
                             </p>
-                            <p className="mb-6 text-sm text-texto-suave sm:text-base">{t("site.quoteRequest.form.wizard.product.subtitle")}</p>
+                            <p className="mb-6 text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.subCategory.subtitle")}</p>
+                            <OptionCards
+                                options={subCategories}
+                                value={selectedSubCategoryId}
+                                onChange={(value) => handleSubCategoryChange(Number(value))}
+                                columnsClassName="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                                mediaLayout="balanced"
+                            />
+                        </div>
+                    )}
 
+                    {step === "product" && selectedSubCategory && (
+                        <div>
+                            <QuoteWizardBackButton onClick={() => setStep("subCategory")} />
+                            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
+                                {t("site.quoteRequest.form.wizard.product.title", { subcategory: selectedSubCategory.text })}
+                            </p>
+                            <p className="mb-6 text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.product.subtitle")}</p>
+
+                            <div className="relative mb-6">
+                                <Search size={18} aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-600" />
+                                <Input
+                                    type="search"
+                                    preserveCase
+                                    value={productSearch}
+                                    onChange={(event) => setProductSearch(event.target.value)}
+                                    placeholder={t("site.quoteRequest.form.wizard.product.searchPlaceholder")}
+                                    aria-label={t("site.quoteRequest.form.wizard.product.searchPlaceholder")}
+                                    className="pl-11"
+                                />
+                            </div>
                             {productCardOptions.length === 0 ? (
-                                <p className="text-sm text-texto-suave">
-                                    {mode === "finished" ? t("site.quoteRequest.form.noProductsFinished") : t("site.quoteRequest.form.noProductsCustomizable")}
-                                </p>
+                                <div role="status" className="rounded-panel border border-line bg-canvas/40 p-5 text-center">
+                                    <p className="mb-3 break-words text-sm text-ink-600">
+                                        {t("site.quoteRequest.form.wizard.product.noResults", { search: productSearch.trim() })}
+                                    </p>
+                                    <Button type="button" variant="secondary" onClick={() => setProductSearch("")}>
+                                        {t("site.quoteRequest.form.wizard.product.clearSearch")}
+                                    </Button>
+                                </div>
                             ) : (
                                 <OptionCards
                                     options={productCardOptions}
@@ -717,7 +752,7 @@ export function QuoteCalculatorForm({
                                 selectedProduct.variants.length > 1 ? (
                                     renderVariantField(selectedProduct)
                                 ) : (
-                                    <p className="mb-5 rounded-[10px] border border-gris-campo px-4 py-3 text-sm text-verde-profundo">
+                                    <p className="mb-5 rounded-[10px] border border-line px-4 py-3 text-sm text-ink-900">
                                         {selectedVariant ? variantLabel(selectedProduct.displayName, selectedVariant, t) : null}
                                     </p>
                                 )
@@ -762,20 +797,20 @@ export function QuoteCalculatorForm({
 
                             {renderProductHeader(selectedProduct)}
 
-                            <div className="rounded-2xl border border-gris-campo p-4 sm:p-5">
+                            <div className="rounded-panel border border-line p-4 sm:p-5">
                                 <div className="mb-2 flex items-center justify-between gap-3">
-                                    <p className="text-sm font-semibold text-verde-profundo">
+                                    <p className="text-sm font-semibold text-ink-900">
                                         {t("site.quoteRequest.form.wizard.total.summaryTitle")}
                                     </p>
                                     <button
                                         type="button"
                                         onClick={() => setStep("pallets")}
-                                        className="text-sm font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                        className="text-sm inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("site.quoteRequest.form.wizard.total.edit")}
                                     </button>
                                 </div>
-                                <ul className="space-y-1 text-sm text-texto-suave">
+                                <ul className="space-y-1 text-sm text-ink-600">
                                     {selectedVariant && <li>{variantLabel(selectedProduct.displayName, selectedVariant, t)}</li>}
                                     <li>
                                         {t("site.quoteRequest.form.requestedPallets")}: {watchedRequestedPallets ?? "-"}
@@ -787,7 +822,7 @@ export function QuoteCalculatorForm({
                                     )}
                                     {materialGroups.map((group) => (
                                         <li key={group.key}>
-                                            <span className="font-medium text-verde-profundo">
+                                            <span className="font-medium text-ink-900">
                                                 {t(`site.quoteRequest.form.${group.level}MaterialLabel`)} · {group.group}:
                                             </span>{" "}
                                             {group.options.find((option) => option.id === group.selectedId)?.displayName ?? "-"}

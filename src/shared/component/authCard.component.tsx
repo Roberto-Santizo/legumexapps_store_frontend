@@ -1,6 +1,7 @@
 import type { ReactNode, SubmitEventHandler } from "react"
 import { LogIn, ShieldAlert } from "lucide-react"
 import { Button } from "@/shared/component/button.component"
+import { useTranslation } from "react-i18next"
 
 type AuthCardProps = {
     headerExtra?: ReactNode
@@ -33,6 +34,7 @@ export function AuthCard({
     insideFooter,
     outsideFooter,
 }: Readonly<AuthCardProps>) {
+    const { t } = useTranslation()
     return (
         <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas p-4">
             <div
@@ -51,7 +53,7 @@ export function AuthCard({
                         {headerExtra && <div className="absolute right-4 top-4">{headerExtra}</div>}
                         <img
                             src={import.meta.env.VITE_IMAGE_LOGO}
-                            alt="Legumex Logo"
+                            alt={t("common.logoAlt")}
                             className="mx-auto h-20 w-28 object-contain"
                         />
                         <p className="font-display text-2xl font-bold tracking-tight text-white">{brandTitle}</p>

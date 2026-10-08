@@ -11,8 +11,6 @@ type PresentationFormProps<T extends UpdatePresentationInput> = {
     errors: FieldErrors<T>
 }
 
-// Un solo componente para crear/editar -- ver roleForm.component.tsx para la justificación del
-// patrón (Create/Update comparten los mismos campos, solo cambia la opcionalidad).
 export function PresentationForm<T extends UpdatePresentationInput>({
     register,
     errors,

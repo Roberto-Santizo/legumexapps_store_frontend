@@ -4,9 +4,7 @@ import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 export const createProductRawMaterialSchema = z.object({
     productId: z.number().int().positive(),
     rawMaterialId: z.number().int().positive(),
-    // Solo aplica cuando el producto padre es de receta fija (!isCustomizable): el admin lo fija
-    // acá y el cliente nunca lo puede alterar (ver quoteService.buildFixedPercentageRawMaterials
-    // en el backend). Reemplaza el viejo quantityValue -- ver Product.isCustomizable.
+    // Solo aplica a receta fija (!isCustomizable): lo fija el admin y el cliente no puede alterarlo.
     percentage: z.number().positive().max(100).optional(),
     // Solo aplican cuando el producto padre es customizable: ver Product.isCustomizable.
     minPercentage: z.number().min(0).max(100).optional(),

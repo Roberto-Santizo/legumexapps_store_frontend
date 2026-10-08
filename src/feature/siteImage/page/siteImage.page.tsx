@@ -8,8 +8,8 @@ export function SiteImageListPage() {
     return (
         <PageContainer wide>
             <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("siteImage.list.title")}</h1>
-                <p className="mt-1 text-sm text-texto-suave">{t("siteImage.list.subtitle")}</p>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("siteImage.list.title")}</h1>
+                <p className="mt-1 text-sm text-ink-600">{t("siteImage.list.subtitle")}</p>
             </div>
             <SiteImagePanel />
         </PageContainer>

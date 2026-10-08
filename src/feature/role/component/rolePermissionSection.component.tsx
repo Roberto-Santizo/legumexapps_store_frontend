@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect, useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
@@ -35,7 +36,7 @@ export function RolePermissionSection({ roleId }: Readonly<{ roleId: number }>) 
             queryClient.invalidateQueries({ queryKey: ["rolePermissions", roleId] })
             toast.success(data.message)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     function toggle(id: number) {
@@ -51,10 +52,10 @@ export function RolePermissionSection({ roleId }: Readonly<{ roleId: number }>) 
     }
 
     if (permissionsQuery.isLoading || rolePermissionsQuery.isLoading) {
-        return <p className="text-texto-suave">{t("common.loading")}</p>
+        return <p className="text-ink-600">{t("common.loading")}</p>
     }
     if (permissionsQuery.isError || rolePermissionsQuery.isError) {
-        return <p className="text-error-fg">{t("common.loadError")}</p>
+        return <p className="text-danger">{t("common.loadError")}</p>
     }
 
     return (

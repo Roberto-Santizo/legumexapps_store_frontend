@@ -7,7 +7,7 @@ import { EditLink } from "@/shared/component/editLink.component"
 import { formatDateTime } from "@/shared/format/date"
 
 export function LeadTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <PaginatedAdminTable<LeadResponse>
@@ -34,7 +34,7 @@ export function LeadTable() {
                 {
                     key: "createdAt",
                     header: t("lead.table.receivedAt"),
-                    render: (lead) => formatDateTime(lead.createdAt),
+                    render: (lead) => formatDateTime(lead.createdAt, i18n.language),
                 },
                 {
                     key: "notes",

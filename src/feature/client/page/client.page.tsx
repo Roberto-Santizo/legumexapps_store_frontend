@@ -14,7 +14,7 @@ export function ClientListPage() {
     return (
         <PageContainer wide>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("client.list.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("client.list.title")}</h1>
                 {hasPermission("clients:create") && (
                     <Link to="/admin/clients/create" className={buttonClassName("primary")}>
                         {t("client.list.createLink")}

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { UpdateRawMaterialInput } from "@/feature/rawMaterial/schema/rawMaterial.schema"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { FormField } from "@/shared/component/formField.component"
-import { Input } from "@/shared/component/input.component"
+import { RegisteredField } from "@/shared/component/registeredField.component"
 import { Select } from "@/shared/component/select.component"
 import { Checkbox } from "@/shared/component/checkbox.component"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
@@ -14,10 +14,7 @@ type RawMaterialFormProps<T extends UpdateRawMaterialInput> = {
     errors: FieldErrors<T>
 }
 
-// Un solo componente para crear/editar -- ver roleForm.component.tsx para la justificación del
-// patrón (Create/Update comparten los mismos campos, solo cambia la opcionalidad). Sin selector
-// de unidad de costo -- se fuerza server-side a la Libra, costPerUnit es "costo por libra" (ver
-// rawMaterial.schema.ts).
+// Sin selector de unidad de costo: el backend fija la libra, costPerUnit es costo por libra.
 export function RawMaterialForm<T extends UpdateRawMaterialInput>({
     register,
     errors,
@@ -26,23 +23,8 @@ export function RawMaterialForm<T extends UpdateRawMaterialInput>({
 
     return (
         <div>
-            <FormField
-                label={t("rawMaterial.form.code")}
-                htmlFor="code"
-                error={getFieldErrorMessage(t, errors.code as FieldError | undefined)}
-                required
-            >
-                <Input id="code" required hasError={!!errors.code} {...register("code" as Path<T>)} />
-            </FormField>
-
-            <FormField
-                label={t("rawMaterial.form.displayName")}
-                htmlFor="displayName"
-                error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
-                required
-            >
-                <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
-            </FormField>
+            <RegisteredField name={"code" as Path<T>} label={t("rawMaterial.form.code")} register={register} errors={errors} required inputProps={{ required: true }} />
+            <RegisteredField name={"displayName" as Path<T>} label={t("rawMaterial.form.displayName")} register={register} errors={errors} required />
 
             <FormField
                 label={t("rawMaterial.form.ingredientType")}
@@ -66,26 +48,21 @@ export function RawMaterialForm<T extends UpdateRawMaterialInput>({
                 </Select>
             </FormField>
 
-            <FormField
+            <RegisteredField
+                name={"costPerUnit" as Path<T>}
                 label={t("rawMaterial.form.costPerUnit")}
-                htmlFor="costPerUnit"
-                error={getFieldErrorMessage(t, errors.costPerUnit as FieldError | undefined)}
+                register={register}
+                errors={errors}
                 required
-            >
-                <Input
-                    id="costPerUnit"
-                    type="number"
-                    step="0.0001"
-                    hasError={!!errors.costPerUnit}
-                    {...register("costPerUnit" as Path<T>, { setValueAs: toOptionalNumber })}
-                />
-            </FormField>
+                inputProps={{ type: "number", step: "0.0001" }}
+                registerOptions={{ setValueAs: toOptionalNumber }}
+            />
 
             <div className="mb-5 flex gap-6">
                 <Checkbox id="isOrganic" label={t("rawMaterial.form.isOrganic")} {...register("isOrganic" as Path<T>)} />
                 <Checkbox id="isMixable" label={t("rawMaterial.form.isMixable")} {...register("isMixable" as Path<T>)} />
             </div>
-            <p className="mb-5 -mt-3 text-sm text-texto-suave">{t("rawMaterial.form.isOrganicHint")}</p>
+            <p className="mb-5 -mt-3 text-sm text-ink-600">{t("rawMaterial.form.isOrganicHint")}</p>
 
             <TranslationSection
                 register={register}

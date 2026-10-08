@@ -7,15 +7,15 @@ type ChipProps = HTMLAttributes<HTMLSpanElement> & {
 }
 
 const toneClasses: Record<ChipTone, string> = {
-    fresh: "bg-brote/25 text-verde-profundo",
-    frozen: "bg-cat-iqf text-verde-profundo",
-    neutral: "bg-gris-campo text-texto-suave",
+    fresh: "border-success-border bg-success-bg text-success",
+    frozen: "border-info-border bg-info/10 text-info",
+    neutral: "border-line bg-canvas text-ink-600",
 }
 
 export function Chip({ tone = "neutral", className = "", ...props }: Readonly<ChipProps>) {
     return (
         <span
-            className={`inline-flex items-center gap-1 rounded-chip px-2 py-1 text-xs font-medium ${toneClasses[tone]} ${className}`}
+            className={`inline-flex items-center gap-1 rounded-badge border px-2 py-1 text-xs font-medium ${toneClasses[tone]} ${className}`}
             {...props}
         />
     )

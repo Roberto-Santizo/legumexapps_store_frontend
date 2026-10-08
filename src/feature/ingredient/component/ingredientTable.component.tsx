@@ -3,12 +3,11 @@ import { getIngredientsPaginatedAPI } from "@/feature/ingredient/api/ingredient.
 import type { IngredientResponse } from "@/feature/ingredient/schema/ingredient.schema"
 import { PaginatedAdminTable } from "@/shared/component/paginatedAdminTable.component"
 import { EditLink } from "@/shared/component/editLink.component"
-import { Chip } from "@/shared/component/chip.component"
 import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
 
 export function IngredientTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <PaginatedAdminTable<IngredientResponse>
@@ -21,28 +20,14 @@ export function IngredientTable() {
                 { key: "code", header: t("ingredient.form.code"), render: (ingredient) => ingredient.code },
                 { key: "displayName", header: t("ingredient.form.displayName"), render: (ingredient) => ingredient.displayName },
                 {
-                    key: "ingredientType",
-                    header: t("ingredient.form.ingredientType"),
-                    render: (ingredient) => t(`ingredient.form.ingredientTypeOptions.${ingredient.ingredientType}`),
-                },
-                {
                     key: "costPerUnit",
                     header: t("ingredient.form.costPerUnit"),
                     render: (ingredient) => (ingredient.costPerUnit != null ? formatCurrency(ingredient.costPerUnit) : "—"),
                 },
                 {
-                    key: "isOrganic",
-                    header: t("ingredient.form.isOrganic"),
-                    render: (ingredient) => (
-                        <Chip tone={ingredient.isOrganic ? "fresh" : "neutral"}>
-                            {ingredient.isOrganic ? t("ingredient.organicTag") : t("ingredient.conventionalTag")}
-                        </Chip>
-                    ),
-                },
-                {
                     key: "updatedAt",
                     header: t("common.updatedAt"),
-                    render: (ingredient) => formatDateTime(ingredient.updatedAt),
+                    render: (ingredient) => formatDateTime(ingredient.updatedAt, i18n.language),
                 },
             ]}
         />

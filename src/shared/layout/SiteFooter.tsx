@@ -25,14 +25,14 @@ export function SiteFooter() {
     ]
 
     return (
-        <footer className="relative overflow-hidden bg-verde-profundo pt-16 pb-8 text-crema">
-            <Leaf className="pointer-events-none absolute -right-8 -bottom-8 rotate-12 text-crema/5" size={220} strokeWidth={1} />
+        <footer className="relative overflow-hidden border-t border-brand-300/30 bg-brand-900 pt-16 pb-8 text-landing-cream">
+            <Leaf className="pointer-events-none absolute -right-8 -bottom-8 rotate-12 text-landing-cream/5" size={220} strokeWidth={1} />
 
             <SiteContainer className="relative">
                 <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
                     <div className="col-span-2 sm:col-span-4 lg:col-span-1">
-                        <span className="font-display text-xl font-extrabold uppercase tracking-tight">Legumex</span>
-                        <p className="mt-3 max-w-xs text-sm text-crema/70">{t("site.footer.tagline")}</p>
+                        <span className="font-display text-xl font-bold uppercase tracking-tight">Legumex</span>
+                        <p className="mt-3 max-w-xs text-sm text-landing-cream/70">{t("site.footer.tagline")}</p>
                     </div>
 
                     <FooterLinkColumn title={t("site.footer.catalog.title")} links={catalogLinks} />
@@ -40,9 +40,9 @@ export function SiteFooter() {
                     <FooterLinkColumn title={t("site.footer.support.title")} links={supportLinks} />
                 </div>
 
-                <div className="mt-12 flex flex-col gap-6 border-t border-crema/15 pt-8 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-12 flex flex-col gap-6 border-t border-brand-300/30 pt-8 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h3 className="font-mono text-xs uppercase tracking-[0.06em] text-crema/60">
+                        <h3 className="font-mono text-xs uppercase tracking-[0.06em] text-landing-cream/60">
                             {t("site.footer.newsletter.title")}
                         </h3>
                         <div className="mt-3">
@@ -51,12 +51,10 @@ export function SiteFooter() {
                     </div>
 
                     <div className="flex flex-col items-start gap-4 sm:items-end">
-                        {/* <FooterSocialLinks /> */}
-                        {/* <LanguageSwitch tone="dark" /> */}
                     </div>
                 </div>
 
-                <p className="mt-8 text-xs text-crema/50">
+                <p className="mt-8 text-xs text-landing-cream/75">
                     {t("site.footer.copyright", { year: currentYear })}
                 </p>
             </SiteContainer>

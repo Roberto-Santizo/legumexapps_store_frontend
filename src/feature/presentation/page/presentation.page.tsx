@@ -14,15 +14,14 @@ export function PresentationListPage() {
     return (
         <PageContainer wide>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("presentation.list.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("presentation.list.title")}</h1>
                 {hasPermission("presentations:create") && (
                     <Link to="/admin/presentations/create" className={buttonClassName("primary")}>
                         {t("presentation.list.createLink")}
                     </Link>
                 )}
             </div>
-            {/* Misma permission que "Crear presentación" -- la carga masiva es otra forma de
-                crear, no una acción distinta (mismo criterio que Empaques/Ingredientes). */}
+            {/* Misma permission que "Crear presentación": la carga masiva es otra forma de crear. */}
             {hasPermission("presentations:create") && (
                 <BulkImportPanel
                     translationNamespace="presentation.bulkImport"

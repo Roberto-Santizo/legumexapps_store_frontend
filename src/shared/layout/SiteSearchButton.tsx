@@ -13,7 +13,7 @@ export function SiteSearchButton({ tone = "light" }: Readonly<SiteSearchButtonPr
             type="button"
             aria-label={t("site.header.search")}
             className={`flex h-10 w-10 items-center justify-center rounded-full transition ${
-                tone === "dark" ? "text-crema hover:bg-crema/15" : "text-verde-profundo hover:bg-crema"
+                tone === "dark" ? "text-white hover:bg-white/15" : "text-ink-900 hover:bg-canvas"
             }`}
         >
             <Search size={20} />

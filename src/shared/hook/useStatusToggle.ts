@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -18,7 +19,7 @@ export function useStatusToggle({ mutationFn, invalidateKey }: StatusToggleOptio
             toast.success(data.message)
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 

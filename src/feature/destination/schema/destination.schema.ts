@@ -3,7 +3,7 @@ import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 
 // Países soportados por el cotizador: cada destino pertenece a uno solo, y el cliente filtra
 // por país antes de elegir destino (ver quoteCalculatorForm.component.tsx).
-export const destinationCountryEnum = z.enum(["GT", "US"])
+const destinationCountryEnum = z.enum(["GT", "US"])
 
 export const createDestinationSchema = z.object({
     displayName: z.string().trim().min(1).max(120),

@@ -33,7 +33,7 @@ export function ProductLineRow({ line, index }: Readonly<ProductLineRowProps>) {
                 viewport={viewportOnce}
                 whileHover={{ scale: 1.02, rotate: isReversed ? -0.6 : 0.6 }}
                 transition={{ type: "spring", stiffness: 220, damping: 20 }}
-                className={`relative h-96 overflow-hidden rounded-card shadow-card-hover sm:h-120 ${
+                className={`relative h-72 overflow-hidden rounded-panel shadow-panel sm:h-120 ${
                     isReversed ? "lg:order-2" : ""
                 }`}
             >
@@ -44,8 +44,8 @@ export function ProductLineRow({ line, index }: Readonly<ProductLineRowProps>) {
                     className="h-full w-full object-cover"
                     loading="lazy"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-verde-profundo/50 via-transparent to-transparent" />
-                <span className="absolute top-5 left-5 flex h-12 w-12 items-center justify-center rounded-full bg-crema/95 text-verde-profundo shadow-card">
+                <div className="absolute inset-0 bg-linear-to-t from-brand-900/50 via-transparent to-transparent" />
+                <span className="absolute top-5 left-5 flex h-12 w-12 items-center justify-center rounded-full bg-canvas/95 text-ink-900 shadow-panel">
                     <Icon size={22} />
                 </span>
             </motion.div>
@@ -57,13 +57,13 @@ export function ProductLineRow({ line, index }: Readonly<ProductLineRowProps>) {
                 viewport={viewportOnce}
                 className={isReversed ? "lg:order-1" : ""}
             >
-                <span className="font-mono text-xs uppercase tracking-[0.14em] text-texto-suave">
+                <span className="font-mono text-xs uppercase tracking-[0.14em] text-brand-700">
                     {t("home.lines.lineLabel", { number: index + 1 })}
                 </span>
-                <h3 className="mt-3 font-display text-3xl font-extrabold uppercase tracking-tight text-verde-profundo sm:text-4xl">
+                <h3 className="mt-3 font-display text-3xl font-bold uppercase tracking-tight text-ink-900 sm:text-4xl">
                     {t(`home.lines.items.${line.translationKey}.name`)}
                 </h3>
-                <p className="mt-5 max-w-xl text-base leading-relaxed text-texto-suave sm:text-lg">
+                <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-600 sm:text-lg">
                     {t(`home.lines.items.${line.translationKey}.description`)}
                 </p>
 
@@ -82,7 +82,7 @@ export function ProductLineRow({ line, index }: Readonly<ProductLineRowProps>) {
                             key={`${pill}-${pillIndex}`}
                             variants={fadeUp}
                             whileHover={{ y: -2 }}
-                            className="rounded-chip bg-cat-vainas px-3 py-1.5 text-sm font-medium text-verde-profundo"
+                            className="rounded-badge border border-brand-500/25 bg-brand-500/10 px-3 py-1.5 text-sm font-medium text-ink-900"
                         >
                             {pill}
                         </motion.span>

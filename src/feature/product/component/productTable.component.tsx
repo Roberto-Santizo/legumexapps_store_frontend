@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { getProductsPaginatedAPI, updateProductStatusAPI } from "@/feature/product/api/product.api"
-import type { ProductResponse } from "@/feature/product/schema/product.schema"
+import type { ProductListItem } from "@/feature/product/schema/product.schema"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PaginatedAdminTable } from "@/shared/component/paginatedAdminTable.component"
 import { EditLink } from "@/shared/component/editLink.component"
@@ -10,12 +10,12 @@ import { useStatusToggle } from "@/shared/hook/useStatusToggle"
 import { formatDateTime } from "@/shared/format/date"
 
 export function ProductTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const { hasPermission } = usePermission()
     const { isPending, toggle } = useStatusToggle({ mutationFn: updateProductStatusAPI, invalidateKey: "products" })
 
     return (
-        <PaginatedAdminTable<ProductResponse>
+        <PaginatedAdminTable<ProductListItem>
             queryKey={["products", "paginated"]}
             queryFn={getProductsPaginatedAPI}
             searchPlaceholder={t("product.table.searchPlaceholder")}
@@ -34,9 +34,17 @@ export function ProductTable() {
             )}
             columns={[
                 { key: "id", header: t("common.id"), render: (product) => product.id },
-                { key: "codigo", header: t("product.form.codigo"), render: (product) => product.codigo },
                 { key: "displayName", header: t("product.form.displayName"), render: (product) => product.displayName },
-                { key: "urlSlug", header: t("product.form.urlSlug"), render: (product) => product.urlSlug },
+                {
+                    key: "sku", header: t("product.table.sku"),
+                    render: (product) => product.productVariants.length > 0 ? (
+                        <ul className="space-y-1">
+                            {product.productVariants.map((variant) => (
+                                <li key={variant.id} className="font-mono text-sm">{variant.skuCode}</li>
+                            ))}
+                        </ul>
+                    ) : <span className="text-ink-600">{t("product.table.noSku")}</span>,
+                },
                 {
                     key: "isCustomizable",
                     header: t("product.form.isCustomizable"),
@@ -51,7 +59,7 @@ export function ProductTable() {
                 {
                     key: "updatedAt",
                     header: t("common.updatedAt"),
-                    render: (product) => formatDateTime(product.updatedAt),
+                    render: (product) => formatDateTime(product.updatedAt, i18n.language),
                 },
             ]}
         />

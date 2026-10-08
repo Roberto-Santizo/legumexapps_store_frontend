@@ -5,12 +5,12 @@ import AdminRoutes from "@/shared/router/AdminRoutes"
 import { lazyWithRetry } from "@/shared/router/lazyWithRetry"
 import { Spinner } from "@/shared/component/spinner.component"
 import { PublicOnlyRoute } from "@/shared/auth/PublicOnlyRoute"
-import { CustomerPublicOnlyRoute } from "@/shared/auth/customer/CustomerPublicOnlyRoute"
+import { SalespersonPublicOnlyRoute } from "@/shared/auth/salesperson/SalespersonPublicOnlyRoute"
 
 const NotFoundPage = lazyWithRetry(() => import("@/shared/page/notFound.page").then((m) => ({ default: m.NotFoundPage })))
 const LoginPage = lazyWithRetry(() => import("@/feature/login/page/login.page").then((m) => ({ default: m.LoginPage })))
-const CustomerLoginPage = lazyWithRetry(() =>
-    import("@/feature/customerAuth/page/customerLogin.page").then((m) => ({ default: m.CustomerLoginPage }))
+const SalespersonLoginPage = lazyWithRetry(() =>
+    import("@/feature/salespersonAuth/page/salespersonLogin.page").then((m) => ({ default: m.SalespersonLoginPage }))
 )
 
 export default function AppRouter() {
@@ -31,11 +31,11 @@ export default function AppRouter() {
             <Route
                 path="/iniciar-sesion"
                 element={
-                    <CustomerPublicOnlyRoute>
+                    <SalespersonPublicOnlyRoute>
                         <Suspense fallback={<Spinner />}>
-                            <CustomerLoginPage />
+                            <SalespersonLoginPage />
                         </Suspense>
-                    </CustomerPublicOnlyRoute>
+                    </SalespersonPublicOnlyRoute>
                 }
             />
             <Route

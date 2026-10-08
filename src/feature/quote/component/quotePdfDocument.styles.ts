@@ -2,7 +2,7 @@ import { StyleSheet } from "@react-pdf/renderer"
 
 // Mismos tokens de marca que src/index.css (@theme) -- react-pdf no puede leer variables CSS,
 // así que se repiten acá como constantes. Si la paleta cambia allá, hay que replicarlo acá.
-const VERDE_PROFUNDO = "#0f2e1e"
+export const VERDE_PROFUNDO = "#0f2e1e"
 const DORADO = "#e9b93c"
 const CREMA = "#f7f5ee"
 const HUESO = "#fffdf8"
@@ -11,8 +11,7 @@ const TEXTO_SUAVE = "#5a6154"
 const AVISO_FG = "#9a6b12"
 const AVISO_BG = "#fbeecb"
 const AVISO_BD = "#ead5a0"
-// Mismos tokens que --color-error-fg/bg/bd en index.css (2026-09-13, aviso "cotización de
-// referencia") -- rojo, distinto del aviso ámbar de "Restricciones" (vigencia) de más abajo.
+// Rojo del aviso "cotización de referencia" (mismos tokens que index.css).
 const ERROR_FG = "#b3261e"
 const ERROR_BG = "#fae7e5"
 const ERROR_BD = "#edc4c0"
@@ -153,6 +152,126 @@ export const quotePdfStyles = StyleSheet.create({
         textTransform: "uppercase",
     },
 
+    // Configuración de empaque (ambas variantes, solo nombres -- nunca costos)
+    packagingConfigSection: {
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderBottomWidth: 1,
+        borderBottomColor: GRIS_CAMPO,
+    },
+    packagingConfigTitleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 4,
+    },
+    packagingConfigTitleMark: {
+        width: 6,
+        height: 6,
+        backgroundColor: DORADO,
+        marginRight: 4,
+    },
+    packagingConfigTitle: {
+        fontSize: 7,
+        fontFamily: "Helvetica-Bold",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        color: TEXTO_SUAVE,
+    },
+    packagingCards: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 6,
+    },
+    packagingCard: {
+        flexGrow: 1,
+        flexDirection: "row",
+        alignItems: "flex-start",
+        padding: 7,
+        minHeight: 44,
+        borderWidth: 0.5,
+        borderColor: GRIS_CAMPO,
+        borderRadius: 5,
+        backgroundColor: HUESO,
+    },
+    packagingIcon: {
+        width: 28,
+        height: 28,
+        flexShrink: 0,
+        marginRight: 7,
+        padding: 3,
+        borderRadius: 5,
+        backgroundColor: CREMA,
+    },
+    packagingCardText: { flexGrow: 1, flexShrink: 1, flexBasis: 0 },
+    packagingMaterialType: {
+        fontSize: 6,
+        fontFamily: "Helvetica-Bold",
+        textTransform: "uppercase",
+        letterSpacing: 0.3,
+        lineHeight: 1.3,
+        color: VERDE_PROFUNDO,
+        marginBottom: 3,
+    },
+    packagingMaterialName: {
+        fontSize: 8,
+        lineHeight: 1.3,
+        color: VERDE_PROFUNDO,
+    },
+    packagingConfigColumns: {
+        flexDirection: "row",
+    },
+    packagingConfigColumn: {
+        flex: 1,
+        paddingHorizontal: 6,
+    },
+    packagingConfigColumnDivided: {
+        borderLeftWidth: 0.5,
+        borderLeftColor: GRIS_CAMPO,
+    },
+    packagingConfigLevelRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 3,
+    },
+    packagingConfigLevelBadge: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: VERDE_PROFUNDO,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 4,
+    },
+    packagingConfigLevelBadgeText: {
+        fontSize: 7,
+        fontFamily: "Helvetica-Bold",
+        color: HUESO,
+    },
+    packagingConfigLevelName: {
+        fontSize: 7.5,
+        fontFamily: "Helvetica-Bold",
+        color: VERDE_PROFUNDO,
+    },
+    packagingConfigGroup: {
+        marginBottom: 2,
+    },
+    packagingConfigGroupLabel: {
+        fontSize: 6.5,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        color: TEXTO_SUAVE,
+    },
+    packagingConfigGroupValue: {
+        fontSize: 8.5,
+        fontFamily: "Helvetica-Bold",
+        color: VERDE_PROFUNDO,
+    },
+    packagingConfigFixed: {
+        fontSize: 7.5,
+        color: TEXTO_SUAVE,
+        marginTop: 1,
+    },
+
     // Desglose de costos (solo admin, showCostBreakdown)
     breakdownSection: {
         paddingHorizontal: 10,
@@ -223,7 +342,7 @@ export const quotePdfStyles = StyleSheet.create({
     },
 
     // ===============================
-    // Aviso "cotización de referencia" (2026-09-13, solo cliente)
+    // Aviso "cotización de referencia" (solo cliente)
     // ===============================
     disclaimerBox: {
         borderWidth: 1,

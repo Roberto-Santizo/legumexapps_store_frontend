@@ -1,12 +1,8 @@
 import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
+import { businessIsoDate, shiftIsoDate } from "@/shared/format/businessDate"
 
-function toISODate(date: Date): string {
-    return date.toISOString().slice(0, 10)
-}
-
+// Últimos `days` días calendario (incluido hoy), en hora de Guatemala.
 export function presetRange(days: number): DashboardDateRange {
-    const endDate = new Date()
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - (days - 1))
-    return { startDate: toISODate(startDate), endDate: toISODate(endDate) }
+    const endDate = businessIsoDate()
+    return { startDate: shiftIsoDate(endDate, -(days - 1)), endDate }
 }

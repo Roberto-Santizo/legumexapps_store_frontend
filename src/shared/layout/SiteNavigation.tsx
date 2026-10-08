@@ -24,9 +24,9 @@ export function SiteNavigation({ orientation = "horizontal", tone = "light", onL
 
     const horizontalClass =
         tone === "dark"
-            ? "text-sm font-medium text-crema/75 transition hover:text-crema"
-            : "text-sm font-medium text-texto-suave transition hover:text-verde-profundo"
-    const verticalClass = "rounded-[10px] px-3 py-2.5 text-sm font-medium text-texto-suave transition hover:bg-crema"
+            ? "text-sm font-medium text-white/75 transition hover:text-white"
+            : "text-sm font-medium text-ink-600 transition hover:text-ink-900"
+    const verticalClass = "rounded-[10px] px-3 py-2.5 text-sm font-medium text-ink-600 transition hover:bg-canvas"
     const itemClassName = orientation === "horizontal" ? horizontalClass : verticalClass
 
     return (

@@ -1,7 +1,7 @@
 import { useRef } from "react"
 import { Document, Page, View, Text, Image } from "@react-pdf/renderer"
 import { useTranslation } from "react-i18next"
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import type { QuoteDocumentLine, QuoteLine, QuoteLineComposition } from "@/feature/quote/schema/quote.schema"
 import { quotePdfStyles as styles } from "@/feature/quote/component/quotePdfDocument.styles"
 import {
     QUOTE_VALIDITY_DAYS,
@@ -9,32 +9,74 @@ import {
     calculateQuoteValidUntil,
     quotePdfDateFormatter as pdfDateFormatter,
 } from "@/feature/quote/component/quotePdfSummary"
+import { QuotePdfPackaging } from "@/feature/quote/component/quotePdfPackaging.component"
 import { formatCurrency } from "@/shared/format/currency"
 
 const pdfDateTimeFormatter = new Intl.DateTimeFormat("es-GT", { dateStyle: "short", timeStyle: "short" })
 
+const compositionNumberFormatter = new Intl.NumberFormat("es-GT", { maximumFractionDigits: 3 })
+
+// Composición de una línea A LA MEDIDA (solo esas la traen, ver QuoteLineComposition): la receta que
+// armó el representante -- % de cada materia prima y gramos por unidad de cada ingrediente agregado.
+// Solo nombres y cantidades, NUNCA costos, así que va en ambas variantes (sin gate de
+// showCostBreakdown), igual que la configuración de empaque.
+function CompositionSection({ composition }: Readonly<{ composition: QuoteLineComposition }>) {
+    const { t } = useTranslation()
+    if (composition.rawMaterials.length === 0) return null
+
+    return (
+        <View style={styles.packagingConfigSection}>
+            <View style={styles.packagingConfigTitleRow}>
+                <View style={styles.packagingConfigTitleMark} />
+                <Text style={styles.packagingConfigTitle}>{t("quote.pdf.document.composition.title")}</Text>
+            </View>
+            <Text style={styles.packagingConfigGroupValue}>
+                {composition.rawMaterials
+                    .map((rawMaterial) =>
+                        t("quote.pdf.document.composition.rawMaterial", {
+                            percentage: compositionNumberFormatter.format(rawMaterial.percentage),
+                            name: rawMaterial.displayName,
+                        })
+                    )
+                    .join(" · ")}
+            </Text>
+            {composition.context && <Text style={styles.packagingConfigFixed}>
+                {composition.context.categoryName} · {composition.context.subCategoryName} · {t(composition.context.isOrganic ? "catalogQuote.organic" : "catalogQuote.conventional")} · {t(`catalogQuote.types.${composition.context.ingredientType}`)}
+            </Text>}
+            {composition.ingredients.length > 0 && (
+                <Text style={styles.packagingConfigFixed}>
+                    {t("quote.pdf.document.composition.ingredients", {
+                        ingredients: composition.ingredients
+                            .map((ingredient) =>
+                                t("quote.pdf.document.composition.ingredient", {
+                                    name: ingredient.displayName,
+                                    grams: compositionNumberFormatter.format(ingredient.gramsPerUnit),
+                                })
+                            )
+                            .join(", "),
+                    })}
+                </Text>
+            )}
+        </View>
+    )
+}
+
 type QuotePdfDocumentProps = {
     clientName: string
     quoteDate: Date
-    lines: QuoteCalculation[]
-    // Mismo criterio que QuoteResultCard/QuotedOrderSummary: el cliente final no ve el desglose
-    // interno de costos, solo el admin (ver adminQuoteCalculator.page.tsx vs quoteRequest.page.tsx).
+    // Cualquier línea cotizada (producto definido o a la medida); las a la medida traen composición.
+    lines: QuoteDocumentLine[]
+    // El cliente final no ve el desglose interno de costos, solo el admin.
     showCostBreakdown?: boolean
-    // Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- default false,
-    // independiente de showCostBreakdown (que el admin sigue necesitando en true para ver el
-    // resto del desglose). Ver el mismo prop en quoteResultCard.component.tsx.
+    // Transporte apagado para todos por ahora; independiente de showCostBreakdown.
     showTransport?: boolean
-    // Aviso "cotización de referencia" (2026-09-13) -- default false, solo cliente. Un bloque
-    // único a nivel de documento (no por línea), cerca del total del PEDIDO -- ver el mismo
-    // criterio que el aviso de "Restricciones" (vigencia), que tampoco se repite por línea.
+    // Aviso "cotización de referencia" (solo representante): un bloque único por documento, cerca del
+    // total del pedido.
     showReferenceDisclaimer?: boolean
 }
 
-// Documento PDF del "resumen de cotización" -- se genera bajo demanda desde el cotizador (público
-// o admin) cuando ya hay al menos una línea cotizada en la sesión (ver quotePdfButton.component.tsx),
-// nunca se persiste ni se guarda en el servidor. Usa @react-pdf/renderer, mismo enfoque que el
-// resto del repo para documentos descargables (packing list), pero con su propio diseño ajustado
-// a los datos del cotizador (no hay tarimas/lotes acá, hay productos/palets/costos).
+// Documento PDF del resumen de cotización: se genera bajo demanda en el navegador y nunca se guarda
+// en el servidor.
 export function QuotePdfDocument({
     clientName,
     quoteDate,
@@ -45,12 +87,12 @@ export function QuotePdfDocument({
 }: Readonly<QuotePdfDocumentProps>) {
     const { t } = useTranslation()
 
-    // Mismo criterio que QuotedOrderSummary: las líneas no tienen id propio (QuoteCalculation es
+    // Mismo criterio que QuotedOrderSummary: las líneas no tienen id propio (una línea cotizada es
     // una vista previa de cálculo, no una entidad persistida), así que se identifican por
     // identidad de objeto en vez de por índice -- estable aunque el pedido crezca, y no colisiona
     // entre dos líneas con contenido idéntico (mismo producto cotizado dos veces).
-    const lineIdsRef = useRef(new WeakMap<QuoteCalculation, string>())
-    const getLineId = (line: QuoteCalculation) => {
+    const lineIdsRef = useRef(new WeakMap<QuoteLine, string>())
+    const getLineId = (line: QuoteLine) => {
         const existingId = lineIdsRef.current.get(line)
         if (existingId) return existingId
         const newId = crypto.randomUUID()
@@ -64,7 +106,6 @@ export function QuotePdfDocument({
     return (
         <Document>
             <Page size="LETTER" style={styles.page}>
-                {/* Encabezado */}
                 <View style={styles.headerRow}>
                     {/* Logo servido como asset local (public/logo-legumex.png), NO desde
                     VITE_IMAGE_LOGO (S3). A diferencia del <img> del login, que solo necesita
@@ -82,7 +123,6 @@ export function QuotePdfDocument({
                     </View>
                 </View>
 
-                {/* Datos generales */}
                 <View style={styles.infoBox}>
                     <View style={styles.infoCell}>
                         <Text style={styles.infoLabel}>{t("quote.pdf.document.client")}</Text>
@@ -98,7 +138,6 @@ export function QuotePdfDocument({
                     </View>
                 </View>
 
-                {/* Líneas cotizadas */}
                 {lines.map((line) => (
                     <View key={getLineId(line)} style={styles.lineCard} wrap={false}>
                         <View style={styles.lineHeader}>
@@ -106,8 +145,7 @@ export function QuotePdfDocument({
                                 {line.productDisplayName}
                                 {line.variantLabel && <Text style={styles.lineHeaderVariant}> · {line.variantLabel}</Text>}
                             </Text>
-                            {/* Transporte apagado para TODOS por ahora (2026-09-10, fase 2) -- gateado por
-                            showTransport (no showCostBreakdown), igual que la fila de transporte más abajo. */}
+                            {/* Transporte apagado para todos por ahora (gateado por showTransport). */}
                             {showTransport && (
                                 <Text style={styles.lineHeaderDestination}>{line.breakdown.transport.displayName}</Text>
                             )}
@@ -139,6 +177,10 @@ export function QuotePdfDocument({
                             </View>
                         </View>
 
+                        {line.composition && <CompositionSection composition={line.composition} />}
+
+                        <QuotePdfPackaging breakdown={line.breakdown} />
+
                         {showCostBreakdown && (
                             <View style={styles.breakdownSection}>
                                 {line.breakdown.rawMaterials.length > 0 && (
@@ -147,13 +189,19 @@ export function QuotePdfDocument({
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.rawMaterialCost)}</Text>
                                     </View>
                                 )}
+                                {line.breakdown.ingredients && line.breakdown.ingredients.length > 0 && (
+                                    <View style={styles.breakdownRow}>
+                                        <Text style={styles.breakdownLabel}>{t("quote.pdf.document.ingredients")}</Text>
+                                        <Text style={styles.breakdownValue}>{formatCurrency(line.ingredientCost ?? 0)}</Text>
+                                    </View>
+                                )}
                                 {line.breakdown.unitMaterials && line.breakdown.unitMaterials.length > 0 && (
                                     <View style={styles.breakdownRow}>
                                         <Text style={styles.breakdownLabel}>{t("quote.pdf.document.unitPackaging")}</Text>
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.unitPackagingCost)}</Text>
                                     </View>
                                 )}
-                                {line.breakdown.intermediatePackaging && (
+                                {line.breakdown.intermediateMaterials && line.breakdown.intermediateMaterials.length > 0 && (
                                     <View style={styles.breakdownRow}>
                                         <Text style={styles.breakdownLabel}>{t("quote.pdf.document.intermediatePackaging")}</Text>
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.intermediatePackagingCost)}</Text>
@@ -199,20 +247,17 @@ export function QuotePdfDocument({
                     </View>
                 ))}
 
-                {/* Total del pedido */}
                 <View style={styles.orderTotalRow}>
                     <Text style={styles.orderTotalLabel}>{t("quote.pdf.document.orderTotal")}</Text>
                     <Text style={styles.orderTotalValue}>{formatCurrency(orderTotal)}</Text>
                 </View>
 
-                {/* Aviso "cotización de referencia" (2026-09-13, solo cliente) */}
                 {showReferenceDisclaimer && (
                     <View style={styles.disclaimerBox}>
                         <Text style={styles.disclaimerText}>{t("quote.pdf.document.referenceDisclaimer")}</Text>
                     </View>
                 )}
 
-                {/* Restricciones */}
                 <View style={styles.restrictionsBox}>
                     <Text style={styles.restrictionsTitle}>{t("quote.pdf.document.restrictionsTitle")}</Text>
                     <Text style={styles.restrictionsText}>

@@ -1,3 +1,4 @@
+import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
 import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 import { apiItemResponseSchema, apiListResponseSchema, apiMessageResponseSchema } from "@/shared/api/apiResponse.schema"
@@ -5,10 +6,11 @@ import { adminQuoteSchema, quotableProductSchema, quoteCalculationSchema, quoteD
 import type { CalculateQuoteInput } from "@/feature/quote/schema/quote.schema"
 
 const adminQuoteListResponseSchema = apiListResponseSchema(adminQuoteSchema)
+const EMPTY_DATE_RANGE: Readonly<DashboardDateRange> = Object.freeze({ startDate: null, endDate: null })
 
-export async function getAllQuotesAPI() {
+export async function getAllQuotesAPI(filters: DashboardDateRange = EMPTY_DATE_RANGE) {
     try {
-        const { data } = await api.get("/admin/quotes")
+        const { data } = await api.get("/admin/quotes", { params: Object.fromEntries(Object.entries(filters).filter(([, value]) => !!value)) })
         return adminQuoteListResponseSchema.parse(data)
     } catch (error) {
         handleApiError(error)

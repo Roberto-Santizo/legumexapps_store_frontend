@@ -11,7 +11,7 @@ export function SiteLayout() {
     const isHome = pathname === "/"
 
     return (
-        <div className="flex min-h-screen flex-col bg-crema">
+        <div className={`flex min-h-screen flex-col bg-canvas ${isHome ? "landing-theme" : ""}`}>
             {!isHome && <AnnouncementBar />}
             <SiteHeader />
             <main className="flex-1">

@@ -12,7 +12,7 @@ export function UserListPage() {
     return (
         <PageContainer wide>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("user.list.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("user.list.title")}</h1>
                 {hasPermission("users:create") && (
                     <Link to="/admin/users/create" className={buttonClassName("primary")}>
                         {t("user.list.createLink")}

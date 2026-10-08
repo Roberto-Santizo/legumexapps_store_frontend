@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/shared/auth/ProtectedRoute"
 import { AccessDenied, PermissionGate } from "@/shared/auth/PermissionGate"
 import { usePermission } from "@/shared/auth/usePermission"
 import { lazyWithRetry } from "@/shared/router/lazyWithRetry"
+const PackagingGroupPage = lazyWithRetry(() => import("@/feature/packagingGroup/page/packagingGroup.page").then(module => ({ default: module.PackagingGroupPage })))
 
 const CategoryListPage = lazyWithRetry(() =>
     import("@/feature/category/page/category.page").then((module) => ({ default: module.CategoryListPage }))
@@ -27,16 +28,6 @@ const EditSubCategoryPage = lazyWithRetry(() =>
     import("@/feature/category/page/editSubCategory.page").then((module) => ({ default: module.EditSubCategoryPage }))
 )
 
-const ProductTypeListPage = lazyWithRetry(() =>
-    import("@/feature/product-type/page/productType.page").then((module) => ({ default: module.ProductTypeListPage }))
-)
-const CreateProductTypePage = lazyWithRetry(() =>
-    import("@/feature/product-type/page/createProductType.page").then((module) => ({ default: module.CreateProductTypePage }))
-)
-const EditProductTypePage = lazyWithRetry(() =>
-    import("@/feature/product-type/page/editProductType.page").then((module) => ({ default: module.EditProductTypePage }))
-)
-
 const UnitListPage = lazyWithRetry(() =>
     import("@/feature/unit/page/unit.page").then((module) => ({ default: module.UnitListPage }))
 )
@@ -47,6 +38,15 @@ const EditUnitPage = lazyWithRetry(() =>
     import("@/feature/unit/page/editUnit.page").then((module) => ({ default: module.EditUnitPage }))
 )
 
+const RawMaterialListPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterial/page/rawMaterial.page").then((module) => ({ default: module.RawMaterialListPage }))
+)
+const CreateRawMaterialPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterial/page/createRawMaterial.page").then((module) => ({ default: module.CreateRawMaterialPage }))
+)
+const EditRawMaterialPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterial/page/editRawMaterial.page").then((module) => ({ default: module.EditRawMaterialPage }))
+)
 const IngredientListPage = lazyWithRetry(() =>
     import("@/feature/ingredient/page/ingredient.page").then((module) => ({ default: module.IngredientListPage }))
 )
@@ -124,20 +124,39 @@ const DashboardPage = lazyWithRetry(() =>
 )
 
 const AdminQuoteListPage = lazyWithRetry(() =>
-    import("@/feature/quote/page/adminQuote.page").then((module) => ({ default: module.AdminQuoteListPage }))
+    import("@/feature/quote/page/adminQuotes.page").then((module) => ({ default: module.AdminQuotesPage }))
+)
+const QuoteDraftListPage = lazyWithRetry(() =>
+    import("@/feature/quoteDraft/page/quoteDraft.page").then((module) => ({ default: module.QuoteDraftListPage }))
+)
+const AdminCustomQuoteListPage = lazyWithRetry(() =>
+    import("@/feature/quote/page/adminQuotes.page").then((module) => ({ default: module.AdminCustomQuoteListRedirect }))
+)
+const AdminCustomQuoteDetailPage = lazyWithRetry(() =>
+    import("@/feature/customQuote/page/adminCustomQuoteDetail.page").then((module) => ({ default: module.AdminCustomQuoteDetailPage }))
 )
 const AdminQuoteCalculatorPage = lazyWithRetry(() =>
     import("@/feature/quote/page/adminQuoteCalculator.page").then((module) => ({ default: module.AdminQuoteCalculatorPage }))
 )
 
-const CustomerListPage = lazyWithRetry(() =>
-    import("@/feature/customer/page/customer.page").then((module) => ({ default: module.CustomerListPage }))
+const SalespersonListPage = lazyWithRetry(() =>
+    import("@/feature/salesperson/page/salesperson.page").then((module) => ({ default: module.SalespersonListPage }))
 )
-const CreateCustomerPage = lazyWithRetry(() =>
-    import("@/feature/customer/page/createCustomer.page").then((module) => ({ default: module.CreateCustomerPage }))
+const CreateSalespersonPage = lazyWithRetry(() =>
+    import("@/feature/salesperson/page/createSalesperson.page").then((module) => ({ default: module.CreateSalespersonPage }))
 )
-const EditCustomerPage = lazyWithRetry(() =>
-    import("@/feature/customer/page/editCustomer.page").then((module) => ({ default: module.EditCustomerPage }))
+const EditSalespersonPage = lazyWithRetry(() =>
+    import("@/feature/salesperson/page/editSalesperson.page").then((module) => ({ default: module.EditSalespersonPage }))
+)
+
+const ClientListPage = lazyWithRetry(() =>
+    import("@/feature/client/page/client.page").then((module) => ({ default: module.ClientListPage }))
+)
+const CreateClientPage = lazyWithRetry(() =>
+    import("@/feature/client/page/createClient.page").then((module) => ({ default: module.CreateClientPage }))
+)
+const EditClientPage = lazyWithRetry(() =>
+    import("@/feature/client/page/editClient.page").then((module) => ({ default: module.EditClientPage }))
 )
 
 const LeadListPage = lazyWithRetry(() => import("@/feature/lead/page/lead.page").then((module) => ({ default: module.LeadListPage })))
@@ -147,10 +166,18 @@ const SiteImageListPage = lazyWithRetry(() =>
     import("@/feature/siteImage/page/siteImage.page").then((module) => ({ default: module.SiteImageListPage }))
 )
 
+const JuiceListPage = lazyWithRetry(() => import("@/feature/juice/page/juice.page").then(module => ({ default: module.JuiceListPage })))
+const JuiceEditorPage = lazyWithRetry(() => import("@/feature/juice/page/juiceEditor.page").then(module => ({ default: module.JuiceEditorPage })))
+const JuiceMaterialsPage = lazyWithRetry(() => import("@/feature/juice/page/juiceMaterials.page").then(module => ({ default: module.JuiceMaterialsPage })))
+const JuiceConfigPage = lazyWithRetry(() => import("@/feature/juice/page/juiceConfig.page").then(module => ({ default: module.JuiceConfigPage })))
+
 const routes = [
     { path: "dashboard", component: DashboardPage, permission: "dashboard:view" },
 
-    { path: "quotes", component: AdminQuoteListPage, permission: "quotes:view" },
+    { path: "quotes", component: AdminQuoteListPage, permission: ["quotes:view", "customQuotes:view"] },
+    { path: "quote-drafts", component: QuoteDraftListPage, permission: "quoteDrafts:view" },
+    { path: "custom-quotes", component: AdminCustomQuoteListPage, permission: "customQuotes:view" },
+    { path: "custom-quotes/:customQuoteId", component: AdminCustomQuoteDetailPage, permission: "customQuotes:view" },
     { path: "quotes/calculator", component: AdminQuoteCalculatorPage, permission: "quotes:calculate" },
 
     { path: "categories", component: CategoryListPage, permission: "categories:view" },
@@ -161,19 +188,19 @@ const routes = [
     { path: "sub-categories/create", component: CreateSubCategoryPage, permission: "subCategories:create" },
     { path: "sub-categories/:subCategoryId/edit", component: EditSubCategoryPage, permission: "subCategories:edit" },
 
-    { path: "product-types", component: ProductTypeListPage, permission: "productTypes:view" },
-    { path: "product-types/create", component: CreateProductTypePage, permission: "productTypes:create" },
-    { path: "product-types/:productTypeId/edit", component: EditProductTypePage, permission: "productTypes:edit" },
-
     { path: "units", component: UnitListPage, permission: "units:view" },
     { path: "units/create", component: CreateUnitPage, permission: "units:create" },
     { path: "units/:unitId/edit", component: EditUnitPage, permission: "units:edit" },
 
+    { path: "raw-materials", component: RawMaterialListPage, permission: "rawMaterials:view" },
+    { path: "raw-materials/create", component: CreateRawMaterialPage, permission: "rawMaterials:create" },
+    { path: "raw-materials/:rawMaterialId/edit", component: EditRawMaterialPage, permission: "rawMaterials:edit" },
     { path: "ingredients", component: IngredientListPage, permission: "ingredients:view" },
     { path: "ingredients/create", component: CreateIngredientPage, permission: "ingredients:create" },
     { path: "ingredients/:ingredientId/edit", component: EditIngredientPage, permission: "ingredients:edit" },
 
     { path: "packagings", component: PackagingListPage, permission: "packagings:view" },
+    { path: "packaging-groups", component: PackagingGroupPage, permission: "packagingGroups:view" },
     { path: "packagings/create", component: CreatePackagingPage, permission: "packagings:create" },
     { path: "packagings/:packagingId/edit", component: EditPackagingPage, permission: "packagings:edit" },
 
@@ -189,13 +216,24 @@ const routes = [
     { path: "presentations/create", component: CreatePresentationPage, permission: "presentations:create" },
     { path: "presentations/:presentationId/edit", component: EditPresentationPage, permission: "presentations:edit" },
 
+    { path: "juices", component: JuiceListPage, permission: "juices:view" },
+    { path: "juices/create", component: JuiceEditorPage, permission: "juices:create" },
+    { path: "juices/materials", component: JuiceMaterialsPage, permission: "juices:view" },
+    { path: "juices/:juiceId", component: JuiceEditorPage, permission: "juices:view" },
+    { path: "juices/:juiceId/edit", component: JuiceEditorPage, permission: "juices:edit" },
+    { path: "juice-config", component: JuiceConfigPage, permission: "juiceConfig:edit" },
+
     { path: "products", component: ProductListPage, permission: "products:view" },
     { path: "products/create", component: CreateProductPage, permission: "products:create" },
     { path: "products/:productId/edit", component: EditProductPage, permission: "products:edit" },
 
-    { path: "customers", component: CustomerListPage, permission: "customers:view" },
-    { path: "customers/create", component: CreateCustomerPage, permission: "customers:create" },
-    { path: "customers/:customerId/edit", component: EditCustomerPage, permission: "customers:edit" },
+    { path: "salespeople", component: SalespersonListPage, permission: "salespeople:view" },
+    { path: "salespeople/create", component: CreateSalespersonPage, permission: "salespeople:create" },
+    { path: "salespeople/:salespersonId/edit", component: EditSalespersonPage, permission: "salespeople:edit" },
+
+    { path: "clients", component: ClientListPage, permission: "clients:view" },
+    { path: "clients/create", component: CreateClientPage, permission: "clients:create" },
+    { path: "clients/:clientId/edit", component: EditClientPage, permission: "clients:edit" },
 
     { path: "leads", component: LeadListPage, permission: "leads:view" },
     { path: "leads/:leadId/edit", component: EditLeadPage, permission: "leads:edit" },
@@ -214,7 +252,7 @@ const routes = [
 function AdminIndexRedirect() {
     const { hasPermission } = usePermission()
     const firstAccessibleSection = routes.find(
-        (route) => route.permission.endsWith(":view") && hasPermission(route.permission)
+        (route) => Array.isArray(route.permission) ? route.permission.some(hasPermission) : route.permission.endsWith(":view") && hasPermission(route.permission)
     )
 
     if (!firstAccessibleSection) {

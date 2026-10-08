@@ -2,17 +2,14 @@ import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 import { apiItemResponseSchema, apiListResponseSchema, apiMutationResponseSchema, apiPaginatedListResponseSchema } from "@/shared/api/apiResponse.schema"
 import { getBulkImportTemplate, postBulkImportFile } from "@/shared/api/bulkImport.api"
-import { packagingSkuUsageItemSchema, responsePackagingSchema } from "@/feature/packaging/schema/packaging.schema"
+import { responsePackagingSchema } from "@/feature/packaging/schema/packaging.schema"
 import type { CreatePackagingInput, UpdatePackagingInput } from "@/feature/packaging/schema/packaging.schema"
 
 const packagingListResponseSchema = apiListResponseSchema(responsePackagingSchema)
 const packagingPaginatedListResponseSchema = apiPaginatedListResponseSchema(responsePackagingSchema)
 const packagingItemResponseSchema = apiItemResponseSchema(responsePackagingSchema)
 const packagingMutationResponseSchema = apiMutationResponseSchema(responsePackagingSchema)
-const packagingSkuUsageResponseSchema = apiListResponseSchema(packagingSkuUsageItemSchema)
 
-// Sin params -- también la usan PackagingSelect y PalletMaterialSelect (filtran por packagingRole
-// client-side). No tocar esta firma.
 export async function getPackagingsAPI() {
     try {
         const { data } = await api.get("/packagings")
@@ -60,20 +57,5 @@ export async function updatePackagingAPI(id: number, formData: UpdatePackagingIn
     }
 }
 
-// Filtro "Empaques de este SKU" (solo lectura) -- case-insensitive en el backend, 404 traducido
-// ("SKU no encontrado") que el componente muestra tal cual, mismo criterio que
-// lookupProductVariantBySkuCodeAPI (product/api/productVariant.api.ts).
-export async function getPackagingUsageBySkuCodeAPI(skuCode: string) {
-    try {
-        const { data } = await api.get(`/packagings/by-sku/${encodeURIComponent(skuCode)}`)
-        return packagingSkuUsageResponseSchema.parse(data)
-    } catch (error) {
-        handleApiError(error)
-    }
-}
-
-// Ambas reusan el plumbing genérico de shared/api/bulkImport.api.ts (mismo diseño para todos los
-// catálogos con carga masiva -- ver esa entrada de memoria del proyecto); lo único específico de
-// Empaques acá es la URL.
 export const bulkImportPackagingsAPI = (file: File) => postBulkImportFile("/packagings/bulk-import", file)
 export const downloadPackagingImportTemplateAPI = () => getBulkImportTemplate("/packagings/bulk-import/template")

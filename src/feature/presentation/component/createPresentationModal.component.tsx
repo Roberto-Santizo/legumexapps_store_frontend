@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -26,7 +27,6 @@ export function CreatePresentationModal({ initialDisplayLabel, onCreated, onClos
 
     const {
         register,
-        control,
         handleSubmit,
         formState: { errors },
     } = useForm<CreatePresentationInput>({
@@ -41,7 +41,7 @@ export function CreatePresentationModal({ initialDisplayLabel, onCreated, onClos
             toast.success(data.message)
             onCreated(data.data)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {
@@ -51,7 +51,7 @@ export function CreatePresentationModal({ initialDisplayLabel, onCreated, onClos
     return (
         <Modal title={t("presentation.create.title")} onClose={onClose}>
             <form onSubmit={onSubmit}>
-                <PresentationForm register={register} control={control} errors={errors} />
+                <PresentationForm register={register} errors={errors} />
                 <div className="flex gap-3">
                     <Button type="submit" disabled={createMutation.isPending}>
                         {createMutation.isPending ? t("common.saving") : t("common.save")}

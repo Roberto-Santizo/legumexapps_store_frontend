@@ -24,6 +24,7 @@ export function DestinationForm<T extends UpdateDestinationInput>({
                 label={t("destination.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
+                required
             >
                 <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
             </FormField>
@@ -32,6 +33,7 @@ export function DestinationForm<T extends UpdateDestinationInput>({
                 label={t("destination.form.baseCost")}
                 htmlFor="baseCost"
                 error={getFieldErrorMessage(t, errors.baseCost as FieldError | undefined)}
+                required
             >
                 <Input
                     id="baseCost"
@@ -46,6 +48,7 @@ export function DestinationForm<T extends UpdateDestinationInput>({
                 label={t("destination.form.country")}
                 htmlFor="country"
                 error={getFieldErrorMessage(t, errors.country as FieldError | undefined)}
+                required
             >
                 <Select
                     id="country"

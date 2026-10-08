@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -15,9 +16,8 @@ import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
 
-// Partial<UpdateUnitInput>: si esta Unidad se creó ANTES de este cambio (displayName libre,
-// ya no existe en este catálogo fijo) no hay ninguna key que le corresponda -- se precarga
-// vacío para que el admin elija una del catálogo actual en vez de forzar un match que no existe.
+// Partial: una unidad antigua con displayName libre no tiene key en este catálogo; se precarga
+// vacía para que el admin elija una.
 function toFormValues(unit: UnitResponse): Partial<UpdateUnitInput> {
     const matchingEntry = UNIT_CATALOG.find((entry) => entry.displayName === unit.displayName)
     return {
@@ -62,7 +62,7 @@ export function EditUnitPage() {
             navigate("/admin/units")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -73,15 +73,15 @@ export function EditUnitPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("unit.edit.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("unit.edit.title")}</h1>
                 <Link to="/admin/units" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             <Card>
-                {unitQuery.isLoading && <p className="text-texto-suave">{t("common.loading")}</p>}
-                {unitQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+                {unitQuery.isLoading && <p className="text-ink-600">{t("common.loading")}</p>}
+                {unitQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
                 {unitQuery.data && (
                     <form onSubmit={onSubmit}>

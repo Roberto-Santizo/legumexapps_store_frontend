@@ -9,14 +9,14 @@ export function MarqueeStrip() {
     const loopPhrases = [...phrases, ...phrases]
 
     return (
-        <div className="overflow-hidden border-y border-crema/10 bg-verde-tinta py-5">
+        <div className="overflow-hidden border-y border-brand-300/30 bg-brand-900 py-5">
             <div className="animate-marquee flex w-max items-center gap-10 whitespace-nowrap">
                 {loopPhrases.map((phrase, index) => (
                     <span key={`${phrase}-${index}`} className="flex items-center gap-10">
-                        <span className="font-display text-lg font-bold tracking-wide text-crema uppercase sm:text-xl">
+                        <span className="font-display text-lg font-bold tracking-wide text-landing-cream uppercase sm:text-xl">
                             {phrase}
                         </span>
-                        <Leaf size={16} className="text-dorado" />
+                        <Leaf size={16} className="text-brand-500" />
                     </span>
                 ))}
             </div>

@@ -5,7 +5,7 @@ const dashboardOverviewSchema = z.object({
     totalRevenue: z.number(),
     totalPallets: z.number(),
     totalUnits: z.number(),
-    uniqueCustomers: z.number(),
+    uniqueSalespeople: z.number(),
     averageQuoteValue: z.number(),
 })
 
@@ -24,8 +24,8 @@ const dashboardTopProductSchema = z.object({
     totalRevenue: z.number(),
 })
 
-const dashboardTopCustomerSchema = z.object({
-    customerId: z.number().int(),
+const dashboardTopSalespersonSchema = z.object({
+    salespersonId: z.number().int(),
     name: z.string(),
     companyName: z.string().nullable(),
     email: z.string(),
@@ -34,8 +34,8 @@ const dashboardTopCustomerSchema = z.object({
     totalRevenue: z.number(),
 })
 
-const dashboardTopIngredientSchema = z.object({
-    ingredientId: z.number().int(),
+const dashboardTopRawMaterialSchema = z.object({
+    rawMaterialId: z.number().int(),
     displayName: z.string(),
     quoteCount: z.number(),
     totalCost: z.number(),
@@ -49,10 +49,10 @@ export const dashboardSummarySchema = z.object({
     overview: dashboardOverviewSchema,
     trend: z.array(dashboardTrendPointSchema),
     trendGranularity: z.enum(["day", "week"]),
+    // Ordenado por valor cotizado (backend); alimenta la lista y la dona de participación.
     topProducts: z.array(dashboardTopProductSchema),
-    topProductsByRevenue: z.array(dashboardTopProductSchema),
-    topCustomers: z.array(dashboardTopCustomerSchema),
-    topIngredients: z.array(dashboardTopIngredientSchema),
+    topSalespeople: z.array(dashboardTopSalespersonSchema),
+    topRawMaterials: z.array(dashboardTopRawMaterialSchema),
 })
 
 export type DashboardTrendPoint = z.infer<typeof dashboardTrendPointSchema>

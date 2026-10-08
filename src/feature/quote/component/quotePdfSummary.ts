@@ -1,4 +1,4 @@
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import type { QuoteLine } from "@/feature/quote/schema/quote.schema"
 
 // Único lugar donde vive el número de días de vigencia -- lo usan tanto el documento PDF
 // (quotePdfDocument.component.tsx) como el cuerpo del correo (quotePdfButton.component.tsx), así
@@ -13,6 +13,6 @@ export function calculateQuoteValidUntil(quoteDate: Date): Date {
     return validUntil
 }
 
-export function calculateQuoteOrderTotal(lines: QuoteCalculation[]): number {
+export function calculateQuoteOrderTotal(lines: QuoteLine[]): number {
     return lines.reduce((sum, line) => sum + line.totalCost, 0)
 }

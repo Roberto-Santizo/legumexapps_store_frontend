@@ -14,8 +14,6 @@ type ProcessingCostFormProps<T extends UpdateProcessingCostInput> = {
     watch: UseFormWatch<T>
 }
 
-// Un solo componente para crear/editar -- ver roleForm.component.tsx para la justificación del
-// patrón (Create/Update comparten los mismos campos, solo cambia la opcionalidad).
 export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
     register,
     errors,
@@ -23,9 +21,8 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
 }: Readonly<ProcessingCostFormProps<T>>) {
     const { t } = useTranslation()
 
-    // "value" significa algo distinto según el tipo elegido (Q/libra vs %) -- se lee en vivo con
-    // watch (mismo patrón que createUnit.component.tsx/editUnit.component.tsx) para que la
-    // etiqueta y el hint cambien apenas el admin cambia el selector, sin esperar a guardar.
+    // "value" significa algo distinto según el tipo elegido (USD/libra vs %): se lee en vivo con watch
+    // para que la etiqueta y el hint cambien apenas el admin cambia el selector.
     const calculationType = watch("calculationType" as Path<T>)
     const isPercentage = calculationType === "percentage"
 
@@ -35,6 +32,7 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
                 label={t("processingCost.form.displayName")}
                 htmlFor="displayName"
                 error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
+                required
             >
                 <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
             </FormField>
@@ -42,7 +40,8 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
             <FormField
                 label={t(isPercentage ? "processingCost.form.valueLabelPercentage" : "processingCost.form.valueLabelPerWeight")}
                 htmlFor="value"
-                error={getFieldErrorMessage(t, errors.value as FieldError | undefined)}
+                error={errors.value?.type === "custom" ? t("processingCost.form.percentageLimit") : getFieldErrorMessage(t, errors.value as FieldError | undefined)}
+                required
             >
                 <Input
                     id="value"
@@ -52,7 +51,7 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
                     {...register("value" as Path<T>, { setValueAs: toOptionalNumber })}
                 />
             </FormField>
-            <p className="mb-5 -mt-3 text-sm text-texto-suave">
+            <p className="mb-5 -mt-3 text-sm text-ink-600">
                 {t(isPercentage ? "processingCost.form.valueHintPercentage" : "processingCost.form.valueHintPerWeight")}
             </p>
 
@@ -60,6 +59,7 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
                 label={t("processingCost.form.calculationType")}
                 htmlFor="calculationType"
                 error={getFieldErrorMessage(t, errors.calculationType as FieldError | undefined)}
+                required
             >
                 <Select
                     id="calculationType"

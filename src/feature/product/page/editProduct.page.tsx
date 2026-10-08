@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -10,21 +11,21 @@ import type { ProductResponse, UpdateProductInput } from "@/feature/product/sche
 import { getProductByIdAPI, updateProductAPI } from "@/feature/product/api/product.api"
 import { ProductForm } from "@/feature/product/component/productForm.component"
 import { ProductVariantSection } from "@/feature/product/component/productVariantSection.component"
+import { ProductRawMaterialSection } from "@/feature/product/component/productRawMaterialSection.component"
 import { ProductIngredientSection } from "@/feature/product/component/productIngredientSection.component"
 import { ProductVariantPalletMaterialSection } from "@/feature/product/component/productVariantPalletMaterialSection.component"
 import { ProductVariantUnitMaterialSection } from "@/feature/product/component/productVariantUnitMaterialSection.component"
+import { ProductVariantIntermediateMaterialSection } from "@/feature/product/component/productVariantIntermediateMaterialSection.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
 
 function toFormValues(product: ProductResponse): UpdateProductInput {
-    // Ver el mismo comentario en editCategory.page.tsx::toFormValues.
     const englishTranslation = product.translations.find((translation) => translation.language === "en")
     return {
-        codigo: product.codigo,
         subCategoryId: product.subCategoryId,
-        productTypeId: product.productTypeId,
+        clientId: product.clientId,
         displayName: product.displayName,
         isOrganic: product.isOrganic,
         isCustomizable: product.isCustomizable,
@@ -72,7 +73,7 @@ export function EditProductPage() {
             navigate("/admin/products")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -83,15 +84,15 @@ export function EditProductPage() {
     return (
         <PageContainer className="max-w-4xl">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("product.edit.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("product.edit.title")}</h1>
                 <Link to="/admin/products" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             <Card className="mb-8">
-                {productQuery.isLoading && <p className="text-texto-suave">{t("common.loading")}</p>}
-                {productQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+                {productQuery.isLoading && <p className="text-ink-600">{t("common.loading")}</p>}
+                {productQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
                 {productQuery.data && (
                     <form onSubmit={onSubmit}>
@@ -111,19 +112,19 @@ export function EditProductPage() {
             {productQuery.data && (
                 <div className="space-y-8">
                     <Card>
-                        <h2 className="mb-4 text-lg font-semibold text-verde-profundo">
+                        <h2 className="mb-4 text-lg font-semibold text-ink-900">
                             {t("productVariant.list.title")}
                         </h2>
                         <ProductVariantSection productId={productId} />
                     </Card>
 
                     <Card>
-                        <h2 className="mb-4 text-lg font-semibold text-verde-profundo">
+                        <h2 className="mb-4 text-lg font-semibold text-ink-900">
                             {productQuery.data.data.isCustomizable
-                                ? t("productIngredient.list.titleCustomizable")
-                                : t("productIngredient.list.title")}
+                                ? t("productRawMaterial.list.titleCustomizable")
+                                : t("productRawMaterial.list.title")}
                         </h2>
-                        <ProductIngredientSection
+                        <ProductRawMaterialSection
                             productId={productId}
                             isCustomizable={productQuery.data.data.isCustomizable}
                             isOrganic={productQuery.data.data.isOrganic}
@@ -131,14 +132,28 @@ export function EditProductPage() {
                     </Card>
 
                     <Card>
-                        <h2 className="mb-4 text-lg font-semibold text-verde-profundo">
+                        <h2 className="mb-4 text-lg font-semibold text-ink-900">
+                            {t("productIngredient.list.title")}
+                        </h2>
+                        <ProductIngredientSection productId={productId} />
+                    </Card>
+
+                    <Card>
+                        <h2 className="mb-4 text-lg font-semibold text-ink-900">
                             {t("productVariantUnitMaterial.list.title")}
                         </h2>
                         <ProductVariantUnitMaterialSection productId={productId} />
                     </Card>
 
                     <Card>
-                        <h2 className="mb-4 text-lg font-semibold text-verde-profundo">
+                        <h2 className="mb-4 text-lg font-semibold text-ink-900">
+                            {t("productVariantIntermediateMaterial.list.title")}
+                        </h2>
+                        <ProductVariantIntermediateMaterialSection productId={productId} />
+                    </Card>
+
+                    <Card>
+                        <h2 className="mb-4 text-lg font-semibold text-ink-900">
                             {t("productVariantPalletMaterial.list.title")}
                         </h2>
                         <ProductVariantPalletMaterialSection productId={productId} />

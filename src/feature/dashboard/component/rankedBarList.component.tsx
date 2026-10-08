@@ -1,7 +1,7 @@
 import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import type { TooltipContentProps } from "recharts"
 import { Card } from "@/shared/component/card.component"
-import { CHART_AXIS_TEXT_COLOR, CHART_GRID_COLOR, CHART_TOOLTIP_BG, CHART_TOOLTIP_TEXT } from "@/feature/dashboard/constant/chartColors"
+import { CHART_AXIS_TEXT_COLOR, CHART_CURSOR_COLOR, CHART_GRID_COLOR, CHART_TOOLTIP_BG, CHART_TOOLTIP_TEXT } from "@/feature/dashboard/constant/chartColors"
 
 interface RankedBarListItem {
     key: string | number
@@ -31,7 +31,7 @@ function RankedBarTooltip({ active, payload }: Readonly<TooltipContentProps>) {
     const item = payload[0].payload as RankedBarListItem
 
     return (
-        <div className="max-w-55 rounded-lg px-3 py-2 text-xs shadow-card-hover" style={{ backgroundColor: CHART_TOOLTIP_BG, color: CHART_TOOLTIP_TEXT }}>
+        <div className="max-w-55 rounded-control border border-line px-3 py-2 text-xs shadow-panel" style={{ backgroundColor: CHART_TOOLTIP_BG, color: CHART_TOOLTIP_TEXT }}>
             <p className="font-semibold">{item.label}</p>
             <p className="mt-0.5">{item.valueLabel}</p>
             {item.secondaryLabel && <p className="mt-0.5 opacity-80">{item.secondaryLabel}</p>}
@@ -44,11 +44,11 @@ export function RankedBarList({ title, subtitle, items, emptyMessage, accentColo
 
     return (
         <Card>
-            <h2 className="font-display text-lg font-bold text-verde-profundo">{title}</h2>
-            {subtitle && <p className="mt-0.5 text-sm text-texto-suave">{subtitle}</p>}
+            <h2 className="font-display text-lg font-bold text-ink-900">{title}</h2>
+            {subtitle && <p className="mt-0.5 text-sm text-ink-600">{subtitle}</p>}
 
             {items.length === 0 ? (
-                <p className="mt-6 text-sm text-texto-suave">{emptyMessage}</p>
+                <p className="mt-6 text-sm text-ink-600">{emptyMessage}</p>
             ) : (
                 <div className="mt-4" style={{ width: "100%", height: chartData.length * ROW_HEIGHT + 16 }}>
                     <ResponsiveContainer>
@@ -63,9 +63,9 @@ export function RankedBarList({ title, subtitle, items, emptyMessage, accentColo
                                 axisLine={false}
                                 tick={{ fill: CHART_AXIS_TEXT_COLOR, fontSize: 12 }}
                             />
-                            <Tooltip content={RankedBarTooltip} cursor={{ fill: "rgba(15, 46, 30, 0.05)" }} />
+                            <Tooltip content={RankedBarTooltip} cursor={{ fill: CHART_CURSOR_COLOR }} />
                             <Bar dataKey="value" fill={accentColor} radius={[0, 4, 4, 0]} maxBarSize={18}>
-                                <LabelList dataKey="valueLabel" position="right" style={{ fill: "#0f2e1e", fontSize: 12, fontWeight: 700 }} />
+                                <LabelList dataKey="valueLabel" position="right" style={{ fill: "var(--color-ink-900)", fontSize: 12, fontWeight: 700 }} />
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>

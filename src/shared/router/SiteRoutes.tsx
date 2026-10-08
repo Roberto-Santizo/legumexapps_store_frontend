@@ -2,12 +2,15 @@ import { Suspense } from "react"
 import { Route } from "react-router-dom"
 import { SiteLayout } from "@/shared/layout/SiteLayout"
 import { Spinner } from "@/shared/component/spinner.component"
-import { CustomerProtectedRoute } from "@/shared/auth/customer/CustomerProtectedRoute"
+import { SalespersonProtectedRoute } from "@/shared/auth/salesperson/SalespersonProtectedRoute"
 import { lazyWithRetry } from "@/shared/router/lazyWithRetry"
 
 const HomePage = lazyWithRetry(() => import("@/feature/home/page/home.page").then((m) => ({ default: m.HomePage })))
 const QuoteRequestPage = lazyWithRetry(() =>
     import("@/feature/quote/page/quoteRequest.page").then((m) => ({ default: m.QuoteRequestPage }))
+)
+const CustomQuoteRequestPage = lazyWithRetry(() =>
+    import("@/feature/customQuote/page/catalogQuoteRequest.page").then((m) => ({ default: m.CatalogQuoteRequestPage }))
 )
 
 export default function SiteRoutes() {
@@ -24,11 +27,21 @@ export default function SiteRoutes() {
             <Route
                 path="/solicitud"
                 element={
-                    <CustomerProtectedRoute>
+                    <SalespersonProtectedRoute>
                         <Suspense fallback={<Spinner />}>
                             <QuoteRequestPage />
                         </Suspense>
-                    </CustomerProtectedRoute>
+                    </SalespersonProtectedRoute>
+                }
+            />
+            <Route
+                path="/solicitud/a-la-medida"
+                element={
+                    <SalespersonProtectedRoute>
+                        <Suspense fallback={<Spinner />}>
+                            <CustomQuoteRequestPage />
+                        </Suspense>
+                    </SalespersonProtectedRoute>
                 }
             />
         </Route>

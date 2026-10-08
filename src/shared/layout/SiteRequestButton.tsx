@@ -17,12 +17,12 @@ export function SiteRequestButton({ itemCount = 0, tone = "light" }: Readonly<Si
             to="/solicitud"
             aria-label={t(isB2cMode() ? "site.header.cart" : "site.header.request")}
             className={`relative flex h-10 w-10 items-center justify-center rounded-full transition ${
-                tone === "dark" ? "text-crema hover:bg-crema/15" : "text-verde-profundo hover:bg-crema"
+                tone === "dark" ? "text-canvas hover:bg-canvas/15" : "text-ink-900 hover:bg-canvas"
             }`}
         >
             <RequestIcon size={20} />
             {itemCount > 0 && (
-                <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-dorado font-mono text-[10px] font-medium text-verde-profundo">
+                <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 font-mono text-[10px] font-medium text-ink-900">
                     {itemCount}
                 </span>
             )}

@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -6,7 +7,14 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { createProductVariantPalletMaterialSchema } from "@/feature/product/schema/productVariantPalletMaterial.schema"
-import type { ProductVariantPalletMaterialResponse } from "@/feature/product/schema/productVariantPalletMaterial.schema"
+import type {
+    ProductVariantPalletMaterialResponse,
+    UpdateProductVariantPalletMaterialInput,
+} from "@/feature/product/schema/productVariantPalletMaterial.schema"
+import { sortByMaterialOptionGroup } from "@/feature/product/schema/materialOptionGroup.schema"
+import { getPackagingGroupOptionsAPI } from "@/feature/packagingGroup/api/packagingGroup.api"
+import { SearchableSelect } from "@/shared/component/searchableSelect.component"
+import { Checkbox } from "@/shared/component/checkbox.component"
 import {
     createProductVariantPalletMaterialAPI,
     deleteProductVariantPalletMaterialAPI,
@@ -16,7 +24,7 @@ import {
 import { getProductVariantsAPI } from "@/feature/product/api/productVariant.api"
 import { getPresentationsAPI } from "@/feature/presentation/api/presentation.api"
 import { getPackagingsAPI } from "@/feature/packaging/api/packaging.api"
-import { PalletMaterialSelect } from "@/feature/packaging/component/palletMaterialSelect.component"
+import { PackagingMaterialSelect } from "@/feature/packaging/component/packagingMaterialSelect.component"
 import { Select } from "@/shared/component/select.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
@@ -25,14 +33,26 @@ import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, 
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 
-const palletMaterialFormSchema = createProductVariantPalletMaterialSchema.omit({ productVariantId: true })
+// El checkbox solo controla si se envía un ID de grupo o null (material fijo).
+const palletMaterialFormSchema = createProductVariantPalletMaterialSchema
+    .omit({ productVariantId: true, optionGroup: true })
+    .extend({ isOptional: z.boolean(), customizeRule: z.boolean() })
+    .superRefine((values, ctx) => {
+        if (values.customizeRule && (!values.quantityBasis || !values.quantityValue)) ctx.addIssue({ code: "custom", path: ["quantityValue"], message: "errors.pallet_consumption_invalid" })
+        if (values.isOptional && values.optionGroupId === null) ctx.addIssue({ code: "custom", path: ["optionGroupId"], message: "optionGroupRequired" })
+    })
 type PalletMaterialFormInput = z.infer<typeof palletMaterialFormSchema>
-
+const EMPTY_MATERIAL_OPTION_GROUP_VALUES = { isOptional: false, optionGroupId: null, isDefault: false, customizeRule: false, quantityBasis: undefined, quantityValue: undefined }
 
 function toFormValues(item: ProductVariantPalletMaterialResponse): Partial<PalletMaterialFormInput> {
     return {
+        customizeRule: false,
         packagingId: item.packagingId,
-        quantityValue: item.quantityValue !== null ? Number(item.quantityValue) : undefined,
+        quantityValue: Number(item.quantityValue),
+        quantityBasis: item.quantityBasis,
+        isOptional: item.optionGroupId !== null,
+        optionGroupId: item.optionGroupId,
+        isDefault: item.isDefault,
     }
 }
 
@@ -45,6 +65,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
 
     const variantsQuery = useQuery({ queryKey: ["productVariants"], queryFn: getProductVariantsAPI })
     const presentationsQuery = useQuery({ queryKey: ["presentations"], queryFn: getPresentationsAPI })
+    const groupsQuery = useQuery({ queryKey: ["packagingGroupOptions"], queryFn: getPackagingGroupOptionsAPI, retry: false })
     const packagingsQuery = useQuery({ queryKey: ["packagings"], queryFn: getPackagingsAPI })
     const palletMaterialsQuery = useQuery({
         queryKey: ["productVariantPalletMaterials"],
@@ -56,7 +77,6 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
     const packagingNameById = new Map((packagingsQuery.data?.data ?? []).map((p) => [p.id, p.displayName]))
 
     function variantLabel(variant: (typeof variants)[number]): string {
-        if (variant.skuCode) return variant.skuCode
         if (variant.presentationId) return presentationNameById.get(variant.presentationId) ?? `#${variant.id}`
         return `#${variant.id}`
     }
@@ -64,22 +84,14 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
     const activeVariantId = selectedVariantId ?? variants[0]?.id ?? null
     const activeVariant = variants.find((variant) => variant.id === activeVariantId) ?? null
 
-    const palletMaterials = (palletMaterialsQuery.data?.data ?? []).filter(
-        (item) => item.productVariantId === activeVariantId
+    const palletMaterials = sortByMaterialOptionGroup(
+        (palletMaterialsQuery.data?.data ?? []).filter((item) => item.productVariantId === activeVariantId)
     )
 
-    // "Cajas por palet" (2026-09-12) ya NO se deriva acá -- es un input directo de la variante
-    // (ProductVariant.boxesPerPallet, ver productVariantSection.component.tsx), así que este
-    // hint solo lo muestra, no lo calcula. Antes había que bajar de unidades a bolsas grandes y
-    // de ahí a cajas (dos significados distintos de "unitsPerBox" según hubiera o no empaque
-    // intermedio) -- ese doble significado desapareció junto con la derivación.
-    //
-    // La bolsa grande (empaque intermedio) sigue sin cargarse como material de palet: su costo ya
-    // lo calcula quoteService.calculateQuote solo, a partir de unitsPerIntermediatePackage. El
-    // hint de "empaques intermedios por palet" sigue siendo puramente informativo, ahora derivado
-    // de bagsPerPallet (boxesPerPallet × bagsPerBox) en vez del viejo unitsPerPallet manual --
-    // matemáticamente igual para el mismo dato, solo cambia de dónde sale el multiplicando.
-    const hasIntermediatePackaging = !!activeVariant?.intermediatePackagingId && !!activeVariant?.unitsPerIntermediatePackage
+    // "Cajas por palet" es un input directo de la variante (ProductVariant.boxesPerPallet); este hint
+    // solo lo muestra. La bolsa grande (empaque intermedio) no se carga como material de palet: su costo
+    // lo calcula el motor a partir de unitsPerIntermediatePackage, así que su hint es informativo.
+    const hasIntermediatePackaging = !!activeVariant?.unitsPerIntermediatePackage
     const bagsPerPallet =
         activeVariant?.boxesPerPallet && activeVariant?.bagsPerBox
             ? activeVariant.boxesPerPallet * activeVariant.bagsPerBox
@@ -92,11 +104,31 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
 
     const {
         register,
+        setValue,
         control,
         handleSubmit,
         reset,
+        watch,
         formState: { errors },
-    } = useForm<PalletMaterialFormInput>({ resolver: zodResolver(palletMaterialFormSchema) })
+    } = useForm<PalletMaterialFormInput>({
+        resolver: zodResolver(palletMaterialFormSchema),
+        defaultValues: EMPTY_MATERIAL_OPTION_GROUP_VALUES,
+    })
+    const isOptional = watch("isOptional")
+    const selectedGroupId = watch("optionGroupId")
+    const customizeRule = watch("customizeRule")
+    const selectedPackagingId = watch("packagingId")
+    const selectedPackaging = packagingsQuery.data?.data.find(item => item.id === selectedPackagingId)
+    const existingMaterial = palletMaterials.find(item => item.id === editingId && item.packagingId === selectedPackagingId)
+    const effectiveBasis = existingMaterial?.quantityBasis ?? selectedPackaging?.defaultQuantityBasis
+    const effectiveQuantity = existingMaterial?.quantityValue ?? selectedPackaging?.defaultQuantityValue
+    const hasRule = !!effectiveBasis && effectiveQuantity != null && Number(effectiveQuantity) > 0
+    const existingGroupId = palletMaterials.find(item => item.id === editingId)?.optionGroupId
+    const groupOptions = (groupsQuery.data?.data ?? [])
+        .filter(group => group.isActive || group.id === existingGroupId)
+        .map(group => ({ value: group.id, label: group.displayName, isActive: group.isActive }))
+
+
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariantPalletMaterials"] })
 
@@ -105,23 +137,23 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, formData }: { id: number; formData: PalletMaterialFormInput }) =>
+        mutationFn: ({ id, formData }: { id: number; formData: UpdateProductVariantPalletMaterialInput }) =>
             updateProductVariantPalletMaterialAPI(id, formData),
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
             setEditingId(null)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const deleteMutation = useMutation({
@@ -130,15 +162,17 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
             invalidate()
             toast.success(data.message)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {
         if (!activeVariantId) return
+        const { isOptional: optional, customizeRule: custom, quantityBasis, quantityValue, ...rest } = formData
+        const payload = { ...rest, ...(custom ? { quantityBasis, quantityValue } : {}), optionGroup: null, optionGroupId: optional ? rest.optionGroupId : null, isDefault: optional && rest.isDefault }
         if (editingId) {
-            updateMutation.mutate({ id: editingId, formData })
+            updateMutation.mutate({ id: editingId, formData: payload })
         } else {
-            createMutation.mutate({ ...formData, productVariantId: activeVariantId })
+            createMutation.mutate({ ...payload, productVariantId: activeVariantId })
         }
     })
 
@@ -149,11 +183,11 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
 
     function cancelEdit() {
         setEditingId(null)
-        reset({})
+        reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
     }
 
     if (variants.length === 0) {
-        return <p className="text-texto-suave">{t("productVariantPalletMaterial.noVariants")}</p>
+        return <p className="text-ink-600">{t("productVariantPalletMaterial.noVariants")}</p>
     }
 
     return (
@@ -176,7 +210,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
             </FormField>
 
             {hasIntermediatePackaging && intermediatePackagesPerPallet !== null && (
-                <p className="mb-1 -mt-2 text-sm text-texto-suave">
+                <p className="mb-1 -mt-2 text-sm text-ink-600">
                     {t("productVariantPalletMaterial.intermediatePackagesPerPalletHint", {
                         bagsPerPallet,
                         unitsPerIntermediatePackage: activeVariant?.unitsPerIntermediatePackage,
@@ -186,7 +220,7 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
             )}
 
             {boxesPerPallet !== null && (
-                <p className="mb-4 -mt-2 text-sm text-texto-suave">
+                <p className="mb-4 -mt-2 text-sm text-ink-600">
                     {t("productVariantPalletMaterial.boxesPerPalletHint", { boxesPerPallet })}
                 </p>
             )}
@@ -197,6 +231,8 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                         <TableRow>
                             <Th>{t("productVariantPalletMaterial.form.packagingId")}</Th>
                             <Th>{t("productVariantPalletMaterial.form.quantityValue")}</Th>
+                            <Th>{t("materialOptionGroup.table.group")}</Th>
+                            <Th>{t("materialOptionGroup.table.default")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -204,19 +240,21 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                         {palletMaterials.map((item) => (
                             <TableRow key={item.id}>
                                 <Td>{packagingNameById.get(item.packagingId) ?? "-"}</Td>
-                                <Td>{item.quantityValue ?? "-"}</Td>
+                                <Td>{item.quantityValue ?? "-"} {t(item.quantityBasis === "per_box" ? "productVariantPalletMaterial.perBox" : "productVariantPalletMaterial.perPallet")}</Td>
+                                <Td>{item.optionGroup ?? t("materialOptionGroup.table.fixed")}</Td>
+                                <Td>{item.optionGroup !== null && item.isDefault ? t("common.yes") : "-"}</Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
                                         onClick={() => startEdit(item)}
-                                        className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.edit")}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => deleteMutation.mutate(item.id)}
-                                        className="font-medium text-error-fg underline underline-offset-4"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-danger underline underline-offset-4 transition-colors hover:bg-danger-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.delete")}
                                     </button>
@@ -235,25 +273,46 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                     label={t("productVariantPalletMaterial.form.packagingId")}
                     htmlFor="packagingId"
                     error={getFieldErrorMessage(t, errors.packagingId)}
+                    required
                 >
                     <Controller
                         name="packagingId"
                         control={control}
                         render={({ field }) => (
-                            <PalletMaterialSelect
+                            <PackagingMaterialSelect
+                                role="pallet"
                                 inputId="packagingId"
                                 hasError={!!errors.packagingId}
                                 value={field.value}
-                                onChange={field.onChange}
+                                onChange={value => {
+                                    field.onChange(value)
+                                    setValue("customizeRule", false)
+                                    setValue("quantityBasis", undefined)
+                                    setValue("quantityValue", undefined)
+                                }}
                             />
                         )}
                     />
                 </FormField>
 
+                <div className="mb-5 sm:col-span-2">
+                    <p className="mb-3 text-sm">{t("packaging.consumption.rule")}: {hasRule
+                        ? `${effectiveQuantity} ${t(effectiveBasis === "per_box" ? "productVariantPalletMaterial.perBox" : "productVariantPalletMaterial.perPallet")}`
+                        : t("packaging.consumption.missing")}</p>
+                    {existingMaterial && <p className="mb-3 text-sm text-ink-600">{t("packaging.consumption.existing")}</p>}
+                    <Controller name="customizeRule" control={control} render={({ field }) => <Checkbox id="customizePalletRule" label={t("packaging.consumption.customize")} checked={field.value} onChange={event => {
+                        field.onChange(event.target.checked)
+                        setValue("quantityBasis", event.target.checked ? effectiveBasis ?? "per_pallet" : undefined)
+                        setValue("quantityValue", event.target.checked && effectiveQuantity != null ? Number(effectiveQuantity) : undefined)
+                    }} />} />
+                    {customizeRule && <p className="mt-2 text-sm text-danger">{t("packaging.consumption.overrideWarning")}</p>}
+                </div>
+                {customizeRule && <>
                 <FormField
                     label={t("productVariantPalletMaterial.form.quantityValue")}
                     htmlFor="quantityValue"
                     error={getFieldErrorMessage(t, errors.quantityValue)}
+                    required
                 >
                     <Input
                         id="quantityValue"
@@ -264,8 +323,39 @@ export function ProductVariantPalletMaterialSection({ productId }: Readonly<{ pr
                     />
                 </FormField>
 
+                <FormField required label={t("productVariantPalletMaterial.form.quantityBasis")} htmlFor="palletQuantityBasis">
+                    <Select id="palletQuantityBasis" {...register("quantityBasis")}>
+                        <option value="per_box">{t("productVariantPalletMaterial.perBox")}</option>
+                        <option value="per_pallet">{t("productVariantPalletMaterial.perPallet")}</option>
+                    </Select>
+                </FormField>
+
+                </>}
+
+                <div className="mb-5 sm:col-span-2">
+                    <Checkbox id="palletMaterialIsOptional" label={t("materialOptionGroup.isOptional")} {...register("isOptional")} />
+                </div>
+                {isOptional && <>
+                    <FormField required label={t("materialOptionGroup.optionGroup")} htmlFor="palletMaterialOptionGroup" error={errors.optionGroupId ? t("materialOptionGroup.optionGroupRequired") : undefined}>
+                        <Controller name="optionGroupId" control={control} render={({ field }) => <SearchableSelect
+                            inputId="palletMaterialOptionGroup"
+                            options={groupOptions}
+                            value={groupOptions.find(option => option.value === field.value) ?? null}
+                            onChange={option => field.onChange(option?.value ?? null)}
+                            isOptionDisabled={option => groupsQuery.data?.data.find(group => group.id === option.value)?.isActive === false && option.value !== existingGroupId}
+                            isLoading={groupsQuery.isLoading}
+                            hasError={!!errors.optionGroupId || groupsQuery.isError}
+                            placeholder={t("packagingGroup.select")}
+                            noOptionsMessage={() => t("packagingGroup.noOptions")}
+                        />} />
+                        {groupsQuery.isError && <p className="text-sm text-danger">{t("common.loadError")}</p>}
+                    </FormField>
+                    <div className="mb-5 flex items-end"><Checkbox id="palletMaterialIsDefault" label={t("materialOptionGroup.isDefault")} {...register("isDefault")} /></div>
+                    <p className="mb-5 text-sm text-ink-600 sm:col-span-2">{t("materialOptionGroup.hint")}</p>
+                </>}
+
                 <div className="flex gap-3 sm:col-span-2">
-                    <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                    <Button type="submit" disabled={(!customizeRule && !hasRule) || createMutation.isPending || updateMutation.isPending || (isOptional && (groupsQuery.isLoading || groupsQuery.isError || !selectedGroupId))}>
                         {editingId ? t("common.save") : t("productVariantPalletMaterial.form.addButton")}
                     </Button>
                     {editingId && (

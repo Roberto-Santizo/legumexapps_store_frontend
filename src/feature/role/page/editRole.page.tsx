@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -55,7 +56,7 @@ export function EditRolePage() {
             toast.success(data.message)
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -66,15 +67,15 @@ export function EditRolePage() {
     return (
         <PageContainer className="max-w-4xl">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("role.edit.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("role.edit.title")}</h1>
                 <Link to="/admin/roles" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
             </div>
 
             <Card className="mb-8">
-                {roleQuery.isLoading && <p className="text-texto-suave">{t("common.loading")}</p>}
-                {roleQuery.isError && <p className="text-error-fg">{t("common.loadError")}</p>}
+                {roleQuery.isLoading && <p className="text-ink-600">{t("common.loading")}</p>}
+                {roleQuery.isError && <p className="text-danger">{t("common.loadError")}</p>}
 
                 {roleQuery.data && (
                     <form onSubmit={onSubmit}>
@@ -88,7 +89,7 @@ export function EditRolePage() {
 
             {roleQuery.data && (
                 <Card>
-                    <h2 className="mb-4 text-lg font-semibold text-verde-profundo">{t("role.permissions.title")}</h2>
+                    <h2 className="mb-4 text-lg font-semibold text-ink-900">{t("role.permissions.title")}</h2>
                     <RolePermissionSection roleId={roleId} />
                 </Card>
             )}

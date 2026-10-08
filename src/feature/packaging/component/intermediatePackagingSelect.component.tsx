@@ -9,10 +9,8 @@ type IntermediatePackagingSelectProps = SelectHTMLAttributes<HTMLSelectElement> 
     hasError?: boolean
 }
 
-// Solo empaques de rol "intermediate" -- la bolsa grande que agrupa varias unidades pequeñas
-// antes de ir a la caja (ver ProductVariant.intermediatePackagingId). Mismo patrón que
-// unitMaterialSelect.component.tsx (rol "unit") y palletMaterialSelect.component.tsx (rol "pallet"),
-// salvo que este selector se queda nativo (sin búsqueda): es un FK único, no un join de N filas.
+// Solo empaques de rol "intermediate" (la bolsa grande que agrupa varias unidades antes de la caja);
+// selector nativo, sin búsqueda.
 export const IntermediatePackagingSelect = forwardRef<HTMLSelectElement, IntermediatePackagingSelectProps>(
     function IntermediatePackagingSelect({ hasError, ...props }, ref) {
         const { t } = useTranslation()

@@ -1,28 +1,26 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Truck, Wheat, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent } from "lucide-react"
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import { Truck, Wheat, FlaskConical, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent } from "lucide-react"
+import type { QuoteLine } from "@/feature/quote/schema/quote.schema"
 import { Card } from "@/shared/component/card.component"
 import { Spinner } from "@/shared/component/spinner.component"
 import { formatCurrency } from "@/shared/format/currency"
 
 type QuoteResultCardProps = {
-    result: QuoteCalculation | null
+    result: QuoteLine | null
     isPending: boolean
     showCostBreakdown?: boolean
-    // Transporte "apagado" para TODOS por ahora (2026-09-10, fase 2 -- ver quoteCalculatorForm
-    // showDestination): default false a propósito, independiente de showCostBreakdown -- ese
-    // flag sigue gobernando el resto de líneas del desglose (materia prima, empaques, costos
-    // adicionales, etc.), que el admin SÍ debe seguir viendo. No reusar showCostBreakdown acá
-    // otra vez (como se hizo en la fase 1, solo para cliente) porque ahora también hay que
-    // apagar transporte para el admin, que sigue con showCostBreakdown=true. Reversión futura:
-    // volver el default a true (o pasarlo explícito) donde se quiera reactivar.
+    // Transporte apagado para todos por ahora: default false e independiente de showCostBreakdown, que
+    // sigue gobernando el resto del desglose que el admin sí ve.
     showTransport?: boolean
-    // Aviso "cotización de referencia" (2026-09-13) -- default false, SOLO el cliente
-    // (quoteRequest.page.tsx) lo activa. El admin (AdminQuoteListPage/adminQuoteCalculatorPage)
-    // no lo pasa: internamente el staff SÍ conoce el desglose real, el aviso es para quien
-    // recibe el precio desde afuera sin ver cómo se armó.
+    // Aviso "cotización de referencia": solo lo activa el wizard del representante.
     showReferenceDisclaimer?: boolean
+}
+
+// Grupos de opciones: una fila elegida de un grupo se muestra como "Caja: caja de
+// envío" en el desglose admin; una fila fija (optionGroup null) solo con su nombre.
+function materialLineLabel(line: { displayName: string; optionGroup: string | null }): string {
+    return line.optionGroup ? `${line.optionGroup}: ${line.displayName}` : line.displayName
 }
 
 function CostRow({
@@ -34,10 +32,10 @@ function CostRow({
     return (
         <div className="flex items-start justify-between gap-3 py-1.5 text-sm">
             <div>
-                <p className="text-verde-profundo">{label}</p>
-                {quantityLabel && <p className="text-xs text-texto-suave">{quantityLabel}</p>}
+                <p className="text-ink-900">{label}</p>
+                {quantityLabel && <p className="text-xs text-ink-600">{quantityLabel}</p>}
             </div>
-            <p className="shrink-0 font-medium text-verde-profundo">{format(lineTotal)}</p>
+            <p className="shrink-0 font-medium text-ink-900">{format(lineTotal)}</p>
         </div>
     )
 }
@@ -56,15 +54,15 @@ function CostSection({
     children: ReactNode
 }>) {
     return (
-        <div className="border-t border-gris-campo pt-4 first:border-t-0 first:pt-0">
+        <div className="border-t border-line pt-4 first:border-t-0 first:pt-0">
             <div className="mb-2 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-texto-suave">
+                <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-ink-600">
                     {icon}
                     {title}
                 </div>
-                <p className="text-sm font-semibold text-verde-profundo">{format(subtotal)}</p>
+                <p className="text-sm font-semibold text-ink-900">{format(subtotal)}</p>
             </div>
-            <div className="divide-y divide-gris-campo/60">{children}</div>
+            <div className="divide-y divide-line/60">{children}</div>
         </div>
     )
 }
@@ -77,9 +75,7 @@ export function QuoteResultCard({
     showReferenceDisclaimer = false,
 }: Readonly<QuoteResultCardProps>) {
     const { t } = useTranslation()
-    // Sistema USD-only (2026-09-10): ya no hay toggle de moneda ni conversión -- todo se muestra
-    // en dólares con el formatter compartido. `format` se mantiene como alias para no tener que
-    // tocar la firma de CostRow/CostSection (siguen recibiendo un formatter por prop).
+    // Sistema solo en USD: los montos se muestran con el formatter compartido.
     const format = formatCurrency
 
     if (isPending) {
@@ -93,8 +89,8 @@ export function QuoteResultCard({
     if (!result) {
         return (
             <Card className="flex min-h-80 flex-col items-center justify-center gap-3 text-center">
-                <FileSpreadsheet className="h-10 w-10 text-gris-campo" />
-                <p className="max-w-xs text-texto-suave">{t("site.quoteRequest.result.empty")}</p>
+                <FileSpreadsheet className="h-10 w-10 text-ink-400" />
+                <p className="max-w-xs text-ink-600">{t("site.quoteRequest.result.empty")}</p>
             </Card>
         )
     }
@@ -104,56 +100,50 @@ export function QuoteResultCard({
 
     return (
         <Card>
-            <div className={`mb-5 flex items-start gap-3 border-b border-gris-campo pb-5 ${showTransport ? "justify-between" : "justify-end"}`}>
+            <div className={`mb-5 flex items-start gap-3 border-b border-line pb-5 ${showTransport ? "justify-between" : "justify-end"}`}>
                 {showTransport && (
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">
                             {t("site.quoteRequest.result.destination")}
                         </p>
-                        <p className="font-display text-lg font-bold text-verde-profundo">{breakdown.transport.displayName}</p>
+                        <p className="font-display text-lg font-bold text-ink-900">{breakdown.transport.displayName}</p>
                     </div>
                 )}
                 <div className="text-right">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">
                         {t("site.quoteRequest.result.total")}
                     </p>
-                    <p className="font-display text-2xl font-extrabold text-verde-profundo">{format(result.totalCost)}</p>
+                    <p className="font-display text-2xl font-extrabold text-ink-900">{format(result.totalCost)}</p>
                 </div>
             </div>
 
-            {/* Aviso "cotización de referencia" (2026-09-13) -- solo cliente, ver
-            showReferenceDisclaimer arriba. Un bloque corto, en rojo, cerca del total -- nunca en
-            el cotizador interno del admin. */}
+            {/* Aviso "cotización de referencia" (solo representante), cerca del total. */}
             {showReferenceDisclaimer && (
-                <p className="mb-5 rounded-[10px] border border-error-bd bg-error-bg px-3 py-2.5 text-sm font-medium text-error-fg">
+                <p className="mb-5 rounded-[10px] border border-danger-border bg-danger-bg px-3 py-2.5 text-sm font-medium text-danger">
                     {t("site.quoteRequest.result.referenceDisclaimer")}
                 </p>
             )}
 
             <div className="mb-5 grid grid-cols-3 gap-3 text-center">
-                <div className="rounded-[10px] bg-crema p-3">
-                    <p className="text-lg font-bold text-verde-profundo">{result.requestedPallets}</p>
-                    <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.pallets")}</p>
+                <div className="rounded-[10px] bg-canvas p-3">
+                    <p className="text-lg font-bold text-ink-900">{result.requestedPallets}</p>
+                    <p className="text-xs text-ink-600">{t("site.quoteRequest.result.pallets")}</p>
                 </div>
-                {/* El cliente final ve CAJAS por palet, no el conteo crudo de bolsas (totalUnits
-                es un dato interno) -- ver boxesPerPallet en QuoteCalculation, calculado por
-                quoteService y solo optional en el schema por compatibilidad con cotizaciones
-                históricas releídas de la BD (que el admin sí puede ver, ver quote.schema.ts).
-                El admin (showCostBreakdown=true) sigue viendo el total de unidades como siempre. */}
+                {/* El representante ve cajas por palet; el total de unidades es un dato interno que solo ve el admin. */}
                 {showCostBreakdown ? (
-                    <div className="rounded-[10px] bg-crema p-3">
-                        <p className="text-lg font-bold text-verde-profundo">{result.totalUnits.toLocaleString("es-MX")}</p>
-                        <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.units")}</p>
+                    <div className="rounded-[10px] bg-canvas p-3">
+                        <p className="text-lg font-bold text-ink-900">{result.totalUnits.toLocaleString("es-MX")}</p>
+                        <p className="text-xs text-ink-600">{t("site.quoteRequest.result.units")}</p>
                     </div>
                 ) : (
-                    <div className="rounded-[10px] bg-crema p-3">
-                        <p className="text-lg font-bold text-verde-profundo">{result.boxesPerPallet ?? "-"}</p>
-                        <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.boxesPerPallet")}</p>
+                    <div className="rounded-[10px] bg-canvas p-3">
+                        <p className="text-lg font-bold text-ink-900">{result.boxesPerPallet ?? "-"}</p>
+                        <p className="text-xs text-ink-600">{t("site.quoteRequest.result.boxesPerPallet")}</p>
                     </div>
                 )}
-                <div className="rounded-[10px] bg-crema p-3">
-                    <p className="text-lg font-bold text-verde-profundo">{format(costPerPallet)}</p>
-                    <p className="text-xs text-texto-suave">{t("site.quoteRequest.result.perPallet")}</p>
+                <div className="rounded-[10px] bg-canvas p-3">
+                    <p className="text-lg font-bold text-ink-900">{format(costPerPallet)}</p>
+                    <p className="text-xs text-ink-600">{t("site.quoteRequest.result.perPallet")}</p>
                 </div>
             </div>
 
@@ -167,8 +157,32 @@ export function QuoteResultCard({
                     >
                         {breakdown.rawMaterials.map((line) => (
                             <CostRow
-                                key={line.ingredientId}
+                                key={line.rawMaterialId}
                                 label={line.displayName}
+                                quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
+                                    count: line.totalUnits.toLocaleString("es-MX"),
+                                })}
+                                lineTotal={line.lineTotal}
+                                format={format}
+                            />
+                        ))}
+                    </CostSection>
+                )}
+
+                {showCostBreakdown && breakdown.ingredients && breakdown.ingredients.length > 0 && (
+                    <CostSection
+                        icon={<FlaskConical size={15} />}
+                        title={t("site.quoteRequest.result.ingredients")}
+                        subtotal={result.ingredientCost ?? 0}
+                        format={format}
+                    >
+                        {breakdown.ingredients.map((line) => (
+                            <CostRow
+                                key={line.ingredientId}
+                                label={t("site.quoteRequest.result.ingredientLabel", {
+                                    name: line.displayName,
+                                    grams: line.gramsPerUnit.toLocaleString("es-MX", { maximumFractionDigits: 3 }),
+                                })}
                                 quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
                                     count: line.totalUnits.toLocaleString("es-MX"),
                                 })}
@@ -189,7 +203,7 @@ export function QuoteResultCard({
                         {breakdown.unitMaterials.map((line) => (
                             <CostRow
                                 key={line.packagingId}
-                                label={line.displayName}
+                                label={materialLineLabel(line)}
                                 quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
                                     count: line.totalUnits.toLocaleString("es-MX"),
                                 })}
@@ -200,21 +214,24 @@ export function QuoteResultCard({
                     </CostSection>
                 )}
 
-                {showCostBreakdown && breakdown.intermediatePackaging && (
+                {showCostBreakdown && breakdown.intermediateMaterials && breakdown.intermediateMaterials.length > 0 && (
                     <CostSection
                         icon={<PackagePlus size={15} />}
                         title={t("site.quoteRequest.result.intermediatePackaging")}
                         subtotal={result.intermediatePackagingCost}
                         format={format}
                     >
-                        <CostRow
-                            label={breakdown.intermediatePackaging.displayName}
-                            quantityLabel={t("site.quoteRequest.result.intermediatePackagesQuantity", {
-                                count: breakdown.intermediatePackaging.packagesNeeded.toLocaleString("es-MX"),
-                            })}
-                            lineTotal={breakdown.intermediatePackaging.lineTotal}
-                            format={format}
-                        />
+                        {breakdown.intermediateMaterials.map((line) => (
+                            <CostRow
+                                key={line.packagingId}
+                                label={materialLineLabel(line)}
+                                quantityLabel={t("site.quoteRequest.result.intermediatePackagesQuantity", {
+                                    count: line.packagesNeeded.toLocaleString("es-MX"),
+                                })}
+                                lineTotal={line.lineTotal}
+                                format={format}
+                            />
+                        ))}
                     </CostSection>
                 )}
 
@@ -241,7 +258,7 @@ export function QuoteResultCard({
                         {breakdown.palletMaterials.map((line) => (
                             <CostRow
                                 key={line.packagingId}
-                                label={line.displayName}
+                                label={materialLineLabel(line)}
                                 quantityLabel={t("site.quoteRequest.result.palletsQuantity", { count: line.requestedPallets })}
                                 lineTotal={line.lineTotal}
                                 format={format}

@@ -10,7 +10,6 @@ const presentationPaginatedListResponseSchema = apiPaginatedListResponseSchema(r
 const presentationItemResponseSchema = apiItemResponseSchema(responsePresentationSchema)
 const presentationMutationResponseSchema = apiMutationResponseSchema(responsePresentationSchema)
 
-// Sin params -- también la usa PresentationSelect. No tocar esta firma.
 export async function getPresentationsAPI() {
     try {
         const { data } = await api.get("/presentations")
@@ -58,8 +57,5 @@ export async function updatePresentationAPI(id: number, formData: UpdatePresenta
     }
 }
 
-// Reusan el plumbing genérico de shared/api/bulkImport.api.ts -- mismo diseño para todos los
-// catálogos con carga masiva (ver esa entrada de memoria del proyecto); lo único específico de
-// Presentaciones acá es la URL.
 export const bulkImportPresentationsAPI = (file: File) => postBulkImportFile("/presentations/bulk-import", file)
 export const downloadPresentationImportTemplateAPI = () => getBulkImportTemplate("/presentations/bulk-import/template")

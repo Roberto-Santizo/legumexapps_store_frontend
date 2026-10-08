@@ -20,13 +20,13 @@ export function SiteMobileMenu({ isOpen, onClose }: Readonly<SiteMobileMenuProps
             <button
                 type="button"
                 aria-label={t("site.header.closeMenu")}
-                className="absolute inset-0 bg-verde-profundo/40"
+                className="absolute inset-0 bg-brand-900/40"
                 onClick={onClose}
             />
-            <div className="absolute inset-y-0 right-0 flex w-full max-w-xs flex-col gap-8 bg-hueso p-6 shadow-card">
+            <div className="absolute inset-y-0 right-0 flex w-full max-w-xs flex-col gap-8 bg-surface p-6 shadow-panel">
                 <div className="flex items-center justify-between">
-                    <span className="font-display text-lg font-extrabold uppercase text-verde-profundo">Legumex</span>
-                    <button type="button" aria-label={t("site.header.closeMenu")} onClick={onClose} className="text-verde-profundo">
+                    <span className="font-display text-lg font-extrabold uppercase text-ink-900">Legumex</span>
+                    <button type="button" aria-label={t("site.header.closeMenu")} onClick={onClose} className="text-ink-900">
                         <X size={22} />
                     </button>
                 </div>

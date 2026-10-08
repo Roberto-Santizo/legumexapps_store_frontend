@@ -23,7 +23,7 @@ export function PasswordInput({
 
     return (
         <div className="relative">
-            <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-texto-suave" />
+            <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-600" />
             <Input
                 id={id}
                 type={isVisible ? "text" : "password"}
@@ -38,7 +38,7 @@ export function PasswordInput({
                 type="button"
                 onClick={() => setIsVisible((visible) => !visible)}
                 aria-label={isVisible ? hidePasswordLabel : showPasswordLabel}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-texto-suave transition hover:text-verde-profundo"
+                className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center text-ink-600 rounded-action transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface hover:text-ink-900"
             >
                 {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>

@@ -10,7 +10,7 @@ export function ProductLinesSection() {
     const { t } = useTranslation()
 
     return (
-        <section id="lineas" className="bg-crema py-24 sm:py-32">
+        <section id="lineas" className="bg-landing-cream py-20 sm:py-28">
             <SiteContainer>
                 <motion.div
                     variants={fadeUp}
@@ -19,13 +19,13 @@ export function ProductLinesSection() {
                     viewport={viewportOnce}
                     className="mx-auto max-w-2xl text-center"
                 >
-                    <span className="font-mono text-xs uppercase tracking-[0.14em] text-dorado-hover">
+                    <span className="font-mono text-xs uppercase tracking-[0.14em] text-brand-700">
                         {t("home.lines.eyebrow")}
                     </span>
-                    <h2 className="mt-4 font-display text-3xl font-extrabold uppercase tracking-tight text-verde-profundo sm:text-4xl">
+                    <h2 className="mt-4 font-display text-3xl font-bold uppercase tracking-tight text-ink-900 sm:text-4xl">
                         {t("home.lines.title")}
                     </h2>
-                    <p className="mt-5 text-base leading-relaxed text-texto-suave sm:text-lg">{t("home.lines.subtitle")}</p>
+                    <p className="mt-5 text-base leading-relaxed text-ink-600 sm:text-lg">{t("home.lines.subtitle")}</p>
                 </motion.div>
 
                 <div className="mt-20 flex flex-col gap-24 sm:mt-24 sm:gap-32">
@@ -35,7 +35,7 @@ export function ProductLinesSection() {
                 </div>
 
                 <div className="mt-24 sm:mt-28">
-                    <h3 className="text-center font-display text-xl font-bold uppercase tracking-tight text-verde-profundo">
+                    <h3 className="text-center font-display text-xl font-bold uppercase tracking-tight text-ink-900">
                         {t("home.lines.highlightsTitle")}
                     </h3>
                     <ProductHighlightsCarousel />

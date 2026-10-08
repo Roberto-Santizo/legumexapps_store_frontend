@@ -12,11 +12,11 @@ export function StatTile({ label, value, caption, icon }: Readonly<StatTileProps
     return (
         <Card className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-                <p className="text-sm font-medium text-texto-suave">{label}</p>
-                <p className="mt-1 truncate font-display text-2xl font-extrabold text-verde-profundo">{value}</p>
-                {caption && <p className="mt-1 text-xs text-texto-suave">{caption}</p>}
+                <p className="text-sm font-medium text-ink-600">{label}</p>
+                <p className="mt-1 truncate font-display text-2xl font-extrabold text-ink-900">{value}</p>
+                {caption && <p className="mt-1 text-xs text-ink-600">{caption}</p>}
             </div>
-            <div className="shrink-0 rounded-[10px] bg-crema p-2 text-verde-tinta">{icon}</div>
+            <div className="shrink-0 rounded-control bg-canvas p-2 text-focus">{icon}</div>
         </Card>
     )
 }

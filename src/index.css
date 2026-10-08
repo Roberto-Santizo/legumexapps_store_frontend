@@ -2,12 +2,75 @@
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
-@import "@fontsource/archivo/700.css";
-@import "@fontsource/archivo/800.css";
-@import "@fontsource/jetbrains-mono/400.css";
-@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/inter/700.css";
 
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+/* Phase 1: shared brand foundation. Legacy color aliases below remain available
+   until component adoption in phase 2. */
 @theme {
+    --color-brand-900: #044e27;
+    --color-brand-700: #0a6b38;
+    --color-brand-500: #6eac19;
+    --color-brand-300: #9dc092;
+
+    --color-ink-900: #1a2b22;
+    --color-ink-600: #5b6b63;
+    --color-ink-400: #8a978f;
+    --color-line: #e3e8e4;
+    --color-surface: #ffffff;
+    --color-canvas: #f6f8f5;
+    /* Soft Customize surfaces derived from the existing brand palette. */
+    --color-customize-mint: color-mix(in srgb, var(--color-brand-300) 18%, var(--color-surface));
+    --color-customize-cream: color-mix(in srgb, var(--color-dorado) 10%, var(--color-surface));
+    --color-customize-slate: #eef4f6;
+    --color-customize-slate-border: color-mix(in srgb, var(--color-customize-slate) 80%, var(--color-ink-400));
+
+    --color-success: #2e7d32;
+    --color-success-bg: #edf6ed;
+    --color-success-border: #bdd9bf;
+    --color-danger: #c0362c;
+    --color-danger-bg: #fcefeb;
+    --color-danger-border: #eac5be;
+    --color-warning: #c98a14;
+    --color-warning-fg: #80570a;
+    --color-warning-bg: #fff6e3;
+    --color-warning-border: #ead4a3;
+    --color-info: #2a6f8e;
+    --color-info-bg: #edf5f8;
+    --color-info-border: #bed7e1;
+
+    --color-action-primary: #044e27;
+    --color-action-primary-hover: #0a6b38;
+    --color-action-primary-text: #ffffff;
+    --color-focus: #0a6b38;
+
+    /* Tailwind spacing utilities use this 4px base. */
+    --spacing: 0.25rem;
+    --spacing-control: 2.75rem;
+    --radius-control: 0.625rem;
+    --radius-panel: 0.75rem;
+    --radius-action: 0.5rem;
+    --radius-badge: 999px;
+    --shadow-panel: 0 1px 4px rgb(4 78 39 / 0.06);
+
+    --text-xs: 0.75rem;
+    --text-xs--line-height: 1.5;
+    --text-sm: 0.875rem;
+    --text-sm--line-height: 1.5;
+    --text-base: 1rem;
+    --text-base--line-height: 1.5;
+    --text-lg: 1.125rem;
+    --text-lg--line-height: 1.5;
+    --text-xl: 1.25rem;
+    --text-xl--line-height: 1.4;
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: 1.3;
+    --text-3xl: 1.875rem;
+    --text-3xl--line-height: 1.25;
+    --text-4xl: 2.25rem;
+    --text-4xl--line-height: 1.2;
+
     /* Base */
     --color-verde-profundo: #0f2e1e;
     --color-verde-tinta: #1c4430;
@@ -52,14 +115,54 @@
     --max-width-site: 1280px;
 
     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-    --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Explicit theme activation; the layout phase will connect the theme selector. */
+:root {
+    color-scheme: light;
+}
+
+:root.dark,
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --color-canvas: #101613;
+    --color-surface: #19211c;
+    --color-ink-900: #edf3ee;
+    --color-ink-600: #bac7bf;
+    --color-ink-400: #94a69a;
+    --color-line: #3a4b40;
+    --color-success: #86c98a;
+    --color-success-bg: #1a3020;
+    --color-success-border: #39583c;
+    --color-danger: #f2998e;
+    --color-danger-bg: #35201d;
+    --color-danger-border: #72463f;
+    --color-warning: #e7b754;
+    --color-warning-fg: #e7b754;
+    --color-warning-bg: #302818;
+    --color-warning-border: #665431;
+    --color-info: #87bfd7;
+    --color-info-bg: #192d36;
+    --color-info-border: #395968;
+    --color-action-primary: #6eac19;
+    --color-action-primary-hover: #9dc092;
+    --color-action-primary-text: #101613;
+    --color-focus: #9dc092;
+    --shadow-panel: 0 1px 4px rgb(0 0 0 / 0.2);
 }
 
 body {
-    background-color: var(--color-crema);
-    color: var(--color-verde-profundo);
+    background-color: var(--color-canvas);
+    color: var(--color-ink-900);
     font-family: var(--font-sans);
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+}
+
+.font-mono {
+    font-variant-numeric: tabular-nums;
 }
 
 
@@ -100,4 +203,320 @@ body {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* Public home only: cream and sage surfaces, independent of the admin theme. */
+@theme {
+    --color-landing-cream: #f7f3ea;
+    --color-landing-sage: color-mix(in srgb, var(--color-brand-300) 35%, var(--color-landing-cream));
+}
+
+.landing-theme {
+    color-scheme: light;
+    --color-canvas: var(--color-landing-cream);
+    --color-surface: var(--color-landing-cream);
+    --color-ink-900: var(--color-brand-900);
+    --color-ink-600: #536258;
+    --color-ink-400: #78847b;
+    --color-line: #ded9ce;
+    --color-focus: var(--color-brand-700);
+    --color-action-primary: var(--color-brand-900);
+    --color-action-primary-hover: var(--color-brand-700);
+    --color-action-primary-text: var(--color-landing-cream);
+    --color-danger: #c0362c;
+    --color-success: var(--color-brand-700);
+    overflow-x: clip;
+}
+
+.landing-theme .landing-hero {
+    min-height: max(48rem, 95svh);
+    padding-top: calc(8rem + env(safe-area-inset-top));
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+}
+
+.landing-headline {
+    font-size: clamp(2.25rem, 4.1vw, 4.25rem);
+    line-height: 1.08;
+    text-shadow: none;
+}
+.landing-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 5rem);
+}
+.landing-hero-copy {
+    min-width: 0;
+}
+.landing-fresh-shape {
+    position: absolute;
+    right: -8rem;
+    top: 15%;
+    width: 45%;
+    height: 75%;
+    border-radius: 45% 55% 65% 35%;
+    background: color-mix(in srgb, var(--color-brand-300) 20%, transparent);
+    transform: rotate(-12deg);
+}
+.landing-hero-curve {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3.5rem;
+    color: var(--color-landing-sage);
+    pointer-events: none;
+}
+
+.landing-theme .landing-cta-primary {
+    height: 3.25rem;
+    padding-inline: 2rem;
+    border-color: transparent;
+    background: var(--color-brand-900);
+    color: var(--color-landing-cream);
+}
+
+.landing-theme .landing-cta-primary:hover {
+    background: var(--color-brand-700);
+}
+
+.landing-theme .landing-cta-secondary {
+    height: 3.25rem;
+    padding-inline: 2rem;
+    border-color: var(--color-brand-900);
+    background: transparent;
+    color: var(--color-brand-900);
+}
+
+.landing-theme .landing-cta-secondary:hover {
+    background: color-mix(in srgb, var(--color-brand-300) 20%, var(--color-landing-cream));
+    color: var(--color-brand-900);
+}
+
+.landing-theme .landing-cta-primary:focus-visible,
+.landing-theme .landing-cta-secondary:focus-visible {
+    --tw-ring-color: var(--color-brand-700);
+    --tw-ring-offset-color: var(--color-landing-cream);
+}
+
+.landing-theme .site-header {
+    padding-top: env(safe-area-inset-top);
+}
+
+.landing-theme .site-header > div:first-child {
+    gap: 1rem;
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+}
+
+.landing-theme .landing-header-glass {
+    border-bottom-color: transparent;
+    background: color-mix(in srgb, var(--color-landing-cream) 94%, transparent);
+    backdrop-filter: blur(12px);
+}
+.landing-theme .landing-header-logo {
+    flex-shrink: 0;
+}
+.landing-theme .landing-header-glass .landing-header-logo {
+    border-radius: 0.75rem 0.75rem 1.75rem 0.75rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--color-brand-900);
+    color: white;
+}
+.landing-theme .landing-header-glass > div:first-child button,
+.landing-theme .landing-header-glass > div:first-child a[aria-label] {
+    color: var(--color-brand-900);
+}
+.landing-theme .landing-header-glass button[aria-haspopup="menu"] {
+    border-color: var(--color-line);
+    background: var(--color-landing-cream);
+    color: var(--color-brand-900);
+}
+
+.landing-theme .landing-header-glass nav a,
+.landing-theme .landing-header-glass nav button {
+    color: var(--color-brand-900);
+}
+
+.landing-theme .site-header a[href="/solicitud"]:not([aria-label]) {
+    min-height: 2.75rem;
+    background: var(--color-brand-900);
+    border-color: transparent;
+    color: var(--color-landing-cream);
+    font-weight: 600;
+}
+
+.landing-theme .site-header a[href="/solicitud"]:not([aria-label]):hover {
+    background: var(--color-brand-700);
+}
+
+.landing-theme .site-header button:focus-visible,
+.landing-theme .site-header a:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 4px;
+}
+
+.landing-theme .site-header button[aria-haspopup="menu"] {
+    backdrop-filter: blur(8px);
+}
+
+.landing-theme .site-header button[aria-label] {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+}
+
+.landing-theme .site-header nav a,
+.landing-theme .site-header nav button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+}
+
+.landing-theme footer {
+    background: var(--color-brand-900);
+}
+
+.landing-theme footer .text-brand-500,
+.landing-theme footer a:hover {
+    color: var(--color-brand-500);
+}
+
+@media (min-width: 640px) {
+    .landing-theme .site-header > div:first-child {
+        padding-left: max(2.5rem, env(safe-area-inset-left));
+        padding-right: max(2.5rem, env(safe-area-inset-right));
+    }
+}
+
+@media (max-width: 639px) {
+    .landing-theme .site-header a[href="/solicitud"]:not([aria-label]) {
+        padding-inline: 0.75rem;
+        font-size: 0.6875rem;
+    }
+}
+
+@media (max-width: 1023px) {
+    .landing-theme .landing-hero {
+        min-height: auto;
+        padding-top: calc(8rem + env(safe-area-inset-top));
+        padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+    }
+    .landing-hero-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2.5rem;
+    }
+    .landing-hero-copy {
+        max-width: 38rem;
+    }
+    .landing-headline {
+        font-size: clamp(2.1rem, 6.5vw, 3.8rem);
+    }
+    .landing-fresh-shape {
+        top: 50%;
+        width: 90%;
+        height: 45%;
+    }
+}
+@media (max-width: 639px) {
+    .landing-hero-copy .landing-cta-primary,
+    .landing-hero-copy .landing-cta-secondary {
+        width: 100%;
+    }
+}
+
+/* Continuous cream/sage story from the hero through the public home sections. */
+.landing-about-shape {
+    position: absolute;
+    left: -8rem;
+    top: 5rem;
+    width: 35rem;
+    height: 30rem;
+    border-radius: 60% 40% 45% 55%;
+    transform: rotate(-12deg);
+    background: color-mix(in srgb, var(--color-brand-300) 18%, transparent);
+    pointer-events: none;
+}
+.landing-stat-card:hover {
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-brand-900) 8%, transparent);
+}
+.landing-theme footer form,
+.landing-theme footer input {
+    min-width: 0;
+}
+.landing-theme footer form button {
+    background: var(--color-brand-500);
+    color: var(--color-brand-900);
+    --tw-ring-color: var(--color-brand-300);
+    --tw-ring-offset-color: var(--color-brand-900);
+}
+.landing-theme footer form button:hover {
+    background: var(--color-brand-300);
+}
+.landing-theme footer a:focus-visible {
+    outline: 2px solid var(--color-brand-300);
+    outline-offset: 4px;
+}
+/* Editorial product photography: contained overlaps, transform-only Motion transitions. */
+.landing-product-showcase { position: relative; min-width: 0; height: clamp(27rem, 44vw, 38rem); isolation: isolate; }
+.landing-showcase-stage { position: absolute; inset: 0; overflow: clip; }
+.landing-showcase-image {
+    position: absolute; left: 15%; top: 12%; width: 70%; height: 76%; object-fit: cover;
+    border-radius: 32% 12% 30% 10% / 22% 12% 26% 10%;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--color-brand-900) 8%, transparent);
+    background: var(--color-brand-300);
+}
+.landing-showcase-image-frozen { border-radius: 12% 30% 10% 26%; }
+.landing-showcase-image-hpp { border-radius: 28% 10% 26% 12%; }
+.landing-showcase-image-healthySnacks { border-radius: 12% 26% 10% 30%; }
+.landing-showcase-orbit {
+    position: absolute; inset: 6% 4% 8%; border: 1px solid color-mix(in srgb, var(--color-brand-500) 22%, transparent);
+    border-radius: 42% 58% 38% 62%; transform: rotate(15deg);
+}
+.landing-showcase-leaf { position: absolute; bottom: 5%; left: 10%; color: var(--color-brand-700); transform: rotate(-20deg); }
+.landing-showcase-pause {
+    position: absolute; right: 5%; bottom: 2%; display: grid; place-items: center; width: 44px; height: 44px;
+    background: color-mix(in srgb, var(--color-brand-300) 20%, var(--color-landing-cream));
+}
+@media (max-width: 1023px) {
+    .landing-product-showcase { width: min(100%, 38rem); justify-self: center; height: clamp(21rem, 65vw, 30rem); }
+}
+
+@keyframes catalog-enter {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* The persistent Customize search supplies its own labelled clear button. */
+#catalog-material-search::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+}
+
+/* Native progress ignores accent-color in some browsers; keep its semantics
+   while painting the Customize composition with the existing palette. */
+.catalog-mix-progress {
+    appearance: none;
+    border: 0;
+    background: var(--color-customize-slate-border);
+}
+.catalog-mix-progress::-webkit-progress-bar {
+    background: var(--color-customize-slate-border);
+    border-radius: 999px;
+}
+.catalog-mix-progress::-webkit-progress-value {
+    background: currentColor;
+    border-radius: 999px;
+    transition: width 200ms ease;
+}
+.catalog-mix-progress::-moz-progress-bar {
+    background: currentColor;
+    border-radius: 999px;
+    transition: width 200ms ease;
+}
+
+.catalog-percentage-input {
+    background: var(--color-customize-cream);
+}
+@media (prefers-reduced-motion: reduce) {
+    .catalog-mix-progress::-webkit-progress-value,
+    .catalog-mix-progress::-moz-progress-bar { transition: none; }
 }

@@ -16,9 +16,7 @@ type UserFormProps<T extends UpdateUserInput> = {
     isEditing?: boolean
 }
 
-// Un solo componente para crear/editar -- ver roleForm.component.tsx para la justificación del
-// patrón. isEditing es la única asimetría real (el campo password se comporta distinto), así que
-// queda aislada en vez de forzar dos componentes separados por un solo campo.
+// isEditing es la única diferencia entre crear y editar: el password pasa a ser opcional.
 export function UserForm<T extends UpdateUserInput>({
     register,
     errors,
@@ -28,7 +26,12 @@ export function UserForm<T extends UpdateUserInput>({
 
     return (
         <div>
-            <FormField label={t("user.form.name")} htmlFor="name" error={getFieldErrorMessage(t, errors.name as FieldError | undefined)}>
+            <FormField
+                label={t("user.form.name")}
+                htmlFor="name"
+                error={getFieldErrorMessage(t, errors.name as FieldError | undefined)}
+                required
+            >
                 <Input id="name" hasError={!!errors.name} {...register("name" as Path<T>)} />
             </FormField>
 
@@ -36,11 +39,17 @@ export function UserForm<T extends UpdateUserInput>({
                 label={t("user.form.username")}
                 htmlFor="username"
                 error={getFieldErrorMessage(t, errors.username as FieldError | undefined)}
+                required
             >
                 <Input id="username" hasError={!!errors.username} preserveCase {...register("username" as Path<T>)} />
             </FormField>
 
-            <FormField label={t("user.form.roleId")} htmlFor="role_id" error={getFieldErrorMessage(t, errors.role_id as FieldError | undefined)}>
+            <FormField
+                label={t("user.form.roleId")}
+                htmlFor="role_id"
+                error={getFieldErrorMessage(t, errors.role_id as FieldError | undefined)}
+                required
+            >
                 <RoleSelect
                     id="role_id"
                     hasError={!!errors.role_id}
@@ -52,6 +61,7 @@ export function UserForm<T extends UpdateUserInput>({
                 label={isEditing ? t("user.form.newPassword") : t("user.form.password")}
                 htmlFor="password"
                 error={getFieldErrorMessage(t, errors.password as FieldError | undefined)}
+                required={!isEditing}
             >
                 <Input
                     id="password"

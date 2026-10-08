@@ -13,6 +13,8 @@ dist-ssr
 *.local
 
 .env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -24,3 +26,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated output (test screenshots/PDFs, static analysis, TS build cache)
+artifacts/
+.scannerwork/
+*.tsbuildinfo
+
+# Manual screenshot/PDF review helpers (not required by npm test)
+/scripts/review-*.cjs
+/scripts/**/*.py
+
+# Local cleanup worktrees/backups, if created inside this repository
+/.legacy-config-cleanup/

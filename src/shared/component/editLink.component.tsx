@@ -14,7 +14,7 @@ export function EditLink({ to, permission }: Readonly<EditLinkProps>) {
     if (!hasPermission(permission)) return null
 
     return (
-        <Link to={to} className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta">
+        <Link to={to} className="rounded-action focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface font-medium text-ink-900 underline decoration-focus underline-offset-4 hover:text-focus">
             {t("common.edit")}
         </Link>
     )

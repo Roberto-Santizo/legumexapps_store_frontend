@@ -13,8 +13,8 @@ import { QuotesTrendChart } from "@/feature/dashboard/component/quotesTrendChart
 import { RankedBarList } from "@/feature/dashboard/component/rankedBarList.component"
 import { ProductRevenueShareChart } from "@/feature/dashboard/component/productRevenueShareChart.component"
 import {
-    CHART_ACCENT_CUSTOMERS,
-    CHART_ACCENT_INGREDIENTS,
+    CHART_ACCENT_SALESPEOPLE,
+    CHART_ACCENT_RAW_MATERIALS,
     CHART_ACCENT_PRODUCTS,
 } from "@/feature/dashboard/constant/chartColors"
 import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
@@ -22,11 +22,13 @@ import { formatCurrency } from "@/shared/format/currency"
 import { formatNumber } from "@/shared/format/number"
 
 export function DashboardPage() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const [range, setRange] = useState<DashboardDateRange>(() => presetRange(30))
 
     const summaryQuery = useQuery({
-        queryKey: ["dashboardSummary", range.startDate, range.endDate],
+        // El idioma va en la clave: el backend resuelve los nombres de productos/materias primas en el
+        // idioma del admin (Accept-Language), así que cambiarlo debe volver a pedir el resumen.
+        queryKey: ["dashboardSummary", range.startDate, range.endDate, i18n.language],
         queryFn: () => getDashboardSummaryAPI(range),
         placeholderData: keepPreviousData,
     })
@@ -37,7 +39,7 @@ export function DashboardPage() {
     if (summaryQuery.isLoading) {
         content = <Spinner />
     } else if (hasLoadError) {
-        content = <p className="text-error-fg">{t("common.loadError")}</p>
+        content = <p className="text-danger">{t("common.loadError")}</p>
     } else {
         content = (
             <div className="space-y-6">
@@ -58,8 +60,8 @@ export function DashboardPage() {
                         icon={<Boxes size={20} />}
                     />
                     <StatTile
-                        label={t("dashboard.overview.uniqueCustomers")}
-                        value={formatNumber(summary.overview.uniqueCustomers)}
+                        label={t("dashboard.overview.uniqueSalespeople")}
+                        value={formatNumber(summary.overview.uniqueSalespeople)}
                         icon={<Users size={20} />}
                     />
                     <StatTile
@@ -86,15 +88,15 @@ export function DashboardPage() {
                             label: product.productDisplayName,
                             secondaryLabel: t("dashboard.topProducts.secondary", {
                                 count: product.quoteCount,
-                                revenue: formatCurrency(product.totalRevenue),
+                                pallets: formatNumber(product.totalPallets),
                             }),
-                            value: product.totalUnits,
-                            valueLabel: t("dashboard.topProducts.unitsLabel", { units: formatNumber(product.totalUnits) }),
+                            value: product.totalRevenue,
+                            valueLabel: formatCurrency(product.totalRevenue),
                         }))}
                     />
 
                     <ProductRevenueShareChart
-                        productsByRevenue={summary.topProductsByRevenue}
+                        productsByRevenue={summary.topProducts}
                         totalRevenue={summary.overview.totalRevenue}
                         emptyMessage={t("dashboard.productRevenueShare.empty")}
                     />
@@ -102,33 +104,33 @@ export function DashboardPage() {
 
                 <div className="grid gap-4 lg:grid-cols-2">
                     <RankedBarList
-                        title={t("dashboard.topCustomers.title")}
-                        subtitle={t("dashboard.topCustomers.subtitle")}
-                        emptyMessage={t("dashboard.topCustomers.empty")}
-                        accentColor={CHART_ACCENT_CUSTOMERS}
-                        items={summary.topCustomers.map((customer) => ({
-                            key: customer.customerId,
-                            label: customer.companyName ? `${customer.name} · ${customer.companyName}` : customer.name,
-                            secondaryLabel: t("dashboard.topCustomers.secondary", {
-                                count: customer.quoteCount,
-                                pallets: formatNumber(customer.totalPallets),
+                        title={t("dashboard.topSalespeople.title")}
+                        subtitle={t("dashboard.topSalespeople.subtitle")}
+                        emptyMessage={t("dashboard.topSalespeople.empty")}
+                        accentColor={CHART_ACCENT_SALESPEOPLE}
+                        items={summary.topSalespeople.map((salesperson) => ({
+                            key: salesperson.salespersonId,
+                            label: salesperson.companyName ? `${salesperson.name} · ${salesperson.companyName}` : salesperson.name,
+                            secondaryLabel: t("dashboard.topSalespeople.secondary", {
+                                count: salesperson.quoteCount,
+                                pallets: formatNumber(salesperson.totalPallets),
                             }),
-                            value: customer.totalRevenue,
-                            valueLabel: formatCurrency(customer.totalRevenue),
+                            value: salesperson.totalRevenue,
+                            valueLabel: formatCurrency(salesperson.totalRevenue),
                         }))}
                     />
 
                     <RankedBarList
-                        title={t("dashboard.topIngredients.title")}
-                        subtitle={t("dashboard.topIngredients.subtitle")}
-                        emptyMessage={t("dashboard.topIngredients.empty")}
-                        accentColor={CHART_ACCENT_INGREDIENTS}
-                        items={summary.topIngredients.map((ingredient) => ({
-                            key: ingredient.ingredientId,
-                            label: ingredient.displayName,
-                            secondaryLabel: t("dashboard.topIngredients.secondary", { count: ingredient.quoteCount }),
-                            value: ingredient.totalCost,
-                            valueLabel: formatCurrency(ingredient.totalCost),
+                        title={t("dashboard.topRawMaterials.title")}
+                        subtitle={t("dashboard.topRawMaterials.subtitle")}
+                        emptyMessage={t("dashboard.topRawMaterials.empty")}
+                        accentColor={CHART_ACCENT_RAW_MATERIALS}
+                        items={summary.topRawMaterials.map((rawMaterial) => ({
+                            key: rawMaterial.rawMaterialId,
+                            label: rawMaterial.displayName,
+                            secondaryLabel: t("dashboard.topRawMaterials.secondary", { count: rawMaterial.quoteCount }),
+                            value: rawMaterial.totalCost,
+                            valueLabel: formatCurrency(rawMaterial.totalCost),
                         }))}
                     />
                 </div>
@@ -139,8 +141,8 @@ export function DashboardPage() {
     return (
         <PageContainer className="max-w-6xl">
             <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("dashboard.title")}</h1>
-                <p className="mt-1 text-texto-suave">{t("dashboard.subtitle")}</p>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("dashboard.title")}</h1>
+                <p className="mt-1 text-ink-600">{t("dashboard.subtitle")}</p>
             </div>
 
             <div className="mb-6">

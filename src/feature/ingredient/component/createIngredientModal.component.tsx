@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -16,11 +17,9 @@ type CreateIngredientModalProps = {
     onClose: () => void
 }
 
-// Alta rápida que IngredientSelect abre cuando el usuario tipea un ingrediente que no existe en
-// el catálogo (ver ingredientSelect.component.tsx). Reusa IngredientForm tal cual -- misma
-// validación y mismos campos requeridos que la página de creación normal (costPerUnit/costUnitId
-// son obligatorios: sin ellos el ingrediente "costaría" $0 en el cotizador sin ningún aviso, ver
-// ingredient.schema.ts y el comentario en productIngredientSection.component.tsx).
+// Alta rápida que IngredientSelect abre cuando el usuario tipea un ingrediente que no existe en el
+// catálogo (ver ingredientSelect.component.tsx). Reusa IngredientForm tal cual -- misma validación y
+// mismos campos requeridos que la página de creación normal (costPerUnit, costo por libra).
 export function CreateIngredientModal({ initialDisplayName, onCreated, onClose }: Readonly<CreateIngredientModalProps>) {
     const { t } = useTranslation()
     const queryClient = useQueryClient()
@@ -41,7 +40,7 @@ export function CreateIngredientModal({ initialDisplayName, onCreated, onClose }
             toast.success(data.message)
             onCreated(data.data)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {

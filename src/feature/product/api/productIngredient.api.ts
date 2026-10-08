@@ -1,6 +1,7 @@
 import api from "@/shared/api/api"
 import { handleApiError } from "@/shared/api/handleApiError"
 import { apiListResponseSchema, apiMessageResponseSchema, apiMutationResponseSchema } from "@/shared/api/apiResponse.schema"
+import { getBulkImportTemplate, postBulkImportFile } from "@/shared/api/bulkImport.api"
 import { responseProductIngredientSchema } from "@/feature/product/schema/productIngredient.schema"
 import type { CreateProductIngredientInput, UpdateProductIngredientInput } from "@/feature/product/schema/productIngredient.schema"
 
@@ -42,3 +43,7 @@ export async function deleteProductIngredientAPI(id: number) {
         handleApiError(error)
     }
 }
+
+// Ingredientes por producto referenciado mediante el SKU de una variante (paso 3 de 3, opcional).
+export const bulkImportProductIngredientsAPI = (file: File) => postBulkImportFile("/product-ingredients/bulk-import", file)
+export const downloadProductIngredientImportTemplateAPI = () => getBulkImportTemplate("/product-ingredients/bulk-import/template")

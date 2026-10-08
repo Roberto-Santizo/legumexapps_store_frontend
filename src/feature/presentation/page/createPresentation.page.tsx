@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -20,7 +21,6 @@ export function CreatePresentationPage() {
 
     const {
         register,
-        control,
         handleSubmit,
         formState: { errors },
     } = useForm<CreatePresentationInput>({
@@ -35,7 +35,7 @@ export function CreatePresentationPage() {
             navigate("/admin/presentations")
         },
         onError: (error) => {
-            toast.error(error.message)
+            showErrorToast(error)
         },
     })
 
@@ -46,7 +46,7 @@ export function CreatePresentationPage() {
     return (
         <PageContainer>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("presentation.create.title")}</h1>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("presentation.create.title")}</h1>
                 <Link to="/admin/presentations" className={buttonClassName("secondary")}>
                     {t("common.back")}
                 </Link>
@@ -54,7 +54,7 @@ export function CreatePresentationPage() {
 
             <Card>
                 <form onSubmit={onSubmit}>
-                    <PresentationForm register={register} control={control} errors={errors} />
+                    <PresentationForm register={register} errors={errors} />
                     <Button type="submit" disabled={createPresentationMutation.isPending}>
                         {createPresentationMutation.isPending ? t("common.saving") : t("common.save")}
                     </Button>

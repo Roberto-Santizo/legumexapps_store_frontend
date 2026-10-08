@@ -1,3 +1,4 @@
+import { TranslatedMessage } from "@/shared/i18n/translatedMessage.component"
 import { useCallback, useRef, useState } from "react"
 import type { ChangeEvent } from "react"
 import Webcam from "react-webcam"
@@ -9,11 +10,12 @@ import { Button } from "@/shared/component/button.component"
 type Props = {
     onClose: () => void
     onSave: (imageBase64: string) => void
+    allowedMimeTypes?: readonly string[]
 }
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5MB -- mismo límite que el resto del catálogo de fotos (ver imageUploadField.component.tsx)
 
-export function UploadImages({ onClose, onSave }: Readonly<Props>) {
+export function UploadImages({ onClose, onSave, allowedMimeTypes }: Readonly<Props>) {
     const { t } = useTranslation()
     const webcamRef = useRef<Webcam>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -30,12 +32,12 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
         event.target.value = "" 
 
         if (!file) return
-        if (!file.type.startsWith("image/")) {
-            toast.error(t("common.imageUpload.invalidType"))
+        if (allowedMimeTypes ? !allowedMimeTypes.includes(file.type) : !file.type.startsWith("image/")) {
+            toast.error(<TranslatedMessage translationKey="common.imageUpload.invalidType" />)
             return
         }
         if (file.size > MAX_FILE_SIZE_BYTES) {
-            toast.error(t("common.imageUpload.invalidSize"))
+            toast.error(<TranslatedMessage translationKey="common.imageUpload.invalidSize" />)
             return
         }
 
@@ -51,15 +53,15 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
     }
 
     return (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-verde-profundo/50 p-3 sm:p-4">
-            <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-2xl bg-crema p-4 shadow-solid sm:p-6">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-brand-900/50 p-3 sm:p-4">
+            <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-panel border border-line bg-surface p-4 shadow-panel sm:p-6">
                 <div className="mb-4 flex items-center justify-between">
-                    <h2 className="font-display text-lg font-bold text-verde-profundo">{t("common.imageUpload.title")}</h2>
+                    <h2 className="font-display text-lg font-bold text-ink-900">{t("common.imageUpload.title")}</h2>
                     <button
                         type="button"
                         onClick={onClose}
                         aria-label={t("common.cancel")}
-                        className="text-texto-suave transition hover:text-verde-profundo"
+                        className="flex h-10 w-10 items-center justify-center text-ink-600 rounded-action transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface hover:text-ink-900"
                     >
                         <X size={20} />
                     </button>
@@ -67,7 +69,7 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
 
                 {preview ? (
                     <>
-                        <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-hueso sm:h-72">
+                        <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-surface sm:h-72">
                             <img src={preview} alt="" className="h-full w-full object-contain" />
                         </div>
 
@@ -84,11 +86,11 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
                 ) : (
                     <>
                         {isCameraUnavailable ? (
-                            <div className="flex h-56 w-full items-center justify-center rounded-lg border border-gris-campo bg-hueso px-4 text-center text-sm text-texto-suave sm:h-72">
+                            <div className="flex h-56 w-full items-center justify-center rounded-lg border border-line bg-surface px-4 text-center text-sm text-ink-600 sm:h-72">
                                 {t("common.imageUpload.cameraUnavailable")}
                             </div>
                         ) : (
-                            <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-hueso sm:h-72">
+                            <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-surface sm:h-72">
                                 <Webcam
                                     ref={webcamRef}
                                     screenshotFormat="image/jpeg"
@@ -99,7 +101,7 @@ export function UploadImages({ onClose, onSave }: Readonly<Props>) {
                             </div>
                         )}
 
-                        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+                        <input ref={fileInputRef} type="file" accept={allowedMimeTypes?.join(",") ?? "image/*"} className="hidden" onChange={handleFileSelect} />
 
                         <div className="mt-4 flex flex-wrap justify-center gap-3">
                             {!isCameraUnavailable && (

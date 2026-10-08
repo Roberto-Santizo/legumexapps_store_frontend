@@ -3,9 +3,7 @@ import { Controller } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import type { UpdateCategoryInput } from "@/feature/category/schema/category.schema"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
-import { FormField } from "@/shared/component/formField.component"
-import { Input } from "@/shared/component/input.component"
-import { Textarea } from "@/shared/component/textarea.component"
+import { RegisteredField } from "@/shared/component/registeredField.component"
 import { ImageUploadField } from "@/shared/component/imageUploadField.component"
 import { TranslationSection } from "@/shared/component/translationSection.component"
 
@@ -36,29 +34,13 @@ export function CategoryForm<T extends UpdateCategoryInput>({
                         onChange={field.onChange}
                         initialImageUrl={currentImageUrl}
                         errorMessage={getFieldErrorMessage(t, errors.image as FieldError | undefined)}
+                        required={currentImageUrl === undefined}
                     />
                 )}
             />
 
-            <FormField
-                label={t("category.form.displayName")}
-                htmlFor="displayName"
-                error={getFieldErrorMessage(t, errors.displayName as FieldError | undefined)}
-            >
-                <Input id="displayName" hasError={!!errors.displayName} {...register("displayName" as Path<T>)} />
-            </FormField>
-
-            <FormField
-                label={t("category.form.fullDescription")}
-                htmlFor="fullDescription"
-                error={getFieldErrorMessage(t, errors.fullDescription as FieldError | undefined)}
-            >
-                <Textarea
-                    id="fullDescription"
-                    hasError={!!errors.fullDescription}
-                    {...register("fullDescription" as Path<T>)}
-                />
-            </FormField>
+            <RegisteredField name={"displayName" as Path<T>} label={t("category.form.displayName")} register={register} errors={errors} required />
+            <RegisteredField name={"fullDescription" as Path<T>} label={t("category.form.fullDescription")} register={register} errors={errors} multiline />
 
             <TranslationSection
                 register={register}
@@ -67,8 +49,9 @@ export function CategoryForm<T extends UpdateCategoryInput>({
                 hint={t("category.form.translationSectionHint")}
                 displayNameLabel={t("category.form.displayNameEn")}
                 fullDescriptionLabel={t("category.form.fullDescriptionEn")}
-                className="mt-4 rounded-lg border border-gris-campo p-4"
+                className="mt-4 rounded-lg border border-line p-4"
             />
         </div>
     )
 }
+    

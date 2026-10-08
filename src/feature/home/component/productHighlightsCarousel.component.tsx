@@ -43,15 +43,15 @@ export function ProductHighlightsCarousel() {
                 <div className="-ml-4 flex sm:-ml-6">
                     {PRODUCT_LINES.map((line) => (
                         <div key={line.id} className="min-w-0 flex-[0_0_78%] pl-4 sm:flex-[0_0_46%] sm:pl-6 lg:flex-[0_0_32%]">
-                            <div className="relative h-72 overflow-hidden rounded-card shadow-card sm:h-80">
+                            <div className="relative h-72 overflow-hidden rounded-panel shadow-panel sm:h-80">
                                 <img
                                     src={siteImages[line.slotKey] ?? line.image}
                                     alt={t(`home.lines.items.${line.translationKey}.name`)}
                                     className="h-full w-full object-cover"
                                     loading="lazy"
                                 />
-                                <div className="absolute inset-0 bg-linear-to-t from-verde-profundo/70 via-verde-profundo/10 to-transparent" />
-                                <span className="absolute bottom-4 left-4 font-display text-lg font-bold uppercase tracking-tight text-crema">
+                                <div className="absolute inset-0 bg-linear-to-t from-brand-900/70 via-brand-900/10 to-transparent" />
+                                <span className="absolute bottom-4 left-4 font-display text-lg font-bold uppercase tracking-tight text-landing-cream">
                                     {t(`home.lines.items.${line.translationKey}.name`)}
                                 </span>
                             </div>
@@ -67,8 +67,8 @@ export function ProductHighlightsCarousel() {
                         type="button"
                         aria-label={t(`home.lines.items.${line.translationKey}.name`)}
                         onClick={() => emblaApi?.scrollTo(index)}
-                        className={`h-2 rounded-full transition-all ${
-                            index === selectedIndex ? "w-6 bg-dorado" : "w-2 bg-gris-campo"
+                        className={`h-2 rounded-badge transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas ${
+                            index === selectedIndex ? "w-6 bg-brand-500" : "w-2 bg-line"
                         }`}
                     />
                 ))}

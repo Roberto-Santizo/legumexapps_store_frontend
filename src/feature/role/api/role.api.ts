@@ -9,8 +9,6 @@ const rolePaginatedListResponseSchema = apiPaginatedListResponseSchema(responseR
 const roleItemResponseSchema = apiItemResponseSchema(responseRoleSchema)
 const roleMutationResponseSchema = apiMutationResponseSchema(responseRoleSchema)
 
-// Sin params -- también la usan RoleSelect y el lookup de nombres en UserTable. No tocar esta
-// firma.
 export async function getRolesAPI() {
     try {
         const { data } = await api.get("/roles")

@@ -31,15 +31,15 @@ export function TranslationSection<T extends TranslatableInput>({
     hint,
     displayNameLabel,
     fullDescriptionLabel,
-    className = "rounded-lg border border-gris-campo p-4",
+    className = "rounded-lg border border-line p-4",
 }: Readonly<TranslationSectionProps<T>>) {
     const { t } = useTranslation()
     const translationErrors = (errors as FieldErrors<TranslatableInput>).translations?.en
 
     return (
         <div className={className}>
-            <p className="mb-1 text-sm font-semibold text-verde-profundo">{title}</p>
-            <p className="mb-3 text-xs text-texto-suave">{hint}</p>
+            <p className="mb-1 text-sm font-semibold text-ink-900">{title}</p>
+            <p className="mb-3 text-xs text-ink-600">{hint}</p>
 
             <FormField
                 label={displayNameLabel}

@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useRef, useState } from "react"
 import type { QueryKey } from "@tanstack/react-query"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -7,18 +8,9 @@ import { Download, Upload } from "lucide-react"
 import { BulkImportApiError } from "@/shared/api/bulkImport.api"
 import type { BulkImportResponse } from "@/shared/api/bulkImport.api"
 import { Button } from "@/shared/component/button.component"
+import { ImportFilePicker } from "@/shared/component/importFilePicker.component"
+import { downloadBlob } from "@/shared/utils/downloadBlob"
 
-
-function downloadBlob(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = filename
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
-}
 
 type BulkImportPanelProps = {
     translationNamespace: string
@@ -45,7 +37,7 @@ export function BulkImportPanel({
     const templateMutation = useMutation({
         mutationFn: downloadTemplate,
         onSuccess: (blob) => blob && downloadBlob(blob, templateFilename),
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const importMutation = useMutation({
@@ -58,7 +50,7 @@ export function BulkImportPanel({
         },
         onError: (error) => {
             if (!(error instanceof BulkImportApiError) || error.rowErrors.length === 0) {
-                toast.error(error.message)
+                showErrorToast(error)
             }
         },
     })
@@ -75,9 +67,9 @@ export function BulkImportPanel({
     }
 
     return (
-        <div className="mb-4 rounded-card border border-gris-campo bg-crema/60 p-4">
-            <p className="mb-3 text-sm font-semibold text-verde-profundo">{t(key("title"))}</p>
-            <p className="mb-3 text-sm text-texto-suave">{t(key("description"))}</p>
+        <div className="mb-4 rounded-panel border border-line bg-surface shadow-panel p-4">
+            <p className="mb-3 text-sm font-semibold text-ink-900">{t(key("title"))}</p>
+            <p className="mb-3 text-sm text-ink-600">{t(key("description"))}</p>
 
             <div className="flex flex-wrap items-center gap-3">
                 <Button
@@ -90,13 +82,7 @@ export function BulkImportPanel({
                     {t(key("downloadTemplate"))}
                 </Button>
 
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileChange}
-                    className="text-sm text-texto-suave file:mr-3 file:rounded-full file:border-0 file:bg-verde-profundo file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-crema hover:file:bg-verde-tinta"
-                />
+                <ImportFilePicker inputRef={fileInputRef} fileName={selectedFile?.name} accept=".xlsx,.xls" onChange={handleFileChange} />
 
                 <Button type="button" onClick={handleImport} disabled={!selectedFile || importMutation.isPending}>
                     <Upload size={16} className="mr-1.5 inline" />
@@ -105,11 +91,11 @@ export function BulkImportPanel({
             </div>
 
             {rowErrors.length > 0 && (
-                <div className="mt-4 rounded-[10px] border border-error-bd bg-error-bg p-3">
-                    <p className="mb-2 text-sm font-semibold text-error-fg">
+                <div className="mt-4 rounded-control border border-danger-border bg-danger-bg p-3">
+                    <p className="mb-2 text-sm font-semibold text-danger">
                         {t(key("rowErrorsTitle"), { count: rowErrors.length })}
                     </p>
-                    <ul className="max-h-56 space-y-1 overflow-y-auto text-sm text-error-fg">
+                    <ul className="max-h-56 space-y-1 overflow-y-auto text-sm text-danger">
                         {rowErrors.map((issue, index) => (
                             <li key={`${issue.row}-${issue.field}-${index}`}>
                                 {t(key("rowErrorItem"), { row: issue.row, message: issue.message })}

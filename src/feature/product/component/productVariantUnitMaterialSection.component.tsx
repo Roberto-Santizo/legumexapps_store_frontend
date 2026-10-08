@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -6,7 +7,16 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { createProductVariantUnitMaterialSchema } from "@/feature/product/schema/productVariantUnitMaterial.schema"
-import type { ProductVariantUnitMaterialResponse } from "@/feature/product/schema/productVariantUnitMaterial.schema"
+import type {
+    ProductVariantUnitMaterialResponse,
+    UpdateProductVariantUnitMaterialInput,
+} from "@/feature/product/schema/productVariantUnitMaterial.schema"
+import {
+    sortByMaterialOptionGroup,
+} from "@/feature/product/schema/materialOptionGroup.schema"
+import { getPackagingGroupOptionsAPI } from "@/feature/packagingGroup/api/packagingGroup.api"
+import { SearchableSelect } from "@/shared/component/searchableSelect.component"
+import { Checkbox } from "@/shared/component/checkbox.component"
 import {
     createProductVariantUnitMaterialAPI,
     deleteProductVariantUnitMaterialAPI,
@@ -16,7 +26,7 @@ import {
 import { getProductVariantsAPI } from "@/feature/product/api/productVariant.api"
 import { getPresentationsAPI } from "@/feature/presentation/api/presentation.api"
 import { getPackagingsAPI } from "@/feature/packaging/api/packaging.api"
-import { UnitMaterialSelect } from "@/feature/packaging/component/unitMaterialSelect.component"
+import { PackagingMaterialSelect } from "@/feature/packaging/component/packagingMaterialSelect.component"
 import { Select } from "@/shared/component/select.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
@@ -25,20 +35,27 @@ import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, 
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 
-const unitMaterialFormSchema = createProductVariantUnitMaterialSchema.omit({ productVariantId: true })
+// El checkbox solo controla si se envía un ID de grupo o null (material fijo).
+const unitMaterialFormSchema = createProductVariantUnitMaterialSchema
+    .omit({ productVariantId: true })
+    .extend({ isOptional: z.boolean() })
+    .superRefine((values, ctx) => {
+        if (values.isOptional && values.optionGroupId === null) ctx.addIssue({ code: "custom", path: ["optionGroupId"], message: "optionGroupRequired" })
+    })
 type UnitMaterialFormInput = z.infer<typeof unitMaterialFormSchema>
+const EMPTY_MATERIAL_OPTION_GROUP_VALUES = { quantityPerUnit: 1, isOptional: false, optionGroupId: null, isDefault: false }
 
 function toFormValues(item: ProductVariantUnitMaterialResponse): Partial<UnitMaterialFormInput> {
     return {
         packagingId: item.packagingId,
         quantityPerUnit: Number(item.quantityPerUnit),
+        isOptional: item.optionGroupId !== null,
+        optionGroupId: item.optionGroupId,
+        isDefault: item.isDefault,
     }
 }
 
-// Mismo diseño que ProductVariantPalletMaterialSection (mini-CRUD scoped a la variante
-// seleccionada, N filas -- ver ese componente) pero para el empaque individual (bolsa +
-// etiqueta + tapa..., rol "unit" en vez de "pallet"). Reemplaza el viejo campo único
-// ProductVariant.packagingId.
+// Empaque individual (bolsa, etiqueta, tapa...) de la variante seleccionada.
 export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ productId: number }>) {
     const { t } = useTranslation()
     const queryClient = useQueryClient()
@@ -49,6 +66,7 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
     const variantsQuery = useQuery({ queryKey: ["productVariants"], queryFn: getProductVariantsAPI })
     const presentationsQuery = useQuery({ queryKey: ["presentations"], queryFn: getPresentationsAPI })
     const packagingsQuery = useQuery({ queryKey: ["packagings"], queryFn: getPackagingsAPI })
+    const groupsQuery = useQuery({ queryKey: ["packagingGroupOptions"], queryFn: getPackagingGroupOptionsAPI, retry: false })
     const unitMaterialsQuery = useQuery({
         queryKey: ["productVariantUnitMaterials"],
         queryFn: getProductVariantUnitMaterialsAPI,
@@ -59,15 +77,14 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
     const packagingNameById = new Map((packagingsQuery.data?.data ?? []).map((p) => [p.id, p.displayName]))
 
     function variantLabel(variant: (typeof variants)[number]): string {
-        if (variant.skuCode) return variant.skuCode
         if (variant.presentationId) return presentationNameById.get(variant.presentationId) ?? `#${variant.id}`
         return `#${variant.id}`
     }
 
     const activeVariantId = selectedVariantId ?? variants[0]?.id ?? null
 
-    const unitMaterials = (unitMaterialsQuery.data?.data ?? []).filter(
-        (item) => item.productVariantId === activeVariantId
+    const unitMaterials = sortByMaterialOptionGroup(
+        (unitMaterialsQuery.data?.data ?? []).filter((item) => item.productVariantId === activeVariantId)
     )
 
     const {
@@ -75,8 +92,18 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
         control,
         handleSubmit,
         reset,
+        watch,
         formState: { errors },
-    } = useForm<UnitMaterialFormInput>({ resolver: zodResolver(unitMaterialFormSchema) })
+    } = useForm<UnitMaterialFormInput>({
+        resolver: zodResolver(unitMaterialFormSchema),
+        defaultValues: EMPTY_MATERIAL_OPTION_GROUP_VALUES,
+    })
+    const isOptional = watch("isOptional")
+    const selectedGroupId = watch("optionGroupId")
+    const existingGroupId = unitMaterials.find(item => item.id === editingId)?.optionGroupId
+    const groupOptions = (groupsQuery.data?.data ?? [])
+        .filter(group => group.isActive || group.id === existingGroupId)
+        .map(group => ({ value: group.id, label: group.displayName, isActive: group.isActive }))
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ["productVariantUnitMaterials"] })
 
@@ -85,23 +112,23 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, formData }: { id: number; formData: UnitMaterialFormInput }) =>
+        mutationFn: ({ id, formData }: { id: number; formData: UpdateProductVariantUnitMaterialInput }) =>
             updateProductVariantUnitMaterialAPI(id, formData),
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
             setEditingId(null)
-            reset({})
+            reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
             setFormResetKey((key) => key + 1)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const deleteMutation = useMutation({
@@ -110,15 +137,17 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
             invalidate()
             toast.success(data.message)
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => showErrorToast(error),
     })
 
     const onSubmit = handleSubmit((formData) => {
         if (!activeVariantId) return
+        const { isOptional: optional, ...rest } = formData
+        const payload = { ...rest, optionGroupId: optional ? rest.optionGroupId : null, isDefault: optional && rest.isDefault }
         if (editingId) {
-            updateMutation.mutate({ id: editingId, formData })
+            updateMutation.mutate({ id: editingId, formData: payload })
         } else {
-            createMutation.mutate({ ...formData, productVariantId: activeVariantId })
+            createMutation.mutate({ ...payload, productVariantId: activeVariantId })
         }
     })
 
@@ -129,11 +158,11 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
 
     function cancelEdit() {
         setEditingId(null)
-        reset({})
+        reset(EMPTY_MATERIAL_OPTION_GROUP_VALUES)
     }
 
     if (variants.length === 0) {
-        return <p className="text-texto-suave">{t("productVariantUnitMaterial.noVariants")}</p>
+        return <p className="text-ink-600">{t("productVariantUnitMaterial.noVariants")}</p>
     }
 
     return (
@@ -161,6 +190,8 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                         <TableRow>
                             <Th>{t("productVariantUnitMaterial.form.packagingId")}</Th>
                             <Th>{t("productVariantUnitMaterial.form.quantityPerUnit")}</Th>
+                            <Th>{t("materialOptionGroup.table.group")}</Th>
+                            <Th>{t("materialOptionGroup.table.default")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -169,18 +200,20 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                             <TableRow key={item.id}>
                                 <Td>{packagingNameById.get(item.packagingId) ?? "-"}</Td>
                                 <Td>{item.quantityPerUnit}</Td>
+                                <Td>{item.optionGroup ?? t("materialOptionGroup.table.fixed")}</Td>
+                                <Td>{item.optionGroup !== null && item.isDefault ? t("common.yes") : "-"}</Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
                                         onClick={() => startEdit(item)}
-                                        className="font-medium text-verde-profundo underline decoration-dorado underline-offset-4 hover:text-verde-tinta"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.edit")}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => deleteMutation.mutate(item.id)}
-                                        className="font-medium text-error-fg underline underline-offset-4"
+                                        className="inline-flex min-h-control items-center rounded-action px-2 font-medium text-danger underline underline-offset-4 transition-colors hover:bg-danger-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {t("common.delete")}
                                     </button>
@@ -199,12 +232,14 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                     label={t("productVariantUnitMaterial.form.packagingId")}
                     htmlFor="unitMaterialPackagingId"
                     error={getFieldErrorMessage(t, errors.packagingId)}
+                    required
                 >
                     <Controller
                         name="packagingId"
                         control={control}
                         render={({ field }) => (
-                            <UnitMaterialSelect
+                            <PackagingMaterialSelect
+                                role="unit"
                                 inputId="unitMaterialPackagingId"
                                 hasError={!!errors.packagingId}
                                 value={field.value}
@@ -214,10 +249,12 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                     />
                 </FormField>
 
+                {editingId ? <>
                 <FormField
                     label={t("productVariantUnitMaterial.form.quantityPerUnit")}
                     htmlFor="quantityPerUnit"
                     error={getFieldErrorMessage(t, errors.quantityPerUnit)}
+                    required
                 >
                     <Input
                         id="quantityPerUnit"
@@ -228,9 +265,32 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                         {...register("quantityPerUnit", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
+                </> : <p className="mb-5 text-sm">{t("packaging.consumption.unitRule")}</p>}
+
+                <div className="mb-5 sm:col-span-2">
+                    <Checkbox id="unitMaterialIsOptional" label={t("materialOptionGroup.isOptional")} {...register("isOptional")} />
+                </div>
+                {isOptional && <>
+                    <FormField required label={t("materialOptionGroup.optionGroup")} htmlFor="unitMaterialOptionGroup" error={errors.optionGroupId ? t("materialOptionGroup.optionGroupRequired") : undefined}>
+                        <Controller name="optionGroupId" control={control} render={({ field }) => <SearchableSelect
+                            inputId="unitMaterialOptionGroup"
+                            options={groupOptions}
+                            value={groupOptions.find(option => option.value === field.value) ?? null}
+                            onChange={option => field.onChange(option?.value ?? null)}
+                            isOptionDisabled={option => groupsQuery.data?.data.find(group => group.id === option.value)?.isActive === false && option.value !== existingGroupId}
+                            isLoading={groupsQuery.isLoading}
+                            hasError={!!errors.optionGroupId || groupsQuery.isError}
+                            placeholder={t("packagingGroup.select")}
+                            noOptionsMessage={() => t("packagingGroup.noOptions")}
+                        />} />
+                        {groupsQuery.isError && <p className="text-sm text-danger">{t("common.loadError")}</p>}
+                    </FormField>
+                    <div className="mb-5 flex items-end"><Checkbox id="unitMaterialIsDefault" label={t("materialOptionGroup.isDefault")} {...register("isDefault")} /></div>
+                    <p className="mb-5 text-sm text-ink-600 sm:col-span-2">{t("materialOptionGroup.hint")}</p>
+                </>}
 
                 <div className="flex gap-3 sm:col-span-2">
-                    <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                    <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending || (isOptional && (groupsQuery.isLoading || groupsQuery.isError || !selectedGroupId))}>
                         {editingId ? t("common.save") : t("productVariantUnitMaterial.form.addButton")}
                     </Button>
                     {editingId && (

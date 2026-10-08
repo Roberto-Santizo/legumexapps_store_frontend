@@ -6,7 +6,7 @@ import { EditLink } from "@/shared/component/editLink.component"
 import { formatDateTime } from "@/shared/format/date"
 
 export function DestinationTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     return (
         <PaginatedAdminTable<DestinationResponse>
@@ -26,7 +26,7 @@ export function DestinationTable() {
                 {
                     key: "updatedAt",
                     header: t("common.updatedAt"),
-                    render: (destination) => formatDateTime(destination.updatedAt),
+                    render: (destination) => formatDateTime(destination.updatedAt, i18n.language),
                 },
             ]}
         />

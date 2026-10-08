@@ -4,16 +4,20 @@ import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 export const createProductVariantUnitMaterialSchema = z.object({
     productVariantId: z.number().int().positive(),
     packagingId: z.number().int().positive(),
-    // Requerido: quantityPerUnit * unitCost * totalUnits es la fórmula directa del costo de
-    // esta línea. Si quedara vacío, el material "costaría" $0 en cada cotización -- mismo
-    // criterio que ProductVariantPalletMaterial.quantityValue.
+    // Requerido: quantityPerUnit * unitCost * totalUnits es la fórmula directa del costo de esta
+    // línea; si quedara vacío, el material "costaría" $0 en cada cotización.
     quantityPerUnit: z.number().positive(),
+    // ID estable del catálogo; null = fila fija. El nombre se obtiene en el backend.
+    optionGroupId: z.number().int().positive().nullable(),
+    isDefault: z.boolean(),
 })
 
-// .partial() salvo quantityPerUnit -- no puede quedar vacío ni siquiera al editar una fila
-// existente.
+// .partial() salvo quantityPerUnit/optionGroupId/isDefault -- ninguno puede quedar vacío ni
+// siquiera al editar una fila existente.
 const updateProductVariantUnitMaterialSchema = createProductVariantUnitMaterialSchema.partial().extend({
     quantityPerUnit: createProductVariantUnitMaterialSchema.shape.quantityPerUnit,
+    optionGroupId: createProductVariantUnitMaterialSchema.shape.optionGroupId,
+    isDefault: createProductVariantUnitMaterialSchema.shape.isDefault,
 })
 
 export const responseProductVariantUnitMaterialSchema = baseCatalogSchema.extend({
@@ -22,6 +26,9 @@ export const responseProductVariantUnitMaterialSchema = baseCatalogSchema.extend
     // DECIMAL en Postgres: Sequelize lo devuelve como string en un SELECT normal, pero como
     // número tras un .update() -- z.coerce.number() acepta ambos formatos.
     quantityPerUnit: z.coerce.number(),
+    optionGroup: z.string().nullable(),
+    optionGroupId: z.number().int().nullable(),
+    isDefault: z.boolean(),
 })
 
 export type CreateProductVariantUnitMaterialInput = z.infer<typeof createProductVariantUnitMaterialSchema>

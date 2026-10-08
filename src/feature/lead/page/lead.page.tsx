@@ -10,8 +10,8 @@ export function LeadListPage() {
     return (
         <PageContainer wide>
             <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-verde-profundo">{t("lead.list.title")}</h1>
-                <p className="mt-1 text-sm text-texto-suave">{t("lead.list.subtitle")}</p>
+                <h1 className="text-2xl font-semibold text-ink-900">{t("lead.list.title")}</h1>
+                <p className="mt-1 text-sm text-ink-600">{t("lead.list.subtitle")}</p>
             </div>
             <LeadTable />
         </PageContainer>

@@ -9,8 +9,8 @@ export function AccessDenied() {
 
     return (
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-            <h1 className="text-2xl font-semibold text-verde-profundo">{t("accessDenied.title")}</h1>
-            <p className="text-texto-suave">{t("accessDenied.message")}</p>
+            <h1 className="text-2xl font-semibold text-ink-900">{t("accessDenied.title")}</h1>
+            <p className="text-ink-600">{t("accessDenied.message")}</p>
             <Link to="/admin" className={buttonClassName("primary")}>
                 {t("accessDenied.backLink")}
             </Link>
@@ -18,10 +18,10 @@ export function AccessDenied() {
     )
 }
 
-export function PermissionGate({ permission, children }: Readonly<{ permission: string; children: ReactNode }>) {
+export function PermissionGate({ permission, children }: Readonly<{ permission: string | string[]; children: ReactNode }>) {
     const { hasPermission } = usePermission()
 
-    if (!hasPermission(permission)) return <AccessDenied />
+    if (!(Array.isArray(permission) ? permission.some(hasPermission) : hasPermission(permission))) return <AccessDenied />
 
     return children
 }

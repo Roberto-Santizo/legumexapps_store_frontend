@@ -1,8 +1,5 @@
-// Espejo de backendLegumexStore/src/features/unit/constants/unitCatalog.ts -- debe mantenerse
-// sincronizado a mano (no hay paquete compartido entre front y back en este repo). Es la
-// fuente de las opciones del selector "Unidad" al crear/editar una Unidad: el admin ya no
-// escribe displayName/unitType/baseFactor a mano, el backend los resuelve de este mismo
-// catálogo a partir de la key elegida (ver unit.service.ts).
+// Espejo de backend features/unit/constants/unitCatalog.ts, sincronizado a mano. Es la fuente de
+// las opciones del selector "Unidad"; el backend resuelve displayName/unitType/baseFactor desde la key.
 export type UnitCatalogKey =
     | "gram"
     | "kilogram"

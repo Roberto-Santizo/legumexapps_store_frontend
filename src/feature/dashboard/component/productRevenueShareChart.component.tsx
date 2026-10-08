@@ -28,8 +28,9 @@ interface RevenueTooltipPayload {
 }
 
 function renderSlice(props: PieSectorShapeProps) {
-    const slice = props.payload as Slice
-    return <Sector {...props} fill={slice.color} />
+    const { key, ...sectorProps } = props
+    const slice = sectorProps.payload as Slice
+    return <Sector key={key} {...sectorProps} fill={slice.color} />
 }
 
 function RevenueShareTooltip({ active, payload }: Readonly<TooltipContentProps>) {

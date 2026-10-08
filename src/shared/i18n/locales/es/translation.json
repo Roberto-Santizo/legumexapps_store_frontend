@@ -658,7 +658,7 @@
       "title": "Editar materia prima"
     },
     "table": {
-      "searchPlaceholder": "Buscar por nombre...",
+      "searchPlaceholder": "Buscar por nombre o código...",
       "empty": "No hay materias primas registradas"
     },
     "bulkImport": {
@@ -811,6 +811,10 @@
     }
   },
   "product": {
+    "export": {
+      "button": "Exportar catálogo completo",
+      "pending": "Generando Excel..."
+    },
     "form": {
       "image": "Foto del producto",
       "subCategoryId": "Subcategoría",

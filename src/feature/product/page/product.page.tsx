@@ -2,6 +2,7 @@ import type { ComponentProps } from "react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { ProductTable } from "@/feature/product/component/productTable.component"
+import { ProductExportButton } from "@/feature/product/component/productExportButton.component"
 import { InitialProductImportPanel } from "@/feature/product/component/initialProductImportPanel.component"
 import { bulkImportProductRawMaterialsAPI, downloadProductRawMaterialImportTemplateAPI } from "@/feature/product/api/productRawMaterial.api"
 import { bulkImportProductIngredientsAPI, downloadProductIngredientImportTemplateAPI } from "@/feature/product/api/productIngredient.api"
@@ -51,11 +52,14 @@ export function ProductListPage() {
         <PageContainer wide>
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h1 className="text-2xl font-semibold text-ink-900">{t("product.list.title")}</h1>
-                {hasPermission("products:create") && (
-                    <Link to="/admin/products/create" className={buttonClassName("primary")}>
-                        {t("product.list.createLink")}
-                    </Link>
-                )}
+                <div className="flex flex-wrap items-center gap-3">
+                    {hasPermission("products:view") && <ProductExportButton />}
+                    {hasPermission("products:create") && (
+                        <Link to="/admin/products/create" className={buttonClassName("primary")}>
+                            {t("product.list.createLink")}
+                        </Link>
+                    )}
+                </div>
             </div>
             {visibleImportSteps.length > 0 && (
                 <section className="mb-6">

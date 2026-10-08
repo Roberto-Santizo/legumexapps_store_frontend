@@ -658,7 +658,7 @@
       "title": "Edit raw material"
     },
     "table": {
-      "searchPlaceholder": "Search by name...",
+      "searchPlaceholder": "Search by name or code...",
       "empty": "No raw materials registered"
     },
     "bulkImport": {
@@ -811,6 +811,10 @@
     }
   },
   "product": {
+    "export": {
+      "button": "Export complete catalog",
+      "pending": "Generating Excel..."
+    },
     "form": {
       "image": "Product photo",
       "subCategoryId": "Subcategory",

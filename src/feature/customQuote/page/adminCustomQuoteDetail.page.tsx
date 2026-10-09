@@ -12,6 +12,7 @@ import { CustomQuoteStatusBadge } from "@/feature/customQuote/component/customQu
 import { CustomQuoteSpecification } from "@/feature/customQuote/component/customQuoteSpecification.component"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
+import { QuoteProductionButton } from "@/feature/quote/component/quoteProductionButton.component"
 import { sendAdminQuotePdfEmailAPI } from "@/feature/quote/api/adminQuote.api"
 import { toCustomQuoteDocumentLine } from "@/feature/customQuote/component/customQuoteComposition"
 import { usePermission } from "@/shared/auth/usePermission"
@@ -111,6 +112,7 @@ export function AdminCustomQuoteDetailPage() {
             {customQuote && (
                 <div className="space-y-6">
                     <QuotePdfButton lines={[toCustomQuoteDocumentLine(customQuote)]} quoteDate={new Date(customQuote.createdAt)} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={hasPermission("quotes:calculate") ? sendAdminQuotePdfEmailAPI : undefined} />
+                    <QuoteProductionButton lines={[customQuote]} clientName={customQuote.breakdown.order?.clientName ?? ""} orderId={`customizable-${customQuote.id}`} salespersonName={customQuote.salesperson?.name} quoteDate={new Date(customQuote.createdAt)} />
                     <Card className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <ReadOnlyField label={t("adminCustomQuote.detail.status")}>
                             {hasPermission("customQuotes:edit") ? (

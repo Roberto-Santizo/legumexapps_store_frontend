@@ -191,6 +191,8 @@
         "mixRange": "{{min}}% - {{max}}%",
         "mixEmpty": "This product doesn't have any raw materials configured yet. Contact the administrator.",
         "wizard": {
+          "progress": "Quote progress",
+          "stepCount": "Step {{current}} of {{total}}",
           "back": "Back",
           "steps": {
             "mode": "Type",
@@ -204,7 +206,8 @@
             "title": "How many pallets do you need?",
             "subtitle": "Choose the presentation (if applicable) and the number of pallets. You'll see the boxes per pallet and the total weight of your order.",
             "boxesPerPallet": "Boxes per pallet",
-            "totalWeight": "Total order weight"
+            "totalWeight": "Total order weight",
+            "chooseVariantFirst": "Choose a presentation to see boxes, units and weight."
           },
           "total": {
             "summaryTitle": "Your selection",
@@ -1179,6 +1182,8 @@
       "fixed": "Fixed products",
       "customizable": "Customizable products",
       "fixedTitle": "Fixed product quotes",
+      "production": "Production reports",
+      "productionTitle": "Production reports by order",
       "customizableTitle": "Customizable product quotes"
     }
   },
@@ -1212,6 +1217,47 @@
     "description": "Calculate quotes with the full cost breakdown (raw materials, packaging and pallet materials). Nothing is saved -- it's just a lookup tool, it doesn't appear in \"Quotes\" and it doesn't affect the dashboard."
   },
   "quote": {
+    "production": {
+      "title": "Quote production sheet",
+      "download": "Download production sheet",
+      "generating": "Generating sheet…",
+      "clientName": "Order customer",
+      "clientLocked": "All lines belong to this customer. Start a new order for another customer.",
+      "mixedOrderHint": "Add fixed and customizable products to the same order. The PDF includes all lines.",
+      "description": "Orders grouped by customer and salesperson. Download the complete details to share with production and print without application access.",
+      "search": "Search customer, salesperson, product or order number",
+      "empty": "No orders match this filter.",
+      "order": "Order number",
+      "salesperson": "Salesperson",
+      "date": "Quote date",
+      "purpose": "Technical quotation details for production review and planning.",
+      "code": "Code",
+      "material": "Material",
+      "recipe": "Recipe per unit",
+      "required": "Total quantity",
+      "unit": "unit",
+      "units": "units",
+      "unavailable": "Not recorded",
+      "productCode": "Product SKU",
+      "productId": "Product ID",
+      "customNoSku": "Customizable, no own SKU",
+      "pallets": "Pallets",
+      "totalUnits": "Total units",
+      "boxesPerPallet": "Boxes per pallet",
+      "unitsPerBox": "Units per box",
+      "totalBoxes": "Total boxes",
+      "netWeight": "Net weight per unit",
+      "totalWeight": "Total weight",
+      "consolidated": "Consolidated order materials",
+      "materialsTotal": "Total quantities by code",
+      "levels": {
+        "raw": "Raw materials",
+        "ingredients": "Ingredients",
+        "unit": "Unit packaging",
+        "intermediate": "Intermediate packaging",
+        "pallet": "Pallet materials"
+      }
+    },
     "orderSummary": {
       "title": "Order in progress",
       "itemCount": "{{count}} products quoted",
@@ -1270,6 +1316,8 @@
         "adjustment": "Additional adjustment",
         "lineTotal": "Line total",
         "orderTotal": "Order total",
+        "linesTitle": "Quoted products ({{count}})",
+        "pageNumber": "Page {{page}} of {{total}}",
         "referenceDisclaimer": "Reference quote only. Prices are estimates, not a final offer. We'll confirm details and final pricing when we contact you.",
         "restrictionsTitle": "Restrictions",
         "restrictionsText": "This quote is valid for {{days}} days only from its issue date. After this period prices may change and a new quote must be requested.",

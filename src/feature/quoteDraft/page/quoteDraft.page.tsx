@@ -33,7 +33,7 @@ export function QuoteDraftListPage() {
     }
 
     return (
-        <PageContainer>
+        <PageContainer wide>
             <div className="mb-6">
                 <h1 className="text-2xl font-semibold text-ink-900">{t("quoteDraft.list.title")}</h1>
                 <p className="mt-1 max-w-3xl text-ink-600">{t("quoteDraft.list.description")}</p>

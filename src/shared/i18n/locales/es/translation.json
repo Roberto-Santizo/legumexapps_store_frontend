@@ -204,6 +204,8 @@
         "mixRange": "{{min}}% - {{max}}%",
         "mixEmpty": "Este producto todavía no tiene materias primas configuradas. Contacta al administrador.",
         "wizard": {
+          "progress": "Progreso de la cotización",
+          "stepCount": "Paso {{current}} de {{total}}",
           "back": "Atrás",
           "steps": {
             "mode": "Tipo",
@@ -217,7 +219,8 @@
             "title": "¿Cuántos palets necesitas?",
             "subtitle": "Elige la presentación (si aplica) y la cantidad de palets. Verás las cajas por palet y el peso total de tu pedido.",
             "boxesPerPallet": "Cajas por palet",
-            "totalWeight": "Peso total del pedido"
+            "totalWeight": "Peso total del pedido",
+            "chooseVariantFirst": "Elige una presentación para ver cajas, unidades y peso."
           },
           "total": {
             "summaryTitle": "Tu selección",
@@ -1179,6 +1182,8 @@
       "fixed": "Productos fijos",
       "customizable": "Productos personalizables",
       "fixedTitle": "Cotizaciones de productos fijos",
+      "production": "Reportes para producción",
+      "productionTitle": "Reportes para producción por pedido",
       "customizableTitle": "Cotizaciones de productos personalizables"
     }
   },
@@ -1212,6 +1217,47 @@
     "description": "Calcula cotizaciones con el desglose completo de costos (materia prima, empaque y materiales de palet). No se guarda ningún registro -- es solo una herramienta de consulta, no aparece en \"Cotizaciones\" ni afecta el panel de indicadores."
   },
   "quote": {
+    "production": {
+      "title": "Ficha de producción de la cotización",
+      "download": "Descargar ficha de producción",
+      "generating": "Generando ficha…",
+      "clientName": "Cliente del pedido",
+      "clientLocked": "Todas las líneas pertenecen a este cliente. Para otro cliente, inicia un pedido nuevo.",
+      "mixedOrderHint": "Puedes agregar productos fijos y personalizables al mismo pedido. El PDF incluirá todas las líneas.",
+      "description": "Pedidos agrupados por cliente y representante. Descarga el detalle completo para compartirlo con producción e imprimirlo sin acceso a la aplicación.",
+      "search": "Buscar por cliente, representante, producto o folio",
+      "empty": "No hay pedidos para este filtro.",
+      "order": "Folio del pedido",
+      "salesperson": "Representante",
+      "date": "Fecha de cotización",
+      "purpose": "Detalle técnico de lo cotizado para revisión y planificación de producción.",
+      "code": "Código",
+      "material": "Material",
+      "recipe": "Receta por unidad",
+      "required": "Cantidad total",
+      "unit": "unidad",
+      "units": "unidades",
+      "unavailable": "No registrado",
+      "productCode": "SKU del producto",
+      "productId": "ID del producto",
+      "customNoSku": "Personalizable, sin SKU propio",
+      "pallets": "Palets",
+      "totalUnits": "Unidades totales",
+      "boxesPerPallet": "Cajas por palet",
+      "unitsPerBox": "Unidades por caja",
+      "totalBoxes": "Cajas totales",
+      "netWeight": "Peso neto por unidad",
+      "totalWeight": "Peso total",
+      "consolidated": "Materiales consolidados del pedido",
+      "materialsTotal": "Cantidades totales por código",
+      "levels": {
+        "raw": "Materias primas",
+        "ingredients": "Ingredientes",
+        "unit": "Empaque unitario",
+        "intermediate": "Empaque intermedio",
+        "pallet": "Paletización"
+      }
+    },
     "orderSummary": {
       "title": "Pedido en curso",
       "itemCount": "{{count}} productos cotizados",
@@ -1270,6 +1316,8 @@
         "adjustment": "Ajuste adicional",
         "lineTotal": "Total de la línea",
         "orderTotal": "Total del pedido",
+        "linesTitle": "Productos cotizados ({{count}})",
+        "pageNumber": "Página {{page}} de {{total}}",
         "referenceDisclaimer": "Cotización de referencia. Los valores son estimados y no constituyen una oferta final. Al contactarte confirmaremos disponibilidad, especificaciones y el precio definitivo.",
         "restrictionsTitle": "Restricciones",
         "restrictionsText": "Esta cotización es válida únicamente por {{days}} días a partir de su fecha de emisión. Transcurrido este período, los precios pueden variar y deberá solicitarse una nueva cotización.",

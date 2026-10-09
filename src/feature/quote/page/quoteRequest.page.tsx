@@ -14,6 +14,8 @@ import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.compo
 import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary.component"
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
 import type { SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
+import { useSharedQuoteOrder } from "../component/useSharedQuoteOrder"
+import { QuoteOrderClient } from "../component/quoteOrderClient.component"
 
 // Flujo aparte de cotización a la medida (producto que no existe, sin SKU) -- ver feature/customQuote.
 const CUSTOM_QUOTE_PATH = "/solicitud/a-la-medida"
@@ -27,7 +29,8 @@ export function QuoteRequestPage() {
     // al elegir otro producto, después de guardar con éxito y en "Nueva cotización".
     const [draftKey, setDraftKey] = useState(() => crypto.randomUUID())
     const rotateDraftKey = useCallback(() => setDraftKey(crypto.randomUUID()), [])
-    const order = useQuoteOrder(rotateDraftKey)
+    const sharedOrder = useSharedQuoteOrder()
+    const order = useQuoteOrder(rotateDraftKey, sharedOrder)
 
     const productsQuery = useQuery({ queryKey: ["quoteProducts"], queryFn: getQuoteProductsAPI })
     // Transporte apagado temporalmente: este flujo no pide el catálogo de destinos.
@@ -49,7 +52,8 @@ export function QuoteRequestPage() {
 
     const handleSubmit = (formData: SalespersonQuoteInput) => {
         order.clearCurrentResult()
-        calculateMutation.mutate(formData)
+        if (!sharedOrder.identity.clientName) { toast.error(t("quote.pdf.modal.required")); return }
+        calculateMutation.mutate({ ...formData, order: sharedOrder.identity })
     }
 
     const content = (
@@ -88,7 +92,7 @@ export function QuoteRequestPage() {
                         onClear={order.handleClearOrder}
                         showCostBreakdown={false}
                         showReferenceDisclaimer
-                        pdfAction={<QuotePdfButton lines={order.quotedLines} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={sendQuotePdfEmailAPI} />}
+                        pdfAction={<QuotePdfButton lines={order.quotedLines} orderClientName={sharedOrder.identity.clientName} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={sendQuotePdfEmailAPI} />}
                     />
                 )
             }
@@ -121,7 +125,8 @@ export function QuoteRequestPage() {
                 </div>
             </header>
 
-            {content}
+            <QuoteOrderClient name={sharedOrder.clientName} locked={sharedOrder.lines.length > 0} onChange={sharedOrder.setClientName} />
+            {sharedOrder.identity.clientName && content}
         </SiteContainer>
     )
 }

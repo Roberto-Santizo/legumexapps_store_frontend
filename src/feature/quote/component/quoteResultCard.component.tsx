@@ -19,8 +19,9 @@ type QuoteResultCardProps = {
 
 // Grupos de opciones: una fila elegida de un grupo se muestra como "Caja: caja de
 // envío" en el desglose admin; una fila fija (optionGroup null) solo con su nombre.
-function materialLineLabel(line: { displayName: string; optionGroup: string | null }): string {
-    return line.optionGroup ? `${line.optionGroup}: ${line.displayName}` : line.displayName
+function materialLineLabel(line: { code?: string; displayName: string; optionGroup: string | null }): string {
+    const name = line.code ? `${line.code} · ${line.displayName}` : line.displayName
+    return line.optionGroup ? `${line.optionGroup}: ${name}` : name
 }
 
 function CostRow({
@@ -148,6 +149,7 @@ export function QuoteResultCard({
             </div>
 
             <div className="space-y-4">
+                {showCostBreakdown && breakdown.production && <p className="text-sm text-ink-600">{t("quote.production.productCode")}: {breakdown.production.skuCode || t("quote.production.customNoSku")}</p>}
                 {showCostBreakdown && breakdown.rawMaterials.length > 0 && (
                     <CostSection
                         icon={<Wheat size={15} />}
@@ -158,7 +160,7 @@ export function QuoteResultCard({
                         {breakdown.rawMaterials.map((line) => (
                             <CostRow
                                 key={line.rawMaterialId}
-                                label={line.displayName}
+                                label={line.code ? `${line.code} · ${line.displayName}` : line.displayName}
                                 quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
                                     count: line.totalUnits.toLocaleString("es-MX"),
                                 })}
@@ -180,7 +182,7 @@ export function QuoteResultCard({
                             <CostRow
                                 key={line.ingredientId}
                                 label={t("site.quoteRequest.result.ingredientLabel", {
-                                    name: line.displayName,
+                                    name: line.code ? `${line.code} · ${line.displayName}` : line.displayName,
                                     grams: line.gramsPerUnit.toLocaleString("es-MX", { maximumFractionDigits: 3 }),
                                 })}
                                 quantityLabel={t("site.quoteRequest.result.unitsQuantity", {

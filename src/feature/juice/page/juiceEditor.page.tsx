@@ -33,7 +33,7 @@ export function JuiceEditorPage() {
         return <div className="space-y-6">
             <Card>
                 {creating && <p className="mb-4 text-sm text-ink-600">{t("juice.createHelp")}</p>}
-                <JuiceForm key={`${row?.id ?? "new"}-${row?.updatedAt ?? ""}`} fields={juiceFields} schema={juiceInputSchema} responseSchema={juiceResponseSchema} path={row ? `/admin/juices/${row.id}` : "/admin/juices"} row={row} readOnly={viewOnly} onSaved={saved => { if (creating) navigate(`/admin/juices/${saved.id}${hasPermission("juices:edit") ? "/edit" : ""}`) }} />
+                <JuiceForm key={`${row?.id ?? "new"}-${row?.updatedAt ?? ""}`} fields={juiceFields} layout="product" schema={juiceInputSchema} responseSchema={juiceResponseSchema} path={row ? `/admin/juices/${row.id}` : "/admin/juices"} row={row} readOnly={viewOnly} onSaved={saved => { if (creating) navigate(`/admin/juices/${saved.id}${hasPermission("juices:edit") ? "/edit" : ""}`) }} />
             </Card>
             {!creating && validId && <>
                 <Link to="/admin/juices/materials" className={buttonClassName("secondary")}>{t("juice.materials")}</Link>
@@ -44,7 +44,7 @@ export function JuiceEditorPage() {
         </div>
     }
     return <PageContainer>
-        <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-2xl font-semibold text-ink-900">{t(titleKey)}{row ? ` · ${row.displayName}` : ""}</h1>
             <Link to="/admin/juices" className={buttonClassName("secondary")}>{t("common.back")}</Link>
         </div>

@@ -94,10 +94,15 @@ export const calculateQuoteSchema = z.object({
 // seguimiento de cotizaciones sin finalizar. El cotizador del admin nunca lo manda.
 const salespersonQuoteSchema = calculateQuoteSchema.extend({
     draftKey: z.string().uuid().optional(),
+    order: z.object({ id: z.string().uuid(), clientName: z.string().trim().min(1).max(150) }).optional(),
 })
 
 const rawMaterialLineSchema = z.object({
     rawMaterialId: z.number().int(),
+    code: z.string().optional(),
+    percentage: z.number().optional(),
+    gramsPerUnit: z.number().optional(),
+    quantityUnit: z.string().optional(),
     displayName: z.string(),
     unitCost: z.number(),
     quantityPerUnit: z.number(),
@@ -109,6 +114,8 @@ const rawMaterialLineSchema = z.object({
 // receta (ver quote.service.ts::buildIngredientLines en el backend). Solo lo usa el desglose admin.
 const ingredientLineSchema = z.object({
     ingredientId: z.number().int(),
+    code: z.string().optional(),
+    quantityUnit: z.string().optional(),
     displayName: z.string(),
     grams: z.number(),
     referenceNetWeightGrams: z.number(),
@@ -123,6 +130,7 @@ const ingredientLineSchema = z.object({
 // desglose admin ("Caja: caja de envío").
 const unitMaterialLineSchema = z.object({
     packagingId: z.number().int(),
+    code: z.string().optional(),
     displayName: z.string(),
     optionGroup: z.string().nullable(),
     unitCost: z.number(),
@@ -133,6 +141,7 @@ const unitMaterialLineSchema = z.object({
 
 const intermediateMaterialLineSchema = z.object({
     packagingId: z.number().int(),
+    code: z.string().optional(),
     displayName: z.string(),
     optionGroup: z.string().nullable(),
     unitCost: z.number(),
@@ -160,6 +169,7 @@ const percentageCostLineSchema = z.object({
 
 const palletMaterialLineSchema = z.object({
     packagingId: z.number().int(),
+    code: z.string().optional(),
     displayName: z.string(),
     optionGroup: z.string().nullable(),
     unitCost: z.number(),
@@ -210,6 +220,8 @@ export const quoteLineSchema = z.object({
     adjustmentCost: z.coerce.number().optional(),
     totalCost: z.coerce.number(),
     breakdown: z.object({
+        order: z.object({ id: z.string().uuid(), clientName: z.string() }).optional(),
+        production: z.object({ productId: z.number().int().optional(), skuCode: z.string().optional(), kind: z.enum(["fixed", "customizable"]), boxesPerPallet: z.number(), bagsPerBox: z.number(), netWeightGrams: z.number().nullable() }).optional(),
         rawMaterials: z.array(rawMaterialLineSchema),
         // Opcional: no existe en cotizaciones guardadas antes de este campo.
         ingredients: z.array(ingredientLineSchema).optional(),

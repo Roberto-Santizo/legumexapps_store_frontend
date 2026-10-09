@@ -15,7 +15,7 @@ export function ProductLineRow({ line, index }: Readonly<ProductLineRowProps>) {
     const Icon = line.icon
     const isReversed = index % 2 === 1
     const siteImages = useSiteImages()
-    const imageSrc = siteImages[line.slotKey] ?? line.image
+    const imageSrc = siteImages[line.slotKey]
 
     const imageRef = useRef<HTMLDivElement>(null)
     const { scrollYProgress } = useScroll({ target: imageRef, offset: ["start end", "end start"] })
@@ -33,17 +33,20 @@ export function ProductLineRow({ line, index }: Readonly<ProductLineRowProps>) {
                 viewport={viewportOnce}
                 whileHover={{ scale: 1.02, rotate: isReversed ? -0.6 : 0.6 }}
                 transition={{ type: "spring", stiffness: 220, damping: 20 }}
-                className={`relative h-72 overflow-hidden rounded-panel shadow-panel sm:h-120 ${
+                className={`relative h-72 overflow-hidden rounded-panel bg-brand-300/25 shadow-panel sm:h-120 ${
                     isReversed ? "lg:order-2" : ""
                 }`}
             >
-                <motion.img
-                    src={imageSrc}
-                    alt={t(`home.lines.items.${line.translationKey}.name`)}
-                    style={{ y: imageY, scale: 1.18 }}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                />
+                {/* Sin foto subida para este slot: queda el fondo suave, nunca una foto de stock. */}
+                {imageSrc && (
+                    <motion.img
+                        src={imageSrc}
+                        alt={t(`home.lines.items.${line.translationKey}.name`)}
+                        style={{ y: imageY, scale: 1.18 }}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                    />
+                )}
                 <div className="absolute inset-0 bg-linear-to-t from-brand-900/50 via-transparent to-transparent" />
                 <span className="absolute top-5 left-5 flex h-12 w-12 items-center justify-center rounded-full bg-canvas/95 text-ink-900 shadow-panel">
                     <Icon size={22} />

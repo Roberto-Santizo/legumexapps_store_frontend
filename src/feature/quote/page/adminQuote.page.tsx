@@ -12,6 +12,7 @@ import { Spinner } from "@/shared/component/spinner.component"
 import { getAllQuotesAPI } from "@/feature/quote/api/adminQuote.api"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 import { formatCurrency } from "@/shared/format/currency"
+import { QuoteProductionButton } from "../component/quoteProductionButton.component"
 
 
 export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }: Readonly<{ embedded?: boolean; dateRange?: DashboardDateRange; onDateChange?: (range: DashboardDateRange) => void }> = {}) {
@@ -104,6 +105,7 @@ export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }
                             {isExpanded && (
                                 <div className="border-t border-line p-4 sm:p-6">
                                     <QuoteResultCard result={quote} isPending={false} />
+                                    <div className="mt-4"><QuoteProductionButton lines={[quote]} clientName={quote.breakdown.order?.clientName ?? ""} orderId={`fixed-${quote.id}`} salespersonName={quote.quotingSalesperson.name} quoteDate={quote.createdAt} /></div>
                                 </div>
                             )}
                         </Card>

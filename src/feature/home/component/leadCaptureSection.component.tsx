@@ -3,11 +3,13 @@ import { useTranslation } from "react-i18next"
 import { Clock, Leaf, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { fadeUp, slideFromLeft, slideFromRight, viewportOnce } from "@/shared/animation/motionVariants"
-import { HOME_IMAGES } from "@/feature/home/constant/homeImages.constant"
 import { LeadCaptureForm } from "@/feature/home/component/leadCaptureForm.component"
+import { useSiteImages } from "@/feature/siteImage/hook/useSiteImages"
 
 export function LeadCaptureSection() {
     const { t } = useTranslation()
+    // Mismo slot que "Quiénes somos" (antes ambas secciones compartían la misma foto de stock).
+    const backgroundSrc = useSiteImages().who_we_are
 
     return (
         <section id="contacto" className="bg-landing-sage py-20 sm:py-28">
@@ -20,12 +22,14 @@ export function LeadCaptureSection() {
                         viewport={viewportOnce}
                         className="relative flex min-h-80 flex-col justify-between overflow-hidden bg-brand-900 p-7 text-landing-cream sm:p-12"
                     >
-                        <img
-                            src={HOME_IMAGES.aboutField}
-                            alt=""
-                            className="absolute inset-0 h-full w-full object-cover opacity-45"
-                            loading="lazy"
-                        />
+                        {backgroundSrc && (
+                            <img
+                                src={backgroundSrc}
+                                alt=""
+                                className="absolute inset-0 h-full w-full object-cover opacity-45"
+                                loading="lazy"
+                            />
+                        )}
                         <div className="absolute inset-0 bg-brand-900/65" />
 
                         <div className="relative">

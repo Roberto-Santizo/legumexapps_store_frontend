@@ -4,14 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import type { TFunction } from "i18next"
-import { ChevronRight, Package, Search, SlidersHorizontal } from "lucide-react"
+import { Boxes, Check, Minus, Package, Pencil, Plus, Search, SlidersHorizontal } from "lucide-react"
 import { calculateQuoteSchema } from "@/feature/quote/schema/quote.schema"
 import type { CalculateQuoteInput, QuotableProduct, QuoteDestination, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 import type { DestinationCountry } from "@/feature/destination/schema/destination.schema"
-import { Card } from "@/shared/component/card.component"
 import { Chip } from "@/shared/component/chip.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Select } from "@/shared/component/select.component"
+import { CatalogQuoteSection, CatalogQuoteSelectionCards } from "@/feature/customQuote/component/catalogQuoteUi.component"
 import { SearchableSelect } from "@/shared/component/searchableSelect.component"
 import type { SearchableSelectOption } from "@/shared/component/searchableSelect.component"
 import { OptionCards } from "@/shared/component/optionCards.component"
@@ -23,6 +23,8 @@ import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 import { QuoteLiveTotal, QuoteMaterialGroups } from "@/feature/quote/component/quoteMaterialGroups.component"
 import { QuotePalletsStep } from "@/feature/quote/component/quotePalletsStep.component"
 import { QuoteWizardBackButton } from "@/feature/quote/component/quoteWizardBackButton.component"
+import { QuoteWizardStepper } from "@/feature/quote/component/quoteWizardStepper.component"
+import type { QuoteWizardCrumb } from "@/feature/quote/component/quoteWizardStepper.component"
 import type { MaterialGroup, MaterialLevel, MaterialOption } from "@/feature/quote/component/quoteMaterialGroups.component"
 import { calculateTotalOrderWeightKg, formatTotalOrderWeight } from "@/feature/quote/quoteWeight.util"
 
@@ -105,19 +107,12 @@ function resolveSelectedMaterialId(
     return options.find((option) => option.isDefault)?.id
 }
 
-// Etiqueta del selector de SKU: nombre del producto + bagsPerBox × presentación + boxesPerPallet.
-// El backend solo envía variantes con esos datos; el fallback de presentationLabel es defensivo.
-function variantLabel(productName: string, variant: QuotableProduct["variants"][number], t: TFunction): string {
-    const unitsPerBox = t("site.quoteRequest.form.variantLabel.unitsPerBox", { count: variant.bagsPerBox })
-    const sizePart = variant.presentationLabel ? `${unitsPerBox} × ${variant.presentationLabel}` : unitsPerBox
-    const boxesPerPallet = t("site.quoteRequest.form.variantLabel.boxesPerPallet", { count: variant.boxesPerPallet })
-    return [productName, sizePart, boxesPerPallet].filter(Boolean).join(" · ")
-}
-
-function crumbClassName(isActive: boolean, enabled: boolean): string {
-    if (isActive) return "border-focus bg-brand-300/20 text-focus"
-    if (enabled) return "border-transparent text-ink-600 hover:bg-canvas hover:text-ink-900"
-    return "border-transparent cursor-not-allowed text-ink-400"
+// Subtítulo de la tarjeta de presentación: unidades por caja + cajas por palet.
+function variantDetails(variant: QuotableProduct["variants"][number], t: TFunction): string {
+    return [
+        t("site.quoteRequest.form.variantLabel.unitsPerBox", { count: variant.bagsPerBox }),
+        t("site.quoteRequest.form.variantLabel.boxesPerPallet", { count: variant.boxesPerPallet }),
+    ].join(" · ")
 }
 
 export function QuoteCalculatorForm({
@@ -235,6 +230,7 @@ export function QuoteCalculatorForm({
     const selectedVariantId = watch("productVariantId")
     const selectedVariant = variants.find((variant) => variant.id === selectedVariantId)
     const watchedRequestedPallets = watch("requestedPallets")
+    const palletCount = Number.isInteger(watchedRequestedPallets) && watchedRequestedPallets > 0 ? watchedRequestedPallets : 0
     const totalWeightKg = selectedVariant ? calculateTotalOrderWeightKg(selectedVariant, watchedRequestedPallets) : null
 
     // Grupos de opciones: un chooser por grupo de cada nivel (ej.
@@ -410,7 +406,7 @@ export function QuoteCalculatorForm({
         onSubmit({ ...withMaterials, rawMaterialMix })
     })
 
-    const crumbs: { key: QuoteWizardStep; label: string; enabled: boolean }[] = [
+    const crumbs: QuoteWizardCrumb[] = [
         { key: "mode", label: t("site.quoteRequest.form.wizard.steps.mode"), enabled: true },
         { key: "category", label: t("site.quoteRequest.form.wizard.steps.category"), enabled: true },
         { key: "subCategory", label: t("site.quoteRequest.form.wizard.steps.subCategory"), enabled: !!selectedCategory },
@@ -419,57 +415,83 @@ export function QuoteCalculatorForm({
         { key: "total", label: t("site.quoteRequest.form.wizard.steps.total"), enabled: hasReachedTotal },
     ]
 
-    const variantFieldProps = register("productVariantId", { setValueAs: toOptionalNumber })
-    const renderVariantField = (product: QuotableProduct) => (
-        <FormField
-            label={t("site.quoteRequest.form.variant")}
-            htmlFor="productVariantId"
-            error={getFieldErrorMessage(t, errors.productVariantId)}
-            required
-        >
-            <Select
-                id="productVariantId"
-                hasError={!!errors.productVariantId}
-                defaultValue=""
-                {...variantFieldProps}
-                onChange={(event) => {
-                    variantFieldProps.onChange(event)
-                    handleVariantChange()
-                }}
-            >
-                <option value="">{t("common.selectPlaceholder")}</option>
-                {product.variants.map((variant) => (
-                    <option key={variant.id} value={variant.id}>
-                        {variantLabel(product.displayName, variant, t)}
-                    </option>
-                ))}
-            </Select>
-        </FormField>
+    // Presentación (SKU): tarjetas cuando hay más de una, una fila fija cuando solo hay una. El valor
+    // vive en react-hook-form vía setValue (igual que la preselección de handleProductChange).
+    const selectVariant = (variantId: number) => {
+        if (variantId === selectedVariantId) return
+        setValue("productVariantId", variantId, { shouldValidate: true })
+        handleVariantChange()
+    }
+    const renderPresentationSection = (product: QuotableProduct) => (
+        <CatalogQuoteSection tone="sky" title={t("site.quoteRequest.form.variant")}>
+            {product.variants.length > 1 ? (
+                <>
+                    <CatalogQuoteSelectionCards
+                        value={selectedVariantId}
+                        options={product.variants.map((variant) => ({
+                            value: variant.id,
+                            text: variant.presentationLabel ?? product.displayName,
+                            subtitle: variantDetails(variant, t),
+                            icon: <Boxes size={22} aria-hidden="true" />,
+                        }))}
+                        onChange={(value) => selectVariant(Number(value))}
+                    />
+                    {errors.productVariantId && (
+                        <p role="alert" className="mt-3 text-sm text-danger">{getFieldErrorMessage(t, errors.productVariantId)}</p>
+                    )}
+                </>
+            ) : (
+                selectedVariant && (
+                    <div className="flex items-center gap-3 rounded-xl border border-line bg-linear-to-br from-customize-mint via-surface to-accent-coral-bg p-4">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface text-brand-700 ring-1 ring-line dark:text-brand-500">
+                            <Boxes size={20} aria-hidden="true" />
+                        </span>
+                        <div className="min-w-0">
+                            <p className="break-words font-semibold text-ink-900">{selectedVariant.presentationLabel ?? product.displayName}</p>
+                            <p className="text-sm text-ink-600">{variantDetails(selectedVariant, t)}</p>
+                        </div>
+                        <Check size={18} aria-hidden="true" className="ml-auto shrink-0 text-brand-700 dark:text-brand-500" />
+                    </div>
+                )
+            )}
+        </CatalogQuoteSection>
     )
 
-    const renderProductHeader = (product: QuotableProduct) => (
-        <>
-            <div className="mb-6 flex items-center gap-3 rounded-panel border border-line bg-canvas/40 p-3 sm:gap-4 sm:p-4">
+    const renderProductHeader = (product: QuotableProduct) => {
+        const showRecipe = !product.isCustomizable && product.fixedRecipe.length > 0
+        return (
+            <div className="relative mb-6 flex flex-col gap-4 overflow-hidden rounded-2xl border border-line bg-linear-to-br from-customize-mint via-surface to-accent-coral-bg p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
                 {product.imageUrl ? (
-                    <img src={product.imageUrl} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover sm:h-16 sm:w-16" />
+                    <img src={product.imageUrl} alt="" className="size-20 shrink-0 rounded-xl object-cover shadow-panel ring-1 ring-line sm:size-24" />
                 ) : (
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-line/20 text-ink-600 sm:h-16 sm:w-16">
-                        <Package size={20} />
+                    <div className="flex size-20 shrink-0 items-center justify-center rounded-xl bg-surface text-brand-700 ring-1 ring-line sm:size-24">
+                        <Package size={28} aria-hidden="true" />
                     </div>
                 )}
-                <div>
-                    <p className="text-xs text-ink-600">{selectedCategory?.text}</p>
-                    <p className="font-semibold text-ink-900 sm:text-lg">{product.displayName}</p>
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase tracking-wide text-brand-700 dark:text-brand-500">
+                        {[selectedCategory?.text, selectedSubCategory?.text].filter(Boolean).join(" / ")}
+                    </p>
+                    <p className="mt-1 break-words font-display text-xl font-bold text-ink-900 sm:text-2xl">{product.displayName}</p>
+                    {(product.isOrganic || showRecipe) && (
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                            {product.isOrganic && <Chip tone="fresh">{t("site.quoteRequest.form.organicBadge")}</Chip>}
+                            {showRecipe && (
+                                <>
+                                    <span className="text-xs font-medium text-ink-600">{t("site.quoteRequest.form.fixedRecipeTitle")}:</span>
+                                    {product.fixedRecipe.map((rawMaterial) => (
+                                        <span key={rawMaterial.rawMaterialId} className="inline-flex items-center rounded-full border border-line bg-surface/80 px-2.5 py-1 text-xs font-medium text-ink-900">
+                                            {t("site.quoteRequest.form.fixedRecipeLine", { percentage: rawMaterial.percentage, name: rawMaterial.displayName })}
+                                        </span>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
-
-            {product.isOrganic && (
-                <div className="mb-5 flex flex-wrap gap-2">
-                    <Chip tone="fresh">{t("site.quoteRequest.form.organicBadge")}</Chip>
-                </div>
-            )}
-        </>
-    )
+        )
+    }
 
     // El botón de calcular depende solo de lo que la cotización necesita: variante, palets, una elección
     // vigente en CADA grupo de opciones y -- en modo personalizable -- una mezcla que sume 100%.
@@ -483,29 +505,11 @@ export function QuoteCalculatorForm({
         <QuoteLiveTotal total={livePreviewTotal} isLoading={isLivePreviewLoading} pallets={watchedRequestedPallets} />
     ) : null
 
-    const renderFixedRecipe = (product: QuotableProduct) =>
-        !product.isCustomizable && product.fixedRecipe.length > 0 ? (
-            <div className="mb-6 rounded-panel border border-line p-4 sm:p-5">
-                <p className="mb-2 text-sm font-semibold text-ink-900">{t("site.quoteRequest.form.fixedRecipeTitle")}</p>
-                <p className="text-sm text-ink-600">
-                    {product.fixedRecipe
-                        .map((rawMaterial) =>
-                            t("site.quoteRequest.form.fixedRecipeLine", {
-                                percentage: rawMaterial.percentage,
-                                name: rawMaterial.displayName,
-                            })
-                        )
-                        .join(" · ")}
-                </p>
-            </div>
-        ) : null
-
     const renderMixSection = () =>
         mode === "customizable" ? (
-            <div className="mb-6 rounded-panel border border-line p-4 sm:p-5">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-ink-900">{t("site.quoteRequest.form.mixTitle")}</p>
-                    <p className={`text-sm font-semibold ${isMixComplete ? "text-ink-900" : "text-danger"}`}>
+            <CatalogQuoteSection title={t("site.quoteRequest.form.mixTitle")} tone="cream">
+                <div className="mb-3 flex justify-end">
+                    <p className={`text-sm font-semibold ${isMixComplete ? "text-brand-700 dark:text-brand-500" : "text-danger"}`}>
                         {t("site.quoteRequest.form.mixTotal", { total: mixTotal })}
                     </p>
                 </div>
@@ -548,12 +552,12 @@ export function QuoteCalculatorForm({
                 {!isMixComplete && rawMaterialPool.length > 0 && (
                     <p className="mt-3 text-xs text-danger">{t("site.quoteRequest.form.mixIncomplete")}</p>
                 )}
-            </div>
+            </CatalogQuoteSection>
         ) : null
 
     const renderDestinationSection = () =>
         showDestination ? (
-            <>
+            <CatalogQuoteSection tone="sky" title={t("site.quoteRequest.form.destination")}>
                 <FormField label={t("site.quoteRequest.form.country")} htmlFor="quoteCountry">
                     <Select
                         id="quoteCountry"
@@ -591,58 +595,34 @@ export function QuoteCalculatorForm({
                         />
                     )}
                 </FormField>
-            </>
+            </CatalogQuoteSection>
         ) : null
 
     return (
-        <Card>
-            {/* Relleno extra solo en pantallas grandes: el Card ya trae p-4/sm:p-6, esto lo
-            agranda desde lg sin pelear contra sus clases. */}
-            <div className="lg:p-3 xl:p-6">
-                <div className="mb-5 flex items-center gap-3">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-panel border border-line bg-canvas text-brand-500">
-                        <Package className="h-5 w-5" />
-                    </span>
-                    <h2 className="font-display text-xl font-bold text-ink-900 sm:text-2xl">{t("site.quoteRequest.form.title")}</h2>
-                </div>
-
-                <nav className="mb-7 flex flex-wrap items-center gap-x-1 gap-y-2 border-b border-line pb-5 text-sm">
-                    {crumbs.map((crumb, index) => (
-                        <div key={crumb.key} className="flex min-w-0 max-w-full items-center gap-1">
-                            {index > 0 && <ChevronRight size={16} className="text-ink-400" />}
-                            <button
-                                type="button"
-                                disabled={!crumb.enabled}
-                                aria-current={step === crumb.key ? "step" : undefined}
-                                onClick={() => setStep(crumb.key)}
-                                className={`min-h-control rounded-action border-b-2 px-3.5 py-2 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface sm:px-4 ${crumbClassName(step === crumb.key, crumb.enabled)}`}
-                            >
-                                {crumb.label}
-                            </button>
-                        </div>
-                    ))}
-                </nav>
+        <div className="min-w-0 rounded-2xl border border-line bg-surface p-4 shadow-panel sm:p-7 lg:p-8">
+            <div>
+                <QuoteWizardStepper crumbs={crumbs} step={step} onStepChange={setStep} />
 
                 <form onSubmit={submit}>
                     {step === "mode" && (
                         <div>
-                            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
+                            <h2 className="mb-1 font-display text-xl font-bold text-ink-900 sm:text-2xl">
                                 {t("site.quoteRequest.form.wizard.mode.title")}
-                            </p>
+                            </h2>
                             <p className="mb-6 text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.mode.subtitle")}</p>
-                            <OptionCards
+                            <CatalogQuoteSelectionCards
                                 options={[
                                     {
                                         value: "finished",
                                         text: t("site.quoteRequest.form.modeFinished"),
                                         subtitle: t("site.quoteRequest.form.modeFinishedHint"),
-                                        icon: <Package size={22} />,
+                                        icon: <Package size={22} aria-hidden="true" />,
                                     },
                                     {
                                         value: "customizable",
                                         text: t("site.quoteRequest.form.modeCustomizable"),
                                         subtitle: t("site.quoteRequest.form.modeCustomizableHint"),
-                                        icon: <SlidersHorizontal size={22} />,
+                                        icon: <SlidersHorizontal size={22} aria-hidden="true" />,
                                     },
                                 ]}
                                 value={mode}
@@ -653,8 +633,6 @@ export function QuoteCalculatorForm({
                                     }
                                     handleModeChange(value as QuoteMode)
                                 }}
-                                columnsClassName="grid-cols-1 sm:grid-cols-2"
-                                imageHeightClassName="h-16 sm:h-20"
                             />
                         </div>
                     )}
@@ -662,9 +640,9 @@ export function QuoteCalculatorForm({
                     {step === "category" && (
                         <div>
                             <QuoteWizardBackButton onClick={() => setStep("mode")} />
-                            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
+                            <h2 className="mb-1 font-display text-xl font-bold text-ink-900 sm:text-2xl">
                                 {t("site.quoteRequest.form.wizard.category.title")}
-                            </p>
+                            </h2>
                             <p className="mb-6 text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.category.subtitle")}</p>
 
                             {categories.length === 0 ? (
@@ -686,9 +664,9 @@ export function QuoteCalculatorForm({
                     {step === "subCategory" && selectedCategory && (
                         <div>
                             <QuoteWizardBackButton onClick={() => setStep("category")} />
-                            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
+                            <h2 className="mb-1 font-display text-xl font-bold text-ink-900 sm:text-2xl">
                                 {t("site.quoteRequest.form.wizard.subCategory.title", { category: selectedCategory.text })}
-                            </p>
+                            </h2>
                             <p className="mb-6 text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.subCategory.subtitle")}</p>
                             <OptionCards
                                 options={subCategories}
@@ -703,9 +681,9 @@ export function QuoteCalculatorForm({
                     {step === "product" && selectedSubCategory && (
                         <div>
                             <QuoteWizardBackButton onClick={() => setStep("subCategory")} />
-                            <p className="mb-1 font-display text-lg font-bold text-ink-900 sm:text-xl">
+                            <h2 className="mb-1 font-display text-xl font-bold text-ink-900 sm:text-2xl">
                                 {t("site.quoteRequest.form.wizard.product.title", { subcategory: selectedSubCategory.text })}
-                            </p>
+                            </h2>
                             <p className="mb-6 text-sm text-ink-600 sm:text-base">{t("site.quoteRequest.form.wizard.product.subtitle")}</p>
 
                             <div className="relative mb-6">
@@ -747,16 +725,7 @@ export function QuoteCalculatorForm({
                     {step === "pallets" && selectedProduct && (
                         <QuotePalletsStep
                             header={renderProductHeader(selectedProduct)}
-                            fixedRecipe={renderFixedRecipe(selectedProduct)}
-                            variantField={
-                                selectedProduct.variants.length > 1 ? (
-                                    renderVariantField(selectedProduct)
-                                ) : (
-                                    <p className="mb-5 rounded-[10px] border border-line px-4 py-3 text-sm text-ink-900">
-                                        {selectedVariant ? variantLabel(selectedProduct.displayName, selectedVariant, t) : null}
-                                    </p>
-                                )
-                            }
+                            presentationSection={renderPresentationSection(selectedProduct)}
                             selectedVariant={selectedVariant}
                             requestedPallets={watchedRequestedPallets}
                             palletsField={
@@ -766,15 +735,34 @@ export function QuoteCalculatorForm({
                                     error={getFieldErrorMessage(t, errors.requestedPallets)}
                                     required
                                 >
-                                    <Input
-                                        id="requestedPallets"
-                                        type="number"
-                                        min={1}
-                                        step={1}
-                                        defaultValue={1}
-                                        hasError={!!errors.requestedPallets}
-                                        {...register("requestedPallets", { setValueAs: toOptionalNumber })}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="secondary"
+                                            aria-label={t("catalogQuote.ui.decreasePallets")}
+                                            disabled={palletCount <= 1}
+                                            onClick={() => setValue("requestedPallets", palletCount - 1, { shouldValidate: true })}
+                                        >
+                                            <Minus size={16} aria-hidden="true" />
+                                        </Button>
+                                        <Input
+                                            id="requestedPallets"
+                                            type="number"
+                                            min={1}
+                                            step={1}
+                                            inputMode="numeric"
+                                            defaultValue={1}
+                                            className="min-w-0 text-center text-lg font-semibold"
+                                            hasError={!!errors.requestedPallets}
+                                            {...register("requestedPallets", { setValueAs: toOptionalNumber })}
+                                        />
+                                        <Button
+                                            variant="secondary"
+                                            aria-label={t("catalogQuote.ui.increasePallets")}
+                                            onClick={() => setValue("requestedPallets", palletCount + 1, { shouldValidate: true })}
+                                        >
+                                            <Plus size={16} aria-hidden="true" />
+                                        </Button>
+                                    </div>
                                 </FormField>
                             }
                             materialsSection={<QuoteMaterialGroups groups={materialGroups} onSelect={handleMaterialSelect} />}
@@ -797,43 +785,46 @@ export function QuoteCalculatorForm({
 
                             {renderProductHeader(selectedProduct)}
 
-                            <div className="rounded-panel border border-line p-4 sm:p-5">
-                                <div className="mb-2 flex items-center justify-between gap-3">
-                                    <p className="text-sm font-semibold text-ink-900">
-                                        {t("site.quoteRequest.form.wizard.total.summaryTitle")}
-                                    </p>
-                                    <button
-                                        type="button"
-                                        onClick={() => setStep("pallets")}
-                                        className="text-sm inline-flex min-h-control items-center rounded-action px-2 font-medium text-focus underline decoration-brand-300 underline-offset-4 transition-colors hover:bg-brand-300/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-                                    >
-                                        {t("site.quoteRequest.form.wizard.total.edit")}
-                                    </button>
-                                </div>
-                                <ul className="space-y-1 text-sm text-ink-600">
-                                    {selectedVariant && <li>{variantLabel(selectedProduct.displayName, selectedVariant, t)}</li>}
-                                    <li>
-                                        {t("site.quoteRequest.form.requestedPallets")}: {watchedRequestedPallets ?? "-"}
-                                    </li>
+                            <CatalogQuoteSection title={t("site.quoteRequest.form.wizard.total.summaryTitle")}>
+                                <dl className="divide-y divide-line text-sm">
+                                    {selectedVariant && (
+                                        <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 pb-2.5">
+                                            <dt className="text-ink-600">{t("site.quoteRequest.form.variant")}</dt>
+                                            <dd className="text-right font-medium text-ink-900">
+                                                {selectedVariant.presentationLabel ?? selectedProduct.displayName} · {variantDetails(selectedVariant, t)}
+                                            </dd>
+                                        </div>
+                                    )}
+                                    <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5">
+                                        <dt className="text-ink-600">{t("site.quoteRequest.form.requestedPallets")}</dt>
+                                        <dd className="font-medium text-ink-900">{watchedRequestedPallets ?? "-"}</dd>
+                                    </div>
                                     {totalWeightKg !== null && (
-                                        <li>
-                                            {t("site.quoteRequest.form.wizard.pallets.totalWeight")}: {formatTotalOrderWeight(totalWeightKg)}
-                                        </li>
+                                        <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5">
+                                            <dt className="text-ink-600">{t("site.quoteRequest.form.wizard.pallets.totalWeight")}</dt>
+                                            <dd className="font-medium text-ink-900">{formatTotalOrderWeight(totalWeightKg)}</dd>
+                                        </div>
                                     )}
                                     {materialGroups.map((group) => (
-                                        <li key={group.key}>
-                                            <span className="font-medium text-ink-900">
-                                                {t(`site.quoteRequest.form.${group.level}MaterialLabel`)} · {group.group}:
-                                            </span>{" "}
-                                            {group.options.find((option) => option.id === group.selectedId)?.displayName ?? "-"}
-                                        </li>
+                                        <div key={group.key} className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5">
+                                            <dt className="text-ink-600">
+                                                {t(`site.quoteRequest.form.${group.level}MaterialLabel`)} · {group.group}
+                                            </dt>
+                                            <dd className="text-right font-medium text-ink-900">
+                                                {group.options.find((option) => option.id === group.selectedId)?.displayName ?? "-"}
+                                            </dd>
+                                        </div>
                                     ))}
-                                </ul>
-                            </div>
+                                </dl>
+                                <Button variant="secondary" onClick={() => setStep("pallets")} className="mt-4">
+                                    <Pencil size={16} aria-hidden="true" />
+                                    {t("site.quoteRequest.form.wizard.total.edit")}
+                                </Button>
+                            </CatalogQuoteSection>
                         </div>
                     )}
                 </form>
             </div>
-        </Card>
+        </div>
     )
 }

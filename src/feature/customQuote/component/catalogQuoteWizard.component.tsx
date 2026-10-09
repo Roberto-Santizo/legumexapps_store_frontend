@@ -25,7 +25,7 @@ import { CatalogQuoteContext } from "./catalogQuoteUi.component"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 
 type Step = CatalogStep
-type Props = { mode?: "customer"; onConfirmed: (line: QuoteDocumentLine, result: CatalogConfirmed) => void } | { mode: "admin" }
+type Props = { mode?: "customer"; order?: { id: string; clientName: string }; onConfirmed: (line: QuoteDocumentLine, result: CatalogConfirmed) => void } | { mode: "admin" }
 export function CatalogQuoteWizard(props: Readonly<Props>) {
     const { t, i18n } = useTranslation()
     const isAdmin = props.mode === "admin"
@@ -89,7 +89,7 @@ export function CatalogQuoteWizard(props: Readonly<Props>) {
                 setError("catalogQuote.changed")
                 return
             }
-            const result = await confirmCatalogAPI({ input, previewToken: calculation.previewToken, confirmationKey: confirmationKey.current })
+            const result = await confirmCatalogAPI({ input, previewToken: calculation.previewToken, confirmationKey: confirmationKey.current, order: props.order })
             if (current !== sequence.current) return
             setConfirmed(result)
             props.onConfirmed(toCustomQuoteDocumentLine(result), result)
@@ -144,13 +144,13 @@ export function CatalogQuoteWizard(props: Readonly<Props>) {
     return <div className="min-w-0 rounded-2xl border border-line bg-surface p-4 shadow-panel sm:p-7 lg:p-8">
         <CatalogQuoteStepper step={step} />
         <CatalogQuoteContext category={category} subCategory={subCategory} />
-        <h2 tabIndex={-1} ref={heading} className={`mb-6 font-display text-xl font-bold sm:text-2xl ${step === "mix" ? "text-warning-fg" : "text-ink-900"}`}>{t(`catalogQuote.steps.${step}`)}</h2>
+        <h2 tabIndex={-1} ref={heading} className={`mb-6 font-display text-xl font-bold sm:text-2xl ${step === "mix" ? "text-accent-coral" : "text-ink-900"}`}>{t(`catalogQuote.steps.${step}`)}</h2>
         {error && <p role="alert" className="mb-4 rounded-panel border border-danger-border bg-danger-bg p-3 text-danger">{error}</p>}
         {step === "category" && <><CatalogQuoteSelectionCards value={state.categoryId} options={catalog.data.categories.map(row => ({ value: row.id, text: row.displayName, icon: <Layers size={22} aria-hidden="true" /> }))} onChange={value => { change("categoryId", value); setStep("subCategory") }} /><p className="mt-5 text-sm text-ink-600">{t("catalogQuote.ui.selectionHint")}</p></>}
         {step === "subCategory" && <><CatalogQuoteSelectionCards value={state.subCategoryId} options={(category?.subCategories ?? []).map(row => ({ value: row.id, text: row.displayName, icon: <Leaf size={22} aria-hidden="true" /> }))} onChange={value => { change("subCategoryId", value); setStep("profile") }} /><CatalogQuoteNavigation onBack={previous} disabled={!subCategory} onNext={() => setStep("profile")} /></>}
         {step === "profile" && <CatalogQuoteProfileStep types={types} effectiveType={effectiveType} isOrganic={state.isOrganic} subCategory={subCategory} hasMaterials={materials.length > 0} previous={previous} onNext={() => setStep("mix")} onTypeChange={value => change("ingredientType", value)} onOrganicChange={value => change("isOrganic", value)} />}
         {step === "mix" && <>
-            <p className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full border border-brand-300/40 bg-customize-mint px-3 py-2 text-xs font-medium text-brand-700"><Leaf size={15} aria-hidden="true" /><span>{t(`catalogQuote.types.${effectiveType}`)}</span><span aria-hidden="true" className="text-ink-400">·</span><BadgeCheck size={15} aria-hidden="true" /><span>{t(state.isOrganic ? "catalogQuote.organic" : "catalogQuote.conventional")}</span></p>
+            <p className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full border border-accent-sky-border bg-accent-sky-bg px-3 py-2 text-xs font-medium text-accent-sky"><Leaf size={15} aria-hidden="true" /><span>{t(`catalogQuote.types.${effectiveType}`)}</span><span aria-hidden="true" className="text-ink-400">·</span><BadgeCheck size={15} aria-hidden="true" /><span>{t(state.isOrganic ? "catalogQuote.organic" : "catalogQuote.conventional")}</span></p>
             <CatalogQuoteMixBuilder materials={materials} percentages={state.percentages} onChange={updatePercentage} />
             <CatalogQuoteNavigation onBack={previous} disabled={!exactMix(state.percentages)} onNext={() => setStep("configuration")} />
         </>}

@@ -7,11 +7,13 @@ import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.compone
 import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary.component"
 import { sendQuotePdfEmailAPI } from "@/feature/quote/api/quote.api"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
-import type { QuoteDocumentLine } from "@/feature/quote/schema/quote.schema"
+import { useSharedQuoteOrder } from "@/feature/quote/component/useSharedQuoteOrder"
+import { QuoteOrderClient } from "@/feature/quote/component/quoteOrderClient.component"
 
 export function CatalogQuoteRequestPage() {
     const { t } = useTranslation()
-    const [lines, setLines] = useState<QuoteDocumentLine[]>([])
+    const order = useSharedQuoteOrder()
+    const lines = order.lines
     const [resetKey, setResetKey] = useState(0)
     const reset = () => { setResetKey(key => key + 1) }
     return <SiteContainer className="bg-customize-slate py-12 sm:py-16">
@@ -21,8 +23,9 @@ export function CatalogQuoteRequestPage() {
             <p className="max-w-2xl text-base leading-relaxed text-ink-600">{t("catalogQuote.ui.intro")}</p>
         </div>
         <div className="mx-auto max-w-6xl space-y-6">
-            <CatalogQuoteWizard key={resetKey} onConfirmed={(line) => { setLines(currentLines => [...currentLines, line]) }} />
-            {!!lines.length && <QuotedOrderSummary lines={lines} onQuoteAnother={reset} onClear={() => { setLines([]); reset() }} showCostBreakdown={false} showReferenceDisclaimer pdfAction={<QuotePdfButton lines={lines} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={sendQuotePdfEmailAPI} />} />}
+            <QuoteOrderClient name={order.clientName} locked={lines.length > 0} onChange={order.setClientName} />
+            {order.identity.clientName && <CatalogQuoteWizard key={resetKey} order={order.identity} onConfirmed={order.addLine} />}
+            {!!lines.length && <QuotedOrderSummary lines={lines} onQuoteAnother={reset} onClear={() => { order.clear(); reset() }} showCostBreakdown={false} showReferenceDisclaimer pdfAction={<QuotePdfButton lines={lines} orderClientName={order.identity.clientName} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={sendQuotePdfEmailAPI} />} />}
         </div>
     </SiteContainer>
 }

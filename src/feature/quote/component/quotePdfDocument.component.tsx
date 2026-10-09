@@ -14,6 +14,9 @@ import { formatCurrency } from "@/shared/format/currency"
 
 const pdfDateTimeFormatter = new Intl.DateTimeFormat("es-GT", { dateStyle: "short", timeStyle: "short" })
 
+// Mismos datos de contacto que la sección de contacto de la landing (leadCaptureSection.component.tsx).
+const PDF_CONTACT_LINE = "Legumex · kate@legumex.net · +502 3042 5579"
+
 const compositionNumberFormatter = new Intl.NumberFormat("es-GT", { maximumFractionDigits: 3 })
 
 // Composición de una línea A LA MEDIDA (solo esas la traen, ver QuoteLineComposition): la receta que
@@ -30,16 +33,14 @@ function CompositionSection({ composition }: Readonly<{ composition: QuoteLineCo
                 <View style={styles.packagingConfigTitleMark} />
                 <Text style={styles.packagingConfigTitle}>{t("quote.pdf.document.composition.title")}</Text>
             </View>
-            <Text style={styles.packagingConfigGroupValue}>
-                {composition.rawMaterials
-                    .map((rawMaterial) =>
-                        t("quote.pdf.document.composition.rawMaterial", {
-                            percentage: compositionNumberFormatter.format(rawMaterial.percentage),
-                            name: rawMaterial.displayName,
-                        })
-                    )
-                    .join(" · ")}
-            </Text>
+            <View style={styles.compositionChips}>
+                {composition.rawMaterials.map((rawMaterial) => (
+                    <View key={rawMaterial.displayName} style={styles.compositionChip}>
+                        <Text style={styles.compositionChipPercent}>{compositionNumberFormatter.format(rawMaterial.percentage)} %</Text>
+                        <Text style={styles.compositionChipName}>{rawMaterial.displayName}</Text>
+                    </View>
+                ))}
+            </View>
             {composition.context && <Text style={styles.packagingConfigFixed}>
                 {composition.context.categoryName} · {composition.context.subCategoryName} · {t(composition.context.isOrganic ? "catalogQuote.organic" : "catalogQuote.conventional")} · {t(`catalogQuote.types.${composition.context.ingredientType}`)}
             </Text>}
@@ -106,6 +107,12 @@ export function QuotePdfDocument({
     return (
         <Document>
             <Page size="LETTER" style={styles.page}>
+                <View style={styles.topBand} fixed>
+                    <View style={styles.topBandDeep} />
+                    <View style={styles.topBandLeaf} />
+                    <View style={styles.topBandWarm} />
+                </View>
+
                 <View style={styles.headerRow}>
                     {/* Logo servido como asset local (public/logo-legumex.png), NO desde
                     VITE_IMAGE_LOGO (S3). A diferencia del <img> del login, que solo necesita
@@ -138,17 +145,29 @@ export function QuotePdfDocument({
                     </View>
                 </View>
 
-                {lines.map((line) => (
+                <View style={styles.sectionTitleRow}>
+                    <View style={styles.sectionTitleBar} />
+                    <Text style={styles.sectionTitle}>{t("quote.pdf.document.linesTitle", { count: lines.length })}</Text>
+                </View>
+
+                {lines.map((line, index) => (
                     <View key={getLineId(line)} style={styles.lineCard} wrap={false}>
                         <View style={styles.lineHeader}>
-                            <Text style={styles.lineHeaderProduct}>
-                                {line.productDisplayName}
-                                {line.variantLabel && <Text style={styles.lineHeaderVariant}> · {line.variantLabel}</Text>}
-                            </Text>
-                            {/* Transporte apagado para todos por ahora (gateado por showTransport). */}
-                            {showTransport && (
-                                <Text style={styles.lineHeaderDestination}>{line.breakdown.transport.displayName}</Text>
-                            )}
+                            <View style={styles.lineNumber}>
+                                <Text style={styles.lineNumberText}>{index + 1}</Text>
+                            </View>
+                            <View style={styles.lineHeaderText}>
+                                <Text style={styles.lineHeaderProduct}>{line.productDisplayName}</Text>
+                                {line.variantLabel && <Text style={styles.lineHeaderVariant}>{line.variantLabel}</Text>}
+                                {/* Transporte apagado para todos por ahora (gateado por showTransport). */}
+                                {showTransport && (
+                                    <Text style={styles.lineHeaderDestination}>{line.breakdown.transport.displayName}</Text>
+                                )}
+                            </View>
+                            <View style={styles.lineHeaderTotal}>
+                                <Text style={styles.lineTotalLabel}>{t("quote.pdf.document.lineTotal")}</Text>
+                                <Text style={styles.lineTotalValue}>{formatCurrency(line.totalCost)}</Text>
+                            </View>
                         </View>
 
                         <View style={styles.lineStatsRow}>
@@ -169,7 +188,7 @@ export function QuotePdfDocument({
                                     <Text style={styles.lineStatLabel}>{t("quote.pdf.document.boxesPerPallet")}</Text>
                                 </View>
                             )}
-                            <View style={styles.lineStatLast}>
+                            <View style={styles.lineStat}>
                                 <Text style={styles.lineStatValue}>
                                     {formatCurrency(line.totalCost / line.requestedPallets)}
                                 </Text>
@@ -240,34 +259,38 @@ export function QuotePdfDocument({
                             </View>
                         )}
 
-                        <View style={styles.lineTotalRow}>
-                            <Text style={styles.lineTotalLabel}>{t("quote.pdf.document.lineTotal")}</Text>
-                            <Text style={styles.lineTotalValue}>{formatCurrency(line.totalCost)}</Text>
-                        </View>
+                        <View style={styles.lineCardFooter} />
                     </View>
                 ))}
 
-                <View style={styles.orderTotalRow}>
+                <View style={styles.orderTotalRow} wrap={false}>
                     <Text style={styles.orderTotalLabel}>{t("quote.pdf.document.orderTotal")}</Text>
                     <Text style={styles.orderTotalValue}>{formatCurrency(orderTotal)}</Text>
                 </View>
 
                 {showReferenceDisclaimer && (
-                    <View style={styles.disclaimerBox}>
+                    <View style={styles.disclaimerBox} wrap={false}>
                         <Text style={styles.disclaimerText}>{t("quote.pdf.document.referenceDisclaimer")}</Text>
                     </View>
                 )}
 
-                <View style={styles.restrictionsBox}>
+                <View style={styles.restrictionsBox} wrap={false}>
                     <Text style={styles.restrictionsTitle}>{t("quote.pdf.document.restrictionsTitle")}</Text>
                     <Text style={styles.restrictionsText}>
                         {t("quote.pdf.document.restrictionsText", { days: QUOTE_VALIDITY_DAYS })}
                     </Text>
                 </View>
 
-                <Text style={styles.generatedAt}>
-                    {t("quote.pdf.document.generatedAt", { date: pdfDateTimeFormatter.format(quoteDate) })}
-                </Text>
+                <View style={styles.footer} fixed>
+                    <Text style={styles.footerBrand}>{PDF_CONTACT_LINE}</Text>
+                    <Text style={styles.generatedAt}>
+                        {t("quote.pdf.document.generatedAt", { date: pdfDateTimeFormatter.format(quoteDate) })}
+                    </Text>
+                    <Text
+                        style={styles.footerPage}
+                        render={({ pageNumber, totalPages }) => t("quote.pdf.document.pageNumber", { page: pageNumber, total: totalPages })}
+                    />
+                </View>
             </Page>
         </Document>
     )

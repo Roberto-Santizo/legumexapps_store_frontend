@@ -43,13 +43,15 @@ export function ProductHighlightsCarousel() {
                 <div className="-ml-4 flex sm:-ml-6">
                     {PRODUCT_LINES.map((line) => (
                         <div key={line.id} className="min-w-0 flex-[0_0_78%] pl-4 sm:flex-[0_0_46%] sm:pl-6 lg:flex-[0_0_32%]">
-                            <div className="relative h-72 overflow-hidden rounded-panel shadow-panel sm:h-80">
-                                <img
-                                    src={siteImages[line.slotKey] ?? line.image}
-                                    alt={t(`home.lines.items.${line.translationKey}.name`)}
-                                    className="h-full w-full object-cover"
-                                    loading="lazy"
-                                />
+                            <div className="relative h-72 overflow-hidden rounded-panel bg-brand-300/25 shadow-panel sm:h-80">
+                                {siteImages[line.slotKey] && (
+                                    <img
+                                        src={siteImages[line.slotKey]}
+                                        alt={t(`home.lines.items.${line.translationKey}.name`)}
+                                        className="h-full w-full object-cover"
+                                        loading="lazy"
+                                    />
+                                )}
                                 <div className="absolute inset-0 bg-linear-to-t from-brand-900/70 via-brand-900/10 to-transparent" />
                                 <span className="absolute bottom-4 left-4 font-display text-lg font-bold uppercase tracking-tight text-landing-cream">
                                     {t(`home.lines.items.${line.translationKey}.name`)}

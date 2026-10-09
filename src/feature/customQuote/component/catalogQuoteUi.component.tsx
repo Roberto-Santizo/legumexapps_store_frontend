@@ -9,7 +9,7 @@ export type CatalogStep = typeof catalogSteps[number]
 
 function stepCircleClasses(index: number, current: number): string {
     if (index < current) return "bg-brand-700 text-white"
-    if (index === current) return "bg-dorado text-brand-900 ring-4 ring-customize-cream shadow-panel"
+    if (index === current) return "bg-surface text-brand-700 ring-2 ring-brand-500 shadow-[0_0_0_6px_var(--color-customize-mint)] dark:text-brand-500"
     return "bg-canvas text-ink-600 ring-1 ring-line"
 }
 
@@ -23,25 +23,33 @@ export function CatalogQuoteStepper({ step }: Readonly<{ step: CatalogStep }>) {
         if (list && active) list.scrollLeft += active.getBoundingClientRect().left - list.getBoundingClientRect().left - (list.clientWidth - active.clientWidth) / 2
     }, [current])
     return <nav aria-label={t("catalogQuote.ui.progress")} className="mb-8 border-b border-line pb-6">
-        <p className="mb-3 text-sm font-medium text-warning-fg md:hidden">{t("catalogQuote.ui.stepCount", { current: current + 1, total: catalogSteps.length })} · {t(`catalogQuote.ui.stepper.${step}`)}</p>
+        <p className="mb-3 text-sm font-medium text-brand-700 dark:text-brand-500 md:hidden">{t("catalogQuote.ui.stepCount", { current: current + 1, total: catalogSteps.length })} · {t(`catalogQuote.ui.stepper.${step}`)}</p>
         <ol ref={listRef} className="flex overflow-x-auto pb-2">
             {catalogSteps.map((item, index) => <li key={item} aria-current={item === step ? "step" : undefined} className="relative flex min-w-24 flex-1 flex-col items-center gap-2 text-center text-xs md:min-w-0">
                 {index > 0 && <span aria-hidden="true" className={`absolute right-1/2 top-4 h-0.5 w-full ${index <= current ? "bg-brand-700" : "bg-line"}`} />}
                 <span className={`relative z-10 flex size-8 items-center justify-center rounded-full font-semibold transition-all duration-200 ${stepCircleClasses(index, current)}`}>
                     {index < current ? <Check size={16} aria-label={t("catalogQuote.ui.completed")} /> : index + 1}
                 </span>
-                <span className={index === current ? "rounded-full bg-customize-cream px-2 font-semibold text-warning-fg" : "text-ink-600"}>{t(`catalogQuote.ui.stepper.${item}`)}</span>
+                <span className={index === current ? "rounded-full bg-customize-mint px-2 font-semibold text-brand-700 dark:text-brand-500" : "text-ink-600"}>{t(`catalogQuote.ui.stepper.${item}`)}</span>
             </li>)}
         </ol>
     </nav>
 }
 
-type SelectionOption = { value: number | string; text: string; subtitle?: string; icon?: ReactNode; disabled?: boolean }
+export type AccentTone = "green" | "sky" | "coral"
+// Icon tiles share the product hero's soft mint -> peach wash with a brand-green icon; `tone` only nudges the
+// gradient's far end so the accents stay a hint, never a block of colour.
+const ACCENT_TILE: Record<AccentTone, string> = {
+    green: "bg-linear-to-br from-customize-mint via-surface to-accent-coral-bg text-brand-700 ring-1 ring-line dark:text-brand-500",
+    sky: "bg-linear-to-br from-customize-mint via-surface to-accent-sky-bg text-brand-700 ring-1 ring-line dark:text-brand-500",
+    coral: "bg-linear-to-br from-customize-mint via-surface to-accent-coral-bg text-brand-700 ring-1 ring-line dark:text-brand-500",
+}
+type SelectionOption = { value: number | string; text: string; subtitle?: string; icon?: ReactNode; disabled?: boolean; tone?: AccentTone }
 export function CatalogQuoteSelectionCards({ options, value, onChange }: Readonly<{ options: SelectionOption[]; value: number | string | null | undefined; onChange: (value: number | string) => void }>) {
     return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {options.map(option => <button key={option.value} type="button" disabled={option.disabled} aria-pressed={value === option.value} onClick={() => onChange(option.value)}
-            className={`group relative min-w-0 rounded-2xl border p-5 text-left shadow-panel transition duration-200 enabled:hover:-translate-y-0.5 enabled:hover:border-dorado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${value === option.value ? "border-brand-300 bg-customize-mint" : "border-line bg-surface"}`}>
-            <span className={`mb-5 flex size-11 items-center justify-center rounded-xl transition-colors duration-200 ${value === option.value ? "bg-surface text-brand-700" : "bg-customize-mint text-brand-700"}`}>{option.icon ?? <Package size={22} aria-hidden="true" />}</span>
+            className={`group relative min-w-0 rounded-2xl border p-5 text-left shadow-panel transition duration-200 enabled:hover:-translate-y-0.5 enabled:hover:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${value === option.value ? "border-brand-300 bg-customize-mint" : "border-line bg-surface"}`}>
+            <span className={`mb-5 flex size-11 items-center justify-center rounded-xl transition-colors duration-200 ${ACCENT_TILE[option.tone ?? "green"]}`}>{option.icon ?? <Package size={22} aria-hidden="true" />}</span>
             {value === option.value && <span className="absolute right-4 top-4 flex size-6 items-center justify-center rounded-full bg-brand-700 text-white"><Check size={15} aria-hidden="true" /></span>}
             <span className="block break-words text-base font-semibold text-ink-900">{option.text}</span>
             {option.subtitle && <span className="mt-2 block text-sm leading-relaxed text-ink-600">{option.subtitle}</span>}
@@ -57,8 +65,17 @@ export function CatalogQuoteNavigation({ onBack, onNext, disabled, pending, subm
     </div>
 }
 
-export function CatalogQuoteSection({ title, children, tone = "mint" }: Readonly<{ title: string; children: ReactNode; tone?: "mint" | "cream" }>) {
-    return <section className="min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-panel sm:p-6"><h3 className={`mb-4 rounded-lg border-l-2 px-3 py-2 text-sm font-semibold ${tone === "cream" ? "border-customize-slate-border bg-customize-slate text-warning-fg" : "border-brand-300 bg-customize-mint text-brand-700"}`}>{title}</h3>{children}</section>
+// Section titles are plain ink text with a short bar; the tone only colours that bar (a quiet hint, not a band).
+// "cream" is kept as an alias of coral for existing callers.
+const SECTION_TONE = {
+    mint: "from-brand-500 to-brand-300",
+    sky: "from-accent-sky to-brand-300",
+    coral: "from-accent-coral to-brand-300",
+    cream: "from-accent-coral to-brand-300",
+} as const
+export type SectionTone = keyof typeof SECTION_TONE
+export function CatalogQuoteSection({ title, children, tone = "mint" }: Readonly<{ title: string; children: ReactNode; tone?: SectionTone }>) {
+    return <section className="min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-panel sm:p-6"><h3 className="mb-4 flex items-center gap-2.5 text-base font-semibold text-ink-900"><span aria-hidden="true" className={`h-5 w-1 shrink-0 rounded-full bg-linear-to-b ${SECTION_TONE[tone]}`} />{title}</h3>{children}</section>
 }
 
 export function CatalogQuoteContext({ category, subCategory }: Readonly<{ category?: { displayName: string }; subCategory?: { displayName: string } }>) {

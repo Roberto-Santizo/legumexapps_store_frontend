@@ -7,10 +7,11 @@ type ModalProps = {
     title: string
     onClose: () => void
     children: ReactNode
+    size?: "default" | "wide"
 }
 
 
-export function Modal({ title, onClose, children }: Readonly<ModalProps>) {
+export function Modal({ title, onClose, children, size = "default" }: Readonly<ModalProps>) {
     const { t } = useTranslation()
 
     useEffect(() => {
@@ -29,7 +30,7 @@ export function Modal({ title, onClose, children }: Readonly<ModalProps>) {
                 className="absolute inset-0 cursor-default"
                 onClick={onClose}
             />
-            <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-panel border border-line bg-surface p-6 shadow-panel">
+            <div className={`relative max-h-[90vh] w-full overflow-y-auto rounded-panel border border-line bg-surface p-6 shadow-panel ${size === "wide" ? "max-w-4xl sm:p-8" : "max-w-md"}`}>
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-ink-900">{title}</h2>
                     <button

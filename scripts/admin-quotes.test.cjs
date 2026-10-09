@@ -33,6 +33,7 @@ function harness(file,extra={}){
  const overrides={react,"react-i18next":{useTranslation:()=>({t:key=>key})},"react-router-dom":{useSearchParams:()=>[params,v=>{params=v}],Navigate:"Navigate",Link:"Link"},"@/shared/auth/usePermission":{usePermission:()=>({hasPermission:p=>permissions.includes(p)})},"@/shared/auth/PermissionGate":{AccessDenied:"Denied"},"@/shared/router/lazyWithRetry":{lazyWithRetry:load=>({load})},"@tanstack/react-query":{useQuery:options=>{queries.push(options);return query}},"@/feature/quote/api/adminQuote.api":{getAllQuotesAPI:filters=>filters},"@/feature/customQuote/api/adminCustomQuote.api":{getAdminCustomQuotesAPI:filters=>filters},...extra}
  for(const [name,exportName] of [["pageContainer","PageContainer"],["card","Card"],["input","Input"],["spinner","Spinner"],["select","Select"],["formField","FormField"]]) overrides["@/shared/component/"+name+".component"]={[exportName]:exportName}
  overrides["@/feature/dashboard/component/dateRangeFilter.component"]={DateRangeFilter:"DateRange"};overrides["@/feature/customQuote/component/adminCustomQuoteTable.component"]={AdminCustomQuoteTable:"CustomTable"};overrides["@/feature/quote/component/quoteResultCard.component"]={QuoteResultCard:"FixedDetail"}
+ overrides["../component/quoteProductionButton.component"]={QuoteProductionButton:"ProductionButton"}
  const module=loader(overrides)(file)
  const render=name=>{cursor=0;return all(module[name]({embedded:true}))}
  return {render,queries,setQuery:q=>query=q,setPermissions:p=>permissions=p,setParams:p=>params=new URLSearchParams(p),params:()=>params}
@@ -53,10 +54,11 @@ test("responsive selector fixtures use real page controls in both languages",()=
  fs.writeFileSync(path.join(target,"review.html"),`<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body>${screens.join("")}<script>addEventListener('load',()=>{const failures=[...document.querySelectorAll('[data-fixture]')].filter(el=>el.scrollWidth>el.clientWidth+1).map(el=>el.dataset.fixture);const result=document.createElement('pre');result.id='layout-result';result.textContent=JSON.stringify({width:innerWidth,viewportOverflow:document.documentElement.scrollWidth>innerWidth,failures});document.body.append(result)})</script></body></html>`)
 })
 test("selector exposes only permitted views and mounts only the URL-selected list",()=>{
- const h=harness(parent);let tree=h.render("AdminQuotesPage");const buttons=tree.filter(n=>n.type==="button");assert.equal(buttons.length,2);assert.equal(buttons[0].props["aria-pressed"],true)
+ const h=harness(parent);let tree=h.render("AdminQuotesPage");const buttons=tree.filter(n=>n.type==="button");assert.equal(buttons.length,3);assert.equal(buttons[0].props["aria-pressed"],true)
  const active=tree.find(n=>n.type?.load);assert.ok(active.type.load.toString().includes("./adminQuote.page"))
  h.setParams("search=kept");h.render("AdminQuotesPage").filter(n=>n.type==="button")[1].props.onClick();assert.equal(h.params().get("type"),"customizable");assert.equal(h.params().get("search"),"kept")
  tree=h.render("AdminQuotesPage");assert.ok(tree.find(n=>n.type?.load).type.load.toString().includes("adminCustomQuoteList.page"))
+ h.setParams("type=production");tree=h.render("AdminQuotesPage");assert.ok(tree.find(n=>n.type?.load).type.load.toString().includes("productionOrders.component"));assert.equal(tree.filter(n=>n.type?.load).length,1)
  h.setPermissions(["customQuotes:view"]);h.setParams("type=fixed");tree=h.render("AdminQuotesPage");assert.equal(tree.filter(n=>n.type==="button").length,1);assert.equal(tree.find(n=>n.type==="button").props["aria-pressed"],true)
  h.setPermissions(["quotes:view"]);h.setParams("type=customizable");assert.ok(h.render("AdminQuotesPage").find(n=>n.type?.load).type.load.toString().includes("./adminQuote.page"))
  h.setPermissions([]);assert.equal(h.render("AdminQuotesPage")[0].type,"Denied")
@@ -65,7 +67,7 @@ test("old custom quote list redirects to the unified customizable view",()=>{
  const h=harness(parent);h.setParams("status=pending");const node=h.render("AdminCustomQuoteListRedirect")[0];assert.equal(node.type,"Navigate");assert.equal(node.props.to,"/admin/quotes?status=pending&type=customizable");assert.equal(node.props.replace,true)
 })
 test("existing fixed search and inline detail retain their own data and query",()=>{
- const h=harness("src/feature/quote/page/adminQuote.page.tsx");const quote={id:1,productDisplayName:"Mango",variantLabel:"500g",quotingSalesperson:{name:"Ana",email:"ana@example.com"},createdAt:new Date(),requestedPallets:1,totalCost:20};h.setQuery({data:{data:[quote]}})
+ const h=harness("src/feature/quote/page/adminQuote.page.tsx");const quote={id:1,productDisplayName:"Mango",variantLabel:"500g",quotingSalesperson:{name:"Ana",email:"ana@example.com"},createdAt:new Date(),requestedPallets:1,totalCost:20,breakdown:{}};h.setQuery({data:{data:[quote]}})
  let tree=h.render("AdminQuoteListPage");assert.equal(h.queries.at(-1).queryKey[0],"adminQuotes")
  tree.find(n=>n.type==="Input").props.onChange({target:{value:"absent"}});assert.ok(h.render("AdminQuoteListPage").some(n=>n.props.children==="adminQuote.list.noMatches"))
  h.render("AdminQuoteListPage").find(n=>n.type==="Input").props.onChange({target:{value:"Ana"}});tree=h.render("AdminQuoteListPage");tree.find(n=>n.type==="button").props.onClick();assert.equal(h.render("AdminQuoteListPage").find(n=>n.type==="FixedDetail").props.result,quote)

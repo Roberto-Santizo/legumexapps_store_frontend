@@ -11,7 +11,7 @@ export async function previewCatalogAPI(input: CatalogInput) {
     const { data } = await salespersonApi.post("/custom-quotes/catalog-preview", input)
     return catalogPreviewSchema.parse(data.data)
 }
-export async function confirmCatalogAPI(request: { input: CatalogInput; previewToken: string; confirmationKey: string }) {
+export async function confirmCatalogAPI(request: { input: CatalogInput; previewToken: string; confirmationKey: string; order?: { id: string; clientName: string } }) {
     const { data } = await salespersonApi.post("/custom-quotes/catalog-confirm", request)
     return catalogConfirmedSchema.parse(data.data)
 }

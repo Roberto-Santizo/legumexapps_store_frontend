@@ -9,8 +9,9 @@ const React = require("react")
 async function modules() {
     const renderer = await import("@react-pdf/renderer")
     const messages = JSON.parse(fs.readFileSync("src/shared/i18n/locales/en/translation.json", "utf8"))
+    const spanish = JSON.parse(fs.readFileSync("src/shared/i18n/locales/es/translation.json", "utf8"))
     const i18next = require("i18next").createInstance()
-    await i18next.init({ lng: "en", resources: { en: { translation: messages } }, interpolation: { escapeValue: false } })
+    await i18next.init({ lng: "en", resources: { en: { translation: messages }, es: { translation: spanish } }, interpolation: { escapeValue: false } })
     const cache = new Map()
     function load(file) {
         file = path.resolve(file)
@@ -19,7 +20,7 @@ async function modules() {
         const source = ts.transpileModule(fs.readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText
         const localRequire = name => {
             if (name === "@react-pdf/renderer") return { ...renderer, Image: props => React.createElement(renderer.Image, { ...props, src: props.src === "/logo-legumex.png" ? fs.readFileSync("public/logo-legumex.png") : props.src }) }
-            if (name === "react-i18next") return { useTranslation: () => ({ t: i18next.t.bind(i18next) }) }
+            if (name === "react-i18next") return { useTranslation: () => ({ t: i18next.t.bind(i18next), i18n: i18next }) }
             if (name.startsWith("@/") || name.startsWith(".")) {
                 const base = name.startsWith("@/") ? path.resolve("src", name.slice(2)) : path.resolve(path.dirname(file), name)
                 return load([`${base}.ts`, `${base}.tsx`].find(candidate => fs.existsSync(candidate)))
@@ -29,12 +30,59 @@ async function modules() {
         vm.runInThisContext(`(function(require,module,exports){${source}\n})`, { filename: file })(localRequire, module, module.exports)
         return module.exports
     }
-    return { renderer, load }
+    return { renderer, load, i18next }
 }
 const setup = modules()
 const pouch = { displayName: "Bolsa GV Fruit Salad Blend 48 oz", optionGroup: "BOLSAS (BAGS)" }
 const box = { displayName: "Caja Fruit Salad Blend 6x48 oz", optionGroup: "CAJAS (BOX)" }
 const inner = { displayName: "Inner master pouch for six retail units", optionGroup: null }
+
+function mixedOrderFixture() {
+    const base = { destinationId: null, productDisplayName: "Fixed pineapple", variantLabel: "6 x 48 OZ", requestedPallets: 2, totalUnits: 720, boxesPerPallet: 60,
+        rawMaterialCost: 1800, unitPackagingCost: 100, intermediatePackagingCost: 12, palletMaterialCost: 100, transportCost: 0, totalCost: 2012,
+        breakdown: { production: { productId: 5, skuCode: "PTC3010111", kind: "fixed", boxesPerPallet: 60, bagsPerBox: 6, netWeightGrams: 1360 },
+            rawMaterials: [{ rawMaterialId: 1, code: "MP001", displayName: "Pineapple", percentage: 100, gramsPerUnit: 1360, quantityPerUnit: 1.36, totalUnits: 720, unitCost: 1, lineTotal: 1800 }],
+            ingredients: [], unitMaterials: [{ ...pouch, code: "EMP001", quantityPerUnit: 1, totalUnits: 720 }], intermediateMaterials: [{ ...inner, code: "EMP002", packagesNeeded: 120 }],
+            palletMaterials: [{ ...box, code: "EMP003", quantityPerPallet: 60, requestedPallets: 2 }], transport: { destinationId: null, displayName: "", baseCost: 0 } } }
+    const custom = { ...base, productDisplayName: "Custom tropical blend", requestedPallets: 1, totalUnits: 360, totalCost: 1006,
+        composition: { rawMaterials: [{ displayName: "Pineapple", percentage: 100 }], ingredients: [] },
+        breakdown: { ...base.breakdown, production: { kind: "customizable", boxesPerPallet: 60, bagsPerBox: 6, netWeightGrams: 1360 },
+            rawMaterials: [{ ...base.breakdown.rawMaterials[0], totalUnits: 360 }], intermediateMaterials: [{ ...inner, code: "EMP002", packagesNeeded: 60 }] } }
+    return [base, custom]
+}
+
+test("mixed orders consolidate physical quantities and keep missing historical quantities unknown", async () => {
+    const { load } = await setup
+    const { productionMaterials, consolidateProductionMaterials } = load("src/feature/quote/component/quoteProductionData.ts")
+    const lines = mixedOrderFixture()
+    const before = JSON.stringify(lines)
+    const totals = consolidateProductionMaterials(lines)
+    assert.ok(Math.abs(totals.find(row => row.code === "MP001").quantity - 1468.8) < 1e-9)
+    assert.equal(totals.find(row => row.code === "EMP001").quantity, 1080)
+    assert.equal(totals.find(row => row.code === "EMP002").quantity, 180)
+    assert.equal(totals.find(row => row.code === "EMP003").quantity, 180)
+    const legacy = { ...lines[0], breakdown: { ...lines[0].breakdown, rawMaterials: [{ displayName: "Historical material", quantityPerUnit: 50 }] } }
+    assert.equal(productionMaterials(legacy).raw[0].quantity, null)
+    assert.equal(JSON.stringify(lines), before)
+    const sameCodeDifferentCatalog = { ...lines[0], breakdown: { ...lines[0].breakdown, unitMaterials: [{ ...pouch, code: "MP001", quantityPerUnit: 1 }] } }
+    assert.equal(consolidateProductionMaterials([sameCodeDifferentCatalog]).filter(row => row.code === "MP001").length, 2)
+})
+
+test("renders both mixed customer PDF and printable production report with all material levels", async () => {
+    const { renderer, load, i18next } = await setup
+    const { QuotePdfDocument } = load("src/feature/quote/component/quotePdfDocument.component.tsx")
+    const { QuoteProductionDocument } = load("src/feature/quote/component/quoteProductionDocument.component.tsx")
+    const lines = mixedOrderFixture()
+    const props = { lines, clientName: "Mixed order customer", orderId: "PEDIDO-MIXTO-DEMO", salespersonName: "Representative", quoteDate: new Date("2026-10-08T12:00:00Z") }
+    const output = path.resolve("artifacts/quote-production")
+    fs.mkdirSync(output, { recursive: true })
+    await renderer.renderToFile(React.createElement(QuotePdfDocument, { ...props, showCostBreakdown: false }), path.join(output, "mixed-customer.pdf"))
+    await renderer.renderToFile(React.createElement(QuoteProductionDocument, props), path.join(output, "mixed-production.pdf"))
+    await i18next.changeLanguage("es")
+    try { await renderer.renderToFile(React.createElement(QuoteProductionDocument, props), path.join(output, "mixed-production-es.pdf")) }
+    finally { await i18next.changeLanguage("en") }
+    for (const file of ["mixed-customer.pdf", "mixed-production.pdf"]) assert.match(fs.readFileSync(path.join(output, file)).subarray(0, 5).toString(), /^%PDF-/)
+})
 
 test("PDF presentation uses structured types, omits unused levels and never mutates snapshots", async () => {
     const { load } = await setup

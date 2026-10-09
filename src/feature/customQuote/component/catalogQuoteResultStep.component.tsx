@@ -14,7 +14,7 @@ export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonl
     }
     return <>
             <div className="grid gap-5 md:grid-cols-2">
-                <CatalogQuoteSection title={t("catalogQuote.ui.yourMix")} tone="cream">
+                <CatalogQuoteSection title={t("catalogQuote.ui.yourMix")} tone="coral">
                     <p className="mb-4 font-semibold">{confirmed.productDisplayName}</p>
                     <p className="mb-4 text-sm text-ink-600">{t((confirmed.configuration.snapshot?.isOrganic ?? confirmed.isOrganic) ? "catalogQuote.organic" : "catalogQuote.conventional")} · {confirmed.configuration.snapshot && t(`catalogQuote.types.${confirmed.configuration.snapshot.ingredientType}`)}</p>
                     <ul className="space-y-3">
@@ -29,7 +29,7 @@ export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonl
                     <p className="text-xl font-semibold">{confirmed.variantLabel}</p>
                     <p className="mt-3 text-sm text-ink-600">{t("catalogQuote.logistics", { units: confirmed.bagsPerBox, boxes: confirmed.configuration.pallet.boxesPerPallet })}</p>
                 </CatalogQuoteSection>
-                <CatalogQuoteSection title={t("catalogQuote.ui.packaging")} tone="cream">
+                <CatalogQuoteSection title={t("catalogQuote.ui.packaging")} tone="sky">
                     {(["unit", "intermediate", "pallet"] as const).map(level => {
                     const rows = packagingByLevel[level]
                     return rows.length > 0 && <div key={level} className="mb-4">
@@ -38,7 +38,7 @@ export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonl
                     </div>
                 })}</CatalogQuoteSection>
                 <CatalogQuoteSection title={t("catalogQuote.ui.quantity")}>
-                    <Boxes className="mb-3 text-brand-700" aria-hidden="true" />
+                    <Boxes className="mb-3 text-accent-sky" aria-hidden="true" />
                     <CatalogQuoteQuantities pallets={confirmed.requestedPallets} boxes={confirmed.requestedPallets * confirmed.configuration.pallet.boxesPerPallet} units={confirmed.totalUnits} />
                     {confirmed.configuration.snapshot && <p className="mt-3 text-sm text-ink-600">{t("catalogQuote.totalWeight", { weight: (Number(confirmed.configuration.snapshot.quantity.totalWeightGrams) / 1000).toLocaleString(i18n.language) })}</p>}
                 </CatalogQuoteSection>

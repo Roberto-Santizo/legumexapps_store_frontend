@@ -29,6 +29,7 @@ type QuotePdfButtonProps = {
     showReferenceDisclaimer?: boolean
     sendEmailAPI?: (formData: FormData) => Promise<{ message: string } | undefined>
     quoteDate?: Date
+    orderClientName?: string
 }
 
 // Pasos del modal: primero solo el nombre (obligatorio siempre), luego una elección entre
@@ -79,6 +80,7 @@ export function QuotePdfButton({
     showReferenceDisclaimer = false,
     sendEmailAPI,
     quoteDate,
+    orderClientName,
 }: Readonly<QuotePdfButtonProps>) {
     const { t } = useTranslation()
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -107,12 +109,12 @@ export function QuotePdfButton({
     if (lines.length === 0) return null
 
     const handleOpen = () => {
-        setStep("name")
-        setClientName("")
+        setStep(orderClientName ? "choice" : "name")
+        setClientName(orderClientName ?? "")
         setClientEmail("")
         setNameError(undefined)
         setEmailError(undefined)
-        setConfirmed(null)
+        setConfirmed(orderClientName ? { clientName: orderClientName, quoteDate: quoteDate ?? new Date() } : null)
         setIsDownloading(false)
         setIsBuildingPdfForEmail(false)
         setEmailSent(false)
@@ -151,7 +153,7 @@ export function QuotePdfButton({
     }
 
     const handleBackToName = () => {
-        setStep("name")
+        if (!orderClientName) setStep("name")
     }
 
     const handleBackToChoice = () => {
@@ -302,11 +304,11 @@ export function QuotePdfButton({
                                         {t("quote.pdf.modal.emailOption")}
                                     </Button>}
                                 </div>
-                                <div className="mt-4 flex justify-start">
+                                {!orderClientName && <div className="mt-4 flex justify-start">
                                     <Button type="button" variant="secondary" onClick={handleBackToName}>
                                         {t("common.back")}
                                     </Button>
-                                </div>
+                                </div>}
                             </>
                         )}
 

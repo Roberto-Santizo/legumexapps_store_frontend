@@ -25,6 +25,13 @@
     --color-customize-cream: color-mix(in srgb, var(--color-dorado) 10%, var(--color-surface));
     --color-customize-slate: #eef4f6;
     --color-customize-slate-border: color-mix(in srgb, var(--color-customize-slate) 80%, var(--color-ink-400));
+    /* Quote wizards: two accents that pair with the brand greens (cool ocean + warm coral). */
+    --color-accent-sky: #1f6f8b;
+    --color-accent-sky-bg: #e7f2f6;
+    --color-accent-sky-border: #b9d8e3;
+    --color-accent-coral: #b4502c;
+    --color-accent-coral-bg: #fdf0ea;
+    --color-accent-coral-border: #f2cbb9;
 
     --color-success: #2e7d32;
     --color-success-bg: #edf6ed;
@@ -150,6 +157,13 @@
     --color-action-primary-hover: #9dc092;
     --color-action-primary-text: #101613;
     --color-focus: #9dc092;
+    --color-customize-slate: #1b2629;
+    --color-accent-sky: #8cc8dd;
+    --color-accent-sky-bg: #15262d;
+    --color-accent-sky-border: #2f4c57;
+    --color-accent-coral: #f2a383;
+    --color-accent-coral-bg: #2e1d16;
+    --color-accent-coral-border: #5e382a;
     --shadow-panel: 0 1px 4px rgb(0 0 0 / 0.2);
 }
 
@@ -514,7 +528,7 @@ body {
 }
 
 .catalog-percentage-input {
-    background: var(--color-customize-cream);
+    background: var(--color-accent-coral-bg);
 }
 @media (prefers-reduced-motion: reduce) {
     .catalog-mix-progress::-webkit-progress-value,

@@ -5,7 +5,6 @@ import { getClientsAPI } from "@/feature/client/api/client.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { useStatusToggle } from "@/shared/hook/useStatusToggle"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { Card } from "@/shared/component/card.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
 import { PaginatedAdminTable } from "@/shared/component/paginatedAdminTable.component"
 import { StatusBadge } from "@/shared/component/statusBadge.component"
@@ -50,7 +49,7 @@ export function JuiceListPage() {
             </div>}
         />
     }
-    return <PageContainer>
+    return <PageContainer wide>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-2xl font-semibold text-ink-900">{t("juice.title")}</h1>
             <div className="flex flex-wrap gap-3">
@@ -60,9 +59,7 @@ export function JuiceListPage() {
             </div>
         </div>
         {hasPermission("juices:create") && <BulkImportPanel translationNamespace="juice.bulkImport" templateFilename="plantilla-jugos-fijos.xlsx" downloadTemplate={downloadJuiceTemplate} bulkImport={importJuices} invalidateQueryKey={["juice"]} />}
-        <Card>
-            {clientsQuery.isError && <p role="alert" className="mb-4 text-danger">{clientsQuery.error.message}</p>}
-            {renderJuices()}
-        </Card>
+        {clientsQuery.isError && <p role="alert" className="mb-4 text-danger">{clientsQuery.error.message}</p>}
+        {renderJuices()}
     </PageContainer>
 }

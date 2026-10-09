@@ -26,11 +26,34 @@ function loader(overrides = {}) {
     return load
 }
 const statePath = "src/feature/customQuote/component/catalogQuoteState.ts"
+test("shared order survives navigation and refresh, preserves custom composition, locks customer and isolates representatives", () => {
+    const previousStorage = globalThis.sessionStorage
+    const storage = new Map()
+    globalThis.sessionStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) }
+    let current, salespersonId = 42
+    const react = { useState: initial => { if (!current) current = typeof initial === "function" ? initial() : initial; return [current, value => { current = value }] } }
+    const useOrder = loader({ react, "@/shared/auth/salesperson/useSalespersonAuth": { useSalespersonAuth: () => ({ salesperson: { id: salespersonId } }) } })("src/feature/quote/component/useSharedQuoteOrder.ts").useSharedQuoteOrder
+    try {
+        let order = useOrder(); order.setClientName("Customer A"); order = useOrder()
+        const line = { destinationId: null, productDisplayName: "Fixed product", variantLabel: "500g", requestedPallets: 1, totalUnits: 20, rawMaterialCost: 10, unitPackagingCost: 1, intermediatePackagingCost: 0, palletMaterialCost: 1, transportCost: 0, totalCost: 12, breakdown: { order: order.identity, rawMaterials: [], palletMaterials: [], transport: { destinationId: null, displayName: "", baseCost: 0 } } }
+        order.addLine(line); order = useOrder(); order.setClientName("Wrong customer"); assert.equal(useOrder().clientName, "Customer A")
+        current = undefined // route navigation/refresh mounts another hook instance
+        order = useOrder(); assert.equal(order.lines.length, 1)
+        const custom = { ...line, productDisplayName: "Custom mix", composition: { rawMaterials: [{ displayName: "Pineapple", percentage: 100 }], ingredients: [] } }
+        order.addLine(custom); current = undefined; order = useOrder()
+        assert.equal(order.lines.length, 2); assert.equal(order.lines[1].composition.rawMaterials[0].percentage, 100)
+        const sameOrderId = order.id
+        salespersonId = 99; current = undefined; assert.equal(useOrder().lines.length, 0)
+        salespersonId = 42; current = undefined; order = useOrder(); assert.equal(order.id, sameOrderId)
+        order.clear(); current = undefined; order = useOrder(); assert.equal(order.lines.length, 0); assert.equal(order.clientName, ""); assert.notEqual(order.id, sameOrderId)
+    } finally { globalThis.sessionStorage = previousStorage }
+})
 test("catalog page sends confirmed document lines to existing PDF/email actions without another confirmation",()=>{
     let slots=[],cursor=0
     const react={useState:initial=>{const i=cursor++;if(!(i in slots))slots[i]=initial;return [slots[i],value=>{slots[i]=typeof value==="function"?value(slots[i]):value}]}}
     const send=async()=>({message:"sent"})
-    const Page=loader({react,"react-router-dom":{Link:"Link"},"react-i18next":{useTranslation:()=>({t:key=>key})},"../component/catalogQuoteWizard.component":{CatalogQuoteWizard:"Wizard"},"@/feature/quote/component/quotePdfButton.component":{QuotePdfButton:"Pdf"},"@/feature/quote/component/quotedOrderSummary.component":{QuotedOrderSummary:"Summary"},"@/feature/quote/api/quote.api":{sendQuotePdfEmailAPI:send},"@/shared/component/siteContainer.component":{SiteContainer:"Container"}})("src/feature/customQuote/page/catalogQuoteRequest.page.tsx").CatalogQuoteRequestPage
+    const order={lines:[],clientName:"Customer",identity:{id:"order",clientName:"Customer"},addLine:line=>order.lines.push(line),clear:()=>{order.lines=[]},setClientName:()=>{}}
+    const Page=loader({react,"react-router-dom":{Link:"Link"},"react-i18next":{useTranslation:()=>({t:key=>key})},"@/feature/quote/component/useSharedQuoteOrder":{useSharedQuoteOrder:()=>order},"@/feature/quote/component/quoteOrderClient.component":{QuoteOrderClient:"Client"},"../component/catalogQuoteWizard.component":{CatalogQuoteWizard:"Wizard"},"@/feature/quote/component/quotePdfButton.component":{QuotePdfButton:"Pdf"},"@/feature/quote/component/quotedOrderSummary.component":{QuotedOrderSummary:"Summary"},"@/feature/quote/api/quote.api":{sendQuotePdfEmailAPI:send},"@/shared/component/siteContainer.component":{SiteContainer:"Container"}})("src/feature/customQuote/page/catalogQuoteRequest.page.tsx").CatalogQuoteRequestPage
     const nodes=tree=>!tree||typeof tree!=="object"?[]:[tree,...[].concat(tree.props?.children??[]).flat(Infinity).flatMap(nodes)]
     const render=()=>{cursor=0;return nodes(Page())}
     const persisted={totalCost:19,composition:{rawMaterials:[{displayName:"Mango",percentage:100}]},configuration:{snapshot:{isOrganic:true}}}
@@ -40,6 +63,7 @@ test("catalog page sends confirmed document lines to existing PDF/email actions 
     assert.equal(summary.props.pdfAction.props.lines[0],persisted)
     assert.equal(summary.props.pdfAction.props.sendEmailAPI,send)
     assert.equal(summary.props.pdfAction.props.showCostBreakdown,false)
+    assert.equal(summary.props.pdfAction.props.orderClientName,"Customer")
 })
 test("exact percentage UI accepts 100.00 and rejects tolerance, invalid precision and negative values", () => {
     const { exactMix } = loader()(statePath)

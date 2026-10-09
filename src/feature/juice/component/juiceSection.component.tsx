@@ -33,7 +33,7 @@ function JuiceEditorModal({ resource, juiceId, row, viewing, isOverride, title, 
     const fields = row ? resource.fields.filter(isEditableField) : resource.fields
     const fixedValues = !row && juiceId ? { juiceId } : {}
     const excludedClientIds = isOverride ? rows.map(item => Number(item.clientId)) : []
-    return <Modal title={`${t(juiceEditorTitleKey(viewing, row))} · ${title}`} onClose={onClose}>
+    return <Modal title={`${t(juiceEditorTitleKey(viewing, row))} · ${title}`} onClose={onClose} size={isOverride ? "default" : "wide"}>
         {row && resource.referenceName && <p className="mb-4 text-sm">{cell(row, resource.referenceName)}</p>}
         {row && isOverride && <p className="mb-4 text-sm">{cell(row, "clientId")}</p>}
         <JuiceForm key={row?.id ?? "create"} fields={fields} readOnly={viewing} mixBaseUnits={recipeMixBaseUnits(resource, totalUnits, row)} schema={row ? resource.update : resource.create} responseSchema={resource.response} path={juiceRowPath(resource, row, isOverride)} row={row} fixed={fixedValues} references={referenceOptions} excludedClients={excludedClientIds} onSaved={onClose} />

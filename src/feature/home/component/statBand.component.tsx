@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { slideFromLeft, slideFromRight, staggerContainer, viewportOnce } from "@/shared/animation/motionVariants"
 import { HOME_STATS } from "@/feature/home/constant/stats.constant"
-import { HOME_IMAGES } from "@/feature/home/constant/homeImages.constant"
 import { StatItem } from "@/feature/home/component/statItem.component"
 import { useSiteImages } from "@/feature/siteImage/hook/useSiteImages"
 
@@ -12,7 +11,7 @@ export function StatBand() {
     const { t } = useTranslation()
     const imageRef = useRef<HTMLDivElement>(null)
     const siteImages = useSiteImages()
-    const imageSrc = siteImages.who_we_are ?? HOME_IMAGES.aboutField
+    const imageSrc = siteImages.who_we_are
 
     const { scrollYProgress } = useScroll({ target: imageRef, offset: ["start end", "end start"] })
     const imageY = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"])
@@ -28,15 +27,17 @@ export function StatBand() {
                     initial="hidden"
                     whileInView="show"
                     viewport={viewportOnce}
-                    className="relative h-88 overflow-hidden rounded-panel border border-brand-300/40 shadow-panel sm:h-112"
+                    className="relative h-88 overflow-hidden rounded-panel border border-brand-300/40 bg-brand-300/25 shadow-panel sm:h-112"
                 >
-                    <motion.img
-                        src={imageSrc}
-                        alt={t("home.stats.imageAlt")}
-                        style={{ y: imageY, scale: 1.15 }}
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                    />
+                    {imageSrc && (
+                        <motion.img
+                            src={imageSrc}
+                            alt={t("home.stats.imageAlt")}
+                            style={{ y: imageY, scale: 1.15 }}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                        />
+                    )}
                 </motion.div>
 
                 <motion.div variants={slideFromRight} initial="hidden" whileInView="show" viewport={viewportOnce}>

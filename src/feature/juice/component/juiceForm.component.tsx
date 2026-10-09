@@ -26,6 +26,7 @@ type Props = {
     references?: { value: number; label: string }[]; excludedClients?: number[];
     mixBaseUnits?: number;
     fieldSections?: { titleKey: string; fields: JuiceField[]; fractionHelp?: boolean }[];
+    layout?: "grid" | "product";
     onSaved?: (row: JuiceRow) => void;
 }
 
@@ -50,7 +51,7 @@ function parseNumberInput(value: unknown, nullable: boolean | undefined): number
     return Number(value)
 }
 
-export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {}, readOnly = false, references = [], excludedClients = [], mixBaseUnits, fieldSections, onSaved }: Readonly<Props>) {
+export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {}, readOnly = false, references = [], excludedClients = [], mixBaseUnits, fieldSections, layout = "grid", onSaved }: Readonly<Props>) {
     const { t } = useTranslation()
     const formId = useId()
     const queryClient = useQueryClient()
@@ -136,11 +137,11 @@ export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {
                         {section.fields.map(field => renderField(field, section.fractionHelp))}
                     </div>
                 </section>)}
-            </div> : <div className="grid gap-x-6 sm:grid-cols-2">
+            </div> : <div className={layout === "product" ? "min-w-0" : "grid min-w-0 gap-x-6 md:grid-cols-2"}>
                 {fields.map(field => renderField(field))}
             </div>}
         </fieldset>
         {mutation.isError && <p role="alert" className="mb-4 text-danger">{mutation.error.message}</p>}
-        {!readOnly && <Button type="submit" disabled={mutation.isPending || clientsQuery.isError}>{mutation.isPending ? t("common.saving") : t("common.save")}</Button>}
+        {!readOnly && <div className={layout === "product" ? "mt-6 flex border-t border-line pt-6" : "mt-2"}><Button type="submit" disabled={mutation.isPending || clientsQuery.isError}>{mutation.isPending ? t("common.saving") : t("common.save")}</Button></div>}
     </form>
 }

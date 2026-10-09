@@ -1,12 +1,12 @@
 import { useState } from "react"
 import type { QuoteWizardStep } from "@/feature/quote/component/quoteCalculatorForm.component"
-import type { QuoteCalculation } from "@/feature/quote/schema/quote.schema"
+import type { QuoteCalculation, QuoteDocumentLine } from "@/feature/quote/schema/quote.schema"
 
 // "Pedido en curso" del wizard de producto definido, compartido por el cotizador del representante
 // (quoteRequest.page.tsx) y el interno del admin (adminQuoteCalculator.page.tsx): currentResult es lo
 // recién calculado en este paso, quotedLines lo acumulado en la sesión (solo en pantalla; cada
 // línea del representante ya es su propia fila Quote). onNewQuote corre al empezar otra cotización.
-export function useQuoteOrder(onNewQuote?: () => void) {
+export function useQuoteOrder(onNewQuote?: () => void, sharedOrder?: { lines: QuoteDocumentLine[]; addLine: (line: QuoteDocumentLine) => void; clear: () => void }) {
     const [currentResult, setCurrentResult] = useState<QuoteCalculation | null>(null)
     const [quotedLines, setQuotedLines] = useState<QuoteCalculation[]>([])
     const [wizardStep, setWizardStep] = useState<QuoteWizardStep>("mode")
@@ -15,6 +15,7 @@ export function useQuoteOrder(onNewQuote?: () => void) {
     const addQuotedLine = (line: QuoteCalculation) => {
         setCurrentResult(line)
         setQuotedLines((lines) => [...lines, line])
+        sharedOrder?.addLine(line)
     }
 
     const clearCurrentResult = () => setCurrentResult(null)
@@ -35,12 +36,13 @@ export function useQuoteOrder(onNewQuote?: () => void) {
 
     const handleClearOrder = () => {
         setQuotedLines([])
+        sharedOrder?.clear()
         handleQuoteAnother()
     }
 
     return {
         currentResult,
-        quotedLines,
+        quotedLines: sharedOrder?.lines ?? quotedLines,
         wizardStep,
         formResetKey,
         addQuotedLine,

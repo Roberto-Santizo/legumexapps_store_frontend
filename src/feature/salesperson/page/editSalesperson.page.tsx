@@ -10,6 +10,7 @@ import { updateSalespersonSchema } from "@/feature/salesperson/schema/salesperso
 import type { SalespersonResponse, UpdateSalespersonInput } from "@/feature/salesperson/schema/salesperson.schema"
 import { getSalespersonByIdAPI, updateSalespersonAPI } from "@/feature/salesperson/api/salesperson.api"
 import { SalespersonForm } from "@/feature/salesperson/component/salespersonForm.component"
+import { RepresentativeClients } from "@/feature/salesperson/component/representativeClients.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
@@ -90,6 +91,7 @@ export function EditSalespersonPage() {
                     </form>
                 )}
             </Card>
+            {salespersonQuery.data && <RepresentativeClients salespersonId={salespersonId} />}
         </PageContainer>
     )
 }

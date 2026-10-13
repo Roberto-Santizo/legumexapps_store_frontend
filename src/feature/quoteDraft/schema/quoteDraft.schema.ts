@@ -2,6 +2,7 @@ import { z } from "zod"
 
 const draftMaterialLineSchema = z.object({
     displayName: z.string(),
+    displayNameEn: z.string().nullable().optional(),
     optionGroup: z.string().nullable(),
 })
 

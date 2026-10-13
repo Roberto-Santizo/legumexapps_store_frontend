@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 import { useTranslation } from "react-i18next"
 import { Check, Package, Minus, Plus } from "lucide-react"
 import type { CatalogConfiguration, CatalogInput, CatalogPreview } from "../schema/catalogQuote.schema"
@@ -23,7 +24,7 @@ type Props = {
 }
 
 export function CatalogQuotePackagingStep({ configuration, groups, pallets, pending, error, quotePreview, canFinalize, previous, onFinalize, onPalletsChange, onPackagingChange }: Readonly<Props>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const quantity = Number(pallets)
     const quantityValid = Number.isInteger(quantity) && quantity > 0 && quantity <= 100000
     return <form onSubmit={event => { event.preventDefault(); void onFinalize() }}><fieldset disabled={pending} className="min-w-0">
@@ -36,7 +37,7 @@ export function CatalogQuotePackagingStep({ configuration, groups, pallets, pend
                         return <CatalogQuoteSection key={level} title={t(`catalogQuote.ui.levels.${level}`)}>
                             {fixed.length > 0 && <ul className="mb-4 space-y-2">
                                 {fixed.map(row => <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-customize-mint p-3 text-sm">
-                                    <span className="min-w-0 break-words">{row.displayName}</span>
+                                    <span className="min-w-0 break-words">{packagingName(row, i18n.language)}</span>
                                     <span className="inline-flex items-center gap-1 text-xs text-brand-700"><Check size={14} aria-hidden="true" />{t("catalogQuote.ui.included")}</span>
                                 </li>)}
                             </ul>}
@@ -44,7 +45,7 @@ export function CatalogQuotePackagingStep({ configuration, groups, pallets, pend
                                 <p className="mb-3 text-sm font-medium">{group.group}</p>
                                 <CatalogQuoteSelectionCards
                                     value={group.selectedId}
-                                    options={group.options.map(row => ({ value: row.id, text: row.displayName, subtitle: row.isDefault ? t("catalogQuote.ui.default") : undefined, icon: <Package size={22} aria-hidden="true" /> }))}
+                                    options={group.options.map(row => ({ value: row.id, text: packagingName(row, i18n.language), subtitle: row.isDefault ? t("catalogQuote.ui.default") : undefined, icon: <Package size={22} aria-hidden="true" /> }))}
                                     onChange={value => onPackagingChange(group.key, Number(value))}
                                 />
                             </div>)}

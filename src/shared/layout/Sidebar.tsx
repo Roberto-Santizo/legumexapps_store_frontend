@@ -4,7 +4,7 @@ import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Navigation } from "@/shared/layout/Navigation"
 import { Button } from "@/shared/component/button.component"
-import logo from "@/assets/legumex-logo.png"
+import { LegumexLogoStacked } from "@/shared/component/legumexLogoStacked.component"
 
 type SidebarProps = { isOpen: boolean; onClose: () => void }
 
@@ -50,7 +50,7 @@ export function Sidebar({ isOpen, onClose }: Readonly<SidebarProps>) {
             {isOpen && <button type="button" aria-label={t("common.closeMenu")} className="fixed inset-0 z-40 bg-brand-900/40 backdrop-blur-sm lg:hidden" onClick={onClose} />}
             <aside id="admin-sidebar" ref={drawerRef} aria-label={t("adminLayout.navigation")} className={`fixed inset-y-0 left-0 z-50 flex w-64 max-w-[calc(100vw-2rem)] flex-col border-r border-line bg-surface pt-[env(safe-area-inset-top)] transition-[transform,visibility] duration-200 motion-reduce:transition-none lg:visible lg:translate-x-0 ${isOpen ? "visible translate-x-0" : "invisible -translate-x-full"}`}>
                 <div className="relative flex shrink-0 items-center justify-center border-b border-line px-6 py-5">
-                    <img src={logo} alt={t("common.logoAlt")} className="h-32 w-40 rounded-control bg-white object-contain" />
+                    <LegumexLogoStacked />
                     <Button onClick={onClose} variant="secondary" aria-label={t("common.closeMenu")} className="absolute right-2 top-2 px-2 sm:px-2 lg:hidden"><X size={18} aria-hidden="true" /></Button>
                 </div>
                 <div className="flex min-h-0 flex-1 flex-col pt-4"><Navigation /></div>

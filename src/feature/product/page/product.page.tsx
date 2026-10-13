@@ -1,15 +1,14 @@
-import type { ComponentProps } from "react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { ProductTable } from "@/feature/product/component/productTable.component"
 import { ProductExportButton } from "@/feature/product/component/productExportButton.component"
-import { InitialProductImportPanel } from "@/feature/product/component/initialProductImportPanel.component"
+import { ProductBulkImportSection } from "@/feature/product/component/productBulkImportSection.component"
+import type { ProductImportStep } from "@/feature/product/component/productBulkImportSection.component"
 import { bulkImportProductRawMaterialsAPI, downloadProductRawMaterialImportTemplateAPI } from "@/feature/product/api/productRawMaterial.api"
 import { bulkImportProductIngredientsAPI, downloadProductIngredientImportTemplateAPI } from "@/feature/product/api/productIngredient.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { buttonClassName } from "@/shared/component/buttonClassName"
-import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 
 export function ProductListPage() {
     const { t } = useTranslation()
@@ -17,7 +16,7 @@ export function ProductListPage() {
 
     // Tres pasos: Productos y Variantes -> Recetas -> Ingredientes (opcional).
     // Los números mantienen el orden de dependencia aunque un permiso oculte un paso.
-    const importSteps: { step: number; permission: string; panel: ComponentProps<typeof BulkImportPanel> | null }[] = [
+    const importSteps: (ProductImportStep & { permission: string })[] = [
         {
             step: 1,
             permission: "products:create",
@@ -61,25 +60,7 @@ export function ProductListPage() {
                     )}
                 </div>
             </div>
-            {visibleImportSteps.length > 0 && (
-                <section className="mb-6">
-                    <h2 className="mb-1 text-lg font-semibold text-ink-900">{t("product.bulkImportSteps.title")}</h2>
-                    <p className="mb-4 text-sm text-ink-600">{t("product.bulkImportSteps.intro")}</p>
-                    <ol>
-                        {visibleImportSteps.map(({ step, panel }) => (
-                            <li key={step}>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink-900 text-sm font-semibold text-canvas">
-                                        {step}
-                                    </span>
-                                    <p className="text-sm text-ink-600">{t(`product.bulkImportSteps.requires${step}`)}</p>
-                                </div>
-                                {panel ? <BulkImportPanel {...panel} /> : <InitialProductImportPanel />}
-                            </li>
-                        ))}
-                    </ol>
-                </section>
-            )}
+            {visibleImportSteps.length > 0 && <ProductBulkImportSection steps={visibleImportSteps} />}
             <ProductTable />
         </PageContainer>
     )

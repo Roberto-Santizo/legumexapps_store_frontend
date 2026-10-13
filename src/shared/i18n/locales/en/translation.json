@@ -1,4 +1,74 @@
 {
+  "productDetails": {
+    "conventional": "Conventional",
+    "materialTypes": {
+      "fruit": "Fruit",
+      "vegetable": "Vegetable",
+      "pulp": "Pulp",
+      "other": "Other"
+    },
+    "title": "Product details",
+    "view": "View details",
+    "viewProduct": "View details for {{name}}",
+    "fixedProduct": "Fixed product · Registered configuration",
+    "client": "Client",
+    "organic": "Organic",
+    "presentations": "Presentations",
+    "rawMaterials": "Raw materials",
+    "ingredients": "Added ingredients",
+    "code": "Code",
+    "sku": "SKU",
+    "unavailable": "Not recorded",
+    "missingMaterial": "Material unavailable",
+    "unitCost": "Unit cost",
+    "costUnit": "Costing unit",
+    "additionalCost": "Additional cost",
+    "finishedUnit": "finished unit",
+    "inactiveAssociation": "Inactive association",
+    "inactiveMaterial": "Inactive material",
+    "inactivePresentation": "The associated presentation is inactive.",
+    "noRecipe": "No raw materials are registered for this product.",
+    "noIngredients": "This product has no registered added ingredients.",
+    "ingredientsHint": "These are added outside the base recipe's 100%. Quantities are shown with their recorded reference weight.",
+    "ingredientQuantity": "{{grams}} g per {{reference}} g of reference product",
+    "selectedPresentation": "Presentation configuration",
+    "choosePresentation": "Select presentation and SKU",
+    "netWeight": "Net weight per unit",
+    "grams": "{{value}} g",
+    "unitsPerBox": "Units per box",
+    "boxesPerPallet": "Boxes per pallet",
+    "unitsPerIntermediate": "Units per intermediate package",
+    "unitPackaging": "Unit packaging",
+    "intermediatePackaging": "Intermediate packaging",
+    "palletPackaging": "Pallet materials",
+    "packagingHint": "Fixed materials and registered alternatives for this presentation are shown. Options in the same group are alternatives, not cumulative materials.",
+    "fixedMaterial": "Fixed material",
+    "defaultOption": "Default option",
+    "alternative": "Alternative",
+    "perUnit": "{{value}} per finished unit",
+    "perIntermediate": "1 per intermediate package",
+    "perBox": "{{value}} per box",
+    "perPallet": "{{value}} per pallet",
+    "noVariants": "No presentations or SKUs have been registered yet.",
+    "noPackaging": "No packaging materials are registered for this presentation.",
+    "loadError": "Unable to load details. The product may be unavailable or may not be a fixed product.",
+    "retry": "Retry"
+  },
+  "representativeClients": {
+    "title": "Assigned clients",
+    "hint": "Assignments are saved separately and take effect immediately. You can select up to 100 clients at a time.",
+    "assigned": "Assigned clients ({{count}})",
+    "available": "Available clients",
+    "empty": "This representative has no assigned clients yet.",
+    "inactive": "(Inactive)",
+    "search": "Search clients to assign",
+    "noResults": "No available clients match your search.",
+    "selected": "Selected: {{count}} of 100",
+    "assign": "Assign selected clients",
+    "remove": "Remove",
+    "removeLabel": "Remove assignment for {{name}}",
+    "retry": "Retry"
+  },
   "common": {
     "save": "Save",
     "saving": "Saving...",
@@ -71,7 +141,17 @@
       "results_one": "{{count}} result available.",
       "results_other": "{{count}} results available."
     },
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "optional": "Optional",
+    "changeFile": "Change",
+    "removeFile": "Remove file",
+    "dropFileHere": "Drag your Excel here or",
+    "browseFile": "browse your computer",
+    "excelFileHint": ".xlsx file up to 5 MB",
+    "importInstructions": "How to fill in the template",
+    "rowLabel": "Row {{row}}",
+    "show": "Show",
+    "hide": "Hide"
   },
   "nav": {
     "groups": {
@@ -88,6 +168,7 @@
       "too_big": "The value is too big",
       "invalid_format": "The format is invalid",
       "invalid_value": "Value not allowed",
+      "not_multiple_of": "The value exceeds the allowed decimal precision",
       "custom": "Invalid value"
     },
     "packaging_consumption_defaults": "Configure both consumption fields or leave both blank; they apply only to pallet materials.",
@@ -737,14 +818,17 @@
   "packaging": {
     "form": {
       "code": "Code",
-      "displayName": "Name",
+      "displayName": "Name (Spanish)",
       "packagingRole": "What is this material used for?",
       "packagingRoleOptions": {
         "unit": "Unit packaging",
         "intermediate": "Intermediate packaging (large bag)",
         "pallet": "Palletizing material."
       },
-      "unitCost": "Cost per unit (USD)"
+      "unitCost": "Cost per unit (USD)",
+      "classification": "Classification",
+      "isActive": "Active material",
+      "displayNameEn": "Name (English)"
     },
     "list": {
       "title": "Packagings",
@@ -758,7 +842,8 @@
     },
     "table": {
       "searchPlaceholder": "Search by name or code...",
-      "empty": "No packagings registered"
+      "empty": "No packagings registered",
+      "name": "Name"
     },
     "bulkImport": {
       "title": "Bulk import from Excel",
@@ -782,6 +867,16 @@
       "customize": "Customize rule for this variant",
       "overrideWarning": "This exception changes only this association and its future costs; it does not change the catalog.",
       "unitRule": "1 per unit"
+    },
+    "classifications": {
+      "specific": "Specific",
+      "generic": "Generic"
+    },
+    "filters": {
+      "all": "All",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
     }
   },
   "presentation": {
@@ -860,7 +955,13 @@
       "intro": "Import Products and Variants together with their packaging materials in one Excel file, then import Recipes and Ingredients (optional). Each file is fully validated and saved atomically. Configure images in the product editor. Complete recipes and packaging before quoting.",
       "requires1": "Step 1 · Products, Variants and materials — requires active Subcategories, Clients and Presentations; existing packaging codes and groups when materials are included.",
       "requires2": "Step 2 · Recipes — references each product through a variant SKU from step 1; requires Raw Materials in their catalog.",
-      "requires3": "Step 3 · Ingredients (optional) — references each product through a variant SKU from step 1; requires Ingredients in their catalog."
+      "requires3": "Step 3 · Ingredients (optional) — references each product through a variant SKU from step 1; requires Ingredients in their catalog.",
+      "subtitle": "Products and variants, recipes and ingredients in 3 steps",
+      "show": "Show",
+      "hide": "Hide",
+      "tab1": "Products & variants",
+      "tab2": "Recipes",
+      "tab3": "Ingredients"
     }
   },
   "productVariant": {
@@ -1679,6 +1780,16 @@
     "importing": "Importing…",
     "bases": {
       "per_pallet": "Per pallet"
+    },
+    "previewTitle": "Validation preview",
+    "stats": {
+      "products": "Products",
+      "variants": "Variants",
+      "unit": "Unit materials",
+      "intermediate": "Intermediate materials",
+      "pallet": "Pallet materials",
+      "errors": "Errors",
+      "warnings": "Warnings"
     }
   },
   "catalogQuote": {

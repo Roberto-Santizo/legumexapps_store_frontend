@@ -1,4 +1,74 @@
 {
+  "productDetails": {
+    "conventional": "Convencional",
+    "materialTypes": {
+      "fruit": "Fruta",
+      "vegetable": "Vegetal",
+      "pulp": "Pulpa",
+      "other": "Otro"
+    },
+    "title": "Detalles del producto",
+    "view": "Ver detalles",
+    "viewProduct": "Ver detalles de {{name}}",
+    "fixedProduct": "Producto fijo · Configuración registrada",
+    "client": "Cliente",
+    "organic": "Orgánico",
+    "presentations": "Presentaciones",
+    "rawMaterials": "Materias primas",
+    "ingredients": "Ingredientes agregados",
+    "code": "Código",
+    "sku": "SKU",
+    "unavailable": "No registrado",
+    "missingMaterial": "Material no disponible",
+    "unitCost": "Costo unitario",
+    "costUnit": "Unidad de costeo",
+    "additionalCost": "Costo adicional",
+    "finishedUnit": "unidad de producto",
+    "inactiveAssociation": "Asociación inactiva",
+    "inactiveMaterial": "Material inactivo",
+    "inactivePresentation": "La presentación asociada está inactiva.",
+    "noRecipe": "No hay materias primas registradas para este producto.",
+    "noIngredients": "Este producto no tiene ingredientes agregados registrados.",
+    "ingredientsHint": "Se agregan fuera del 100 % de la receta base. Las cantidades se muestran con su peso de referencia registrado.",
+    "ingredientQuantity": "{{grams}} g por cada {{reference}} g de producto de referencia",
+    "selectedPresentation": "Configuración de la presentación",
+    "choosePresentation": "Seleccionar presentación y SKU",
+    "netWeight": "Peso neto por unidad",
+    "grams": "{{value}} g",
+    "unitsPerBox": "Unidades por caja",
+    "boxesPerPallet": "Cajas por pallet",
+    "unitsPerIntermediate": "Unidades por empaque intermedio",
+    "unitPackaging": "Empaque por unidad",
+    "intermediatePackaging": "Empaque intermedio",
+    "palletPackaging": "Materiales de pallet",
+    "packagingHint": "Se muestran los materiales fijos y las alternativas registradas de esta presentación. Las opciones del mismo grupo son alternativas, no materiales acumulativos.",
+    "fixedMaterial": "Material fijo",
+    "defaultOption": "Opción predeterminada",
+    "alternative": "Alternativa",
+    "perUnit": "{{value}} por unidad de producto",
+    "perIntermediate": "1 por empaque intermedio",
+    "perBox": "{{value}} por caja",
+    "perPallet": "{{value}} por pallet",
+    "noVariants": "Todavía no hay presentaciones ni SKU registrados.",
+    "noPackaging": "No hay materiales de empaque registrados para esta presentación.",
+    "loadError": "No se pudieron cargar los detalles. El producto puede no estar disponible o no ser un producto fijo.",
+    "retry": "Reintentar"
+  },
+  "representativeClients": {
+    "title": "Clientes asignados",
+    "hint": "Las asignaciones se guardan por separado y se aplican inmediatamente. Puedes seleccionar hasta 100 clientes a la vez.",
+    "assigned": "Clientes asignados ({{count}})",
+    "available": "Clientes disponibles",
+    "empty": "Este representante todavía no tiene clientes asignados.",
+    "inactive": "(Inactivo)",
+    "search": "Buscar clientes para asignar",
+    "noResults": "No hay clientes disponibles que coincidan con la búsqueda.",
+    "selected": "Seleccionados: {{count}} de 100",
+    "assign": "Asignar seleccionados",
+    "remove": "Quitar",
+    "removeLabel": "Quitar la asignación de {{name}}",
+    "retry": "Reintentar"
+  },
   "common": {
     "save": "Guardar",
     "saving": "Guardando...",
@@ -71,7 +141,17 @@
       "results_one": "{{count}} resultado disponible.",
       "results_other": "{{count}} resultados disponibles."
     },
-    "notifications": "Notificaciones"
+    "notifications": "Notificaciones",
+    "optional": "Opcional",
+    "changeFile": "Cambiar",
+    "removeFile": "Quitar archivo",
+    "dropFileHere": "Arrastra tu Excel aquí o",
+    "browseFile": "búscalo en tu equipo",
+    "excelFileHint": "Archivo .xlsx de hasta 5 MB",
+    "importInstructions": "Cómo llenar la plantilla",
+    "rowLabel": "Fila {{row}}",
+    "show": "Mostrar",
+    "hide": "Ocultar"
   },
   "nav": {
     "groups": {
@@ -88,6 +168,7 @@
       "too_big": "El valor es demasiado largo",
       "invalid_format": "El formato no es válido",
       "invalid_value": "Valor no permitido",
+      "not_multiple_of": "El valor excede la precisión decimal permitida",
       "custom": "Valor inválido"
     },
     "packaging_consumption_defaults": "Configure ambos campos de consumo o deje ambos vacíos; solamente aplican a paletización.",
@@ -737,14 +818,17 @@
   "packaging": {
     "form": {
       "code": "Código",
-      "displayName": "Nombre",
+      "displayName": "Nombre (Español)",
       "packagingRole": "¿Para qué se usa este material?",
       "packagingRoleOptions": {
         "unit": "Empaque individual",
         "intermediate": "Empaque intermedio (bolsa grande)",
         "pallet": "Material de paletización"
       },
-      "unitCost": "Costo por unidad (USD)"
+      "unitCost": "Costo por unidad (USD)",
+      "classification": "Clasificación",
+      "isActive": "Material activo",
+      "displayNameEn": "Nombre (Inglés)"
     },
     "list": {
       "title": "Empaques",
@@ -758,7 +842,8 @@
     },
     "table": {
       "searchPlaceholder": "Buscar por nombre o código...",
-      "empty": "No hay empaques registrados"
+      "empty": "No hay empaques registrados",
+      "name": "Nombre"
     },
     "bulkImport": {
       "title": "Carga masiva desde Excel",
@@ -782,6 +867,16 @@
       "customize": "Personalizar regla para esta variante",
       "overrideWarning": "Esta excepción cambia únicamente esta asociación y sus costos futuros; no cambia el catálogo.",
       "unitRule": "1 por unidad"
+    },
+    "classifications": {
+      "specific": "Específico",
+      "generic": "Genérico"
+    },
+    "filters": {
+      "all": "Todos",
+      "status": "Estado",
+      "active": "Activos",
+      "inactive": "Inactivos"
     }
   },
   "presentation": {
@@ -860,7 +955,13 @@
       "intro": "Cargue Productos y Variantes con sus materiales de empaque en un solo Excel; después cargue Recetas e Ingredientes (opcional). Cada archivo se valida completo y se guarda de forma atómica. Las imágenes se configuran en la edición del producto. Complete la receta y los empaques antes de cotizar.",
       "requires1": "Paso 1 · Productos, Variantes y materiales — requiere Subcategorías, Clientes y Presentaciones activos; códigos MP y grupos existentes cuando se incluyen materiales.",
       "requires2": "Paso 2 · Recetas — referencia cada producto mediante el SKU de una variante del paso 1; requiere Materias Primas en su catálogo.",
-      "requires3": "Paso 3 · Ingredientes (opcional) — referencia cada producto mediante el SKU de una variante del paso 1; requiere Ingredientes en su catálogo."
+      "requires3": "Paso 3 · Ingredientes (opcional) — referencia cada producto mediante el SKU de una variante del paso 1; requiere Ingredientes en su catálogo.",
+      "subtitle": "Productos y variantes, recetas e ingredientes en 3 pasos",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "tab1": "Productos y variantes",
+      "tab2": "Recetas",
+      "tab3": "Ingredientes"
     }
   },
   "productVariant": {
@@ -1679,6 +1780,16 @@
     "importing": "Importando…",
     "bases": {
       "per_pallet": "Por palet"
+    },
+    "previewTitle": "Vista previa de la validación",
+    "stats": {
+      "products": "Productos",
+      "variants": "Variantes",
+      "unit": "Mat. individuales",
+      "intermediate": "Mat. intermedios",
+      "pallet": "Mat. de paletizado",
+      "errors": "Errores",
+      "warnings": "Advertencias"
     }
   },
   "catalogQuote": {

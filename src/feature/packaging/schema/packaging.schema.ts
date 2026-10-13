@@ -6,9 +6,11 @@ const packagingRoleEnum = z.enum(["unit", "intermediate", "pallet"])
 const packagingFields = z.object({
     code: z.string().trim().min(1).max(60),
     displayName: z.string().trim().min(1).max(80),
+    displayNameEn: z.string().trim().max(80).nullable().optional(),
     packagingRole: packagingRoleEnum,
+    classification: z.enum(["specific", "generic"]),
 
-    unitCost: z.number().nonnegative(),
+    unitCost: z.number().nonnegative().max(999999.9999).refine(value => Math.abs(value * 10000 - Math.round(value * 10000)) < 0.000001),
     defaultQuantityBasis: z.enum(["per_box", "per_pallet"]).nullable().optional(),
     defaultQuantityValue: z.number().positive().max(99999999.99).refine(value => Math.abs(value * 100 - Math.round(value * 100)) < 0.000001).nullable().optional(),
 })
@@ -21,8 +23,10 @@ function validateDefaults(value: { packagingRole: string; defaultQuantityBasis?:
     }
 }
 
-export const createPackagingSchema = packagingFields.superRefine(validateDefaults)
+export const createPackagingSchema = packagingFields.extend({ displayNameEn: z.string().trim().min(1).max(80) }).superRefine(validateDefaults)
 export const updatePackagingSchema = packagingFields.partial().extend({
+    classification: packagingFields.shape.classification.optional(),
+    isActive: z.boolean().optional(),
     code: packagingFields.shape.code,
     packagingRole: packagingFields.shape.packagingRole,
     unitCost: packagingFields.shape.unitCost,
@@ -31,7 +35,9 @@ export const updatePackagingSchema = packagingFields.partial().extend({
 export const responsePackagingSchema = baseCatalogSchema.extend({
     code: z.string(),
     displayName: z.string(),
+    displayNameEn: z.string().nullable().optional(),
     packagingRole: packagingRoleEnum,
+    classification: z.enum(["specific", "generic"]),
     unitCost: z.coerce.number().nullable(),
     defaultQuantityBasis: z.enum(["per_box", "per_pallet"]).nullable().optional(),
     defaultQuantityValue: z.coerce.number().nullable().optional(),

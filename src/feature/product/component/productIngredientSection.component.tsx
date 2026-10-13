@@ -31,7 +31,7 @@ type IngredientFormInput = z.infer<typeof ingredientFormSchema>
 
 type SkuWeightOption = { variantId: number; label: string; netWeightGrams: number }
 
-const numberFormatter = new Intl.NumberFormat("es-GT", { maximumFractionDigits: 2 })
+const numberFormatter = new Intl.NumberFormat("es-GT", { maximumFractionDigits: 3 })
 const percentageFormatter = new Intl.NumberFormat("es-GT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 // % del peso neto que representan los gramos -- solo para mostrarle al admin (la fuente de verdad

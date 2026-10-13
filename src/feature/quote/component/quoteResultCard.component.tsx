@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Truck, Wheat, FlaskConical, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent } from "lucide-react"
@@ -19,8 +20,8 @@ type QuoteResultCardProps = {
 
 // Grupos de opciones: una fila elegida de un grupo se muestra como "Caja: caja de
 // envío" en el desglose admin; una fila fija (optionGroup null) solo con su nombre.
-function materialLineLabel(line: { code?: string; displayName: string; optionGroup: string | null }): string {
-    const name = line.code ? `${line.code} · ${line.displayName}` : line.displayName
+function materialLineLabel(line: { code?: string; displayName: string; displayNameEn?: string | null; optionGroup: string | null }, language?: string): string {
+    const name = line.code ? `${line.code} · ${packagingName(line, language)}` : packagingName(line, language)
     return line.optionGroup ? `${line.optionGroup}: ${name}` : name
 }
 
@@ -75,7 +76,7 @@ export function QuoteResultCard({
     showTransport = false,
     showReferenceDisclaimer = false,
 }: Readonly<QuoteResultCardProps>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     // Sistema solo en USD: los montos se muestran con el formatter compartido.
     const format = formatCurrency
 
@@ -205,7 +206,7 @@ export function QuoteResultCard({
                         {breakdown.unitMaterials.map((line) => (
                             <CostRow
                                 key={line.packagingId}
-                                label={materialLineLabel(line)}
+                                label={materialLineLabel(line, i18n.language)}
                                 quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
                                     count: line.totalUnits.toLocaleString("es-MX"),
                                 })}
@@ -226,7 +227,7 @@ export function QuoteResultCard({
                         {breakdown.intermediateMaterials.map((line) => (
                             <CostRow
                                 key={line.packagingId}
-                                label={materialLineLabel(line)}
+                                label={materialLineLabel(line, i18n.language)}
                                 quantityLabel={t("site.quoteRequest.result.intermediatePackagesQuantity", {
                                     count: line.packagesNeeded.toLocaleString("es-MX"),
                                 })}
@@ -260,7 +261,7 @@ export function QuoteResultCard({
                         {breakdown.palletMaterials.map((line) => (
                             <CostRow
                                 key={line.packagingId}
-                                label={materialLineLabel(line)}
+                                label={materialLineLabel(line, i18n.language)}
                                 quantityLabel={t("site.quoteRequest.result.palletsQuantity", { count: line.requestedPallets })}
                                 lineTotal={line.lineTotal}
                                 format={format}

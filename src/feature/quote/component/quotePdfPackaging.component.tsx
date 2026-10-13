@@ -21,8 +21,8 @@ function PackagingIcon({ kind }: Readonly<{ kind: PdfPackagingKind }>) {
 }
 
 export function QuotePdfPackaging({ breakdown }: Readonly<{ breakdown: PdfPackagingSnapshot }>) {
-    const { t } = useTranslation()
-    const materials = buildPdfPackagingMaterials(breakdown)
+    const { t, i18n } = useTranslation()
+    const materials = buildPdfPackagingMaterials(breakdown, i18n.language)
     if (!materials.length) return null
     const basis = materials.length < 3 ? "45%" : "30%"
     return <View style={styles.packagingConfigSection}>

@@ -7,6 +7,7 @@ import { buildSearchableSelectClassNames } from "@/shared/component/searchableSe
 export type SearchableSelectOption = {
     value: number
     label: string
+    searchText?: string
 }
 
 type SearchableSelectProps = Omit<

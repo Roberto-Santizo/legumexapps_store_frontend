@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Layers, PackageOpen, PackagePlus } from "lucide-react"
@@ -36,10 +37,10 @@ const LEVEL_ICON: Record<MaterialLevel, ReactNode> = {
 
 // Solo el NOMBRE del material se muestra en las tarjetas -- nunca su costo (decisión de
 // negocio): el precio del cliente se ve únicamente reflejado en el "Total estimado" en vivo.
-function toCardOptions(group: MaterialGroup, defaultLabel: string) {
+function toCardOptions(group: MaterialGroup, defaultLabel: string, language?: string) {
     return group.options.map((option) => ({
         value: option.id,
-        text: option.displayName,
+        text: packagingName(option, language),
         subtitle: option.isDefault ? defaultLabel : undefined,
         icon: LEVEL_ICON[group.level],
     }))
@@ -83,7 +84,7 @@ type QuoteMaterialGroupsProps = {
 // "Esquinero" bajo paletización), cada uno con su default preseleccionado. Sin grupos no
 // renderiza nada -- el paso sigue sirviendo para palets/peso.
 export function QuoteMaterialGroups({ groups, onSelect }: Readonly<QuoteMaterialGroupsProps>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     if (groups.length === 0) return null
 
@@ -107,7 +108,7 @@ export function QuoteMaterialGroups({ groups, onSelect }: Readonly<QuoteMaterial
                                         <span className="ml-2 font-normal text-ink-600">{t("site.quoteRequest.form.wizard.materials.chooseOne")}</span>
                                     </p>
                                     <CatalogQuoteSelectionCards
-                                        options={toCardOptions(group, defaultLabel)}
+                                        options={toCardOptions(group, defaultLabel, i18n.language)}
                                         value={group.selectedId}
                                         onChange={(value) => onSelect(group.key, Number(value))}
                                     />

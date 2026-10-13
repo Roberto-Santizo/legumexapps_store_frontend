@@ -42,7 +42,7 @@ export function CreatePackagingMaterialModal({ role, initialDisplayName, onCreat
         formState: { errors },
     } = useForm<CreatePackagingInput>({
         resolver: zodResolver(createPackagingSchema),
-        defaultValues: { displayName: initialDisplayName, packagingRole: role },
+        defaultValues: { displayName: initialDisplayName, packagingRole: role, classification: "specific" },
     })
 
     const createMutation = useMutation({
@@ -63,6 +63,7 @@ export function CreatePackagingMaterialModal({ role, initialDisplayName, onCreat
         <Modal title={t(MODAL_TITLE_KEYS[role])} onClose={onClose}>
             <form onSubmit={onSubmit}>
                 <input type="hidden" {...register("packagingRole")} />
+                <input type="hidden" {...register("classification")} />
 
                 <PackagingBaseFields register={register} errors={errors} idPrefix={`${role}Material-`} />
 

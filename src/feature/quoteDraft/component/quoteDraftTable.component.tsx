@@ -12,7 +12,8 @@ const COLUMN_COUNT = 8
 // Materiales ELEGIDOS por grupo (lo que el representante escogió o el default), el mismo helper que
 // la sección "Configuración de empaque" del PDF. Las filas fijas no se listan: no son una elección.
 function ChosenMaterials({ draft }: Readonly<{ draft: QuoteDraft }>) {
-    const groups = buildPackagingConfiguration(draft.packaging).flatMap((level) => level.groups)
+    const { i18n } = useTranslation()
+    const groups = buildPackagingConfiguration(draft.packaging, i18n.language).flatMap((level) => level.groups)
     if (groups.length === 0) return <span className="text-ink-600">—</span>
 
     return (

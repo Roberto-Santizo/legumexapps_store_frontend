@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next"
+import { packagingName } from "@/shared/i18n/packagingName"
 import { useQuery } from "@tanstack/react-query"
 import { getPackagingsAPI } from "@/feature/packaging/api/packaging.api"
 import { CatalogCreatableSelect } from "@/shared/component/catalogCreatableSelect.component"
@@ -14,13 +16,15 @@ type PackagingMaterialSelectProps = CatalogSelectProps & {
 // Empaque individual (rol "unit") o de paletización (rol "pallet") de una variante, con alta rápida
 // del material si no existe (el rol queda fijo).
 export function PackagingMaterialSelect({ role, ...selectProps }: Readonly<PackagingMaterialSelectProps>) {
+    const { i18n } = useTranslation()
     const packagingsQuery = useQuery({ queryKey: ["packagings"], queryFn: getPackagingsAPI })
     const materials = (packagingsQuery.data?.data ?? []).filter((packaging) => packaging.packagingRole === role)
 
     // El label incluye el código para que react-select también busque por código, no solo por nombre.
     const options: SearchableSelectOption[] = materials.map((packaging) => ({
         value: packaging.id,
-        label: `${packaging.code} · ${packaging.displayName}`,
+        searchText: [packaging.code, packaging.displayName, packaging.displayNameEn].filter(Boolean).join(" "),
+        label: `${packaging.code} · ${packagingName(packaging, i18n.language)}`,
     }))
 
     return (

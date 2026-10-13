@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 import { forwardRef } from "react"
 import type { SelectHTMLAttributes } from "react"
 import { useQuery } from "@tanstack/react-query"
@@ -13,7 +14,7 @@ type IntermediatePackagingSelectProps = SelectHTMLAttributes<HTMLSelectElement> 
 // selector nativo, sin búsqueda.
 export const IntermediatePackagingSelect = forwardRef<HTMLSelectElement, IntermediatePackagingSelectProps>(
     function IntermediatePackagingSelect({ hasError, ...props }, ref) {
-        const { t } = useTranslation()
+        const { t, i18n } = useTranslation()
         const packagingsQuery = useQuery({ queryKey: ["packagings"], queryFn: getPackagingsAPI })
         const intermediatePackagings = (packagingsQuery.data?.data ?? []).filter(
             (packaging) => packaging.packagingRole === "intermediate"
@@ -24,7 +25,7 @@ export const IntermediatePackagingSelect = forwardRef<HTMLSelectElement, Interme
                 <option value="">{t("common.selectPlaceholder")}</option>
                 {intermediatePackagings.map((packaging) => (
                     <option key={packaging.id} value={packaging.id}>
-                        {packaging.displayName}
+                        {packagingName(packaging, i18n.language)}
                     </option>
                 ))}
             </Select>

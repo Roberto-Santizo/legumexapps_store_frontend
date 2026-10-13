@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 import { useTranslation } from "react-i18next"
 import { Boxes, Package } from "lucide-react"
 import type { CustomQuoteCalculation } from "../schema/customQuote.schema"
@@ -34,7 +35,7 @@ export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonl
                     const rows = packagingByLevel[level]
                     return rows.length > 0 && <div key={level} className="mb-4">
                         <p className="mb-2 text-xs font-medium text-ink-600">{t(`catalogQuote.ui.levels.${level}`)}</p>
-                        <ul className="space-y-2 text-sm">{rows.map((row, index) => <li key={`${row.packagingId}:${index}`} className="break-words">{row.displayName}</li>)}</ul>
+                        <ul className="space-y-2 text-sm">{rows.map((row, index) => <li key={`${row.packagingId}:${index}`} className="break-words">{packagingName(row, i18n.language)}</li>)}</ul>
                     </div>
                 })}</CatalogQuoteSection>
                 <CatalogQuoteSection title={t("catalogQuote.ui.quantity")}>

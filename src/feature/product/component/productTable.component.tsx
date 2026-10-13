@@ -1,4 +1,7 @@
 import { useTranslation } from "react-i18next"
+import { useState } from "react"
+import { Eye } from "lucide-react"
+import { ProductDetailsModal } from "./productDetails.component"
 import { getProductsPaginatedAPI, updateProductStatusAPI } from "@/feature/product/api/product.api"
 import type { ProductListItem } from "@/feature/product/schema/product.schema"
 import { usePermission } from "@/shared/auth/usePermission"
@@ -11,17 +14,22 @@ import { formatDateTime } from "@/shared/format/date"
 
 export function ProductTable() {
     const { t, i18n } = useTranslation()
+    const [detailsId, setDetailsId] = useState<number | null>(null)
     const { hasPermission } = usePermission()
     const { isPending, toggle } = useStatusToggle({ mutationFn: updateProductStatusAPI, invalidateKey: "products" })
 
     return (
-        <PaginatedAdminTable<ProductListItem>
+        <><PaginatedAdminTable<ProductListItem>
             queryKey={["products", "paginated"]}
             queryFn={getProductsPaginatedAPI}
             searchPlaceholder={t("product.table.searchPlaceholder")}
             emptyMessage={t("product.table.empty")}
             renderActions={(product) => (
                 <div className="flex items-center gap-4">
+                    {!product.isCustomizable && hasPermission("products:view") && <button type="button"
+                        title={t("productDetails.view")} aria-label={t("productDetails.viewProduct", { name: product.displayName })}
+                        className="flex size-10 shrink-0 items-center justify-center rounded-action text-ink-600 transition-colors hover:bg-customize-mint hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                        onClick={() => setDetailsId(product.id)}><Eye size={19} aria-hidden="true" /></button>}
                     <EditLink to={`/admin/products/${product.id}/edit`} permission="products:edit" />
                     {hasPermission("products:edit") && (
                         <StatusToggleButton
@@ -63,5 +71,6 @@ export function ProductTable() {
                 },
             ]}
         />
+        {detailsId !== null && hasPermission("products:view") && <ProductDetailsModal productId={detailsId} onClose={() => setDetailsId(null)} />}</>
     )
 }

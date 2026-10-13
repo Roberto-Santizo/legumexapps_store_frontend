@@ -4,6 +4,16 @@ import { apiItemResponseSchema, apiMutationResponseSchema, apiPaginatedListRespo
 import { getBulkImportTemplate } from "@/shared/api/bulkImport.api"
 import { productListItemSchema, responseProductSchema } from "@/feature/product/schema/product.schema"
 import type { CreateProductInput, UpdateProductInput } from "@/feature/product/schema/product.schema"
+import { productDetailsSchema } from "@/feature/product/schema/productDetails.schema"
+
+const detailsResponseSchema = apiItemResponseSchema(productDetailsSchema)
+
+export async function getFixedProductDetailsAPI(id: number) {
+    try {
+        const { data } = await api.get(`/products/${id}/details`)
+        return detailsResponseSchema.parse(data)
+    } catch (error) { handleApiError(error) }
+}
 
 const productPaginatedListResponseSchema = apiPaginatedListResponseSchema(productListItemSchema)
 const productItemResponseSchema = apiItemResponseSchema(responseProductSchema)

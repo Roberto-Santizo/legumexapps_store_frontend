@@ -29,7 +29,8 @@ function loader(overrides = {}) {
 const all = tree => !tree || typeof tree !== "object" ? [] : [tree, ...[].concat(tree.props?.children ?? []).flat(Infinity).flatMap(all)]
 
 test("informational stepper retains list semantics, active step and horizontal scrolling without a tab stop", () => {
-    const { CatalogQuoteStepper } = loader({ react: { useEffect() {}, useRef: value => ({ current: value }) }, "react-i18next": { useTranslation: () => ({ t: key => key }) }, "@/shared/component/button.component": { Button: "Button" } })("src/feature/customQuote/component/catalogQuoteUi.component.tsx")
+    const effects = []
+    const { CatalogQuoteStepper } = loader({ react: { useEffect: (callback, dependencies) => effects.push({ callback, dependencies }), useRef: value => ({ current: value }) }, "react-i18next": { useTranslation: () => ({ t: key => key }) }, "@/shared/component/button.component": { Button: "Button" } })("src/feature/customQuote/component/catalogQuoteUi.component.tsx")
     const nodes = all(CatalogQuoteStepper({ step: "mix" }))
     const list = nodes.find(row => row.type === "ol")
     assert.equal(list.props.tabIndex, undefined)
@@ -39,8 +40,35 @@ test("informational stepper retains list semantics, active step and horizontal s
     assert.equal(nodes.filter(row => row.type === "li").length, 7)
     const circles = nodes.filter(row => row.type === "span" && row.props.className?.includes("relative z-10"))
     assert.ok(circles[0].props.className.includes("bg-brand-700 text-white"))
-    assert.ok(circles[3].props.className.includes("bg-dorado text-brand-900"))
+    const activeClasses = circles[3].props.className.split(" ")
+    for (const expected of ["bg-surface", "text-brand-700", "ring-2", "ring-brand-500", "dark:text-brand-500"]) {
+        assert.ok(activeClasses.includes(expected), `active step is missing ${expected}`)
+    }
+    assert.ok(activeClasses.includes("shadow-[0_0_0_6px_var(--color-customize-mint)]"))
+    const active = nodes.find(row => row.props["aria-current"] === "step")
+    assert.equal(active.key, "mix")
+    assert.ok(all(active).includes(circles[3]))
+    assert.equal(nodes.some(row => ["button", "a"].includes(row.type)), false)
     assert.ok(circles[4].props.className.includes("bg-canvas text-ink-600"))
+    assert.equal(circles.length, 7)
+    assert.equal(nodes.find(row => row.type === "nav").props["aria-label"], "catalogQuote.ui.progress")
+    const steps = ["category", "subCategory", "profile", "mix", "configuration", "packaging", "result"]
+    for (const [index, step] of steps.entries()) {
+        const tree = all(CatalogQuoteStepper({ step }))
+        const items = tree.filter(row => row.type === "li")
+        assert.deepEqual(items.map(row => row.key), steps)
+        assert.deepEqual(items.filter(row => row.props["aria-current"] === "step").map(row => row.key), [step])
+        assert.equal(tree.some(row => row.props.tabIndex !== undefined || ["button", "a"].includes(row.type)), false)
+        const ol = tree.find(row => row.type === "ol")
+        ol.props.ref.current = {
+            scrollLeft: 40, clientWidth: 300, getBoundingClientRect: () => ({ left: 100 }),
+            children: steps.map(() => ({ clientWidth: 80, getBoundingClientRect: () => ({ left: 180 }) })),
+        }
+        assert.equal(effects.length, index + 2)
+        assert.deepEqual(effects.at(-1).dependencies, [index])
+        effects.at(-1).callback()
+        assert.equal(ol.props.ref.current.scrollLeft, 10)
+    }
 })
 
 test("JuiceForm preserves zero, false and empty defaults while excluding the existing image from submissions", () => {

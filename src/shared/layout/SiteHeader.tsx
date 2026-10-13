@@ -7,12 +7,10 @@ import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { SiteNavigation } from "@/shared/layout/SiteNavigation"
 import { SiteHeaderActions } from "@/shared/layout/SiteHeaderActions"
 import { SiteMobileMenu } from "@/shared/layout/SiteMobileMenu"
-import greenLogo from "@/assets/legumex-logo.png"
+import { LegumexLogo } from "@/shared/component/legumexLogo.component"
 
 
 const CONDENSE_THRESHOLD = 72
-const whiteLogos = import.meta.glob<string>("/src/assets/legumex-logo-white.png", { eager: true, query: "?url", import: "default" })
-const whiteLogo = whiteLogos["/src/assets/legumex-logo-white.png"]
 
 export function SiteHeader() {
     const { t } = useTranslation()
@@ -51,17 +49,8 @@ export function SiteHeader() {
                     isTransparent ? "h-20" : "h-16"
                 }`}
             >
-                <Link
-                    to="/"
-                    className={`landing-header-logo font-display font-bold uppercase tracking-tight transition-all duration-300 ${
-                        isTransparent ? "text-2xl text-white" : "text-xl text-ink-900"
-                    }`}
-                >
-                    {isHome && !isTransparent ? (
-                        <img src={greenLogo} alt="Legumex" className="h-12 w-28 object-contain" />
-                    ) : isTransparent && whiteLogo ? (
-                        <img src={whiteLogo} alt="Legumex" className="h-11 w-auto max-w-36 object-contain" />
-                    ) : "Legumex"}
+                <Link to="/" aria-label="Legumex" className="landing-header-logo">
+                    <LegumexLogo size={isTransparent ? "lg" : "md"} />
                 </Link>
 
                 <div className="hidden lg:block">

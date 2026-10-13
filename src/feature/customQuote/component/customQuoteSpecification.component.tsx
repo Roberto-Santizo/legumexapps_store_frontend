@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Boxes, FlaskConical, Layers, PackageOpen, PackagePlus, Wheat } from "lucide-react"
@@ -71,7 +72,7 @@ function PackagingLevelTable({ title, icon, rows }: Readonly<{ title: string; ic
 }
 
 export function CustomQuoteSpecification({ customQuote }: Readonly<{ customQuote: AdminCustomQuoteDetail }>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const { breakdown, configuration } = customQuote
 
     // % de la configuración guardada, nombre (traducido al guardar) del desglose, emparejados por id.
@@ -88,13 +89,13 @@ export function CustomQuoteSpecification({ customQuote }: Readonly<{ customQuote
 
     const unitRows: PackagingRow[] = (breakdown.unitMaterials ?? []).map((line) => ({
         key: `unit:${line.packagingId}`,
-        name: line.displayName,
+        name: packagingName(line, i18n.language),
         group: line.optionGroup,
         quantity: t("adminCustomQuote.spec.perUnit", { quantity: numberFormatter.format(line.quantityPerUnit) }),
     }))
     const intermediateRows: PackagingRow[] = (breakdown.intermediateMaterials ?? []).map((line) => ({
         key: `intermediate:${line.packagingId}`,
-        name: line.displayName,
+        name: packagingName(line, i18n.language),
         group: line.optionGroup,
         quantity: t("adminCustomQuote.spec.perIntermediate", {
             units: line.unitsPerPackage,
@@ -111,7 +112,7 @@ export function CustomQuoteSpecification({ customQuote }: Readonly<{ customQuote
                       perPallet: numberFormatter.format(line.quantityPerPallet),
                   })
                 : t("adminCustomQuote.spec.perPallet", { quantity: numberFormatter.format(line.quantityPerPallet) })
-        return { key: `pallet:${line.packagingId}`, name: line.displayName, group: line.optionGroup, quantity }
+        return { key: `pallet:${line.packagingId}`, name: packagingName(line, i18n.language), group: line.optionGroup, quantity }
     })
 
     return (

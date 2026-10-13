@@ -4,6 +4,34 @@ const fs = require("node:fs")
 const path = require("node:path")
 const vm = require("node:vm")
 const ts = require("typescript")
+const React = require("react")
+const { renderToStaticMarkup } = require("react-dom/server")
+const jsxRuntime = require("react/jsx-runtime")
+
+// Render with React's actual hook dispatcher, while retaining host-element handlers for assertions.
+function componentRenderer() {
+    const nodes = []
+    const runtime = Object.fromEntries(["jsx", "jsxs"].map(name => [name, (...args) => {
+        const node = jsxRuntime[name](...args)
+        nodes.push(node)
+        return node
+    }]))
+    function load(file, overrides) {
+        const module = { exports: {} }
+        const source = ts.transpileModule(fs.readFileSync(file, "utf8"), {
+            compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
+        }).outputText
+        const localRequire = name => name === "react/jsx-runtime" ? runtime : name in overrides ? overrides[name] : require(name)
+        vm.runInThisContext(`(function(require,module,exports){${source}\n})`, { filename: file })(localRequire, module, module.exports)
+        return module.exports
+    }
+    function render(Component, props) {
+        nodes.length = 0
+        const html = renderToStaticMarkup(React.createElement(Component, props))
+        return { nodes: [...nodes], html }
+    }
+    return { load, render }
+}
 
 function frontend() {
     const calls = []
@@ -74,8 +102,58 @@ test("descarga de plantilla unificada mantiene endpoint y modo blob", async () =
 
 test("la página conserva carga inicial y editor sin panel separado", () => {
     const source = fs.readFileSync("src/feature/product/page/product.page.tsx", "utf8")
-    assert.ok(source.includes("<InitialProductImportPanel />"))
-    assert.ok(source.includes("<ProductTable />"))
+    const h = componentRenderer()
+    const translation = { useTranslation: () => ({ t: key => key }) }
+    const { ProductBulkImportSection } = h.load("src/feature/product/component/productBulkImportSection.component.tsx", {
+        "react-i18next": translation,
+        "lucide-react": { ChevronDown: "svg", FileUp: "svg", ListChecks: "svg" },
+        "@/shared/component/bulkImportPanel.component": { BulkImportPanel: "bulk-panel" },
+        "@/feature/product/component/initialProductImportPanel.component": { InitialProductImportPanel: "initial-panel" },
+    })
+    let permissions = []
+    const rawMaterials = { bulkImportProductRawMaterialsAPI() {}, downloadProductRawMaterialImportTemplateAPI() {} }
+    const ingredients = { bulkImportProductIngredientsAPI() {}, downloadProductIngredientImportTemplateAPI() {} }
+    const { ProductListPage } = h.load("src/feature/product/page/product.page.tsx", {
+        "react-router-dom": { Link: "a" }, "react-i18next": translation,
+        "@/feature/product/component/productTable.component": { ProductTable: "product-table" },
+        "@/feature/product/component/productExportButton.component": { ProductExportButton: "product-export" },
+        "@/feature/product/component/productBulkImportSection.component": { ProductBulkImportSection },
+        "@/feature/product/api/productRawMaterial.api": rawMaterials,
+        "@/feature/product/api/productIngredient.api": ingredients,
+        "@/shared/auth/usePermission": { usePermission: () => ({ hasPermission: permission => permissions.includes(permission) }) },
+        "@/shared/component/pageContainer.component": { PageContainer: ({ children }) => React.createElement("main", null, children) },
+        "@/shared/component/buttonClassName": { buttonClassName: () => "" },
+    })
+    const previousStorage = globalThis.localStorage
+    try {
+        globalThis.localStorage = { getItem: () => "1" }
+        for (const [allowed, expectedSteps] of [
+            [[], []], [["products:create"], [1]], [["products:edit"], [2, 3]], [["products:create", "products:edit"], [1, 2, 3]],
+        ]) {
+            permissions = allowed
+            const { nodes } = h.render(ProductListPage)
+            assert.equal(nodes.filter(node => node.type === "product-table").length, 1)
+            const section = nodes.find(node => node.type === ProductBulkImportSection)
+            assert.deepEqual(section?.props.steps.map(item => item.step) ?? [], expectedSteps)
+            const initial = nodes.filter(node => node.type === "initial-panel")
+            assert.equal(initial.length, expectedSteps.includes(1) ? 1 : 0)
+            if (initial.length) assert.equal(initial[0].props.bare, true)
+            const panels = nodes.filter(node => node.type === "bulk-panel")
+            assert.equal(panels.length, expectedSteps.includes(2) ? 2 : 0)
+            if (panels.length) {
+                assert.equal(panels[0].props.bulkImport, rawMaterials.bulkImportProductRawMaterialsAPI)
+                assert.equal(panels[1].props.bulkImport, ingredients.bulkImportProductIngredientsAPI)
+            }
+            const tabs = nodes.filter(node => node.props.role === "tab")
+            assert.equal(tabs.length, expectedSteps.length)
+            if (tabs.length) assert.equal(tabs.filter(node => node.props["aria-selected"]).length, 1)
+            const tabPanels = nodes.filter(node => node.props.role === "tabpanel")
+            assert.deepEqual(tabPanels.map(node => node.props.hidden), expectedSteps.map((_, index) => index !== 0))
+        }
+    } finally {
+        if (previousStorage === undefined) delete globalThis.localStorage
+        else globalThis.localStorage = previousStorage
+    }
     assert.ok(!source.includes("ProductPackagingImportPanel"))
     assert.equal(fs.existsSync("src/feature/product/component/productPackagingImportPanel.component.tsx"), false)
     for (const locale of ["es", "en"]) {
@@ -88,32 +166,52 @@ test("la página conserva carga inicial y editor sin panel separado", () => {
 
 
 test("selector compartido muestra nombre/reset y abre input oculto sin alterar accept", () => {
-    const module = { exports: {} }
-    const source = ts.transpileModule(fs.readFileSync("src/shared/component/importFilePicker.component.tsx", "utf8"), {
-        compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
-    }).outputText
-    const Button = () => null
-    const mockRequire = name => {
-        if (name === "react-i18next") return { useTranslation: () => ({ t: key => ({ "common.chooseFile": "Choose File", "common.noFileChosen": "No file chosen" })[key] }) }
-        if (name === "@/shared/component/button.component") return { Button }
-        return require(name)
-    }
-    vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(mockRequire, module, module.exports)
-    const Picker = module.exports.ImportFilePicker
+    const h = componentRenderer()
+    const { ImportFilePicker } = h.load("src/shared/component/importFilePicker.component.tsx", {
+        "react-i18next": { useTranslation: () => ({ t: key => key }) },
+        "lucide-react": { FileSpreadsheet: "svg", UploadCloud: "svg", X: "svg" },
+    })
     let clicks = 0
-    const inputRef = { current: { click: () => clicks++ } }
-    const onChange = () => {}
-    const render = (fileName, disabled = false) => Picker({ inputRef, fileName, accept: ".xlsx", disabled, onChange }).props.children
-    const [input, button, name] = render("carga_productos.xlsx")
+    const selected = []
+    const inputRef = { current: { click: () => clicks++, value: "previous-selection" } }
+    const render = (file, disabled = false) => h.render(ImportFilePicker, { inputRef, file, accept: ".xlsx", disabled, onFileSelect: value => selected.push(value) })
+    const first = new File(["synthetic"], "carga_productos.xlsx")
+    const loaded = render(first)
+    const input = loaded.nodes.find(node => node.type === "input")
     assert.equal(input.props.className, "hidden")
+    assert.equal(input.props.type, "file")
     assert.equal(input.props.accept, ".xlsx")
-    assert.equal(input.props.onChange, onChange)
-    assert.equal(button.type, Button)
-    button.props.onClick()
+    assert.equal(input.props.ref, inputRef)
+    loaded.nodes.find(node => node.type === "button" && node.props.children === "common.changeFile").props.onClick()
     assert.equal(clicks, 1)
-    assert.equal(name.props.children, "carga_productos.xlsx")
-    assert.equal(render("otra.xlsx")[2].props.children, "otra.xlsx")
-    assert.equal(render(undefined)[2].props.children, "No file chosen")
-    assert.equal(render(undefined, true)[0].props.disabled, true)
-    assert.equal(render(undefined, true)[1].props.disabled, true)
+    assert.ok(loaded.html.includes(first.name))
+    const next = new File(["other"], "otra.xlsx")
+    input.props.onChange({ target: { files: [next] } })
+    assert.equal(selected.at(-1), next)
+    assert.ok(render(next).html.includes(next.name))
+    loaded.nodes.find(node => node.props["aria-label"] === "common.removeFile").props.onClick()
+    assert.equal(inputRef.current.value, "")
+    assert.equal(selected.at(-1), null)
+    input.props.onChange({ target: { files: [] } })
+    assert.equal(selected.at(-1), null)
+    const empty = render(null)
+    assert.ok(empty.html.includes("common.dropFileHere") && empty.html.includes("common.browseFile"))
+    const dropzone = empty.nodes.find(node => node.type === "button")
+    dropzone.props.onClick()
+    assert.equal(clicks, 2)
+    let prevented = 0
+    dropzone.props.onDrop({ preventDefault: () => prevented++, dataTransfer: { files: [next] } })
+    assert.equal(prevented, 1)
+    assert.equal(selected.at(-1), next)
+    const count = selected.length
+    dropzone.props.onDrop({ preventDefault() {}, dataTransfer: { files: [] } })
+    assert.equal(selected.length, count)
+    for (const file of [null, first]) {
+        const disabled = render(file, true).nodes
+        assert.equal(disabled.find(node => node.type === "input").props.disabled, true)
+        assert.ok(disabled.filter(node => node.type === "button").every(node => node.props.disabled === true))
+        const drop = disabled.find(node => node.props.onDrop)
+        if (drop) drop.props.onDrop({ preventDefault() {}, dataTransfer: { files: [next] } })
+        assert.equal(selected.length, count)
+    }
 })

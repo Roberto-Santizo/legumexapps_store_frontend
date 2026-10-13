@@ -38,3 +38,34 @@ artifacts/
 
 # Local cleanup worktrees/backups, if created inside this repository
 /.legacy-config-cleanup/
+
+# Personal documentation and local investigation artifacts
+/AGENTS.md
+/CLAUDE.md
+/CLAUDE.local.md
+/docs/**/*.md
+/docs/admin-customizable-calculator.md
+/docs/customize-ui.md
+/docs/frontend-cleanup.md
+/docs/i18n-audit.md
+/docs/legumex-design-system.md
+/docs/separate-packaging-import-removal.md
+/docs/sonar-frontend-review.md
+/scripts/**/*.py
+/*.py
+/scripts/diagnose-*.cjs
+/scripts/inspect-*.cjs
+/scripts/start-local-no-sync.cjs
+/scripts/review-*.cjs
+/scratchpad/
+/artifacts/
+/screenshots/
+/audit-results/
+/tmp/
+/temp/
+*.tmp
+*.log
+/docs/*-audit-result.json
+/docs/*.pdf
+/docs/*.png
+/docs/*.jpg

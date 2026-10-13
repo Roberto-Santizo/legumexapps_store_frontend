@@ -3,6 +3,7 @@ import { Leaf } from "lucide-react"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { FooterLinkColumn } from "@/shared/layout/FooterLinkColumn"
 import { FooterNewsletterForm } from "@/shared/layout/FooterNewsletterForm"
+import { LegumexLogo } from "@/shared/component/legumexLogo.component"
 
 export function SiteFooter() {
     const { t } = useTranslation()
@@ -31,7 +32,7 @@ export function SiteFooter() {
             <SiteContainer className="relative">
                 <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
                     <div className="col-span-2 sm:col-span-4 lg:col-span-1">
-                        <span className="font-display text-xl font-bold uppercase tracking-tight">Legumex</span>
+                        <LegumexLogo tone="light" size="lg" />
                         <p className="mt-3 max-w-xs text-sm text-landing-cream/70">{t("site.footer.tagline")}</p>
                     </div>
 

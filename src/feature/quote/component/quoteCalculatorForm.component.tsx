@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -127,7 +128,7 @@ export function QuoteCalculatorForm({
     onProductChange,
     customQuoteHref,
 }: Readonly<QuoteCalculatorFormProps>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const navigate = useNavigate()
     const [step, setStep] = useState<QuoteWizardStep>("mode")
     const [mode, setMode] = useState<QuoteMode>("finished")
@@ -811,7 +812,7 @@ export function QuoteCalculatorForm({
                                                 {t(`site.quoteRequest.form.${group.level}MaterialLabel`)} · {group.group}
                                             </dt>
                                             <dd className="text-right font-medium text-ink-900">
-                                                {group.options.find((option) => option.id === group.selectedId)?.displayName ?? "-"}
+                                                {packagingName(group.options.find((option) => option.id === group.selectedId), i18n.language) || "-"}
                                             </dd>
                                         </div>
                                     ))}

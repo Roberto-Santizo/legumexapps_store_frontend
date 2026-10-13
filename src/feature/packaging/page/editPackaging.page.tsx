@@ -20,8 +20,11 @@ function toFormValues(packaging: PackagingResponse): Partial<UpdatePackagingInpu
     return {
         defaultQuantityBasis: packaging.defaultQuantityBasis ?? null,
         defaultQuantityValue: packaging.defaultQuantityValue == null ? null : Number(packaging.defaultQuantityValue),
+        classification: packaging.classification,
+        isActive: packaging.isActive,
         code: packaging.code,
         displayName: packaging.displayName,
+        displayNameEn: packaging.displayNameEn ?? "",
         packagingRole: packaging.packagingRole,
         unitCost: packaging.unitCost !== null ? Number(packaging.unitCost) : undefined,
     }
@@ -88,7 +91,7 @@ export function EditPackagingPage() {
 
                 {packagingQuery.data && (
                     <form onSubmit={onSubmit}>
-                        <PackagingForm register={register} errors={errors} packagingRole={watch("packagingRole")} />
+                        <PackagingForm editing register={register} errors={errors} packagingRole={watch("packagingRole")} />
                         <Button type="submit" disabled={updatePackagingMutation.isPending}>
                             {updatePackagingMutation.isPending ? t("common.saving") : t("common.save")}
                         </Button>

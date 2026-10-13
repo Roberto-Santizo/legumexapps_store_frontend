@@ -47,7 +47,7 @@ export function QuoteProductionDocument({ lines, clientName, orderId, salesperso
             <Text style={styles.detail}>{t("quote.production.purpose")}</Text>
             {lines.map((line, index) => {
                 const production = line.breakdown.production
-                const materials = productionMaterials(line)
+                const materials = productionMaterials(line, i18n.language)
                 return <View key={index} break={index > 0}>
                     {index > 0 && <Text style={styles.detail}>{t("quote.production.order")}: {orderId} · {clientName}</Text>}
                     <Text style={styles.heading} minPresenceAhead={100}>{index + 1}. {line.productDisplayName}</Text>
@@ -65,7 +65,7 @@ export function QuoteProductionDocument({ lines, clientName, orderId, salesperso
         <Page size="LETTER" style={styles.page}>
             <Text style={styles.title}>{t("quote.production.consolidated")}</Text>
             <Text style={styles.detail}>{t("quote.production.order")}: {orderId}</Text>
-            <MaterialTable title={t("quote.production.materialsTotal")} rows={consolidateProductionMaterials(lines)} />
+            <MaterialTable title={t("quote.production.materialsTotal")} rows={consolidateProductionMaterials(lines, i18n.language)} />
             <Text style={styles.footer} fixed render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
         </Page>
     </Document>

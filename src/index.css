@@ -331,11 +331,203 @@ body {
 .landing-theme .landing-header-logo {
     flex-shrink: 0;
 }
-.landing-theme .landing-header-glass .landing-header-logo {
-    border-radius: 0.75rem 0.75rem 1.75rem 0.75rem;
-    padding: 0.6rem 0.85rem;
-    background: var(--color-brand-900);
-    color: white;
+/* Drawn Legumex logo: tone classes set the palette, transitions animate every color change. */
+.legumex-logo {
+    --logo-peak: var(--color-brand-900);
+    --logo-peak-back: var(--color-brand-900);
+    --logo-field: var(--color-brand-700);
+    --logo-leaf: var(--color-brand-500);
+    --logo-name: var(--color-brand-900);
+    --logo-eyebrow: var(--color-brand-700);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    font-size: 1rem;
+    line-height: 1;
+    white-space: nowrap;
+    transition: font-size 300ms ease;
+}
+.legumex-logo--sm { font-size: 0.875rem; }
+.legumex-logo--sm .legumex-logo-eyebrow { display: none; }
+.legumex-logo--lg { font-size: 1.15rem; }
+.legumex-logo--light {
+    --logo-peak: var(--color-landing-cream);
+    --logo-peak-back: var(--color-landing-cream);
+    --logo-field: var(--color-brand-300);
+    --logo-leaf: var(--color-brand-500);
+    --logo-name: var(--color-landing-cream);
+    --logo-eyebrow: var(--color-brand-300);
+}
+/* Dark admin/site pages; the landing page stays light, so it restores the brand palette. */
+:where(.dark, [data-theme="dark"]) .legumex-logo--brand {
+    --logo-peak: var(--color-brand-300);
+    --logo-peak-back: var(--color-brand-300);
+    --logo-field: var(--color-brand-500);
+    --logo-name: var(--color-ink-900);
+    --logo-eyebrow: var(--color-brand-300);
+}
+.landing-theme .legumex-logo--brand {
+    --logo-peak: var(--color-brand-900);
+    --logo-peak-back: var(--color-brand-900);
+    --logo-field: var(--color-brand-700);
+    --logo-name: var(--color-brand-900);
+    --logo-eyebrow: var(--color-brand-700);
+}
+.legumex-logo-mark {
+    width: 3.6em;
+    height: auto;
+    flex-shrink: 0;
+    overflow: visible;
+}
+.legumex-logo-mark path {
+    transition: fill 400ms ease, transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.legumex-logo-peak { fill: var(--logo-peak); }
+.legumex-logo-peak-back { fill: var(--logo-peak-back); }
+.legumex-logo-field { fill: var(--logo-field); }
+.legumex-logo-leaf { fill: var(--logo-leaf); }
+.legumex-logo-wordmark {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.22em;
+}
+.legumex-logo-eyebrow {
+    font-size: 0.5em;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--logo-eyebrow);
+    transition: color 400ms ease;
+}
+.legumex-logo-name {
+    font-size: 1.5em;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--logo-name);
+    transition: color 400ms ease;
+}
+/* Hover: the fields swap greens and drift, the back peak lights up. */
+a:hover > .legumex-logo,
+.legumex-logo:hover {
+    --logo-peak-back: var(--color-brand-500);
+    --logo-field: var(--color-brand-500);
+    --logo-leaf: var(--color-brand-700);
+}
+a:hover > .legumex-logo--light,
+.legumex-logo--light:hover {
+    --logo-field: var(--color-brand-500);
+    --logo-leaf: var(--color-brand-300);
+}
+a:hover > .legumex-logo .legumex-logo-field,
+.legumex-logo:hover .legumex-logo-field { transform: translateX(-18px); }
+a:hover > .legumex-logo .legumex-logo-leaf,
+.legumex-logo:hover .legumex-logo-leaf { transform: translateX(24px); }
+@media (prefers-reduced-motion: reduce) {
+    .legumex-logo-mark path,
+    .legumex-logo-eyebrow,
+    .legumex-logo-name { transition: none; }
+    a:hover > .legumex-logo path,
+    .legumex-logo:hover path { transform: none; }
+}
+/* Logo apilado del panel admin (shared/component/legumexLogoStacked.component.tsx): paleta clara y oscura propia. */
+.legumex-stacked-logo {
+    --stacked-peak: var(--color-brand-900);
+    --stacked-field: var(--color-brand-700);
+    --stacked-leaf: var(--color-brand-500);
+    --stacked-line: var(--color-brand-300);
+    --stacked-name: var(--color-brand-900);
+    --stacked-eyebrow: var(--color-brand-900);
+    --stacked-rule: var(--color-brand-700);
+    --stacked-tagline: var(--color-brand-900);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    width: 11.5rem;
+    line-height: 1;
+    user-select: none;
+}
+:where(.dark, [data-theme="dark"]) .legumex-stacked-logo {
+    --stacked-peak: #e6efe8;
+    --stacked-field: #8fc79a;
+    --stacked-leaf: #8bc53f;
+    --stacked-line: #4f7a58;
+    --stacked-name: #f2f7f3;
+    --stacked-eyebrow: #b9d3bf;
+    --stacked-rule: #6f9c78;
+    --stacked-tagline: #b9d3bf;
+}
+.legumex-stacked-logo-mark {
+    width: 80%;
+    height: auto;
+    overflow: visible;
+}
+.legumex-stacked-logo-mark path {
+    transition: fill 400ms ease, stroke 400ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.legumex-stacked-logo-peak { fill: var(--stacked-peak); }
+.legumex-stacked-logo-field { fill: var(--stacked-field); }
+.legumex-stacked-logo-leaf { fill: var(--stacked-leaf); }
+.legumex-stacked-logo-line { fill: none; stroke: var(--stacked-line); stroke-width: 1.2; stroke-linecap: round; }
+.legumex-stacked-logo-eyebrow {
+    margin-top: 0.55rem;
+    padding-left: 0.32em;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--stacked-eyebrow);
+}
+.legumex-stacked-logo-name {
+    margin-top: 0.2rem;
+    padding-left: 0.05em;
+    font-size: 2.15rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--stacked-name);
+}
+.legumex-stacked-logo-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    margin-top: 0.35rem;
+    color: var(--stacked-leaf);
+}
+.legumex-stacked-logo-divider::before,
+.legumex-stacked-logo-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--stacked-rule);
+    opacity: 0.7;
+}
+.legumex-stacked-logo-divider svg { width: 0.7rem; height: 0.7rem; flex-shrink: 0; }
+.legumex-stacked-logo-divider path { fill: currentColor; stroke: var(--stacked-field); stroke-width: 0.8; }
+.legumex-stacked-logo-tagline {
+    margin-top: 0.3rem;
+    font-size: 0.66rem;
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    color: var(--stacked-tagline);
+}
+.legumex-stacked-logo-eyebrow,
+.legumex-stacked-logo-name,
+.legumex-stacked-logo-tagline { transition: color 400ms ease; }
+a:hover > .legumex-stacked-logo .legumex-stacked-logo-field,
+.legumex-stacked-logo:hover .legumex-stacked-logo-field { transform: translateX(-6px); }
+a:hover > .legumex-stacked-logo .legumex-stacked-logo-leaf,
+.legumex-stacked-logo:hover .legumex-stacked-logo-leaf { transform: translateX(7px); }
+@media (prefers-reduced-motion: reduce) {
+    .legumex-stacked-logo-mark path,
+    .legumex-stacked-logo-eyebrow,
+    .legumex-stacked-logo-name,
+    .legumex-stacked-logo-tagline { transition: none; }
+    .legumex-stacked-logo:hover path,
+    a:hover > .legumex-stacked-logo path { transform: none; }
 }
 .landing-theme .landing-header-glass > div:first-child button,
 .landing-theme .landing-header-glass > div:first-child a[aria-label] {
@@ -403,6 +595,9 @@ body {
 }
 
 @media (max-width: 639px) {
+    .landing-header-logo .legumex-logo {
+        font-size: 0.78rem;
+    }
     .landing-theme .site-header a[href="/solicitud"]:not([aria-label]) {
         padding-inline: 0.75rem;
         font-size: 0.6875rem;

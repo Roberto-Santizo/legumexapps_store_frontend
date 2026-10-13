@@ -1,3 +1,4 @@
+import { createFilter } from "react-select"
 import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -36,6 +37,7 @@ export function CatalogCreatableSelect<T extends { id: number }>({ inputId, hasE
                 inputId={inputId}
                 hasError={hasError}
                 options={options}
+                filterOption={createFilter({ stringify: option => `${option.data.searchText ?? option.label} ${option.value}` })}
                 placeholder={t("common.searchPlaceholder")}
                 noOptionsMessage={() => t("common.noOptionsFound")}
                 isClearable

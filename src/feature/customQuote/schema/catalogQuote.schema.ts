@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { customQuoteCalculationSchema } from "./customQuote.schema"
 
-const material = z.object({ id: z.number(), packagingId: z.number(), displayName: z.string(), isDefault: z.boolean() })
+const material = z.object({ id: z.number(), packagingId: z.number(), displayName: z.string(), displayNameEn: z.string().nullable().optional(), isDefault: z.boolean() })
 const level = z.object({ fixed: z.array(material), groups: z.array(z.object({ key: z.string(), group: z.string(), options: z.array(material) })) })
 export const catalogConfigurationSchema = z.object({ id: z.number(), fingerprint: z.string(), presentationId: z.number(), displayLabel: z.string(), netWeightGrams: z.number(), bagsPerBox: z.number(), boxesPerPallet: z.number(), unitsPerIntermediatePackage: z.number().nullable(), packaging: z.object({ unit: level, intermediate: level, pallet: level }) })
 export const catalogDiscoverySchema = z.object({ categories: z.array(z.object({ id: z.number(), displayName: z.string(), subCategories: z.array(z.object({ id: z.number(), displayName: z.string(), rawMaterials: z.array(z.object({ rawMaterialId: z.number(), displayName: z.string(), ingredientType: z.enum(["fruit", "vegetable", "pulp", "other"]), isOrganic: z.boolean() })), configurations: z.array(catalogConfigurationSchema) })) })) })

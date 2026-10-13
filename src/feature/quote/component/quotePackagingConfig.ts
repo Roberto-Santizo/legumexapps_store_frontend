@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 type PackagingConfigLevel = "unit" | "intermediate" | "pallet"
 
 type PackagingConfigGroup = {
@@ -14,7 +15,7 @@ export type PackagingConfigLevelSummary = {
     groups: PackagingConfigGroup[]
 }
 
-type MaterialLine = { displayName: string; optionGroup: string | null }
+type MaterialLine = { displayName: string; displayNameEn?: string | null; optionGroup: string | null }
 
 // Lo único que el helper lee de un snapshot (Quote.breakdown o el de un borrador).
 export type PackagingMaterialsSnapshot = {
@@ -32,6 +33,7 @@ export type PackagingMaterialsSnapshot = {
 // omiten.
 export function buildPackagingConfiguration(
     breakdown: PackagingMaterialsSnapshot,
+    language?: string,
 ): PackagingConfigLevelSummary[] {
     const levels: { level: PackagingConfigLevel; number: number; lines: MaterialLine[] | undefined }[] = [
         { level: "unit", number: 1, lines: breakdown.unitMaterials },
@@ -44,9 +46,9 @@ export function buildPackagingConfiguration(
         .map(({ level, number, lines = [] }) => ({
             level,
             number,
-            fixed: lines.filter((line) => line.optionGroup === null).map((line) => line.displayName),
+            fixed: lines.filter((line) => line.optionGroup === null).map((line) => packagingName(line, language)),
             groups: lines
                 .filter((line): line is MaterialLine & { optionGroup: string } => line.optionGroup !== null)
-                .map((line) => ({ group: line.optionGroup, material: line.displayName })),
+                .map((line) => ({ group: line.optionGroup, material: packagingName(line, language) })),
         }))
 }

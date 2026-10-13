@@ -348,12 +348,13 @@ function importPanelHarness({ preview = null, file = null, validateError = null,
     ]
     let created = []
     const overrides = {
-        ...i18n,
+        "react-i18next": { useTranslation: () => ({ t, i18n: { language: "es" } }) },
         react: { useState: state.useState, useRef: value => ({ current: value }) },
         "@tanstack/react-query": { useMutation: () => created.shift(), useQueryClient: () => ({ invalidateQueries() {} }) },
-        "lucide-react": { Download: "Download", Upload: "Upload" },
+        "lucide-react": Object.fromEntries(["Download", "AlertTriangle", "CheckCircle2", "FileSpreadsheet", "ShieldCheck"].map(name => [name, name])),
         sonner: { toast: { success() {}, error() {} } },
         "@/shared/component/importFilePicker.component": { ImportFilePicker: "ImportFilePicker" },
+        "@/shared/component/importInstructions.component": { ImportInstructions: "ImportInstructions" },
         "@/shared/component/table.component": Object.fromEntries(["Table", "TableBody", "TableContainer", "TableHead", "TableRow", "Td", "Th"].map(name => [name, name])),
         "@/shared/component/button.component": { Button: "Button" },
         "@/shared/api/bulkImport.api": { BulkImportApiError: FakeBulkImportApiError },
@@ -363,7 +364,7 @@ function importPanelHarness({ preview = null, file = null, validateError = null,
         "../api/initialProductImport.api": { previewInitialProductImportAPI() {}, confirmInitialProductImportAPI() {} },
     }
     const { InitialProductImportPanel } = loader(overrides)("src/feature/product/component/initialProductImportPanel.component.tsx")
-    function render() { state.begin(); created = mutations(); return all(InitialProductImportPanel()) }
+    function render(props = {}) { state.begin(); created = mutations(); return all(InitialProductImportPanel(props)) }
     const confirmButton = nodes => nodes.find(node => node.type === "Button" && /initialProductImport\.(confirm|importing)/.test(text(node)))
     return { render, confirmButton, confirmed }
 }
@@ -376,13 +377,12 @@ const keysOf = nodes => nodes.map(node => node.key)
 test("initial product import row errors keep order with stable, unique keys", () => {
     const rowErrors = [issue(3, "SKU repetido"), issue(3, "SKU repetido"), { row: 4, field: "clientId", message: "Falta cliente" }]
     const h = importPanelHarness({ validateError: new FakeBulkImportApiError("Archivo inválido", rowErrors) })
-    const paragraphs = () => h.render().find(node => node.props?.role === "alert").props.children.flat().filter(node => node?.type === "p")
-    const first = paragraphs()
-    assert.equal(text(first[0]), "Archivo inválido")
-    const rows = first.slice(1)
+    const alert = () => h.render().find(node => node.props?.role === "alert")
+    assert.equal(text(all(alert()).find(node => node.type === "p")), "Archivo inválido")
+    const rows = all(alert()).filter(node => node.type === "li")
     assert.deepEqual(rows.map(text), ['Productos y SKUs · initialProductImport.rowError{"row":3,"message":"SKU repetido"}', 'Productos y SKUs · initialProductImport.rowError{"row":3,"message":"SKU repetido"}', 'initialProductImport.rowError{"row":4,"message":"Falta cliente"}'])
     assert.equal(new Set(keysOf(rows)).size, 3)
-    assert.deepEqual(keysOf(paragraphs().slice(1)), keysOf(rows))
+    assert.deepEqual(keysOf(all(alert()).filter(node => node.type === "li")), keysOf(rows))
     assert.ok(keysOf(rows).every(key => !/^\d+$/.test(key)))
 })
 
@@ -395,16 +395,26 @@ test("initial product import preview: summary output, default column, issues and
     const h = importPanelHarness({ file: { name: "p.xlsx" }, preview: preview({ materials, issues: [issue(5, "Grupo sin predeterminado", "Empaques"), issue(5, "Grupo sin predeterminado", "Empaques")] }) })
     const nodes = h.render()
     const summary = nodes.find(node => node.type === "output")
-    assert.ok(summary.props.className.includes("block") && summary.props.role === undefined)
-    assert.ok(text(summary).startsWith("initialProductImport.summary"))
+    assert.ok(summary.props.className.includes("grid") && summary.props.role === undefined)
+    const stats = all(summary).filter(node => node.type === "div")
+    const expectedSummary = preview().summary
+    assert.deepEqual(stats.map(node => node.key), Object.keys(expectedSummary))
+    for (const tile of stats) {
+        const values = all(tile).filter(node => node.type === "p")
+        assert.equal(values[0].props.children, expectedSummary[tile.key])
+        assert.equal(text(values[1]), `initialProductImport.stats.${tile.key}`)
+    }
+    assert.equal(h.render({ bare: true })[0].props.className, "")
+    assert.ok(nodes[0].props.className.includes("rounded-panel"))
     const materialRows = nodes.filter(node => node.type === "TableRow" && node.key !== null)
     assert.deepEqual(materialRows.map(row => all(row).filter(node => node.type === "Td")[6].props.children), ["—", "common.yes", "common.no"])
     const stateCell = all(materialRows[1]).filter(node => node.type === "Td")[8]
     const messages = all(stateCell).filter(node => node.type === "p")
     assert.deepEqual(messages.map(text), ["Cantidad inválida", "Cantidad inválida", "Regla heredada"])
-    assert.deepEqual(messages.map(node => node.props.className), ["text-sm text-danger", "text-sm text-danger", "text-sm text-ink-600"])
+    assert.ok(messages.slice(0, 2).every(node => node.props.className.split(" ").includes("text-danger")))
+    assert.ok(messages[2].props.className.split(" ").includes("text-warning-fg"))
     assert.equal(new Set(keysOf(messages.slice(0, 2))).size, 2)
-    const fileIssues = all(nodes.find(node => node.props?.role === "alert")).filter(node => node.type === "p")
+    const fileIssues = all(nodes.find(node => node.props?.role === "alert")).filter(node => node.type === "li")
     assert.equal(fileIssues.length, 2)
     assert.equal(new Set(keysOf(fileIssues)).size, 2)
     assert.equal(text(fileIssues[0]), 'Empaques · initialProductImport.rowError{"row":5,"message":"Grupo sin predeterminado"}')

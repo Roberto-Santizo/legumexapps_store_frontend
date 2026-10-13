@@ -10,19 +10,23 @@ type PackagingBaseFieldsProps<T extends UpdatePackagingInput> = {
     errors: FieldErrors<T>
     // Prefix for the input ids, so a quick-create modal can't collide with a form already on the page.
     idPrefix?: string
+    requireEnglish?: boolean
     // Rendered between the name and the cost (the full form's role select; the quick-create modals fix the role).
     roleField?: ReactNode
 }
 
 // Code, name and unit cost: the fields every packaging needs, shared by PackagingForm and the quick-create modal.
-export function PackagingBaseFields<T extends UpdatePackagingInput>({ register, errors, idPrefix = "", roleField }: Readonly<PackagingBaseFieldsProps<T>>) {
+export function PackagingBaseFields<T extends UpdatePackagingInput>({ register, errors, idPrefix = "", roleField, requireEnglish = true }: Readonly<PackagingBaseFieldsProps<T>>) {
     const { t } = useTranslation()
     const fieldProps = { register, errors, required: true }
 
     return (
         <>
             <RegisteredField {...fieldProps} name={"code" as Path<T>} id={`${idPrefix}code`} label={t("packaging.form.code")} inputProps={{ required: true }} />
-            <RegisteredField {...fieldProps} name={"displayName" as Path<T>} id={`${idPrefix}displayName`} label={t("packaging.form.displayName")} />
+            <div className="grid min-w-0 gap-x-4 md:grid-cols-2">
+                <RegisteredField {...fieldProps} name={"displayName" as Path<T>} id={`${idPrefix}displayName`} label={t("packaging.form.displayName")} inputProps={{ required: true }} />
+                <RegisteredField register={register} errors={errors} required={requireEnglish} name={"displayNameEn" as Path<T>} id={`${idPrefix}displayNameEn`} label={t("packaging.form.displayNameEn")} inputProps={{ required: requireEnglish, maxLength: 80 }} />
+            </div>
             {roleField}
             <RegisteredField
                 {...fieldProps}

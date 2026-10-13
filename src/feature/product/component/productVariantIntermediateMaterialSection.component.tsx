@@ -1,3 +1,4 @@
+import { packagingName } from "@/shared/i18n/packagingName"
 import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -55,7 +56,7 @@ function toFormValues(item: ProductVariantIntermediateMaterialResponse): Partial
 // Empaques intermedios de la variante, con grupos de opciones para que el cliente elija entre
 // alternativas. Sin cantidad propia: el motor usa ProductVariant.unitsPerIntermediatePackage.
 export function ProductVariantIntermediateMaterialSection({ productId }: Readonly<{ productId: number }>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const queryClient = useQueryClient()
     const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null)
     const [editingId, setEditingId] = useState<number | null>(null)
@@ -71,7 +72,7 @@ export function ProductVariantIntermediateMaterialSection({ productId }: Readonl
 
     const variants = (variantsQuery.data?.data ?? []).filter((variant) => variant.productId === productId)
     const presentationNameById = new Map((presentationsQuery.data?.data ?? []).map((p) => [p.id, p.displayLabel]))
-    const packagingNameById = new Map((packagingsQuery.data?.data ?? []).map((p) => [p.id, p.displayName]))
+    const packagingNameById = new Map((packagingsQuery.data?.data ?? []).map((p) => [p.id, packagingName(p, i18n.language)]))
 
     function variantLabel(variant: (typeof variants)[number]): string {
         if (variant.presentationId) return presentationNameById.get(variant.presentationId) ?? `#${variant.id}`

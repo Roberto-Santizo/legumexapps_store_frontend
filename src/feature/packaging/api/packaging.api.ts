@@ -12,17 +12,17 @@ const packagingMutationResponseSchema = apiMutationResponseSchema(responsePackag
 
 export async function getPackagingsAPI() {
     try {
-        const { data } = await api.get("/packagings")
+        const { data } = await api.get("/packagings", { params: { classification: "specific", status: "active" } })
         return packagingListResponseSchema.parse(data)
     } catch (error) {
         handleApiError(error)
     }
 }
 
-export async function getPackagingsPaginatedAPI(params: { page: number; limit?: number; search?: string }) {
+export async function getPackagingsPaginatedAPI(params: { page: number; limit?: number; search?: string; classification?: "specific" | "generic"; packagingRole?: "unit" | "intermediate" | "pallet"; status?: "active" | "inactive" | "all" }) {
     try {
         const { data } = await api.get("/packagings", {
-            params: { page: params.page, limit: params.limit, search: params.search || undefined },
+            params: { ...params, search: params.search || undefined },
         })
         return packagingPaginatedListResponseSchema.parse(data)
     } catch (error) {

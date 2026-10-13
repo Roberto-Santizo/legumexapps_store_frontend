@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { buttonClassName } from "@/shared/component/buttonClassName"
 import { SiteNavigation } from "@/shared/layout/SiteNavigation"
 import { LanguageSwitch } from "@/shared/layout/LanguageSwitch"
+import { LegumexLogo } from "@/shared/component/legumexLogo.component"
 
 type SiteMobileMenuProps = {
     isOpen: boolean
@@ -25,7 +26,7 @@ export function SiteMobileMenu({ isOpen, onClose }: Readonly<SiteMobileMenuProps
             />
             <div className="absolute inset-y-0 right-0 flex w-full max-w-xs flex-col gap-8 bg-surface p-6 shadow-panel">
                 <div className="flex items-center justify-between">
-                    <span className="font-display text-lg font-extrabold uppercase text-ink-900">Legumex</span>
+                    <LegumexLogo size="sm" />
                     <button type="button" aria-label={t("site.header.closeMenu")} onClick={onClose} className="text-ink-900">
                         <X size={22} />
                     </button>

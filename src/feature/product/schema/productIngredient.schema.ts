@@ -8,8 +8,8 @@ import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 export const createProductIngredientSchema = z.object({
     productId: z.number().int().positive(),
     ingredientId: z.number().int().positive(),
-    grams: z.number().positive(),
-    referenceNetWeightGrams: z.number().positive(),
+    grams: z.number().positive().max(9999999.999).multipleOf(0.001),
+    referenceNetWeightGrams: z.number().positive().max(99999999.99).multipleOf(0.01),
 })
 
 const updateProductIngredientSchema = createProductIngredientSchema.partial().extend({

@@ -122,13 +122,13 @@ test("modal supports loading, errors, retry and a dedicated read-only scoped que
     }
     assert.equal(retries, 1)
 })
-test("Eye action is fixed-product/admin-only and opening details keeps the list mounted", () => {
+test("Eye action is permission-gated and opening details keeps the list mounted", () => {
     const h = harness()
     const { ProductTable } = h.load("src/feature/product/component/productTable.component.tsx")
     const render = () => { h.begin(); return all(ProductTable()) }
     let table = render().find(node => node.type === "PaginatedAdminTable")
     assert.deepEqual(table.props.queryKey, ["products", "paginated"])
-    const actions = table.props.renderActions({ id: 1, displayName: "Name", isActive: false, isCustomizable: false })
+    const actions = table.props.renderActions({ id: 1, displayName: "Name", isActive: false })
     all(actions).find(node => node.type === "button").props.onClick()
     const opened = render()
     assert.ok(opened.some(node => node.type === "PaginatedAdminTable"))
@@ -136,10 +136,9 @@ test("Eye action is fixed-product/admin-only and opening details keeps the list 
     assert.ok(modal)
     modal.props.onClose()
     assert.ok(!render().some(node => node.props.productId === 1))
-    assert.ok(!all(table.props.renderActions({ isCustomizable: true })).some(node => node.type === "button"))
     const forbidden = harness({ permissions: [] })
     table = all(forbidden.load("src/feature/product/component/productTable.component.tsx").ProductTable()).find(node => node.type === "PaginatedAdminTable")
-    assert.ok(!all(table.props.renderActions({ isCustomizable: false })).some(node => node.type === "button"))
+    assert.ok(!all(table.props.renderActions({ id: 1 })).some(node => node.type === "button"))
 })
 test("details schema preserves null quantities and accepts PostgreSQL decimal strings", () => {
     const h = harness()

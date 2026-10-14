@@ -5,10 +5,8 @@ import type { UpdateProductInput } from "@/feature/product/schema/product.schema
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
-import { Select } from "@/shared/component/select.component"
 import { Checkbox } from "@/shared/component/checkbox.component"
 import { toNullableNumber } from "@/shared/form/toNullableNumber"
-import { toBoolean } from "@/shared/form/toBoolean"
 import { SubCategorySelect } from "@/feature/category/component/subCategorySelect.component"
 import { ClientSelect } from "@/feature/client/component/clientSelect.component"
 import { ImageUploadField } from "@/shared/component/imageUploadField.component"
@@ -86,23 +84,6 @@ export function ProductForm<T extends UpdateProductInput>({
                 <Checkbox id="isOrganic" label={t("product.form.isOrganic")} {...register("isOrganic" as Path<T>)} />
             </div>
             <p className="mb-5 text-sm text-ink-600">{t("product.form.isOrganicHint")}</p>
-
-            <FormField
-                label={t("product.form.isCustomizable")}
-                htmlFor="isCustomizable"
-                error={getFieldErrorMessage(t, errors.isCustomizable as FieldError | undefined)}
-            >
-                <Select
-                    id="isCustomizable"
-                    hasError={!!errors.isCustomizable}
-                    defaultValue="false"
-                    {...register("isCustomizable" as Path<T>, { setValueAs: toBoolean })}
-                >
-                    <option value="false">{t("product.form.isCustomizableFinished")}</option>
-                    <option value="true">{t("product.form.isCustomizableCustom")}</option>
-                </Select>
-            </FormField>
-            <p className="mb-5 -mt-3 text-sm text-ink-600">{t("product.form.isCustomizableHint")}</p>
 
             <FormField
                 label={t("product.form.additionalCostPerUnit")}

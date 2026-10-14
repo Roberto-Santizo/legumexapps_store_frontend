@@ -28,7 +28,6 @@ function toFormValues(product: ProductResponse): UpdateProductInput {
         clientId: product.clientId,
         displayName: product.displayName,
         isOrganic: product.isOrganic,
-        isCustomizable: product.isCustomizable,
         additionalCostPerUnit: product.additionalCostPerUnit ?? undefined,
         translations: {
             en: { displayName: englishTranslation?.displayName ?? "" },
@@ -120,13 +119,10 @@ export function EditProductPage() {
 
                     <Card>
                         <h2 className="mb-4 text-lg font-semibold text-ink-900">
-                            {productQuery.data.data.isCustomizable
-                                ? t("productRawMaterial.list.titleCustomizable")
-                                : t("productRawMaterial.list.title")}
+                            {t("productRawMaterial.list.title")}
                         </h2>
                         <ProductRawMaterialSection
                             productId={productId}
-                            isCustomizable={productQuery.data.data.isCustomizable}
                             isOrganic={productQuery.data.data.isOrganic}
                         />
                     </Card>

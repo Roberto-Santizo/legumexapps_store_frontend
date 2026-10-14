@@ -48,16 +48,12 @@ type QuoteCalculatorFormProps = {
     // pasa ninguno de los dos: sus cálculos nunca generan borradores.
     draftKey?: string
     onProductChange?: () => void
-    // Catalog-based Customize: the representative navigates to its independent wizard.
-    // Admin callers without this prop retain the established calculator contract.
+    // Cotización a la medida: el representante navega a su wizard independiente desde el paso
+    // "mode". Sin esta prop (cotizador del admin) no hay paso "mode": el wizard arranca en categoría.
     customQuoteHref?: string
 }
 
 const LIVE_PREVIEW_DEBOUNCE_MS = 500
-
-const MIX_PERCENTAGE_TOLERANCE = 0.5
-
-type QuoteMode = "finished" | "customizable"
 
 // Orden del wizard: mode -> category -> subCategory -> product -> pallets ->
 // total. "pallets" es el paso combinado palets + materiales: SKU/presentación, cantidad de palets,
@@ -130,13 +126,12 @@ export function QuoteCalculatorForm({
 }: Readonly<QuoteCalculatorFormProps>) {
     const { t, i18n } = useTranslation()
     const navigate = useNavigate()
-    const [step, setStep] = useState<QuoteWizardStep>("mode")
-    const [mode, setMode] = useState<QuoteMode>("finished")
+    const hasModeStep = !!customQuoteHref
+    const [step, setStep] = useState<QuoteWizardStep>(hasModeStep ? "mode" : "category")
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | null>(null)
     const [productSearch, setProductSearch] = useState("")
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
-    const [mixPercentages, setMixPercentages] = useState<Record<number, string>>({})
     const [selectedCountry, setSelectedCountry] = useState<DestinationCountry>("GT")
     // Lo que el cliente TOCÓ por nivel en las tarjetas de materiales -- estado local, NO un campo de
     // react-hook-form: un <select>/campo registrado re-inyectaba el valor viejo al cambiar de
@@ -174,25 +169,21 @@ export function QuoteCalculatorForm({
         defaultValues: { requestedPallets: 1 },
     })
 
-    const modeProducts = useMemo(
-        () => products.filter((product) => product.isCustomizable === (mode === "customizable")),
-        [products, mode]
-    )
     const categories = useMemo(() => {
         const byId = new Map<number, CardOption>()
-        modeProducts.forEach((product) => {
+        products.forEach((product) => {
             if (!byId.has(product.categoryId)) {
                 byId.set(product.categoryId, { value: product.categoryId, text: product.categoryName, imageUrl: product.categoryImageUrl })
             }
         })
         return [...byId.values()].sort((a, b) => a.text.localeCompare(b.text))
-    }, [modeProducts])
+    }, [products])
 
     const selectedCategory = categories.find((category) => category.value === selectedCategoryId)
 
     const categoryProducts = useMemo(
-        () => modeProducts.filter((product) => product.categoryId === selectedCategoryId),
-        [modeProducts, selectedCategoryId]
+        () => products.filter((product) => product.categoryId === selectedCategoryId),
+        [products, selectedCategoryId]
     )
     const subCategories = useMemo(() => {
         const byId = new Map<number, CardOption>()
@@ -224,7 +215,6 @@ export function QuoteCalculatorForm({
 
     const selectedProduct = subCategoryProducts.find((product) => product.id === selectedProductId)
     const variants = selectedProduct?.variants ?? []
-    const rawMaterialPool = selectedProduct?.rawMaterialPool ?? []
 
     // El menú de alternativas de cada nivel ya viene resuelto en el SKU elegido
     // (QuotableVariant.*MaterialOptionGroups). Se usa watch("productVariantId") porque importa la variante.
@@ -252,10 +242,9 @@ export function QuoteCalculatorForm({
         : []
     const selectedMaterialIdsKey = JSON.stringify(buildSelectedMaterialIds(materialGroups))
 
-    // Recálculo en vivo con debounce mientras el cliente está en el paso "pallets". No corre en modo
-    // personalizable (el preview no manda la mezcla). Ante errores simplemente no se muestra el total;
-    // el submit real sigue siendo la fuente de verdad.
-    const isLiveTotalAvailable = !!previewAPI && mode !== "customizable" && step === "pallets"
+    // Recálculo en vivo con debounce mientras el cliente está en el paso "pallets". Ante errores
+    // simplemente no se muestra el total; el submit real sigue siendo la fuente de verdad.
+    const isLiveTotalAvailable = !!previewAPI && step === "pallets"
     // draftKey se lee por ref dentro del efecto (no es dependencia): rotar la clave no debe disparar
     // un recálculo por sí solo -- el siguiente preview que igual ocurra ya viaja con la clave nueva.
     const draftKeyRef = useRef(draftKey)
@@ -304,29 +293,15 @@ export function QuoteCalculatorForm({
             label: destination.displayName,
         }))
 
-    const mixTotal = rawMaterialPool.reduce((sum, option) => sum + (Number(mixPercentages[option.rawMaterialId]) || 0), 0)
-    const isMixComplete = Math.abs(mixTotal - 100) <= MIX_PERCENTAGE_TOLERANCE
-
     const resetProductSelection = () => {
         setSelectedProductId(null)
         reset({ requestedPallets: 1 })
         setSelectedCountry("GT")
         setProductSearch("")
-        setMixPercentages({})
         setMaterialSelection({})
         setLivePreviewTotal(null)
         setIsLivePreviewLoading(false)
         setHasReachedTotal(false)
-    }
-
-    const handleModeChange = (nextMode: QuoteMode) => {
-        if (nextMode !== mode) {
-            setMode(nextMode)
-            setSelectedCategoryId(null)
-            setSelectedSubCategoryId(null)
-            resetProductSelection()
-        }
-        setStep("category")
     }
 
     const handleCategoryChange = (categoryId: number) => {
@@ -357,7 +332,6 @@ export function QuoteCalculatorForm({
         }
         setSelectedProductId(productId)
         setValue("productVariantId", (onlyVariant?.id ?? undefined) as unknown as number)
-        setMixPercentages({})
         setMaterialSelection({})
         setHasReachedTotal(false)
         setStep("pallets")
@@ -372,10 +346,6 @@ export function QuoteCalculatorForm({
 
     const handleMaterialSelect = (groupKey: string, materialId: number) => {
         setMaterialSelection((current) => ({ ...current, [groupKey]: materialId }))
-    }
-
-    const handleMixPercentageChange = (rawMaterialId: number, value: string) => {
-        setMixPercentages((current) => ({ ...current, [rawMaterialId]: value }))
     }
 
     const handleCountryChange = (country: DestinationCountry) => {
@@ -396,19 +366,11 @@ export function QuoteCalculatorForm({
         // (isPending) mientras tanto, y su propio estado vacío si el guardado llega a fallar.
         setStep("total")
         setHasReachedTotal(true)
-
-        if (mode !== "customizable") {
-            onSubmit(withMaterials)
-            return
-        }
-        const rawMaterialMix = rawMaterialPool
-            .map((option) => ({ rawMaterialId: option.rawMaterialId, percentage: Number(mixPercentages[option.rawMaterialId]) || 0 }))
-            .filter((line) => line.percentage > 0)
-        onSubmit({ ...withMaterials, rawMaterialMix })
+        onSubmit(withMaterials)
     })
 
     const crumbs: QuoteWizardCrumb[] = [
-        { key: "mode", label: t("site.quoteRequest.form.wizard.steps.mode"), enabled: true },
+        ...(hasModeStep ? [{ key: "mode" as const, label: t("site.quoteRequest.form.wizard.steps.mode"), enabled: true }] : []),
         { key: "category", label: t("site.quoteRequest.form.wizard.steps.category"), enabled: true },
         { key: "subCategory", label: t("site.quoteRequest.form.wizard.steps.subCategory"), enabled: !!selectedCategory },
         { key: "product", label: t("site.quoteRequest.form.wizard.steps.product"), enabled: !!selectedSubCategory },
@@ -459,7 +421,7 @@ export function QuoteCalculatorForm({
     )
 
     const renderProductHeader = (product: QuotableProduct) => {
-        const showRecipe = !product.isCustomizable && product.fixedRecipe.length > 0
+        const showRecipe = product.fixedRecipe.length > 0
         return (
             <div className="relative mb-6 flex flex-col gap-4 overflow-hidden rounded-2xl border border-line bg-linear-to-br from-customize-mint via-surface to-accent-coral-bg p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
                 {product.imageUrl ? (
@@ -495,66 +457,15 @@ export function QuoteCalculatorForm({
     }
 
     // El botón de calcular depende solo de lo que la cotización necesita: variante, palets, una elección
-    // vigente en CADA grupo de opciones y -- en modo personalizable -- una mezcla que sume 100%.
+    // vigente en CADA grupo de opciones.
     const canSubmit =
         !!selectedVariantId &&
         !!watchedRequestedPallets &&
-        materialGroups.every((group) => group.selectedId !== undefined) &&
-        (mode !== "customizable" || isMixComplete)
+        materialGroups.every((group) => group.selectedId !== undefined)
 
     const liveTotal = isLiveTotalAvailable ? (
         <QuoteLiveTotal total={livePreviewTotal} isLoading={isLivePreviewLoading} pallets={watchedRequestedPallets} />
     ) : null
-
-    const renderMixSection = () =>
-        mode === "customizable" ? (
-            <CatalogQuoteSection title={t("site.quoteRequest.form.mixTitle")} tone="cream">
-                <div className="mb-3 flex justify-end">
-                    <p className={`text-sm font-semibold ${isMixComplete ? "text-brand-700 dark:text-brand-500" : "text-danger"}`}>
-                        {t("site.quoteRequest.form.mixTotal", { total: mixTotal })}
-                    </p>
-                </div>
-
-                {rawMaterialPool.length === 0 ? (
-                    <p className="text-sm text-ink-600">{t("site.quoteRequest.form.mixEmpty")}</p>
-                ) : (
-                    <div className="space-y-3">
-                        {rawMaterialPool.map((option) => (
-                            <div key={option.rawMaterialId} className="flex items-center justify-between gap-3">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-sm text-ink-900">{option.displayName}</p>
-                                        <Chip tone={option.isOrganic ? "fresh" : "neutral"}>
-                                            {option.isOrganic ? t("rawMaterial.organicTag") : t("rawMaterial.conventionalTag")}
-                                        </Chip>
-                                    </div>
-                                    <p className="text-xs text-ink-600">
-                                        {t("site.quoteRequest.form.mixRange", {
-                                            min: option.minPercentage,
-                                            max: option.maxPercentage,
-                                        })}
-                                    </p>
-                                </div>
-                                <div className="flex w-24 items-center gap-1">
-                                    <Input
-                                        type="number"
-                                        step="0.1"
-                                        min={option.minPercentage}
-                                        max={option.maxPercentage}
-                                        value={mixPercentages[option.rawMaterialId] ?? ""}
-                                        onChange={(event) => handleMixPercentageChange(option.rawMaterialId, event.target.value)}
-                                    />
-                                    <span className="text-sm text-ink-600">%</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {!isMixComplete && rawMaterialPool.length > 0 && (
-                    <p className="mt-3 text-xs text-danger">{t("site.quoteRequest.form.mixIncomplete")}</p>
-                )}
-            </CatalogQuoteSection>
-        ) : null
 
     const renderDestinationSection = () =>
         showDestination ? (
@@ -605,7 +516,7 @@ export function QuoteCalculatorForm({
                 <QuoteWizardStepper crumbs={crumbs} step={step} onStepChange={setStep} />
 
                 <form onSubmit={submit}>
-                    {step === "mode" && (
+                    {step === "mode" && customQuoteHref && (
                         <div>
                             <h2 className="mb-1 font-display text-xl font-bold text-ink-900 sm:text-2xl">
                                 {t("site.quoteRequest.form.wizard.mode.title")}
@@ -626,13 +537,13 @@ export function QuoteCalculatorForm({
                                         icon: <SlidersHorizontal size={22} aria-hidden="true" />,
                                     },
                                 ]}
-                                value={mode}
+                                value="finished"
                                 onChange={(value) => {
-                                    if (value === "customizable" && customQuoteHref) {
+                                    if (value === "customizable") {
                                         navigate(customQuoteHref)
                                         return
                                     }
-                                    handleModeChange(value as QuoteMode)
+                                    setStep("category")
                                 }}
                             />
                         </div>
@@ -640,7 +551,7 @@ export function QuoteCalculatorForm({
 
                     {step === "category" && (
                         <div>
-                            <QuoteWizardBackButton onClick={() => setStep("mode")} />
+                            {hasModeStep && <QuoteWizardBackButton onClick={() => setStep("mode")} />}
                             <h2 className="mb-1 font-display text-xl font-bold text-ink-900 sm:text-2xl">
                                 {t("site.quoteRequest.form.wizard.category.title")}
                             </h2>
@@ -648,7 +559,7 @@ export function QuoteCalculatorForm({
 
                             {categories.length === 0 ? (
                                 <p className="text-sm text-ink-600">
-                                    {mode === "finished" ? t("site.quoteRequest.form.noProductsFinished") : t("site.quoteRequest.form.noProductsCustomizable")}
+                                    {t("site.quoteRequest.form.noProductsFinished")}
                                 </p>
                             ) : (
                                 <OptionCards
@@ -767,7 +678,6 @@ export function QuoteCalculatorForm({
                                 </FormField>
                             }
                             materialsSection={<QuoteMaterialGroups groups={materialGroups} onSelect={handleMaterialSelect} />}
-                            mixSection={renderMixSection()}
                             destinationSection={renderDestinationSection()}
                             liveTotal={liveTotal}
                             canSubmit={canSubmit}

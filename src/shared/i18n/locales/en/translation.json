@@ -262,15 +262,9 @@
         "modeFinishedHint": "Choose from our ready-made presentations, with a fixed recipe.",
         "modeCustomizableHint": "Build your own mix using our available packaging and logistics configurations.",
         "noProductsFinished": "There are no ready-made products available to quote yet.",
-        "noProductsCustomizable": "There are no customizable products available to quote yet.",
         "organicBadge": "100% Organic",
         "fixedRecipeTitle": "Composition",
         "fixedRecipeLine": "{{percentage}}% {{name}}",
-        "mixTitle": "Build your mix",
-        "mixTotal": "Total: {{total}}%",
-        "mixIncomplete": "The mix must total 100% before you can request a quote.",
-        "mixRange": "{{min}}% - {{max}}%",
-        "mixEmpty": "This product doesn't have any raw materials configured yet. Contact the administrator.",
         "wizard": {
           "progress": "Quote progress",
           "stepCount": "Step {{current}} of {{total}}",
@@ -920,10 +914,6 @@
       "urlSlug": "URL slug",
       "isOrganic": "Organic",
       "isOrganicHint": "If you check this box, the raw material selector below will only offer organic variants (plus water/salt/sugar or other items with no variant). Salespeople will see a \"100% Organic\" badge when they pick this product.",
-      "isCustomizable": "Recipe type",
-      "isCustomizableFinished": "Ready-made (fixed recipe)",
-      "isCustomizableCustom": "Customizable (% mix)",
-      "isCustomizableHint": "Customizable: the salesperson builds the raw material mix by percentage when requesting a quote, instead of a fixed recipe.",
       "additionalCostPerUnit": "Additional cost per unit (optional)",
       "additionalCostPerUnitHint": "For costs that aren't well defined yet. Added to the cost of each unit when quoting. Leave the field empty to remove it.",
       "translationSectionTitle": "English translation",
@@ -989,22 +979,17 @@
       "percentage": "Enter the raw material's percentage",
       "percentageTotal": "Total: {{total}}%",
       "percentageTotalIncomplete": "The percentages must total 100% before this product can be quoted.",
-      "minPercentage": "Min %",
-      "maxPercentage": "Max %",
-      "percentageRange": "% Range",
-      "addButton": "Add raw material",
-      "customizableHint": "This product is customizable: define here which raw materials the salesperson can choose and, optionally, an allowed % range for each one."
+      "addButton": "Add raw material"
     },
     "list": {
-      "title": "Raw Materials",
-      "titleCustomizable": "Allowed raw materials (% mix)"
+      "title": "Raw Materials"
     },
     "table": {
       "empty": "No raw materials registered"
     },
     "bulkImport": {
       "title": "Bulk upload Recipes from Excel",
-      "description": "Download the template, fill it in with each product's recipe (one row per raw material) and upload it. The products must already exist (step 1) and each raw material is looked up by its code. Fixed recipe: fill in only \"Porcentaje\" (percentage) and the product's rows must total 100%. Customizable recipe: leave \"Porcentaje\" empty and optionally use \"% mínimo\"/\"% máximo\" (min/max); the ranges must allow reaching 100%. The whole file is validated first: if a single row has an error, no recipe is created. This importer only CREATES recipes: a product that already has one is rejected (edit it from its screen). Identify each product using \"SKU de una variante del producto\" (SKU of a product variant). Recipes and ingredients are shared by all its variants; using different SKUs of the same product does not allow duplicate rows.",
+      "description": "Download the template, fill it in with each product's recipe (one row per raw material) and upload it. The products must already exist (step 1) and each raw material is looked up by its code. \"Porcentaje\" (percentage) is required on every row and the product's rows must total 100%. The whole file is validated first: if a single row has an error, no recipe is created. This importer only CREATES recipes: a product that already has one is rejected (edit it from its screen). Identify each product using \"SKU de una variante del producto\" (SKU of a product variant). Recipes and ingredients are shared by all its variants; using different SKUs of the same product does not allow duplicate rows.",
       "downloadTemplate": "Download template",
       "importButton": "Import file",
       "importing": "Importing...",

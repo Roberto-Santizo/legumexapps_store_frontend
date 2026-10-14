@@ -26,7 +26,7 @@ export function ProductTable() {
             emptyMessage={t("product.table.empty")}
             renderActions={(product) => (
                 <div className="flex items-center gap-4">
-                    {!product.isCustomizable && hasPermission("products:view") && <button type="button"
+                    {hasPermission("products:view") && <button type="button"
                         title={t("productDetails.view")} aria-label={t("productDetails.viewProduct", { name: product.displayName })}
                         className="flex size-10 shrink-0 items-center justify-center rounded-action text-ink-600 transition-colors hover:bg-customize-mint hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                         onClick={() => setDetailsId(product.id)}><Eye size={19} aria-hidden="true" /></button>}
@@ -52,12 +52,6 @@ export function ProductTable() {
                             ))}
                         </ul>
                     ) : <span className="text-ink-600">{t("product.table.noSku")}</span>,
-                },
-                {
-                    key: "isCustomizable",
-                    header: t("product.form.isCustomizable"),
-                    render: (product) =>
-                        t(product.isCustomizable ? "product.form.isCustomizableCustom" : "product.form.isCustomizableFinished"),
                 },
                 {
                     key: "status",

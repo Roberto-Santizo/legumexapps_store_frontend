@@ -37,17 +37,8 @@ const quotableVariantSchema = z.object({
     palletMaterialOptionGroups: z.array(quotableMaterialOptionGroupSchema),
 })
 
-const quotableRawMaterialOptionSchema = z.object({
-    rawMaterialId: z.number().int(),
-    displayName: z.string(),
-    isOrganic: z.boolean(),
-    minPercentage: z.number(),
-    maxPercentage: z.number(),
-})
-
-// Receta fija (!isCustomizable): el % lo fija el admin y el cliente nunca lo puede alterar, pero
-// sí debe VER qué está cotizando (ej. "100% Piña") -- distinto de quotableRawMaterialOptionSchema
-// (el pool editable del mix personalizable) a propósito, son conceptos diferentes.
+// El % lo fija el admin y el cliente nunca lo puede alterar, pero sí debe VER qué está
+// cotizando (ej. "100% Piña").
 const quotableFixedRawMaterialSchema = z.object({
     rawMaterialId: z.number().int(),
     displayName: z.string(),
@@ -58,7 +49,6 @@ export const quotableProductSchema = z.object({
     id: z.number().int(),
     displayName: z.string(),
     isOrganic: z.boolean(),
-    isCustomizable: z.boolean(),
     imageUrl: z.string().nullable(),
     categoryId: z.number().int(),
     categoryName: z.string(),
@@ -66,24 +56,17 @@ export const quotableProductSchema = z.object({
     subCategoryId: z.number().int(),
     subCategoryName: z.string(),
     subCategoryImageUrl: z.string().nullable(),
-    rawMaterialPool: z.array(quotableRawMaterialOptionSchema),
     fixedRecipe: z.array(quotableFixedRawMaterialSchema),
     variants: z.array(quotableVariantSchema),
 })
 
 export const quoteDestinationSchema = responseDestinationSchema
 
-const rawMaterialMixLineSchema = z.object({
-    rawMaterialId: z.number().int().positive(),
-    percentage: z.number().min(0).max(100).multipleOf(0.01),
-})
-
 export const calculateQuoteSchema = z.object({
     productVariantId: z.number().int().positive(),
     // Opcional: transporte apagado temporalmente.
     destinationId: z.number().int().positive().optional(),
     requestedPallets: z.number().int().min(1),
-    rawMaterialMix: z.array(rawMaterialMixLineSchema).optional(),
     // Por nivel, los ids de FILA elegidos (uno por grupo), no el packagingId; un grupo sin id usa su
     // default.
     selectedUnitMaterialIds: z.array(z.number().int().positive()).max(50).optional(),

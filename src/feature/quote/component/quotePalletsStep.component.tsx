@@ -17,7 +17,6 @@ type QuotePalletsStepProps = {
     requestedPallets: number | undefined
     palletsField: ReactNode
     materialsSection: ReactNode
-    mixSection: ReactNode
     destinationSection: ReactNode
     liveTotal: ReactNode
     canSubmit: boolean
@@ -26,7 +25,7 @@ type QuotePalletsStepProps = {
 }
 
 // Paso combinado palets + materiales, en dos columnas desde `lg`: a la izquierda la presentación
-// (SKU), la mezcla/destino cuando aplican y las tarjetas de materiales; a la derecha un panel fijo
+// (SKU), el destino cuando aplica y las tarjetas de materiales; a la derecha un panel fijo
 // con la cantidad de palets, lo que eso representa (cajas, unidades, peso -- derivados de
 // QuotableVariant, nunca inventados), el "Total estimado" en vivo y el submit real del form.
 export function QuotePalletsStep({
@@ -36,7 +35,6 @@ export function QuotePalletsStep({
     requestedPallets,
     palletsField,
     materialsSection,
-    mixSection,
     destinationSection,
     liveTotal,
     canSubmit,
@@ -57,7 +55,6 @@ export function QuotePalletsStep({
             <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
                 <div className="min-w-0 space-y-5">
                     {presentationSection}
-                    {mixSection}
                     {destinationSection}
                     {materialsSection}
                 </div>

@@ -3,7 +3,6 @@ import { getRawMaterialsPaginatedAPI } from "@/feature/rawMaterial/api/rawMateri
 import type { RawMaterialResponse } from "@/feature/rawMaterial/schema/rawMaterial.schema"
 import { PaginatedAdminTable } from "@/shared/component/paginatedAdminTable.component"
 import { EditLink } from "@/shared/component/editLink.component"
-import { Chip } from "@/shared/component/chip.component"
 import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
 
@@ -29,15 +28,6 @@ export function RawMaterialTable() {
                     key: "costPerUnit",
                     header: t("rawMaterial.form.costPerUnit"),
                     render: (rawMaterial) => (rawMaterial.costPerUnit != null ? formatCurrency(rawMaterial.costPerUnit) : "—"),
-                },
-                {
-                    key: "isOrganic",
-                    header: t("rawMaterial.form.isOrganic"),
-                    render: (rawMaterial) => (
-                        <Chip tone={rawMaterial.isOrganic ? "fresh" : "neutral"}>
-                            {rawMaterial.isOrganic ? t("rawMaterial.organicTag") : t("rawMaterial.conventionalTag")}
-                        </Chip>
-                    ),
                 },
                 {
                     key: "updatedAt",

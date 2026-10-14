@@ -159,7 +159,7 @@ test("all seven steps and exceptional states render with translated, accessible 
     const state = { categoryId: 1, subCategoryId: 2, ingredientType: "fruit", isOrganic: false, percentages: { 1: "50", 2: "50" }, configurationId: 3, choices: {}, pallets: "2" }
     const fixed = [{ id: 1, packagingId: 1, displayName: "Bolsa del producto", isDefault: true }]
     const configuration = { id: 3, fingerprint: "fixture", presentationId: 1, displayLabel: "48 OZ", netWeightGrams: 1360, bagsPerBox: 6, boxesPerPallet: 117, unitsPerIntermediatePackage: 3, packaging: { unit: { fixed, groups: [] }, intermediate: { fixed: [{ ...fixed[0], displayName: "Empaque intermedio" }], groups: [] }, pallet: { fixed: [], groups: [{ key: "box", group: "Caja", options: [{ ...fixed[0], displayName: "Caja estándar" }, { ...fixed[0], id: 2, isDefault: false, displayName: "Caja alternativa" }] }] } } }
-    const query = { data: { categories: [{ id: 1, displayName: "Congelado", subCategories: [{ id: 2, displayName: "Mezclas de frutas", rawMaterials: materials.map(row => ({ ...row, ingredientType: "fruit", isOrganic: false })), configurations: [configuration] }] }] } }
+    const query = { data: { categories: [{ id: 1, displayName: "Congelado", subCategories: [{ id: 2, displayName: "Mezclas de frutas", rawMaterials: materials.map(row => ({ ...row, ingredientType: "fruit" })), configurations: [configuration] }] }] } }
     const review = { input: {}, calculation: { productDisplayName: "Mezcla personalizada", variantLabel: "6 × 48 OZ", bagsPerBox: 6, boxesPerPallet: 117, requestedPallets: 2, totalUnits: 1404, totalCost: 12345.67, configuration: { snapshot: {isOrganic:false, ingredientType:"fruit", quantity:{totalWeightGrams:"1909440"}}, rawMaterialMix: [{ rawMaterialId: 1, percentage: 50 }, { rawMaterialId: 2, percentage: 50 }], pallet: { boxesPerPallet: 117 } }, breakdown: { rawMaterials: materials, unitMaterials: fixed, intermediateMaterials: configuration.packaging.intermediate.fixed, palletMaterials: [{ ...fixed[0], displayName: "Caja estándar" }] } } }
     const screens = []
     for (const language of ["es", "en"]) {
@@ -168,7 +168,7 @@ test("all seven steps and exceptional states render with translated, accessible 
             const html = renderToStaticMarkup(React.createElement(CatalogQuoteWizard, { onConfirmed: () => {} }))
             assert.ok(html.includes('aria-current="step"')); assert.equal((html.match(/class="relative flex min-w-24/g) ?? []).length,7); assert.ok(!html.includes('>Review<')); assert.ok(!html.includes('>Revisi?n<'));
             assert.ok(html.includes(resources[language].catalogQuote.steps[step].replace(/&/g, "&amp;")), `${language} ${step} heading`)
-            if (step === "profile") assert.match(html, /disabled=""/)
+            if (step === "profile") assert.doesNotMatch(html, /disabled=""/)
             if (step === "result") { assert.match(html, /12,345\.67/); assert.ok(html.includes(materials[0].displayName)); assert.ok(html.includes("Empaque intermedio")); assert.ok(!html.includes('>Continuar<')); assert.ok(!html.includes('>Continue<')); assert.ok(!html.includes('>Confirm<')); }
             screens.push({ name: `${language}-${step}`, html })
         }
@@ -178,7 +178,7 @@ test("all seven steps and exceptional states render with translated, accessible 
             assert.match(html, /disabled=""/)
             screens.push({ name: `${language}-mix-${name}`, html })
         }
-        const largeMaterials = [...materials, { rawMaterialId: 3, displayName: "Mango en cubos" }, { rawMaterialId: 4, displayName: "Piña en trozos" }, ...Array.from({ length: 116 }, (_, index) => ({ rawMaterialId: index + 5, displayName: `Materia prima de prueba ${index + 5}` }))].map(row => ({ ...row, ingredientType: "fruit", isOrganic: false }))
+        const largeMaterials = [...materials, { rawMaterialId: 3, displayName: "Mango en cubos" }, { rawMaterialId: 4, displayName: "Piña en trozos" }, ...Array.from({ length: 116 }, (_, index) => ({ rawMaterialId: index + 5, displayName: `Materia prima de prueba ${index + 5}` }))].map(row => ({ ...row, ingredientType: "fruit" }))
         const largeQuery = { data: { categories: [{ ...query.data.categories[0], subCategories: [{ ...query.data.categories[0].subCategories[0], rawMaterials: largeMaterials }] }] } }
         for (const [name, percentages, search] of [["empty-search", {}, ""], ["search", { 2: "25" }, "arandano"], ["multiple", { 1: "30", 2: "25", 3: "20" }, ""], ["exact", { 1: "50", 2: "25", 3: "25" }, ""], ["no-results", { 1: "50" }, "dragon fruit"]]) {
             const { CatalogQuoteWizard } = loadComponents({ language, slots: [{ ...state, percentages }, "mix", null, false, "", null, 0, search, 8], query: largeQuery })(directory + "catalogQuoteWizard.component.tsx")

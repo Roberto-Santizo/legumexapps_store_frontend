@@ -710,8 +710,6 @@
       "displayName": "Name",
       "ingredientType": "Raw material type",
       "costPerUnit": "Cost per pound",
-      "isOrganic": "Is the organic variant",
-      "isOrganicHint": "Check this box if this specific row is the organic version (with its own cost) — not whether the raw material \"can be\" organic. Conventional and organic are two separate raw materials in the catalog, e.g. \"Pineapple\" and \"Organic Pineapple\".",
       "ingredientTypeOptions": {
         "fruit": "Fruit",
         "vegetable": "Vegetable",
@@ -722,8 +720,6 @@
       "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name.",
       "displayNameEn": "Name (English)"
     },
-    "organicTag": "Organic",
-    "conventionalTag": "Conventional",
     "list": {
       "title": "Raw Materials",
       "createLink": "Create raw material"
@@ -913,7 +909,7 @@
       "displayName": "Product name",
       "urlSlug": "URL slug",
       "isOrganic": "Organic",
-      "isOrganicHint": "If you check this box, the raw material selector below will only offer organic variants (plus water/salt/sugar or other items with no variant). Salespeople will see a \"100% Organic\" badge when they pick this product.",
+      "isOrganicHint": "Check this box if the product is organic. Salespeople will see a \"100% Organic\" badge when they pick this product.",
       "additionalCostPerUnit": "Additional cost per unit (optional)",
       "additionalCostPerUnitHint": "For costs that aren't well defined yet. Added to the cost of each unit when quoting. Leave the field empty to remove it.",
       "translationSectionTitle": "English translation",

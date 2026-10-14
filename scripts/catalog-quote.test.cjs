@@ -378,17 +378,17 @@ test("wizard displays loading and failed discovery states",()=>{
     harness.query.isLoading=false;harness.query.isError=true;assert.equal(harness.node("p",props=>props.role==="alert").props.children,"common.loadError")
 })
 
-test("mix search receives only compatible materials and wizard navigation preserves percentages",()=>{
+test("mix search receives only materials of the chosen type and wizard navigation preserves percentages",()=>{
     const harness=wizardHarness(async()=>({}))
     harness.query.data.categories[0].subCategories[0].rawMaterials.push(
-        {rawMaterialId:2,displayName:"Broccoli",ingredientType:"vegetable",isOrganic:false},
-        {rawMaterialId:3,displayName:"Organic mango",ingredientType:"fruit",isOrganic:true}
+        {rawMaterialId:2,displayName:"Broccoli",ingredientType:"vegetable"},
+        {rawMaterialId:3,displayName:"Organic mango",ingredientType:"fruit"}
     )
     harness.node("OptionCards").props.onChange(1)
     harness.node("OptionCards").props.onChange(3)
     harness.node("OptionCards",props=>props.options.some(row=>row.value==="fruit")).props.onChange("fruit")
     harness.node("Navigation").props.onNext()
-    assert.deepEqual(harness.node("MixBuilder").props.materials.map(row=>row.rawMaterialId),[1])
+    assert.deepEqual(harness.node("MixBuilder").props.materials.map(row=>row.rawMaterialId),[1,3])
     harness.node("MixBuilder").props.onChange(1,"33.33")
     harness.node("Navigation").props.onBack()
     harness.node("Navigation").props.onNext()

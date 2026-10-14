@@ -57,7 +57,7 @@ function Recipe({ product }: Readonly<{ product: ProductDetails }>) {
                         <div className="h-full rounded-full bg-brand-500" style={{ width: `${progress}%` }} />
                     </div>}
                     {material?.costUnit && <p className="mt-2 text-xs text-ink-600">{t("productDetails.costUnit")}: {material.costUnit.displayName} ({material.costUnit.unitCode})</p>}
-                    {material && <p className="mt-2 text-xs text-ink-600">{t(`productDetails.materialTypes.${["fruit", "vegetable", "pulp", "other"].includes(material.ingredientType) ? material.ingredientType : "other"}`)} · {t(material.isOrganic ? "productDetails.organic" : "productDetails.conventional")}</p>}
+                    {material && <p className="mt-2 text-xs text-ink-600">{t(`productDetails.materialTypes.${["fruit", "vegetable", "pulp", "other"].includes(material.ingredientType) ? material.ingredientType : "other"}`)}</p>}
                     <MaterialCost cost={material?.costPerUnit} unit={material?.costUnit?.displayName} />
                     <Activity associationActive={row.isActive} materialActive={material?.isActive} />
                 </li>

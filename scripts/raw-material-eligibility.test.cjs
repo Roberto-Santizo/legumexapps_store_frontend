@@ -22,29 +22,31 @@ function schemas() {
         throw new Error(`Unexpected schema dependency: ${name}`)
     })
 }
-test("raw-material inputs/responses retire eligibility while preserving cost and organic validation", () => {
+test("raw-material inputs/responses retire eligibility and organic classification while preserving cost", () => {
     const contract = schemas()
-    const input = { code: "SYN-001", displayName: "Raw A", ingredientType: "fruit", isOrganic: false, costPerUnit: 1.2345 }
+    const input = { code: "SYN-001", displayName: "Raw A", ingredientType: "fruit", costPerUnit: 1.2345 }
     for (const name of ["createRawMaterialSchema", "updateRawMaterialSchema"]) {
         for (const legacy of [true, false, undefined]) {
-            const parsed = contract[name].parse({ ...input, isMixable: legacy })
+            const parsed = contract[name].parse({ ...input, isMixable: legacy, isOrganic: legacy })
             assert.equal(parsed.costPerUnit, 1.2345)
-            assert.equal(parsed.isOrganic, false)
+            assert.equal(Object.hasOwn(parsed, "isOrganic"), false)
             assert.equal(Object.hasOwn(parsed, "isMixable"), false)
         }
         assert.equal(contract[name].safeParse({ ...input, costPerUnit: -1 }).success, false)
     }
     const response = { ...input, id: 1, isActive: true, createdAt: "2026-10-14", updatedAt: "2026-10-14", urlSlug: "raw-a", costUnitId: 1, translations: [] }
-    for (const value of [response, { ...response, isMixable: false }]) {
-        assert.equal(Object.hasOwn(contract.responseRawMaterialSchema.parse(value), "isMixable"), false)
+    for (const value of [response, { ...response, isMixable: false, isOrganic: true }]) {
+        const parsed = contract.responseRawMaterialSchema.parse(value)
+        assert.equal(Object.hasOwn(parsed, "isMixable"), false)
+        assert.equal(Object.hasOwn(parsed, "isOrganic"), false)
     }
 })
 
-function selector(onlyOrganicCompatible) {
+function selector() {
     const records = [
-        { id: 1, displayName: "Raw A", ingredientType: "fruit", isOrganic: false, isMixable: false },
-        { id: 2, displayName: "Raw B", ingredientType: "fruit", isOrganic: true },
-        { id: 3, displayName: "Raw C", ingredientType: "other", isOrganic: false },
+        { id: 1, displayName: "Raw A", ingredientType: "fruit", isMixable: false },
+        { id: 2, displayName: "Raw B", ingredientType: "fruit" },
+        { id: 3, displayName: "Raw C", ingredientType: "other" },
     ]
     const rawApi = () => { throw new Error("Network calls forbidden") }
     let observed
@@ -57,18 +59,12 @@ function selector(onlyOrganicCompatible) {
         if (name === "@/feature/rawMaterial/component/createRawMaterialModal.component") return { CreateRawMaterialModal: () => null }
         throw new Error(`Unexpected selector dependency: ${name}`)
     })
-    const html = renderToStaticMarkup(React.createElement(component.RawMaterialSelect, { onlyOrganicCompatible }))
+    const html = renderToStaticMarkup(React.createElement(component.RawMaterialSelect, {}))
     assert.equal(observed.queryFn, rawApi)
     assert.equal(JSON.stringify(observed.queryKey), '["rawMaterials"]')
     return html
 }
-test("raw selector offers historical false and absent flags using only the raw-material API", () => {
-    const html = selector(false)
-    for (const name of ["Raw A", "Raw B", "Raw C"]) assert.ok(html.includes(name))
-})
-test("raw selector preserves organic compatibility without using the retired flag", () => {
-    const html = selector(true)
-    assert.ok(!html.includes("Raw A"))
-    assert.ok(html.includes("Raw B"))
-    assert.ok(html.includes("Raw C"))
+test("raw selector offers every raw material by name only, using only the raw-material API", () => {
+    const html = selector()
+    for (const name of ["Raw A", "Raw B", "Raw C"]) assert.ok(html.includes(`>${name}</option>`))
 })

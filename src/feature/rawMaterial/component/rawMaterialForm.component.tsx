@@ -5,7 +5,6 @@ import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { FormField } from "@/shared/component/formField.component"
 import { RegisteredField } from "@/shared/component/registeredField.component"
 import { Select } from "@/shared/component/select.component"
-import { Checkbox } from "@/shared/component/checkbox.component"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 import { TranslationSection } from "@/shared/component/translationSection.component"
 
@@ -57,11 +56,6 @@ export function RawMaterialForm<T extends UpdateRawMaterialInput>({
                 inputProps={{ type: "number", step: "0.0001" }}
                 registerOptions={{ setValueAs: toOptionalNumber }}
             />
-
-            <div className="mb-5 flex gap-6">
-                <Checkbox id="isOrganic" label={t("rawMaterial.form.isOrganic")} {...register("isOrganic" as Path<T>)} />
-            </div>
-            <p className="mb-5 -mt-3 text-sm text-ink-600">{t("rawMaterial.form.isOrganicHint")}</p>
 
             <TranslationSection
                 register={register}

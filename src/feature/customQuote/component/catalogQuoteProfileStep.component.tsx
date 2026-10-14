@@ -1,13 +1,11 @@
 import { useTranslation } from "react-i18next"
 import { Leaf } from "lucide-react"
-import type { CatalogDiscovery } from "../schema/catalogQuote.schema"
 import { CatalogQuoteSection, CatalogQuoteSelectionCards, CatalogQuoteNavigation } from "./catalogQuoteUi.component"
 
 type Props = {
     types: string[];
     effectiveType: string;
     isOrganic: boolean;
-    subCategory?: CatalogDiscovery["categories"][number]["subCategories"][number];
     hasMaterials: boolean;
     previous?: () => void;
     onNext: () => void;
@@ -15,7 +13,7 @@ type Props = {
     onOrganicChange: (value: boolean) => void;
 }
 
-export function CatalogQuoteProfileStep({ types, effectiveType, isOrganic, subCategory, hasMaterials, previous, onNext, onTypeChange, onOrganicChange }: Readonly<Props>) {
+export function CatalogQuoteProfileStep({ types, effectiveType, isOrganic, hasMaterials, previous, onNext, onTypeChange, onOrganicChange }: Readonly<Props>) {
     const { t } = useTranslation()
     return <>
             <div className="space-y-6">
@@ -33,7 +31,6 @@ export function CatalogQuoteProfileStep({ types, effectiveType, isOrganic, subCa
                             value: organic ? "organic" : "conventional",
                             text: t(organic ? "catalogQuote.organic" : "catalogQuote.conventional"),
                             icon: <Leaf size={22} aria-hidden="true" />,
-                            disabled: !!effectiveType && !subCategory?.rawMaterials.some(row => row.ingredientType === effectiveType && row.isOrganic === organic),
                         }))}
                         onChange={value => onOrganicChange(value === "organic")}
                     />

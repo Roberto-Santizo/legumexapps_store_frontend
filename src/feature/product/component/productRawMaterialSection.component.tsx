@@ -43,13 +43,9 @@ const RECIPE_PERCENTAGE_TOLERANCE = 0.5
 
 type ProductRawMaterialSectionProps = {
     productId: number
-    // Si el producto está marcado como orgánico (Product.isOrganic), el selector solo debe
-    // ofrecer variantes orgánicas o insumos tipo "other" (agua, sal, azúcar...) -- ver
-    // rawMaterialSelect.component.tsx (onlyOrganicCompatible).
-    isOrganic: boolean
 }
 
-export function ProductRawMaterialSection({ productId, isOrganic }: Readonly<ProductRawMaterialSectionProps>) {
+export function ProductRawMaterialSection({ productId }: Readonly<ProductRawMaterialSectionProps>) {
     const { t } = useTranslation()
     const queryClient = useQueryClient()
     const [editingId, setEditingId] = useState<number | null>(null)
@@ -205,7 +201,6 @@ export function ProductRawMaterialSection({ productId, isOrganic }: Readonly<Pro
                             <RawMaterialSelect
                                 inputId="rawMaterialId"
                                 hasError={!!errors.rawMaterialId}
-                                onlyOrganicCompatible={isOrganic}
                                 value={field.value}
                                 onChange={field.onChange}
                             />

@@ -23,7 +23,6 @@ function toFormValues(rawMaterial: RawMaterialResponse): Partial<UpdateRawMateri
         code: rawMaterial.code,
         displayName: rawMaterial.displayName,
         ingredientType: rawMaterial.ingredientType,
-        isOrganic: rawMaterial.isOrganic,
         costPerUnit: rawMaterial.costPerUnit ?? undefined,
         translations: {
             en: { displayName: englishTranslation?.displayName ?? "" },

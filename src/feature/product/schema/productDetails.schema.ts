@@ -12,7 +12,7 @@ export const productDetailsSchema = status.extend({
     displayName: z.string(), isOrganic: z.boolean(), imageUrl: z.string().nullable(), additionalCostPerUnit: number.nullable(),
     client: z.object({ id: z.number().int(), name: z.string(), isActive: z.boolean() }).nullable(),
     parentSubCategory: reference.extend({ parentCategory: reference.nullable() }).nullable(),
-    productRawMaterials: z.array(status.extend({ percentage: number.nullable(), usedRawMaterial: material.extend({ isOrganic: z.boolean(), ingredientType: z.string() }).nullable() })),
+    productRawMaterials: z.array(status.extend({ percentage: number.nullable(), usedRawMaterial: material.extend({ ingredientType: z.string() }).nullable() })),
     productIngredients: z.array(status.extend({ grams: number, referenceNetWeightGrams: number, usedIngredient: material.nullable() })),
     productVariants: z.array(status.extend({
         skuCode: z.string(), boxesPerPallet: number.nullable(), bagsPerBox: number.nullable(), unitsPerIntermediatePackage: number.nullable(),

@@ -35,7 +35,7 @@ export function resolveCatalogSelection(catalog: CatalogDiscovery | undefined, s
     const configuration = subCategory?.configurations.find(row => row.id === state.configurationId)
     const types = [...new Set(subCategory?.rawMaterials.map(row => row.ingredientType) ?? [])]
     const effectiveType = types.length === 1 ? types[0] : state.ingredientType
-    const materials = subCategory?.rawMaterials.filter(row => row.ingredientType === effectiveType && row.isOrganic === state.isOrganic) ?? []
+    const materials = subCategory?.rawMaterials.filter(row => row.ingredientType === effectiveType) ?? []
     const groups = catalogMaterialGroups(configuration, state.choices)
     const parse = catalogInputSchema.safeParse({
         categoryId: state.categoryId, subCategoryId: state.subCategoryId, configurationId: state.configurationId,

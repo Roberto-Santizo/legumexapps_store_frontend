@@ -7,8 +7,8 @@ const fixedProduct = {
     client: { id: 1, name: "Cliente de prueba", isActive: true },
     parentSubCategory: { id: 2, displayName: "Subcategoría registrada", parentCategory: { id: 3, displayName: "Categoría registrada" } },
     productRawMaterials: [
-        { id: 1, isActive: true, percentage: 60, usedRawMaterial: { ...material(1, "Materia prima con nombre completo y características registradas", "TEST-MP-" + "A".repeat(50)), isOrganic: true, ingredientType: "fruit" } },
-        { id: 2, isActive: true, percentage: 40, usedRawMaterial: { ...material(2, "Segunda materia prima", "TEST-MP-2"), isOrganic: true, ingredientType: "fruit" } },
+        { id: 1, isActive: true, percentage: 60, usedRawMaterial: { ...material(1, "Materia prima con nombre completo y características registradas", "TEST-MP-" + "A".repeat(50)), ingredientType: "fruit" } },
+        { id: 2, isActive: true, percentage: 40, usedRawMaterial: { ...material(2, "Segunda materia prima", "TEST-MP-2"), ingredientType: "fruit" } },
     ],
     productIngredients: [{ id: 3, isActive: true, grams: 12.5, referenceNetWeightGrams: 1000, usedIngredient: material(3, "Ingrediente agregado", "TEST-ING-3") }],
     productVariants: [

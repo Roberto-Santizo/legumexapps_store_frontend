@@ -123,7 +123,6 @@ export function EditProductPage() {
                         </h2>
                         <ProductRawMaterialSection
                             productId={productId}
-                            isOrganic={productQuery.data.data.isOrganic}
                         />
                     </Card>
 

@@ -710,8 +710,6 @@
       "displayName": "Nombre",
       "ingredientType": "Tipo de materia prima",
       "costPerUnit": "Costo por libra",
-      "isOrganic": "Es la variante orgánica",
-      "isOrganicHint": "Marca esta casilla si esta fila es específicamente la versión orgánica (con su propio costo) — no si la materia prima \"admite\" ser orgánica. Convencional y orgánica son dos materias primas separadas en el catálogo, ej. \"Piña\" y \"Piña Orgánica\".",
       "ingredientTypeOptions": {
         "fruit": "Fruta",
         "vegetable": "Vegetal",
@@ -722,8 +720,6 @@
       "translationSectionHint": "Opcional. Si se deja vacío, el sitio en inglés muestra el nombre en español.",
       "displayNameEn": "Nombre (inglés)"
     },
-    "organicTag": "Orgánico",
-    "conventionalTag": "Convencional",
     "list": {
       "title": "Materias Primas",
       "createLink": "Crear materia prima"
@@ -913,7 +909,7 @@
       "displayName": "Nombre del producto",
       "urlSlug": "Slug de URL",
       "isOrganic": "Orgánico",
-      "isOrganicHint": "Si marcas esta casilla, el selector de materias primas de abajo solo va a ofrecer variantes orgánicas (y agua/sal/azúcar u otros insumos sin variante). El representante verá una insignia \"100% Orgánico\" al elegir este producto.",
+      "isOrganicHint": "Marca esta casilla si el producto es orgánico. El representante verá una insignia \"100% Orgánico\" al elegir este producto.",
       "additionalCostPerUnit": "Costo adicional por unidad (opcional)",
       "additionalCostPerUnitHint": "Para costos que todavía no están bien definidos. Se suma al costo de cada unidad al cotizar. Deja el campo vacío para quitarlo.",
       "translationSectionTitle": "Traducción al inglés",

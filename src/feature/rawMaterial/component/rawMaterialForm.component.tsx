@@ -60,7 +60,6 @@ export function RawMaterialForm<T extends UpdateRawMaterialInput>({
 
             <div className="mb-5 flex gap-6">
                 <Checkbox id="isOrganic" label={t("rawMaterial.form.isOrganic")} {...register("isOrganic" as Path<T>)} />
-                <Checkbox id="isMixable" label={t("rawMaterial.form.isMixable")} {...register("isMixable" as Path<T>)} />
             </div>
             <p className="mb-5 -mt-3 text-sm text-ink-600">{t("rawMaterial.form.isOrganicHint")}</p>
 

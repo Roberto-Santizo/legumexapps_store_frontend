@@ -13,7 +13,6 @@ export const createRawMaterialSchema = z.object({
     displayName: z.string().trim().min(1).max(120),
     ingredientType: ingredientTypeEnum,
     isOrganic: z.boolean().optional(),
-    isMixable: z.boolean().optional(),
     costPerUnit: z.number().nonnegative(),
     translations: z.object({ en: rawMaterialTranslationInputSchema.optional() }).optional(),
 })
@@ -29,7 +28,6 @@ export const responseRawMaterialSchema = baseCatalogSchema.extend({
     urlSlug: z.string(),
     ingredientType: ingredientTypeEnum,
     isOrganic: z.boolean(),
-    isMixable: z.boolean(),
     costPerUnit: z.coerce.number().nullable(),
     costUnitId: z.number().int().nullable(),
     translations: z.array(z.object({

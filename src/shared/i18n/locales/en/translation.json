@@ -718,7 +718,6 @@
       "costPerUnit": "Cost per pound",
       "isOrganic": "Is the organic variant",
       "isOrganicHint": "Check this box if this specific row is the organic version (with its own cost) — not whether the raw material \"can be\" organic. Conventional and organic are two separate raw materials in the catalog, e.g. \"Pineapple\" and \"Organic Pineapple\".",
-      "isMixable": "Mixable",
       "ingredientTypeOptions": {
         "fruit": "Fruit",
         "vegetable": "Vegetable",
@@ -1005,7 +1004,7 @@
     },
     "bulkImport": {
       "title": "Bulk upload Recipes from Excel",
-      "description": "Download the template, fill it in with each product's recipe (one row per raw material) and upload it. The products must already exist (step 1) and each raw material is looked up by its code. Fixed recipe: fill in only \"Porcentaje\" (percentage) and the product's rows must total 100%. Customizable recipe: leave \"Porcentaje\" empty and optionally use \"% mínimo\"/\"% máximo\" (min/max); the raw materials must be mixable and the ranges must allow reaching 100%. The whole file is validated first: if a single row has an error, no recipe is created. This importer only CREATES recipes: a product that already has one is rejected (edit it from its screen). Identify each product using \"SKU de una variante del producto\" (SKU of a product variant). Recipes and ingredients are shared by all its variants; using different SKUs of the same product does not allow duplicate rows.",
+      "description": "Download the template, fill it in with each product's recipe (one row per raw material) and upload it. The products must already exist (step 1) and each raw material is looked up by its code. Fixed recipe: fill in only \"Porcentaje\" (percentage) and the product's rows must total 100%. Customizable recipe: leave \"Porcentaje\" empty and optionally use \"% mínimo\"/\"% máximo\" (min/max); the ranges must allow reaching 100%. The whole file is validated first: if a single row has an error, no recipe is created. This importer only CREATES recipes: a product that already has one is rejected (edit it from its screen). Identify each product using \"SKU de una variante del producto\" (SKU of a product variant). Recipes and ingredients are shared by all its variants; using different SKUs of the same product does not allow duplicate rows.",
       "downloadTemplate": "Download template",
       "importButton": "Import file",
       "importing": "Importing...",

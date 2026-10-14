@@ -24,7 +24,6 @@ function toFormValues(rawMaterial: RawMaterialResponse): Partial<UpdateRawMateri
         displayName: rawMaterial.displayName,
         ingredientType: rawMaterial.ingredientType,
         isOrganic: rawMaterial.isOrganic,
-        isMixable: rawMaterial.isMixable,
         costPerUnit: rawMaterial.costPerUnit ?? undefined,
         translations: {
             en: { displayName: englishTranslation?.displayName ?? "" },

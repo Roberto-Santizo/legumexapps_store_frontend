@@ -718,7 +718,6 @@
       "costPerUnit": "Costo por libra",
       "isOrganic": "Es la variante orgánica",
       "isOrganicHint": "Marca esta casilla si esta fila es específicamente la versión orgánica (con su propio costo) — no si la materia prima \"admite\" ser orgánica. Convencional y orgánica son dos materias primas separadas en el catálogo, ej. \"Piña\" y \"Piña Orgánica\".",
-      "isMixable": "Se puede mezclar",
       "ingredientTypeOptions": {
         "fruit": "Fruta",
         "vegetable": "Vegetal",
@@ -1005,7 +1004,7 @@
     },
     "bulkImport": {
       "title": "Carga masiva de Recetas desde Excel",
-      "description": "Descarga la plantilla, llénala con la receta de cada producto (una fila por materia prima) y súbela. Los productos ya deben existir (paso 1) y cada materia prima se busca por su código. Receta fija: llena solo \"Porcentaje\" y las filas del producto deben sumar 100%. Receta personalizable: deja vacío \"Porcentaje\" y usa, si quieres, \"% mínimo\"/\"% máximo\"; las materias primas deben ser mezclables y los rangos deben permitir llegar a 100%. El archivo se valida completo primero: si una sola fila tiene un error, no se crea ninguna receta. Solo CREA recetas: un producto que ya tiene receta se rechaza (edítala desde su pantalla). Los productos se identifican mediante «SKU de una variante del producto», no mediante un código de producto. La receta y los ingredientes se comparten entre todas sus variantes; usar distintos SKUs del mismo producto no permite duplicar filas.",
+      "description": "Descarga la plantilla, llénala con la receta de cada producto (una fila por materia prima) y súbela. Los productos ya deben existir (paso 1) y cada materia prima se busca por su código. Receta fija: llena solo \"Porcentaje\" y las filas del producto deben sumar 100%. Receta personalizable: deja vacío \"Porcentaje\" y usa, si quieres, \"% mínimo\"/\"% máximo\"; los rangos deben permitir llegar a 100%. El archivo se valida completo primero: si una sola fila tiene un error, no se crea ninguna receta. Solo CREA recetas: un producto que ya tiene receta se rechaza (edítala desde su pantalla). Los productos se identifican mediante «SKU de una variante del producto», no mediante un código de producto. La receta y los ingredientes se comparten entre todas sus variantes; usar distintos SKUs del mismo producto no permite duplicar filas.",
       "downloadTemplate": "Descargar plantilla",
       "importButton": "Importar archivo",
       "importing": "Importando...",

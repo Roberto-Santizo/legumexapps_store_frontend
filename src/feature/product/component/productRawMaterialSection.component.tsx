@@ -234,7 +234,6 @@ export function ProductRawMaterialSection({ productId, isCustomizable, isOrganic
                             <RawMaterialSelect
                                 inputId="rawMaterialId"
                                 hasError={!!errors.rawMaterialId}
-                                onlyMixable={isCustomizable}
                                 onlyOrganicCompatible={isOrganic}
                                 value={field.value}
                                 onChange={field.onChange}

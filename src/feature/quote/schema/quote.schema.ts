@@ -208,7 +208,7 @@ export const quoteLineSchema = z.object({
     totalCost: z.coerce.number(),
     breakdown: z.object({
         order: z.object({ id: z.string().uuid(), clientName: z.string() }).optional(),
-        production: z.object({ productId: z.number().int().optional(), skuCode: z.string().optional(), kind: z.enum(["fixed", "customizable"]), boxesPerPallet: z.number(), bagsPerBox: z.number(), netWeightGrams: z.number().nullable() }).optional(),
+        production: z.object({ productId: z.number().int().optional(), skuCode: z.string().optional(), kind: z.enum(["fixed", "customizable"]).optional(), boxesPerPallet: z.number(), bagsPerBox: z.number(), netWeightGrams: z.number().nullable() }).optional(),
         rawMaterials: z.array(rawMaterialLineSchema),
         // Opcional: no existe en cotizaciones guardadas antes de este campo.
         ingredients: z.array(ingredientLineSchema).optional(),

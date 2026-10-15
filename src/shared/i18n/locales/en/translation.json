@@ -874,7 +874,8 @@
   "presentation": {
     "form": {
       "displayLabel": "Name",
-      "netWeightGrams": "Net weight (g)"
+      "netWeightGrams": "Net weight of ONE unit (g)",
+      "netWeightGramsHint": "Enter the weight of a single unit (bag, bottle...), not the full name. Example: in \"5x16oz\" the unit is the 16 oz bag, so enter 453.59 g, not 5 × 16 oz (2,267.96 g). Boxes and units per box are set on each SKU."
     },
     "list": {
       "title": "Presentations",

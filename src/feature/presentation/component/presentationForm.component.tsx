@@ -37,10 +37,13 @@ export function PresentationForm<T extends UpdatePresentationInput>({
                 <Input
                     id="netWeightGrams"
                     type="number"
-                    step="0.01"
+                    step="any"
+                    min="0"
+                    inputMode="decimal"
                     hasError={!!errors.netWeightGrams}
                     {...register("netWeightGrams" as Path<T>, { setValueAs: toOptionalNumber })}
                 />
+                <p className="mt-1.5 text-sm text-ink-600">{t("presentation.form.netWeightGramsHint")}</p>
             </FormField>
         </div>
     )

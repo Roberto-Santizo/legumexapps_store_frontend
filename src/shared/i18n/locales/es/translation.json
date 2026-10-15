@@ -874,7 +874,8 @@
   "presentation": {
     "form": {
       "displayLabel": "Nombre",
-      "netWeightGrams": "Peso neto (g)"
+      "netWeightGrams": "Peso neto de UNA unidad (g)",
+      "netWeightGramsHint": "Escribe el peso de una sola unidad (bolsa, botella...), no el del nombre completo. Ejemplo: en \"5x16oz\" la unidad es la bolsa de 16 oz, así que va 453.59 g, no 5 × 16 oz (2,267.96 g). Las cajas y unidades por caja se definen en cada SKU."
     },
     "list": {
       "title": "Presentaciones",

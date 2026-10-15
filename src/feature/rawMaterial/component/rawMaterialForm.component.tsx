@@ -57,7 +57,7 @@ export function RawMaterialForm<T extends UpdateRawMaterialInput>({
                 register={register}
                 errors={errors}
                 required
-                inputProps={{ type: "number", step: "0.0001", readOnly: managedTransformationId !== undefined }}
+                inputProps={{ type: "number", step: "any", readOnly: managedTransformationId !== undefined }}
                 registerOptions={{ setValueAs: toOptionalNumber }}
             />
             {managedTransformationId !== undefined && (

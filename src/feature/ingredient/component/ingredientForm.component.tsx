@@ -28,7 +28,7 @@ export function IngredientForm<T extends UpdateIngredientInput>({
                 register={register}
                 errors={errors}
                 required
-                inputProps={{ type: "number", step: "0.0001" }}
+                inputProps={{ type: "number", step: "any" }}
                 registerOptions={{ setValueAs: toOptionalNumber }}
             />
 

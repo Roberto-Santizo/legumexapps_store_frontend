@@ -38,7 +38,7 @@ export function DestinationForm<T extends UpdateDestinationInput>({
                 <Input
                     id="baseCost"
                     type="number"
-                    step="0.0001"
+                    step="any"
                     hasError={!!errors.baseCost}
                     {...register("baseCost" as Path<T>, { setValueAs: toOptionalNumber })}
                 />

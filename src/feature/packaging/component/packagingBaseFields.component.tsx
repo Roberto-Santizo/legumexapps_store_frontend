@@ -33,7 +33,7 @@ export function PackagingBaseFields<T extends UpdatePackagingInput>({ register, 
                 name={"unitCost" as Path<T>}
                 id={`${idPrefix}unitCost`}
                 label={t("packaging.form.unitCost")}
-                inputProps={{ type: "number", step: "0.0001" }}
+                inputProps={{ type: "number", step: "any" }}
                 registerOptions={{ setValueAs: toOptionalNumber }}
             />
         </>

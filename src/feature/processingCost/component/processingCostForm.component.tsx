@@ -46,7 +46,7 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
                 <Input
                     id="value"
                     type="number"
-                    step="0.0001"
+                    step="any"
                     hasError={!!errors.value}
                     {...register("value" as Path<T>, { setValueAs: toOptionalNumber })}
                 />

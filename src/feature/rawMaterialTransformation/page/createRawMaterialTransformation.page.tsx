@@ -63,6 +63,7 @@ export function CreateRawMaterialTransformationPage() {
                 submitLabel={t("rawMaterialTransformation.form.submitCreate")}
                 isSubmitting={mutation.isPending}
                 onSubmit={(values) => mutation.mutate(values)}
+                cancelTo="/admin/raw-material-transformations"
             />
             </div>
         </PageContainer>

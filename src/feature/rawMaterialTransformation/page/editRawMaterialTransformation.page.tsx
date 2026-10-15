@@ -77,6 +77,7 @@ export function EditRawMaterialTransformationPage() {
                     submitLabel={t("rawMaterialTransformation.form.submitUpdate")}
                     isSubmitting={mutation.isPending}
                     onSubmit={(values) => mutation.mutate(values)}
+                    cancelTo={`/admin/raw-material-transformations/${detail.id}`}
                     currentSourceId={detail.unprocessedRawMaterialId}
                 />
             )}

@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import type { DefaultValues } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { HandCoins, LoaderCircle, Package, Zap } from "lucide-react"
 import {
@@ -15,6 +16,7 @@ import { TransformationGeneralSection } from "@/feature/rawMaterialTransformatio
 import { TransformationCostSection } from "@/feature/rawMaterialTransformation/component/transformationCostSection.component"
 import { TransformationSummary } from "@/feature/rawMaterialTransformation/component/transformationSummary.component"
 import { useTransformationPreview } from "@/feature/rawMaterialTransformation/component/useTransformationPreview"
+import { buttonClassName } from "@/shared/component/buttonClassName"
 
 const CATEGORY_ICONS: Record<TransformationCostCategory, typeof HandCoins> = {
     direct_labor: HandCoins,
@@ -27,10 +29,12 @@ type Props = {
     submitLabel: string
     isSubmitting: boolean
     onSubmit: (values: TransformationFormValues) => void
+    // Adónde vuelve "Cancelar".
+    cancelTo: string
     currentSourceId?: number
 }
 
-export function TransformationForm({ defaultValues, submitLabel, isSubmitting, onSubmit, currentSourceId }: Readonly<Props>) {
+export function TransformationForm({ defaultValues, submitLabel, isSubmitting, onSubmit, cancelTo, currentSourceId }: Readonly<Props>) {
     const { t } = useTranslation()
     const {
         control,
@@ -91,16 +95,16 @@ export function TransformationForm({ defaultValues, submitLabel, isSubmitting, o
                 hasError={!!preview.error}
             />
 
-            {/* Botón principal propio (no Button) para poder darle más altura sin chocar con h-control. */}
-            <button
-                type="submit"
-                disabled={isSubmitting}
-                aria-busy={isSubmitting}
-                className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-action border border-transparent bg-action-primary px-6 py-4 text-base font-semibold text-action-primary-text shadow-panel transition-colors hover:bg-action-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:opacity-60 sm:text-lg"
-            >
-                {isSubmitting && <LoaderCircle size={20} className="animate-spin" aria-hidden="true" />}
-                {isSubmitting ? t("rawMaterialTransformation.form.processing") : submitLabel}
-            </button>
+            {/* Acciones al pie, alineadas a la derecha y del tamaño normal de los botones del sistema. */}
+            <div className="flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-end">
+                <Link to={cancelTo} className={buttonClassName("secondary")}>
+                    {t("common.cancel")}
+                </Link>
+                <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className={buttonClassName("primary", "sm:min-w-48")}>
+                    {isSubmitting && <LoaderCircle size={16} className="animate-spin" aria-hidden="true" />}
+                    {isSubmitting ? t("rawMaterialTransformation.form.processing") : submitLabel}
+                </button>
+            </div>
         </form>
     )
 }

@@ -51,11 +51,13 @@ export function TransformationSummary({ totals, isCalculating = false, isComplet
                 ))}
             </dl>
 
-            <div className="mt-4 rounded-panel bg-action-primary px-5 py-4 text-action-primary-text">
-                <p className="text-sm font-medium opacity-90">{t("rawMaterialTransformation.summary.final")}</p>
-                <p className="mt-1 text-3xl font-bold tabular-nums">{value(totals?.processedCostUsd)}</p>
+            <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-1 rounded-panel border border-brand-300 border-l-4 border-l-brand-500 bg-customize-mint px-5 py-4">
+                <div>
+                    <p className="text-sm font-medium text-ink-600">{t("rawMaterialTransformation.summary.final")}</p>
+                    <p className="mt-1 text-2xl font-bold tabular-nums text-brand-700 sm:text-3xl dark:text-brand-300">{value(totals?.processedCostUsd)}</p>
+                </div>
                 {totals && (
-                    <p className="mt-1 text-sm opacity-90">
+                    <p className="text-sm text-ink-600">
                         {t("rawMaterialTransformation.summary.catalogValue", { value: formatUsdPerPound(totals.catalogCostPerPound, 4) })}
                     </p>
                 )}

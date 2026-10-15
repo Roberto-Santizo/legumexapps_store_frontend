@@ -32,6 +32,8 @@ export const responseRawMaterialSchema = baseCatalogSchema.extend({
         language: z.string(),
         displayName: z.string(),
     })),
+    // Presente cuando el costo lo calcula el módulo de Transformación de Materia Prima.
+    transformation: z.object({ id: z.number().int() }).nullable().optional(),
 })
 
 export type CreateRawMaterialInput = z.infer<typeof createRawMaterialSchema>

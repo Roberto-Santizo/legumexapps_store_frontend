@@ -27,7 +27,16 @@ export function RawMaterialTable() {
                 {
                     key: "costPerUnit",
                     header: t("rawMaterial.form.costPerUnit"),
-                    render: (rawMaterial) => (rawMaterial.costPerUnit != null ? formatCurrency(rawMaterial.costPerUnit) : "—"),
+                    render: (rawMaterial) => (
+                        <span className="inline-flex flex-wrap items-center gap-2">
+                            {rawMaterial.costPerUnit != null ? formatCurrency(rawMaterial.costPerUnit) : "—"}
+                            {rawMaterial.transformation && (
+                                <span className="rounded-chip border border-info-border bg-info-bg px-2 py-0.5 text-xs font-medium text-ink-900">
+                                    {t("rawMaterial.table.transformed")}
+                                </span>
+                            )}
+                        </span>
+                    ),
                 },
                 {
                     key: "updatedAt",

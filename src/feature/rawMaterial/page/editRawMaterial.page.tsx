@@ -89,7 +89,7 @@ export function EditRawMaterialPage() {
 
                 {rawMaterialQuery.data && (
                     <form onSubmit={onSubmit}>
-                        <RawMaterialForm register={register} errors={errors} />
+                        <RawMaterialForm register={register} errors={errors} managedTransformationId={rawMaterialQuery.data.data.transformation?.id} />
                         <Button type="submit" disabled={updateRawMaterialMutation.isPending}>
                             {updateRawMaterialMutation.isPending ? t("common.saving") : t("common.save")}
                         </Button>

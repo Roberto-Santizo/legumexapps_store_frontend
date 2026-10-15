@@ -718,7 +718,9 @@
       },
       "translationSectionTitle": "Traducción al inglés",
       "translationSectionHint": "Opcional. Si se deja vacío, el sitio en inglés muestra el nombre en español.",
-      "displayNameEn": "Nombre (inglés)"
+      "displayNameEn": "Nombre (inglés)",
+      "costManagedByTransformation": "El costo de esta materia prima lo calcula su transformación y no se edita aquí.",
+      "openTransformation": "Ver transformación"
     },
     "list": {
       "title": "Materias Primas",
@@ -732,7 +734,8 @@
     },
     "table": {
       "searchPlaceholder": "Buscar por nombre o código...",
-      "empty": "No hay materias primas registradas"
+      "empty": "No hay materias primas registradas",
+      "transformed": "Transformada"
     },
     "bulkImport": {
       "title": "Carga masiva desde Excel",
@@ -1873,5 +1876,121 @@
     "quantityHint": "Completa el empaque y la cantidad para generar tu cotización.",
     "confirmedHint": "Total confirmado · USD",
     "updatedTotal": "Total actualizado. Revisa el nuevo precio y presiona Continuar nuevamente."
+  },
+  "rawMaterialTransformation": {
+    "navTitle": "Transformación de MP",
+    "title": "Transformación de Materia Prima",
+    "description": "Calcula el costo de una materia prima procesada a partir de su costo original, rendimiento y gastos de transformación.",
+    "list": {
+      "title": "Transformación de Materia Prima",
+      "createLink": "Nueva transformación",
+      "searchPlaceholder": "Buscar por código o nombre...",
+      "empty": "Todavía no hay transformaciones registradas.",
+      "view": "Ver",
+      "unprocessedCode": "Código de entrada",
+      "processedCode": "Código procesado",
+      "yield": "Rendimiento",
+      "inputCost": "Costo de entrada",
+      "processedCost": "Costo procesado"
+    },
+    "edit": {
+      "title": "Editar transformación"
+    },
+    "form": {
+      "generalTitle": "Datos generales",
+      "generalHint": "Origen sin procesar y registro procesado que se creará en Materias Primas.",
+      "unprocessedCode": "Código de materia prima sin procesar",
+      "unprocessedName": "Nombre de materia prima sin procesar",
+      "processedCode": "Código de materia prima procesada",
+      "processedName": "Nombre de materia prima procesada",
+      "processedNameEn": "Nombre en inglés (opcional)",
+      "ingredientType": "Tipo de materia prima",
+      "inputCostPerPound": "Costo sin procesar por libra",
+      "currency": "Moneda",
+      "freightPerPound": "Flete de materia prima por libra",
+      "freightHint": "Por libra de entrada (sin procesar), en la moneda indicada.",
+      "yieldPercentage": "Rendimiento",
+      "yieldHint": "Libras procesadas por cada 100 lb de entrada. Ejemplo: 45 % = 0.45.",
+      "exchangeRate": "Tipo de cambio (quetzales por 1 USD)",
+      "exchangeRateHint": "Convierte a USD todos los importes en quetzales y se guarda con la transformación.",
+      "sharedSourceNotice_one": "Esta materia prima sin procesar ya existe y alimenta {{count}} transformación más. Si cambias su nombre, costo o moneda, esa transformación se recalculará al guardar.",
+      "sharedSourceNotice_other": "Esta materia prima sin procesar ya existe y alimenta {{count}} transformaciones más. Si cambias su nombre, costo o moneda, esas transformaciones se recalcularán al guardar.",
+      "existingSourceNotice": "Esta materia prima sin procesar ya existe: se cargaron su nombre y su costo.",
+      "conceptName": "Concepto",
+      "amount": "Costo",
+      "costBasis": "Base del costo",
+      "poundsPer": {
+        "per_unit": "Libras procesadas por unidad",
+        "per_batch": "Libras procesadas por lote"
+      },
+      "conversion": "Conversión",
+      "perProcessedPound": "USD por lb procesada",
+      "removeConcept": "Eliminar concepto {{name}}",
+      "subtotal": "Subtotal",
+      "addConcept": "Agregar",
+      "emptyCategory": "Sin conceptos. Agrega uno solo si aplica a este producto.",
+      "processing": "Procesando...",
+      "submitCreate": "Procesar materia prima",
+      "submitUpdate": "Guardar y recalcular"
+    },
+    "costBasis": {
+      "per_processed_pound": "Por libra procesada",
+      "per_input_pound": "Por libra de entrada",
+      "per_unit": "Por unidad (bolsa, sticker...)",
+      "per_batch": "Por lote"
+    },
+    "conversionHint": {
+      "per_processed_pound": "Sin conversión",
+      "per_input_pound": "Se divide entre el rendimiento"
+    },
+    "category": {
+      "direct_labor": "Mano de obra directa",
+      "packaging": "Empaques",
+      "other": "Otros costos"
+    },
+    "categoryHint": {
+      "direct_labor": "Lavado, recorte, proceso...",
+      "packaging": "Bolsa, sticker...",
+      "other": "Electricidad, combustible, sanitización..."
+    },
+    "defaults": {
+      "washing": "Lavado",
+      "trimming": "Recorte",
+      "processing": "Proceso",
+      "bag": "Bolsa",
+      "sticker": "Sticker",
+      "electricity": "Electricidad",
+      "fuel": "Búnker o diésel",
+      "sanitization": "Sanitización"
+    },
+    "summary": {
+      "title": "Resumen de costos",
+      "hint": "Calculado por el servidor, en USD por libra procesada.",
+      "rawMaterial": "Materia prima ajustada por rendimiento",
+      "directLabor": "Total mano de obra directa",
+      "packaging": "Total empaques",
+      "other": "Total otros costos",
+      "final": "Costo procesado final por libra (USD)",
+      "catalogValue": "Se guarda en Materias Primas como {{value}} por libra",
+      "exchangeRateUsed": "Tipo de cambio usado: Q{{rate}} por USD",
+      "calculating": "Calculando...",
+      "incomplete": "Completa el costo, el flete, el rendimiento y el tipo de cambio para ver el cálculo.",
+      "error": "No se pudo calcular con los datos actuales. Revisa los conceptos."
+    },
+    "validation": {
+      "codesMustDiffer": "El código procesado debe ser distinto del código sin procesar.",
+      "poundsRequired": "Indica cuántas libras procesadas cubre."
+    },
+    "detail": {
+      "unprocessed": "Materia prima sin procesar",
+      "processed": "Materia prima procesada",
+      "siblings_one": "Este origen también alimenta {{count}} transformación más.",
+      "siblings_other": "Este origen también alimenta {{count}} transformaciones más.",
+      "inCatalog": "en el catálogo",
+      "openInCatalog": "Abrir en Materias Primas",
+      "recalculate": "Recalcular",
+      "noCosts": "Sin conceptos en esta categoría.",
+      "pounds": "Libras por unidad o lote"
+    }
   }
 }

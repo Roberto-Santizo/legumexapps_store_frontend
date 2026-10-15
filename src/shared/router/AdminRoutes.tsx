@@ -47,6 +47,18 @@ const CreateRawMaterialPage = lazyWithRetry(() =>
 const EditRawMaterialPage = lazyWithRetry(() =>
     import("@/feature/rawMaterial/page/editRawMaterial.page").then((module) => ({ default: module.EditRawMaterialPage }))
 )
+const RawMaterialTransformationListPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterialTransformation/page/rawMaterialTransformationList.page").then((module) => ({ default: module.RawMaterialTransformationListPage }))
+)
+const CreateRawMaterialTransformationPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterialTransformation/page/createRawMaterialTransformation.page").then((module) => ({ default: module.CreateRawMaterialTransformationPage }))
+)
+const RawMaterialTransformationDetailPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterialTransformation/page/rawMaterialTransformationDetail.page").then((module) => ({ default: module.RawMaterialTransformationDetailPage }))
+)
+const EditRawMaterialTransformationPage = lazyWithRetry(() =>
+    import("@/feature/rawMaterialTransformation/page/editRawMaterialTransformation.page").then((module) => ({ default: module.EditRawMaterialTransformationPage }))
+)
 const IngredientListPage = lazyWithRetry(() =>
     import("@/feature/ingredient/page/ingredient.page").then((module) => ({ default: module.IngredientListPage }))
 )
@@ -195,6 +207,10 @@ const routes = [
     { path: "raw-materials", component: RawMaterialListPage, permission: "rawMaterials:view" },
     { path: "raw-materials/create", component: CreateRawMaterialPage, permission: "rawMaterials:create" },
     { path: "raw-materials/:rawMaterialId/edit", component: EditRawMaterialPage, permission: "rawMaterials:edit" },
+    { path: "raw-material-transformations", component: RawMaterialTransformationListPage, permission: "rawMaterialTransformations:view" },
+    { path: "raw-material-transformations/create", component: CreateRawMaterialTransformationPage, permission: "rawMaterialTransformations:create" },
+    { path: "raw-material-transformations/:transformationId", component: RawMaterialTransformationDetailPage, permission: "rawMaterialTransformations:view" },
+    { path: "raw-material-transformations/:transformationId/edit", component: EditRawMaterialTransformationPage, permission: "rawMaterialTransformations:edit" },
     { path: "ingredients", component: IngredientListPage, permission: "ingredients:view" },
     { path: "ingredients/create", component: CreateIngredientPage, permission: "ingredients:create" },
     { path: "ingredients/:ingredientId/edit", component: EditIngredientPage, permission: "ingredients:edit" },

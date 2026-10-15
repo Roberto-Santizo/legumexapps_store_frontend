@@ -718,7 +718,9 @@
       },
       "translationSectionTitle": "English translation",
       "translationSectionHint": "Optional. If left empty, the English site shows the Spanish name.",
-      "displayNameEn": "Name (English)"
+      "displayNameEn": "Name (English)",
+      "costManagedByTransformation": "The cost of this raw material is calculated by its transformation and is not edited here.",
+      "openTransformation": "View transformation"
     },
     "list": {
       "title": "Raw Materials",
@@ -732,7 +734,8 @@
     },
     "table": {
       "searchPlaceholder": "Search by name or code...",
-      "empty": "No raw materials registered"
+      "empty": "No raw materials registered",
+      "transformed": "Transformed"
     },
     "bulkImport": {
       "title": "Bulk import from Excel",
@@ -1873,5 +1876,121 @@
     "quantityHint": "Complete packaging and quantity to generate your quote.",
     "confirmedHint": "Confirmed total · USD",
     "updatedTotal": "Updated total. Check the new price and press Continue again."
+  },
+  "rawMaterialTransformation": {
+    "navTitle": "Raw material processing",
+    "title": "Raw Material Transformation",
+    "description": "Calculates the cost of a processed raw material from its original cost, yield and processing expenses.",
+    "list": {
+      "title": "Raw Material Transformation",
+      "createLink": "New transformation",
+      "searchPlaceholder": "Search by code or name...",
+      "empty": "No transformations have been registered yet.",
+      "view": "View",
+      "unprocessedCode": "Input code",
+      "processedCode": "Processed code",
+      "yield": "Yield",
+      "inputCost": "Input cost",
+      "processedCost": "Processed cost"
+    },
+    "edit": {
+      "title": "Edit transformation"
+    },
+    "form": {
+      "generalTitle": "General data",
+      "generalHint": "Unprocessed source and the processed record that will be created in Raw Materials.",
+      "unprocessedCode": "Unprocessed raw material code",
+      "unprocessedName": "Unprocessed raw material name",
+      "processedCode": "Processed raw material code",
+      "processedName": "Processed raw material name",
+      "processedNameEn": "English name (optional)",
+      "ingredientType": "Raw material type",
+      "inputCostPerPound": "Unprocessed cost per pound",
+      "currency": "Currency",
+      "freightPerPound": "Raw material freight per pound",
+      "freightHint": "Per input (unprocessed) pound, in the selected currency.",
+      "yieldPercentage": "Yield",
+      "yieldHint": "Processed pounds per 100 input pounds. Example: 45% = 0.45.",
+      "exchangeRate": "Exchange rate (quetzales per 1 USD)",
+      "exchangeRateHint": "Converts every quetzal amount to USD and is saved with the transformation.",
+      "sharedSourceNotice_one": "This unprocessed raw material already exists and feeds {{count}} other transformation. If you change its name, cost or currency, that transformation will be recalculated on save.",
+      "sharedSourceNotice_other": "This unprocessed raw material already exists and feeds {{count}} other transformations. If you change its name, cost or currency, those transformations will be recalculated on save.",
+      "existingSourceNotice": "This unprocessed raw material already exists: its name and cost were loaded.",
+      "conceptName": "Concept",
+      "amount": "Cost",
+      "costBasis": "Cost basis",
+      "poundsPer": {
+        "per_unit": "Processed pounds per unit",
+        "per_batch": "Processed pounds per batch"
+      },
+      "conversion": "Conversion",
+      "perProcessedPound": "USD per processed lb",
+      "removeConcept": "Remove concept {{name}}",
+      "subtotal": "Subtotal",
+      "addConcept": "Add",
+      "emptyCategory": "No concepts. Add one only if it applies to this product.",
+      "processing": "Processing...",
+      "submitCreate": "Process raw material",
+      "submitUpdate": "Save and recalculate"
+    },
+    "costBasis": {
+      "per_processed_pound": "Per processed pound",
+      "per_input_pound": "Per input pound",
+      "per_unit": "Per unit (bag, sticker...)",
+      "per_batch": "Per batch"
+    },
+    "conversionHint": {
+      "per_processed_pound": "No conversion",
+      "per_input_pound": "Divided by the yield"
+    },
+    "category": {
+      "direct_labor": "Direct labor",
+      "packaging": "Packaging",
+      "other": "Other costs"
+    },
+    "categoryHint": {
+      "direct_labor": "Washing, trimming, processing...",
+      "packaging": "Bag, sticker...",
+      "other": "Electricity, fuel, sanitization..."
+    },
+    "defaults": {
+      "washing": "Washing",
+      "trimming": "Trimming",
+      "processing": "Processing",
+      "bag": "Bag",
+      "sticker": "Sticker",
+      "electricity": "Electricity",
+      "fuel": "Bunker or diesel",
+      "sanitization": "Sanitization"
+    },
+    "summary": {
+      "title": "Cost summary",
+      "hint": "Calculated by the server, in USD per processed pound.",
+      "rawMaterial": "Raw material adjusted by yield",
+      "directLabor": "Direct labor total",
+      "packaging": "Packaging total",
+      "other": "Other costs total",
+      "final": "Final processed cost per pound (USD)",
+      "catalogValue": "Saved in Raw Materials as {{value}} per pound",
+      "exchangeRateUsed": "Exchange rate used: Q{{rate}} per USD",
+      "calculating": "Calculating...",
+      "incomplete": "Fill in the cost, freight, yield and exchange rate to see the calculation.",
+      "error": "Could not calculate with the current data. Check the concepts."
+    },
+    "validation": {
+      "codesMustDiffer": "The processed code must differ from the unprocessed code.",
+      "poundsRequired": "Enter how many processed pounds it covers."
+    },
+    "detail": {
+      "unprocessed": "Unprocessed raw material",
+      "processed": "Processed raw material",
+      "siblings_one": "This source also feeds {{count}} other transformation.",
+      "siblings_other": "This source also feeds {{count}} other transformations.",
+      "inCatalog": "in the catalog",
+      "openInCatalog": "Open in Raw Materials",
+      "recalculate": "Recalculate",
+      "noCosts": "No concepts in this category.",
+      "pounds": "Pounds per unit or batch"
+    }
   }
 }

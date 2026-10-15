@@ -1,5 +1,6 @@
 import type { FieldError, FieldErrors, Path, UseFormRegister } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 import type { UpdateRawMaterialInput } from "@/feature/rawMaterial/schema/rawMaterial.schema"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { FormField } from "@/shared/component/formField.component"
@@ -11,12 +12,15 @@ import { TranslationSection } from "@/shared/component/translationSection.compon
 type RawMaterialFormProps<T extends UpdateRawMaterialInput> = {
     register: UseFormRegister<T>
     errors: FieldErrors<T>
+    // Si el costo lo gestiona una transformación, aquí se muestra solo de lectura.
+    managedTransformationId?: number
 }
 
 // Sin selector de unidad de costo: el backend fija la libra, costPerUnit es costo por libra.
 export function RawMaterialForm<T extends UpdateRawMaterialInput>({
     register,
     errors,
+    managedTransformationId,
 }: Readonly<RawMaterialFormProps<T>>) {
     const { t } = useTranslation()
 
@@ -53,9 +57,17 @@ export function RawMaterialForm<T extends UpdateRawMaterialInput>({
                 register={register}
                 errors={errors}
                 required
-                inputProps={{ type: "number", step: "0.0001" }}
+                inputProps={{ type: "number", step: "0.0001", readOnly: managedTransformationId !== undefined }}
                 registerOptions={{ setValueAs: toOptionalNumber }}
             />
+            {managedTransformationId !== undefined && (
+                <p className="-mt-3 mb-5 rounded-control border border-info-border bg-info-bg px-3 py-2 text-sm text-ink-900">
+                    {t("rawMaterial.form.costManagedByTransformation")}{" "}
+                    <Link to={`/admin/raw-material-transformations/${managedTransformationId}`} className="font-medium underline decoration-focus underline-offset-4 hover:text-focus">
+                        {t("rawMaterial.form.openTransformation")}
+                    </Link>
+                </p>
+            )}
 
             <TranslationSection
                 register={register}

@@ -1264,11 +1264,11 @@
     "types": {
       "label": "Tipo de cotizaciones",
       "fixed": "Productos fijos",
-      "customizable": "Productos personalizables",
+      "customizable": "Productos nuevos",
       "fixedTitle": "Cotizaciones de productos fijos",
       "production": "Reportes para producción",
       "productionTitle": "Reportes para producción por pedido",
-      "customizableTitle": "Cotizaciones de productos personalizables"
+      "customizableTitle": "Cotizaciones de productos nuevos"
     }
   },
   "quoteDraft": {
@@ -1296,7 +1296,7 @@
   },
   "adminQuoteCalculator": {
     "title": "Cotizador interno",
-    "customizableTitle": "Cotizador interno de productos personalizables",
+    "customizableTitle": "Cotizador interno de productos nuevos",
     "calculatedHint": "Cálculo interno completado. No se guardó una solicitud ni se modificaron las cotizaciones recibidas o el Dashboard.",
     "description": "Calcula cotizaciones con el desglose completo de costos (materia prima, empaque y materiales de palet). No se guarda ningún registro -- es solo una herramienta de consulta, no aparece en \"Cotizaciones\" ni afecta el panel de indicadores."
   },
@@ -1307,7 +1307,7 @@
       "generating": "Generando ficha…",
       "clientName": "Cliente del pedido",
       "clientLocked": "Todas las líneas pertenecen a este cliente. Para otro cliente, inicia un pedido nuevo.",
-      "mixedOrderHint": "Puedes agregar productos fijos y personalizables al mismo pedido. El PDF incluirá todas las líneas.",
+      "mixedOrderHint": "Puedes agregar productos fijos y nuevos al mismo pedido. El PDF incluirá todas las líneas.",
       "description": "Pedidos agrupados por cliente y representante. Descarga el detalle completo para compartirlo con producción e imprimirlo sin acceso a la aplicación.",
       "search": "Buscar por cliente, representante, producto o folio",
       "empty": "No hay pedidos para este filtro.",
@@ -1324,7 +1324,7 @@
       "unavailable": "No registrado",
       "productCode": "SKU del producto",
       "productId": "ID del producto",
-      "customNoSku": "Personalizable, sin SKU propio",
+      "customNoSku": "Producto nuevo, sin SKU propio",
       "pallets": "Palets",
       "totalUnits": "Unidades totales",
       "boxesPerPallet": "Cajas por palet",
@@ -1563,7 +1563,7 @@
       "pallets": "Palets",
       "total": "Total",
       "view": "Ver detalle",
-      "empty": "No hay cotizaciones de productos personalizables."
+      "empty": "No hay cotizaciones de productos nuevos."
     },
     "detail": {
       "title": "Cotización a la medida #{{id}}",

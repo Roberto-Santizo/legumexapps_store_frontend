@@ -1264,11 +1264,11 @@
     "types": {
       "label": "Quote type",
       "fixed": "Fixed products",
-      "customizable": "Customizable products",
+      "customizable": "New products",
       "fixedTitle": "Fixed product quotes",
       "production": "Production reports",
       "productionTitle": "Production reports by order",
-      "customizableTitle": "Customizable product quotes"
+      "customizableTitle": "New product quotes"
     }
   },
   "quoteDraft": {
@@ -1296,7 +1296,7 @@
   },
   "adminQuoteCalculator": {
     "title": "Internal calculator",
-    "customizableTitle": "Internal customizable product calculator",
+    "customizableTitle": "Internal new product calculator",
     "calculatedHint": "Internal calculation complete. No request was saved and received quotes and the dashboard remain unchanged.",
     "description": "Calculate quotes with the full cost breakdown (raw materials, packaging and pallet materials). Nothing is saved -- it's just a lookup tool, it doesn't appear in \"Quotes\" and it doesn't affect the dashboard."
   },
@@ -1307,7 +1307,7 @@
       "generating": "Generating sheet…",
       "clientName": "Order customer",
       "clientLocked": "All lines belong to this customer. Start a new order for another customer.",
-      "mixedOrderHint": "Add fixed and customizable products to the same order. The PDF includes all lines.",
+      "mixedOrderHint": "Add fixed and new products to the same order. The PDF includes all lines.",
       "description": "Orders grouped by customer and salesperson. Download the complete details to share with production and print without application access.",
       "search": "Search customer, salesperson, product or order number",
       "empty": "No orders match this filter.",
@@ -1324,7 +1324,7 @@
       "unavailable": "Not recorded",
       "productCode": "Product SKU",
       "productId": "Product ID",
-      "customNoSku": "Customizable, no own SKU",
+      "customNoSku": "New product, no own SKU",
       "pallets": "Pallets",
       "totalUnits": "Total units",
       "boxesPerPallet": "Boxes per pallet",
@@ -1563,7 +1563,7 @@
       "pallets": "Pallets",
       "total": "Total",
       "view": "View details",
-      "empty": "No customizable product quotes."
+      "empty": "No new product quotes."
     },
     "detail": {
       "title": "Custom quote #{{id}}",

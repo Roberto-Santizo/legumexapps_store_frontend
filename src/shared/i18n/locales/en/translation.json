@@ -1909,7 +1909,6 @@
       "freightPerPound": "Raw material freight per pound (USD)",
       "freightHint": "Per input (unprocessed) pound.",
       "yieldPercentage": "Yield",
-      "yieldHint": "Processed pounds per 100 input pounds. Example: 45% = 0.45.",
       "sharedSourceNotice_one": "This unprocessed raw material already exists and feeds {{count}} other transformation. If you change its name or cost, that transformation will be recalculated on save.",
       "sharedSourceNotice_other": "This unprocessed raw material already exists and feeds {{count}} other transformations. If you change its name or cost, those transformations will be recalculated on save.",
       "existingSourceNotice": "This unprocessed raw material already exists: its name and cost were loaded.",

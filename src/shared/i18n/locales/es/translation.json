@@ -1909,7 +1909,6 @@
       "freightPerPound": "Flete de materia prima por libra (USD)",
       "freightHint": "Por libra de entrada (sin procesar).",
       "yieldPercentage": "Rendimiento",
-      "yieldHint": "Libras procesadas por cada 100 lb de entrada. Ejemplo: 45 % = 0.45.",
       "sharedSourceNotice_one": "Esta materia prima sin procesar ya existe y alimenta {{count}} transformación más. Si cambias su nombre o su costo, esa transformación se recalculará al guardar.",
       "sharedSourceNotice_other": "Esta materia prima sin procesar ya existe y alimenta {{count}} transformaciones más. Si cambias su nombre o su costo, esas transformaciones se recalcularán al guardar.",
       "existingSourceNotice": "Esta materia prima sin procesar ya existe: se cargaron su nombre y su costo.",

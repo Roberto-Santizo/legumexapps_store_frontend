@@ -135,10 +135,9 @@ export function TransformationGeneralSection({ control, register, setValue, erro
                 </FormField>
                 <FormField label={t("rawMaterialTransformation.form.yieldPercentage")} htmlFor="yieldPercentage" error={error("yieldPercentage")} required>
                     <div className="relative">
-                        <Input id="yieldPercentage" type="number" step="any" min="0" max="100" inputMode="decimal" className="pr-10" hasError={!!errors.yieldPercentage} {...register("yieldPercentage", numberOptions)} />
+                        <Input id="yieldPercentage" type="number" step="any" min="0" max="100" inputMode="decimal" placeholder="45" className="pr-10" hasError={!!errors.yieldPercentage} {...register("yieldPercentage", numberOptions)} />
                         <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-ink-600" aria-hidden="true">%</span>
                     </div>
-                    <p className="mt-1.5 text-xs text-ink-600">{t("rawMaterialTransformation.form.yieldHint")}</p>
                 </FormField>
             </div>
         </Card>

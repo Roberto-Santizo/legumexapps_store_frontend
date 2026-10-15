@@ -38,6 +38,23 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
             </FormField>
 
             <FormField
+                label={t("processingCost.form.calculationType")}
+                htmlFor="calculationType"
+                error={getFieldErrorMessage(t, errors.calculationType as FieldError | undefined)}
+                required
+            >
+                <Select
+                    id="calculationType"
+                    hasError={!!errors.calculationType}
+                    defaultValue="per_weight"
+                    {...register("calculationType" as Path<T>)}
+                >
+                    <option value="per_weight">{t("processingCost.form.calculationTypeOptions.per_weight")}</option>
+                    <option value="percentage">{t("processingCost.form.calculationTypeOptions.percentage")}</option>
+                </Select>
+            </FormField>
+
+            <FormField
                 label={t(isPercentage ? "processingCost.form.valueLabelPercentage" : "processingCost.form.valueLabelPerWeight")}
                 htmlFor="value"
                 error={errors.value?.type === "custom" ? t("processingCost.form.percentageLimit") : getFieldErrorMessage(t, errors.value as FieldError | undefined)}
@@ -54,23 +71,6 @@ export function ProcessingCostForm<T extends UpdateProcessingCostInput>({
             <p className="mb-5 -mt-3 text-sm text-ink-600">
                 {t(isPercentage ? "processingCost.form.valueHintPercentage" : "processingCost.form.valueHintPerWeight")}
             </p>
-
-            <FormField
-                label={t("processingCost.form.calculationType")}
-                htmlFor="calculationType"
-                error={getFieldErrorMessage(t, errors.calculationType as FieldError | undefined)}
-                required
-            >
-                <Select
-                    id="calculationType"
-                    hasError={!!errors.calculationType}
-                    defaultValue="per_weight"
-                    {...register("calculationType" as Path<T>)}
-                >
-                    <option value="per_weight">{t("processingCost.form.calculationTypeOptions.per_weight")}</option>
-                    <option value="percentage">{t("processingCost.form.calculationTypeOptions.percentage")}</option>
-                </Select>
-            </FormField>
 
             <TranslationSection
                 register={register}

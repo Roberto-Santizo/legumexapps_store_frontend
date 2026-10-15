@@ -9,14 +9,13 @@ type Totals = Pick<TransformationPreviewResult, "rawMaterialCostUsd" | "directLa
 
 type Props = {
     totals?: Totals
-    exchangeRate?: number
     isCalculating?: boolean
     // Sin datos completos todavía (formulario) -> se muestra la ayuda en lugar de los montos.
     isComplete?: boolean
     hasError?: boolean
 }
 
-export function TransformationSummary({ totals, exchangeRate, isCalculating = false, isComplete = true, hasError = false }: Readonly<Props>) {
+export function TransformationSummary({ totals, isCalculating = false, isComplete = true, hasError = false }: Readonly<Props>) {
     const { t } = useTranslation()
     const value = (amount: number | undefined) => (amount !== undefined ? formatUsdPerPound(amount, 6) : "—")
     const rows: [string, number | undefined][] = [
@@ -61,9 +60,6 @@ export function TransformationSummary({ totals, exchangeRate, isCalculating = fa
                     </p>
                 )}
             </div>
-            {exchangeRate !== undefined && Number.isFinite(exchangeRate) && exchangeRate > 0 && (
-                <p className="mt-3 text-xs text-ink-600">{t("rawMaterialTransformation.summary.exchangeRateUsed", { rate: exchangeRate })}</p>
-            )}
         </Card>
     )
 }

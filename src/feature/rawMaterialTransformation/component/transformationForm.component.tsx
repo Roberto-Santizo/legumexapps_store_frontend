@@ -1,9 +1,9 @@
 import { useMemo } from "react"
-import { useFieldArray, useForm, useWatch } from "react-hook-form"
+import { useFieldArray, useForm } from "react-hook-form"
 import type { DefaultValues } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
-import { HandCoins, LoaderCircle, Package, Sparkles, Zap } from "lucide-react"
+import { HandCoins, LoaderCircle, Package, Zap } from "lucide-react"
 import {
     MAX_TRANSFORMATION_COST_LINES,
     TRANSFORMATION_COST_CATEGORIES,
@@ -41,7 +41,6 @@ export function TransformationForm({ defaultValues, submitLabel, isSubmitting, o
     } = useForm<TransformationFormValues>({ resolver: zodResolver(transformationFormSchema), defaultValues })
     const { fields, append, remove } = useFieldArray({ control, name: "costs" })
     const preview = useTransformationPreview(control)
-    const exchangeRate = useWatch({ control, name: "exchangeRate" })
 
     const rowsByCategory = useMemo(() => {
         const grouped: Record<TransformationCostCategory, { key: string; index: number }[]> = { direct_labor: [], packaging: [], other: [] }
@@ -56,7 +55,7 @@ export function TransformationForm({ defaultValues, submitLabel, isSubmitting, o
     }
 
     const addConcept = (category: TransformationCostCategory) => {
-        append({ category, conceptName: "", amount: 0, currency: "USD", costBasis: "per_processed_pound", poundsPerUnit: null }, { shouldFocus: true })
+        append({ category, conceptName: "", amount: 0, costBasis: "per_processed_pound", poundsPerUnit: null }, { shouldFocus: true })
     }
 
     const submit = handleSubmit((values) => onSubmit(toTransformationPayload(values)))
@@ -87,7 +86,6 @@ export function TransformationForm({ defaultValues, submitLabel, isSubmitting, o
 
             <TransformationSummary
                 totals={preview.result}
-                exchangeRate={typeof exchangeRate === "number" ? exchangeRate : undefined}
                 isCalculating={preview.isCalculating}
                 isComplete={preview.isComplete}
                 hasError={!!preview.error}
@@ -100,7 +98,7 @@ export function TransformationForm({ defaultValues, submitLabel, isSubmitting, o
                 aria-busy={isSubmitting}
                 className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-action border border-transparent bg-action-primary px-6 py-4 text-base font-semibold text-action-primary-text shadow-panel transition-colors hover:bg-action-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:opacity-60 sm:text-lg"
             >
-                {isSubmitting ? <LoaderCircle size={20} className="animate-spin" aria-hidden="true" /> : <Sparkles size={20} aria-hidden="true" />}
+                {isSubmitting && <LoaderCircle size={20} className="animate-spin" aria-hidden="true" />}
                 {isSubmitting ? t("rawMaterialTransformation.form.processing") : submitLabel}
             </button>
         </form>

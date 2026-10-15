@@ -3,14 +3,10 @@ import { useTranslation } from "react-i18next"
 import { Plus, Trash2 } from "lucide-react"
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form"
 import { useWatch } from "react-hook-form"
-import {
-    basisNeedsPounds,
-    TRANSFORMATION_COST_BASES,
-    TRANSFORMATION_CURRENCIES,
-} from "@/feature/rawMaterialTransformation/schema/rawMaterialTransformation.schema"
+import { basisNeedsPounds, TRANSFORMATION_COST_BASES } from "@/feature/rawMaterialTransformation/schema/rawMaterialTransformation.schema"
 import type { TransformationCostCategory, TransformationFormValues } from "@/feature/rawMaterialTransformation/schema/rawMaterialTransformation.schema"
 import { transformationFieldError } from "@/feature/rawMaterialTransformation/component/transformationFieldError"
-import { SectionHeading } from "@/feature/rawMaterialTransformation/component/transformationGeneralSection.component"
+import { SectionHeading, UsdInput } from "@/feature/rawMaterialTransformation/component/transformationGeneralSection.component"
 import { formatUsdPerPound } from "@/feature/rawMaterialTransformation/constant/rawMaterialTransformation.constant"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
@@ -59,19 +55,13 @@ function CostRow({ index, control, register, errors, lineUsd, onRemove }: Readon
             </div>
             <FieldErrorText>{transformationFieldError(t, rowErrors?.conceptName)}</FieldErrorText>
 
-            <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-[minmax(0,1fr)_6.5rem_minmax(0,1.5fr)] xl:grid-cols-[minmax(0,1fr)_6.5rem_minmax(0,1.5fr)_minmax(0,1.1fr)_minmax(0,1fr)]">
+            <div className="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.1fr)_minmax(0,1fr)]">
                 <div>
                     <label htmlFor={id("amount")} className={smallLabel}>{t("rawMaterialTransformation.form.amount")}</label>
-                    <Input id={id("amount")} type="number" step="any" min="0" inputMode="decimal" hasError={!!rowErrors?.amount} {...register(`costs.${index}.amount`, { setValueAs: toOptionalNumber })} />
+                    <UsdInput id={id("amount")} hasError={!!rowErrors?.amount} {...register(`costs.${index}.amount`, { setValueAs: toOptionalNumber })} />
                     <FieldErrorText>{transformationFieldError(t, rowErrors?.amount)}</FieldErrorText>
                 </div>
                 <div>
-                    <label htmlFor={id("currency")} className={smallLabel}>{t("rawMaterialTransformation.form.currency")}</label>
-                    <Select id={id("currency")} {...register(`costs.${index}.currency`)}>
-                        {TRANSFORMATION_CURRENCIES.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
-                    </Select>
-                </div>
-                <div className="col-span-2 md:col-span-1">
                     <label htmlFor={id("basis")} className={smallLabel}>{t("rawMaterialTransformation.form.costBasis")}</label>
                     <Select id={id("basis")} {...register(`costs.${index}.costBasis`)}>
                         {TRANSFORMATION_COST_BASES.map((option) => <option key={option} value={option}>{t(`rawMaterialTransformation.costBasis.${option}`)}</option>)}
@@ -91,7 +81,7 @@ function CostRow({ index, control, register, errors, lineUsd, onRemove }: Readon
                         </>
                     )}
                 </div>
-                <div className="md:col-span-2 xl:col-span-1">
+                <div>
                     <span className={smallLabel}>{t("rawMaterialTransformation.form.perProcessedPound")}</span>
                     <p className="flex h-control items-center font-semibold tabular-nums text-ink-900">{lineUsd !== undefined ? formatUsdPerPound(lineUsd, 6) : "—"}</p>
                 </div>

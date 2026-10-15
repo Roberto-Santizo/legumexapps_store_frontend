@@ -1,11 +1,11 @@
-import type { ReactNode } from "react"
+import { forwardRef } from "react"
+import type { InputHTMLAttributes, ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Info, Wheat } from "lucide-react"
 import type { Control, FieldError, FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form"
 import { useWatch } from "react-hook-form"
 import { getUnprocessedSourcesAPI } from "@/feature/rawMaterialTransformation/api/rawMaterialTransformation.api"
-import { TRANSFORMATION_CURRENCIES } from "@/feature/rawMaterialTransformation/schema/rawMaterialTransformation.schema"
 import type { TransformationFormValues } from "@/feature/rawMaterialTransformation/schema/rawMaterialTransformation.schema"
 import { transformationFieldError } from "@/feature/rawMaterialTransformation/component/transformationFieldError"
 import { Card } from "@/shared/component/card.component"
@@ -24,6 +24,17 @@ type Props = {
 }
 
 const SOURCES_DATALIST_ID = "unprocessed-raw-material-sources"
+
+// Campo numérico de importe: todo se ingresa en USD, así que la moneda se muestra como etiqueta fija.
+export const UsdInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { hasError?: boolean }>(function UsdInput(props, ref) {
+    return (
+        <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-ink-600" aria-hidden="true">$</span>
+            <Input ref={ref} type="number" step="any" min="0" inputMode="decimal" className="pl-8 pr-14" {...props} />
+            <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-xs font-semibold text-ink-600" aria-hidden="true">USD</span>
+        </div>
+    )
+})
 
 export function SectionHeading({ icon, title, hint, aside }: Readonly<{ icon: ReactNode; title: string; hint?: string; aside?: ReactNode }>) {
     return (
@@ -56,7 +67,6 @@ export function TransformationGeneralSection({ control, register, setValue, erro
         if (!match) return
         setValue("unprocessedName", match.displayName, { shouldValidate: true })
         setValue("inputCostPerPound", match.costPerPound, { shouldValidate: true })
-        setValue("inputCurrency", match.costCurrency, { shouldValidate: true })
     }
 
     const codeField = register("unprocessedCode")
@@ -117,28 +127,10 @@ export function TransformationGeneralSection({ control, register, setValue, erro
                 </FormField>
 
                 <FormField label={t("rawMaterialTransformation.form.inputCostPerPound")} htmlFor="inputCostPerPound" error={error("inputCostPerPound")} required>
-                    <div className="flex gap-2">
-                        <div className="min-w-0 flex-1">
-                            <Input id="inputCostPerPound" type="number" step="any" min="0" inputMode="decimal" hasError={!!errors.inputCostPerPound} {...register("inputCostPerPound", numberOptions)} />
-                        </div>
-                        <div className="w-28 shrink-0">
-                            <Select aria-label={t("rawMaterialTransformation.form.currency")} {...register("inputCurrency")}>
-                                {TRANSFORMATION_CURRENCIES.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
-                            </Select>
-                        </div>
-                    </div>
+                    <UsdInput id="inputCostPerPound" hasError={!!errors.inputCostPerPound} {...register("inputCostPerPound", numberOptions)} />
                 </FormField>
                 <FormField label={t("rawMaterialTransformation.form.freightPerPound")} htmlFor="freightPerPound" error={error("freightPerPound")} required>
-                    <div className="flex gap-2">
-                        <div className="min-w-0 flex-1">
-                            <Input id="freightPerPound" type="number" step="any" min="0" inputMode="decimal" hasError={!!errors.freightPerPound} {...register("freightPerPound", numberOptions)} />
-                        </div>
-                        <div className="w-28 shrink-0">
-                            <Select aria-label={t("rawMaterialTransformation.form.currency")} {...register("freightCurrency")}>
-                                {TRANSFORMATION_CURRENCIES.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
-                            </Select>
-                        </div>
-                    </div>
+                    <UsdInput id="freightPerPound" hasError={!!errors.freightPerPound} {...register("freightPerPound", numberOptions)} />
                     <p className="mt-1.5 text-xs text-ink-600">{t("rawMaterialTransformation.form.freightHint")}</p>
                 </FormField>
                 <FormField label={t("rawMaterialTransformation.form.yieldPercentage")} htmlFor="yieldPercentage" error={error("yieldPercentage")} required>
@@ -147,10 +139,6 @@ export function TransformationGeneralSection({ control, register, setValue, erro
                         <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-ink-600" aria-hidden="true">%</span>
                     </div>
                     <p className="mt-1.5 text-xs text-ink-600">{t("rawMaterialTransformation.form.yieldHint")}</p>
-                </FormField>
-                <FormField label={t("rawMaterialTransformation.form.exchangeRate")} htmlFor="exchangeRate" error={error("exchangeRate")} required>
-                    <Input id="exchangeRate" type="number" step="any" min="0" inputMode="decimal" hasError={!!errors.exchangeRate} {...register("exchangeRate", numberOptions)} />
-                    <p className="mt-1.5 text-xs text-ink-600">{t("rawMaterialTransformation.form.exchangeRateHint")}</p>
                 </FormField>
             </div>
         </Card>

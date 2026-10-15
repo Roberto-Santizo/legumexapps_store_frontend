@@ -27,14 +27,11 @@ export function CreateRawMaterialTransformationPage() {
         processedName: "",
         processedNameEn: "",
         ingredientType: "" as TransformationFormValues["ingredientType"],
-        inputCurrency: "GTQ",
         freightPerPound: 0,
-        freightCurrency: "GTQ",
         costs: TRANSFORMATION_COST_CATEGORIES.flatMap((category) => DEFAULT_COST_CONCEPTS[category].map((concept) => ({
             category,
             conceptName: t(`rawMaterialTransformation.defaults.${concept}`).toLocaleUpperCase(i18n.language),
             amount: 0,
-            currency: "USD" as const,
             costBasis: "per_processed_pound" as const,
             poundsPerUnit: null,
         }))),
@@ -54,6 +51,8 @@ export function CreateRawMaterialTransformationPage() {
 
     return (
         <PageContainer wide>
+            {/* Más angosto que wide (7xl): un formulario de dos columnas a todo el ancho se ve estirado. */}
+            <div className="mx-auto max-w-5xl">
             <TransformationPageHeader
                 title={t("rawMaterialTransformation.title")}
                 description={t("rawMaterialTransformation.description")}
@@ -65,6 +64,7 @@ export function CreateRawMaterialTransformationPage() {
                 isSubmitting={mutation.isPending}
                 onSubmit={(values) => mutation.mutate(values)}
             />
+            </div>
         </PageContainer>
     )
 }

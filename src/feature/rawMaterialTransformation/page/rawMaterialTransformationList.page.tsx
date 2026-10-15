@@ -72,7 +72,7 @@ export function RawMaterialTransformationListPage() {
                     {
                         key: "inputCost",
                         header: t("rawMaterialTransformation.list.inputCost"),
-                        render: (item) => <span className="tabular-nums">{formatAmount(item.inputCostPerPound, item.inputCurrency)}/lb</span>,
+                        render: (item) => <span className="tabular-nums">{formatAmount(item.inputCostPerPound)}/lb</span>,
                     },
                     {
                         key: "processedCost",

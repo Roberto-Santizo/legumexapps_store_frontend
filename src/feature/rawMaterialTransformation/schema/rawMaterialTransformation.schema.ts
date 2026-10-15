@@ -1,16 +1,13 @@
 import { z } from "zod"
 
-export const TRANSFORMATION_CURRENCIES = ["GTQ", "USD"] as const
 export const TRANSFORMATION_COST_CATEGORIES = ["direct_labor", "packaging", "other"] as const
 export const TRANSFORMATION_COST_BASES = ["per_processed_pound", "per_input_pound", "per_unit", "per_batch"] as const
 export const MAX_TRANSFORMATION_COST_LINES = 100
 
-export type TransformationCurrency = (typeof TRANSFORMATION_CURRENCIES)[number]
 export type TransformationCostCategory = (typeof TRANSFORMATION_COST_CATEGORIES)[number]
 export type TransformationCostBasis = (typeof TRANSFORMATION_COST_BASES)[number]
 
 const ingredientTypeEnum = z.enum(["fruit", "vegetable", "pulp", "other"])
-const currencySchema = z.enum(TRANSFORMATION_CURRENCIES)
 
 export function basisNeedsPounds(basis: TransformationCostBasis): boolean {
     return basis === "per_unit" || basis === "per_batch"
@@ -26,7 +23,6 @@ const costLineFormSchema = z.object({
     category: z.enum(TRANSFORMATION_COST_CATEGORIES),
     conceptName: z.string().trim().min(1).max(120),
     amount: z.number().nonnegative(),
-    currency: currencySchema,
     costBasis: z.enum(TRANSFORMATION_COST_BASES),
     poundsPerUnit: z.number().positive().nullable().optional(),
 }).superRefine((line, ctx) => {
@@ -35,8 +31,8 @@ const costLineFormSchema = z.object({
     }
 })
 
-// Espejo del contrato del backend (saveRawMaterialTransformationSchema). El costo final NUNCA se
-// envía: el servidor lo calcula.
+// Espejo del contrato del backend (saveRawMaterialTransformationSchema). Todos los importes en USD.
+// El costo final NUNCA se envía: el servidor lo calcula.
 const transformationBaseSchema = z.object({
     unprocessedCode: z.string().trim().min(1).max(60),
     unprocessedName: z.string().trim().min(1).max(120),
@@ -45,11 +41,8 @@ const transformationBaseSchema = z.object({
     processedNameEn: z.string().trim().max(120).optional(),
     ingredientType: ingredientTypeEnum,
     inputCostPerPound: z.number().nonnegative(),
-    inputCurrency: currencySchema,
     freightPerPound: z.number().nonnegative(),
-    freightCurrency: currencySchema,
     yieldPercentage: z.number().gt(0).lte(100),
-    exchangeRate: z.number().positive(),
     costs: z.array(costLineFormSchema).max(MAX_TRANSFORMATION_COST_LINES),
 })
 
@@ -63,11 +56,8 @@ export type TransformationCostLineValues = TransformationFormValues["costs"][num
 
 const previewSchema = transformationBaseSchema.pick({
     inputCostPerPound: true,
-    inputCurrency: true,
     freightPerPound: true,
-    freightCurrency: true,
     yieldPercentage: true,
-    exchangeRate: true,
     costs: true,
 })
 export type TransformationPreviewInput = z.infer<typeof previewSchema>
@@ -97,7 +87,6 @@ const listItemSchema = z.object({
     unprocessedCode: z.string(),
     unprocessedName: z.string(),
     inputCostPerPound: z.number(),
-    inputCurrency: currencySchema,
     processedRawMaterialId: z.number().int(),
     processedCode: z.string(),
     processedName: z.string(),
@@ -117,8 +106,6 @@ export const transformationDetailSchema = listItemSchema.extend({
     processedNameEn: z.string().nullable(),
     ingredientType: ingredientTypeEnum,
     freightPerPound: z.number(),
-    freightCurrency: currencySchema,
-    exchangeRate: z.number(),
     freightUsdPerPound: z.number(),
     rawMaterialCostUsd: z.number(),
     directLaborCostUsd: z.number(),
@@ -130,7 +117,6 @@ export const transformationDetailSchema = listItemSchema.extend({
         category: z.enum(TRANSFORMATION_COST_CATEGORIES),
         conceptName: z.string(),
         amount: z.number(),
-        currency: currencySchema,
         costBasis: z.enum(TRANSFORMATION_COST_BASES),
         poundsPerUnit: z.number().nullable(),
         costUsdPerProcessedPound: z.number(),
@@ -156,7 +142,6 @@ export const unprocessedSourceSchema = z.object({
     code: z.string(),
     displayName: z.string(),
     costPerPound: z.number(),
-    costCurrency: currencySchema,
     transformationCount: z.number().int(),
 })
 export type UnprocessedSource = z.infer<typeof unprocessedSourceSchema>

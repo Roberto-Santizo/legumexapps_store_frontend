@@ -20,16 +20,12 @@ function toFormValues(detail: TransformationDetail): DefaultValues<Transformatio
         processedNameEn: detail.processedNameEn ?? "",
         ingredientType: detail.ingredientType,
         inputCostPerPound: detail.inputCostPerPound,
-        inputCurrency: detail.inputCurrency,
         freightPerPound: detail.freightPerPound,
-        freightCurrency: detail.freightCurrency,
         yieldPercentage: detail.yieldPercentage,
-        exchangeRate: detail.exchangeRate,
         costs: detail.costs.map((cost) => ({
             category: cost.category,
             conceptName: cost.conceptName,
             amount: cost.amount,
-            currency: cost.currency,
             costBasis: cost.costBasis,
             poundsPerUnit: cost.poundsPerUnit,
         })),
@@ -65,6 +61,8 @@ export function EditRawMaterialTransformationPage() {
 
     return (
         <PageContainer wide>
+            {/* Más angosto que wide (7xl): un formulario de dos columnas a todo el ancho se ve estirado. */}
+            <div className="mx-auto max-w-5xl">
             <TransformationPageHeader
                 title={t("rawMaterialTransformation.edit.title")}
                 description={detail ? `${detail.unprocessedCode} → ${detail.processedCode}` : undefined}
@@ -82,6 +80,7 @@ export function EditRawMaterialTransformationPage() {
                     currentSourceId={detail.unprocessedRawMaterialId}
                 />
             )}
+            </div>
         </PageContainer>
     )
 }

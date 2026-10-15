@@ -45,7 +45,7 @@ function TraceabilityCard({ detail }: Readonly<{ detail: TransformationDetail }>
                     <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">{t("rawMaterialTransformation.detail.unprocessed")}</p>
                     <p className="mt-1 text-xl font-semibold text-ink-900">{detail.unprocessedCode}</p>
                     <p className="text-sm text-ink-600">{detail.unprocessedName}</p>
-                    <p className="mt-3 tabular-nums text-ink-900">{formatAmount(detail.inputCostPerPound, detail.inputCurrency)} / lb</p>
+                    <p className="mt-3 tabular-nums text-ink-900">{formatAmount(detail.inputCostPerPound)} / lb</p>
                     {detail.siblingCount > 0 && <p className="mt-2 text-xs text-ink-600">{t("rawMaterialTransformation.detail.siblings", { count: detail.siblingCount })}</p>}
                 </div>
                 <div className="flex items-center justify-center text-brand-500" aria-hidden="true">
@@ -109,7 +109,7 @@ function CostsCard({ detail, category }: Readonly<{ detail: TransformationDetail
                             {costs.map((cost) => (
                                 <TableRow key={cost.id}>
                                     <Td>{cost.conceptName}</Td>
-                                    <Td><span className="tabular-nums">{formatAmount(cost.amount, cost.currency)}</span></Td>
+                                    <Td><span className="tabular-nums">{formatAmount(cost.amount)}</span></Td>
                                     <Td>{t(`rawMaterialTransformation.costBasis.${cost.costBasis}`)}</Td>
                                     <Td>{cost.poundsPerUnit ?? "—"}</Td>
                                     <Td><span className="font-semibold tabular-nums">{formatUsdPerPound(cost.costUsdPerProcessedPound, 6)}</span></Td>
@@ -151,6 +151,8 @@ export function RawMaterialTransformationDetailPage() {
 
     return (
         <PageContainer wide>
+            {/* Más angosto que wide (7xl): un formulario de dos columnas a todo el ancho se ve estirado. */}
+            <div className="mx-auto max-w-5xl">
             <TransformationPageHeader
                 title={detail ? `${detail.unprocessedCode} → ${detail.processedCode}` : t("rawMaterialTransformation.title")}
                 description={detail?.processedName}
@@ -175,20 +177,19 @@ export function RawMaterialTransformationDetailPage() {
                 <div className="space-y-6">
                     <TraceabilityCard detail={detail} />
                     <Card>
-                        <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                        <dl className="grid gap-5 sm:grid-cols-3">
                             <Item label={t("rawMaterialTransformation.form.yieldPercentage")}>{detail.yieldPercentage}%</Item>
-                            <Item label={t("rawMaterialTransformation.form.freightPerPound")}>{formatAmount(detail.freightPerPound, detail.freightCurrency)} / lb</Item>
-                            <Item label={t("rawMaterialTransformation.form.exchangeRate")}>Q{detail.exchangeRate}</Item>
+                            <Item label={t("rawMaterialTransformation.form.freightPerPound")}>{formatAmount(detail.freightPerPound)} / lb</Item>
                             <Item label={t("common.updatedAt")}>{formatDateTime(detail.updatedAt, i18n.language)}</Item>
                         </dl>
                     </Card>
                     {TRANSFORMATION_COST_CATEGORIES.map((category) => <CostsCard key={category} detail={detail} category={category} />)}
                     <TransformationSummary
                         totals={{ ...detail, catalogCostPerPound: detail.catalogCostPerPound ?? 0 }}
-                        exchangeRate={detail.exchangeRate}
                     />
                 </div>
             )}
+            </div>
         </PageContainer>
     )
 }

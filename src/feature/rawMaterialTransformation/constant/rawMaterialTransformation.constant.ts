@@ -20,7 +20,7 @@ export function formatUsdPerPound(value: number, fractionDigits = 4): string {
     return formatter.format(value)
 }
 
-export function formatAmount(value: number, currency: "GTQ" | "USD"): string {
-    const symbol = currency === "GTQ" ? "Q" : "$"
-    return `${symbol}${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`
+// Importe ingresado por el admin (siempre USD), sin rellenar decimales de más.
+export function formatAmount(value: number): string {
+    return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`
 }

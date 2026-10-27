@@ -1,7 +1,7 @@
 import { forwardRef } from "react"
 import type { ButtonHTMLAttributes } from "react"
-import type { ButtonVariant } from "@/shared/component/buttonClassName"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import type { ButtonVariant } from "@/shared/utils/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
     variant?: ButtonVariant

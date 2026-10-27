@@ -4,7 +4,7 @@ import { PackagingTable } from "@/feature/packaging/component/packagingTable.com
 import { bulkImportPackagingsAPI, downloadPackagingImportTemplateAPI } from "@/feature/packaging/api/packaging.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 
 export function PackagingListPage() {

@@ -309,7 +309,8 @@ export function QuoteResultCard({
                     >
                         <CostRow
                             label={t("site.quoteRequest.result.adjustment")}
-                            quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
+                            quantityLabel={t("site.quoteRequest.result.adjustmentDetail", {
+                                unitCost: format(breakdown.adjustment.unitCost),
                                 count: breakdown.adjustment.totalUnits.toLocaleString("es-MX"),
                             })}
                             lineTotal={breakdown.adjustment.lineTotal}

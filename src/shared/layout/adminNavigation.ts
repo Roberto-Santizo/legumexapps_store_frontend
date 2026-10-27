@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react"
 import {
+    Boxes,
     Calculator,
     Carrot,
     FlaskConical,
@@ -20,7 +21,6 @@ import {
     ShieldCheck,
     ShoppingBag,
     GlassWater,
-    SlidersHorizontal,
     UserCog,
     Users,
 } from "lucide-react"
@@ -54,9 +54,10 @@ export const NAV_GROUPS: NavGroup[] = [
         id: "catalog",
         labelKey: "nav.groups.catalog",
         items: [
+            { url: "/admin/generic-packaging", labelKey: "genericPackaging.title", icon: PackageOpen, permission: "genericPackaging:view" },
+            { url: "/admin/pallet-kit", labelKey: "palletKit.title", icon: Boxes, permission: "palletKit:view" },
             { url: "/admin/products", labelKey: "product.list.title", icon: ShoppingBag, permission: "products:view" },
             { url: "/admin/juices", labelKey: "juice.title", icon: GlassWater, permission: "juices:view" },
-            { url: "/admin/juice-config", labelKey: "juice.configTitle", icon: SlidersHorizontal, permission: "juiceConfig:edit" },
             { url: "/admin/categories", labelKey: "category.list.title", icon: FolderTree, permission: "categories:view" },
             { url: "/admin/sub-categories", labelKey: "subCategory.list.title", icon: Layers, permission: "subCategories:view" },
             { url: "/admin/raw-materials", labelKey: "rawMaterial.list.title", icon: Carrot, permission: "rawMaterials:view" },

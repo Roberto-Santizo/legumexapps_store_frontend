@@ -1,8 +1,8 @@
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer"
 import { useTranslation } from "react-i18next"
 import type { QuoteLine } from "../schema/quote.schema"
-import { productionMaterials, consolidateProductionMaterials } from "./quoteProductionData"
-import type { ProductionMaterial } from "./quoteProductionData"
+import { productionMaterials, consolidateProductionMaterials } from "../util/quoteProductionData"
+import type { ProductionMaterial } from "../util/quoteProductionData"
 
 const styles = StyleSheet.create({
     page: { padding: 32, paddingBottom: 44, fontSize: 9, fontFamily: "Helvetica", color: "#0f2e1e" },

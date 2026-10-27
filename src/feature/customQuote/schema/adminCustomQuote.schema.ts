@@ -27,7 +27,6 @@ export const adminCustomQuoteListItemSchema = z.object({
     presentationLabel: z.string().nullable(),
     productDisplayName: z.string(),
     variantLabel: z.string().nullable(),
-    isOrganic: z.boolean(),
     requestedPallets: z.number().int(),
     totalUnits: z.number(),
     totalCost: z.number(),
@@ -45,7 +44,6 @@ export const adminCustomQuoteDetailSchema = quoteLineSchema.extend({
     subCategoryName: z.string().nullable(),
     presentationId: z.number().int(),
     presentationLabel: z.string().nullable(),
-    isOrganic: z.boolean(),
     destinationName: z.string().nullable(),
     bagsPerBox: z.number().int(),
     unitsPerIntermediatePackage: z.number().int().nullable(),
@@ -61,7 +59,7 @@ export type AdminCustomQuoteListItem = z.infer<typeof adminCustomQuoteListItemSc
 export type AdminCustomQuoteDetail = z.infer<typeof adminCustomQuoteDetailSchema>
 
 // Rango opcional sobre la fecha de guardado (YYYY-MM-DD de Guatemala, null = sin límite) -- misma forma
-// que DashboardDateRange, para reusar DateRangeFilter -- + estado opcional.
+// que DateRange, para reusar DateRangeFilter -- + estado opcional.
 export type AdminCustomQuoteListFilters = {
     startDate: string | null
     endDate: string | null

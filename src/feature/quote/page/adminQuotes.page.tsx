@@ -1,5 +1,6 @@
-import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
+import type { DateRange } from "@/shared/schema/dateRange.schema"
 import { Suspense, useState } from "react"
+import type { ComponentType } from "react"
 import { Navigate, useSearchParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { Package, SlidersHorizontal, ClipboardList } from "lucide-react"
@@ -10,8 +11,6 @@ import { Spinner } from "@/shared/component/spinner.component"
 import { lazyWithRetry } from "@/shared/router/lazyWithRetry"
 
 const FixedQuotes = lazyWithRetry(() => import("./adminQuote.page").then(module => ({ default: module.AdminQuoteListPage })))
-const CustomizableQuotes = lazyWithRetry(() => import("@/feature/customQuote/page/adminCustomQuoteList.page").then(module => ({ default: module.AdminCustomQuoteListPage })))
-const ProductionReports = lazyWithRetry(() => import("../component/productionOrders.component").then(module => ({ default: module.ProductionOrders })))
 
 export function AdminCustomQuoteListRedirect() {
     const [params] = useSearchParams()
@@ -20,11 +19,19 @@ export function AdminCustomQuoteListRedirect() {
     return <Navigate to={`/admin/quotes?${target}`} replace />
 }
 
-export function AdminQuotesPage() {
+export interface EmbeddedQuoteListProps {
+    embedded?: boolean
+    dateRange?: DateRange
+    onDateChange?: (range: DateRange) => void
+}
+
+// Contenedor de pestañas de cotizaciones. Las vistas de otros features (personalizables y órdenes de
+// producción) las inyecta el router, para que quote no dependa de customQuote ni de productionOrder.
+export function AdminQuotesPage({ customizableQuotes: CustomizableQuotes, productionReports: ProductionReports }: Readonly<{ customizableQuotes: ComponentType<EmbeddedQuoteListProps>; productionReports: ComponentType }>) {
     const { t } = useTranslation()
     const { hasPermission } = usePermission()
     const [params, setParams] = useSearchParams()
-    const [dateRanges, setDateRanges] = useState<Record<string, DashboardDateRange>>({ fixed: { startDate: null, endDate: null }, customizable: { startDate: null, endDate: null } })
+    const [dateRanges, setDateRanges] = useState<Record<string, DateRange>>({ fixed: { startDate: null, endDate: null }, customizable: { startDate: null, endDate: null } })
     const options = [
         { value: "fixed", permission: "quotes:view", icon: Package },
         { value: "customizable", permission: "customQuotes:view", icon: SlidersHorizontal },
@@ -32,7 +39,7 @@ export function AdminQuotesPage() {
     if (hasPermission("quotes:view") && hasPermission("customQuotes:view")) options.push({ value: "production", permission: "quotes:view", icon: ClipboardList })
     if (!options.length) return <AccessDenied />
     const selected = options.find(option => option.value === params.get("type"))?.value ?? options[0].value
-    const onDateChange = (range: DashboardDateRange) => setDateRanges(current => ({ ...current, [selected]: range }))
+    const onDateChange = (range: DateRange) => setDateRanges(current => ({ ...current, [selected]: range }))
     function select(value: string) {
         const next = new URLSearchParams(params)
         next.set("type", value)

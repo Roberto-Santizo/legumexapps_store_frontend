@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { usePermission } from "@/shared/auth/usePermission"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 export function AccessDenied() {
     const { t } = useTranslation()

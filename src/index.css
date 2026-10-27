@@ -47,6 +47,17 @@
     --color-info-bg: #edf5f8;
     --color-info-border: #bed7e1;
 
+    /* Data visualization: vivid categorical slots in fixed order (green, blue, amber, pink),
+       validated for colorblind separation on each surface. "Other" stays neutral. */
+    --color-chart-1: #16a34a;
+    --color-chart-2: #2563eb;
+    --color-chart-3: #f59e0b;
+    --color-chart-4: #db2777;
+    --color-chart-other: #b4bfb8;
+    --color-chart-track: #e8f5ec;
+    /* Dashboard figures and headings: deep green instead of near-black text. */
+    --color-figure: #0b5d34;
+
     --color-action-primary: #044e27;
     --color-action-primary-hover: #0a6b38;
     --color-action-primary-text: #ffffff;
@@ -153,6 +164,13 @@
     --color-info: #87bfd7;
     --color-info-bg: #192d36;
     --color-info-border: #395968;
+    --color-chart-1: #16a34a;
+    --color-chart-2: #3b7ff5;
+    --color-chart-3: #c98500;
+    --color-chart-4: #e5468e;
+    --color-chart-other: #5d6d63;
+    --color-chart-track: #20372a;
+    --color-figure: #c9f2d4;
     --color-action-primary: #6eac19;
     --color-action-primary-hover: #9dc092;
     --color-action-primary-text: #101613;

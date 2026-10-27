@@ -44,27 +44,39 @@ test("raw-material inputs/responses retire eligibility and organic classificatio
 
 function selector() {
     const records = [
-        { id: 1, displayName: "Raw A", ingredientType: "fruit", isMixable: false },
-        { id: 2, displayName: "Raw B", ingredientType: "fruit" },
-        { id: 3, displayName: "Raw C", ingredientType: "other" },
+        { id: 1, code: "MP-001", displayName: "Raw A", ingredientType: "fruit", isMixable: false, translations: [] },
+        // Spanish base name with an English translation: the English UI must show the translation.
+        { id: 2, code: "MP-002", displayName: "Materia B", ingredientType: "fruit", translations: [{ language: "en", displayName: "Raw B" }] },
+        { id: 3, code: "MP-003", displayName: "Raw C", ingredientType: "other", translations: [] },
     ]
     const rawApi = () => { throw new Error("Network calls forbidden") }
-    let observed
+    let observed, options
     const component = load("src/feature/rawMaterial/component/rawMaterialSelect.component.tsx", name => {
         if (name === "react/jsx-runtime") return require(name)
         if (name === "@tanstack/react-query") return { useQuery: options => { observed = options; return { data: { data: records } } } }
-        if (name === "react-i18next") return { useTranslation: () => ({ t: key => key }) }
+        if (name === "react-i18next") return { useTranslation: () => ({ t: key => key, i18n: { language: "en-US", resolvedLanguage: "en" } }) }
+        if (name === "@/shared/utils/catalogDisplayName") return load("src/shared/utils/catalogDisplayName.ts", () => { throw new Error("No dependencies expected") })
         if (name === "@/feature/rawMaterial/api/rawMaterial.api") return { getRawMaterialsAPI: rawApi }
         if (name === "@/shared/component/catalogCreatableSelect.component") return { CatalogCreatableSelect: props => React.createElement("select", {}, props.options.map(option => React.createElement("option", { key: option.value, value: option.value }, option.label))) }
         if (name === "@/feature/rawMaterial/component/createRawMaterialModal.component") return { CreateRawMaterialModal: () => null }
         throw new Error(`Unexpected selector dependency: ${name}`)
     })
+    options = component.RawMaterialSelect({}).props.options
     const html = renderToStaticMarkup(React.createElement(component.RawMaterialSelect, {}))
     assert.equal(observed.queryFn, rawApi)
     assert.equal(JSON.stringify(observed.queryKey), '["rawMaterials"]')
-    return html
+    return { html, options }
 }
-test("raw selector offers every raw material by name only, using only the raw-material API", () => {
-    const html = selector()
-    for (const name of ["Raw A", "Raw B", "Raw C"]) assert.ok(html.includes(`>${name}</option>`))
+test("raw selector shows codes and names and supports searching either without changing IDs", () => {
+    const { html, options } = selector()
+    const filter = require("react-select").createFilter({ stringify: option => `${option.data.searchText ?? option.label} ${option.value}` })
+    for (const [index, name] of ["Raw A", "Raw B", "Raw C"].entries()) {
+        const code = `MP-00${index + 1}`
+        assert.ok(html.includes(`>${code} - ${name}</option>`))
+        const option = { label: options[index].label, value: String(options[index].value), data: options[index] }
+        assert.equal(filter(option, code.toLowerCase()), true)
+        assert.equal(filter(option, name.toLowerCase()), true)
+        assert.equal(filter(option, "not-a-match"), false)
+        assert.equal(options[index].value, index + 1)
+    }
 })

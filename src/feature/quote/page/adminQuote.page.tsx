@@ -1,10 +1,10 @@
-import { DateRangeFilter } from "@/feature/dashboard/component/dateRangeFilter.component"
-import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
+import { DateRangeFilter } from "@/shared/component/dateRangeFilter.component"
+import type { DateRange } from "@/shared/schema/dateRange.schema"
 import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { useQuery } from "@tanstack/react-query"
-import { ChevronDown, ChevronUp, FileSpreadsheet } from "lucide-react"
+import { ChevronDown, ChevronUp, FileSpreadsheet, Mail } from "lucide-react"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Input } from "@/shared/component/input.component"
@@ -15,23 +15,29 @@ import { formatCurrency } from "@/shared/format/currency"
 import { QuoteProductionButton } from "../component/quoteProductionButton.component"
 
 
-export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }: Readonly<{ embedded?: boolean; dateRange?: DashboardDateRange; onDateChange?: (range: DashboardDateRange) => void }> = {}) {
+export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }: Readonly<{ embedded?: boolean; dateRange?: DateRange; onDateChange?: (range: DateRange) => void }> = {}) {
     const { t } = useTranslation()
     const [search, setSearch] = useState("")
     const [expandedId, setExpandedId] = useState<number | null>(null)
 
-    const [localRange, setLocalRange] = useState<DashboardDateRange>({ startDate: null, endDate: null })
+    const [localRange, setLocalRange] = useState<DateRange>({ startDate: null, endDate: null })
     const range = dateRange ?? localRange
     const quotesQuery = useQuery({ queryKey: ["adminQuotes", range.startDate, range.endDate], queryFn: () => getAllQuotesAPI(range) })
     const quotes = quotesQuery.data?.data ?? []
+
+    // Representante con empresa y correo, o el usuario staff que la guardó desde el cotizador del admin.
+    const authorName = (quote: (typeof quotes)[number]) => quote.quotingSalesperson?.name ?? quote.quotingUser?.name ?? ""
+    const authorDetails = (quote: (typeof quotes)[number]) => quote.quotingSalesperson
+        ? [quote.quotingSalesperson.companyName, quote.quotingSalesperson.email]
+        : [t("adminQuote.list.adminAuthor")]
 
     const normalizedSearch = search.trim().toLowerCase()
     const filteredQuotes = normalizedSearch
         ? quotes.filter((quote) => {
               const haystack = [
-                  quote.quotingSalesperson.name,
-                  quote.quotingSalesperson.companyName,
-                  quote.quotingSalesperson.email,
+                  authorName(quote),
+                  ...authorDetails(quote),
+                  ...quote.emailDeliveries.flatMap(delivery => [delivery.recipientName, delivery.recipientEmail]),
                   quote.productDisplayName,
               ]
                   .filter(Boolean)
@@ -78,9 +84,7 @@ export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }
                                         )}
                                     </p>
                                     <p className="mt-1 truncate text-sm font-medium text-ink-600">
-                                        {quote.quotingSalesperson.name}
-                                        {quote.quotingSalesperson.companyName && ` · ${quote.quotingSalesperson.companyName}`}
-                                        {` · ${quote.quotingSalesperson.email}`}
+                                        {[authorName(quote), ...authorDetails(quote)].filter(Boolean).join(" · ")}
                                     </p>
                                     <p className="mt-1 text-xs text-ink-600">
                                         {/* Transporte apagado por ahora: no se interpola el destino. */}
@@ -89,6 +93,14 @@ export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }
                                             pallets: quote.requestedPallets,
                                         })}
                                     </p>
+                                    {quote.emailDeliveries.length > 0 && (
+                                        <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs font-medium text-brand-700">
+                                            <Mail size={14} className="shrink-0" aria-hidden="true" />
+                                            <span className="truncate">
+                                                {t("adminQuote.list.sentTo", { count: quote.emailDeliveries.length, name: quote.emailDeliveries.at(-1)!.recipientName })}
+                                            </span>
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
                                     <p className="font-display text-lg font-extrabold text-ink-900">
@@ -104,8 +116,22 @@ export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }
 
                             {isExpanded && (
                                 <div className="border-t border-line p-4 sm:p-6">
+                                    {quote.emailDeliveries.length > 0 && (
+                                        <section className="mb-4 rounded-panel border border-line bg-canvas p-4" aria-labelledby={`quote-${quote.id}-deliveries`}>
+                                            <h3 id={`quote-${quote.id}-deliveries`} className="text-sm font-semibold text-ink-900">{t("adminQuote.list.deliveriesTitle")}</h3>
+                                            <ul className="mt-2 space-y-1.5">
+                                                {quote.emailDeliveries.map(delivery => (
+                                                    <li key={`${delivery.sentAt.toISOString()}:${delivery.recipientEmail}`} className="text-sm text-ink-600 wrap-break-word">
+                                                        <span className="font-medium text-ink-900">{delivery.recipientName}</span>
+                                                        {` · ${delivery.recipientEmail} · `}
+                                                        {delivery.sentAt.toLocaleString("es-GT", { timeZone: "America/Guatemala", dateStyle: "short", timeStyle: "short" })}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </section>
+                                    )}
                                     <QuoteResultCard result={quote} isPending={false} />
-                                    <div className="mt-4"><QuoteProductionButton lines={[quote]} clientName={quote.breakdown.order?.clientName ?? ""} orderId={`fixed-${quote.id}`} salespersonName={quote.quotingSalesperson.name} quoteDate={quote.createdAt} /></div>
+                                    <div className="mt-4"><QuoteProductionButton lines={[quote]} clientName={quote.breakdown.order?.clientName ?? ""} orderId={`fixed-${quote.id}`} salespersonName={authorName(quote)} quoteDate={quote.createdAt} /></div>
                                 </div>
                             )}
                         </Card>

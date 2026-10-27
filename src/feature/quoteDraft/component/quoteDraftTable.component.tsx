@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import type { QuoteDraft } from "@/feature/quoteDraft/schema/quoteDraft.schema"
 import { QuoteDraftStateBadge } from "@/feature/quoteDraft/component/quoteDraftStateBadge.component"
-import { buildPackagingConfiguration } from "@/feature/quote/component/quotePackagingConfig"
+import { buildPackagingConfiguration } from "@/feature/quote/util/quotePackagingConfig"
 import { ProductSummary, SalespersonSummary } from "@/feature/quote/component/quoteListCells.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { formatCurrency } from "@/shared/format/currency"

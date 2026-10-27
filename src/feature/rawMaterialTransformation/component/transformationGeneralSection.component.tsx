@@ -7,7 +7,7 @@ import type { Control, FieldError, FieldErrors, UseFormRegister, UseFormSetValue
 import { useWatch } from "react-hook-form"
 import { getUnprocessedSourcesAPI } from "@/feature/rawMaterialTransformation/api/rawMaterialTransformation.api"
 import type { TransformationFormValues } from "@/feature/rawMaterialTransformation/schema/rawMaterialTransformation.schema"
-import { transformationFieldError } from "@/feature/rawMaterialTransformation/component/transformationFieldError"
+import { transformationFieldError } from "@/feature/rawMaterialTransformation/util/transformationFieldError"
 import { Card } from "@/shared/component/card.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"

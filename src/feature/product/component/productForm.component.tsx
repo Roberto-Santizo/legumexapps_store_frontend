@@ -7,7 +7,7 @@ import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
 import { Checkbox } from "@/shared/component/checkbox.component"
 import { toNullableNumber } from "@/shared/form/toNullableNumber"
-import { SubCategorySelect } from "@/feature/category/component/subCategorySelect.component"
+import { ProductCategorySelect } from "./productCategorySelect.component"
 import { ClientSelect } from "@/feature/client/component/clientSelect.component"
 import { ImageUploadField } from "@/shared/component/imageUploadField.component"
 import { TranslationSection } from "@/shared/component/translationSection.component"
@@ -18,6 +18,7 @@ type ProductFormProps<T extends UpdateProductInput> = {
     errors: FieldErrors<T>
     // Solo aplica en edición; al crear no se pasa.
     currentImageUrl?: string | null
+    directCostsOnly?: boolean
 }
 
 // currentImageUrl es la única diferencia entre crear y editar, por eso es opcional.
@@ -26,30 +27,24 @@ export function ProductForm<T extends UpdateProductInput>({
     control,
     errors,
     currentImageUrl,
+    directCostsOnly = false,
 }: Readonly<ProductFormProps<T>>) {
     const { t } = useTranslation()
 
     return (
         <div>
-            <FormField
-                label={t("product.form.subCategoryId")}
-                htmlFor="subCategoryId"
-                error={getFieldErrorMessage(t, errors.subCategoryId as FieldError | undefined)}
-                required
-            >
-                <Controller
-                    name={"subCategoryId" as Path<T>}
-                    control={control}
-                    render={({ field }) => (
-                        <SubCategorySelect
-                            inputId="subCategoryId"
-                            hasError={!!errors.subCategoryId}
-                            value={field.value as number | undefined}
-                            onChange={field.onChange}
-                        />
-                    )}
-                />
-            </FormField>
+            <Controller
+                name={"subCategoryId" as Path<T>}
+                control={control}
+                render={({ field }) => (
+                    <ProductCategorySelect
+                        inputId="subCategoryId"
+                        error={getFieldErrorMessage(t, errors.subCategoryId as FieldError | undefined)}
+                        value={field.value as number | undefined}
+                        onChange={field.onChange}
+                    />
+                )}
+            />
 
             <FormField
                 label={t("product.form.clientId")}
@@ -85,6 +80,7 @@ export function ProductForm<T extends UpdateProductInput>({
             </div>
             <p className="mb-5 text-sm text-ink-600">{t("product.form.isOrganicHint")}</p>
 
+            {!directCostsOnly && <>
             <FormField
                 label={t("product.form.additionalCostPerUnit")}
                 htmlFor="additionalCostPerUnit"
@@ -101,6 +97,7 @@ export function ProductForm<T extends UpdateProductInput>({
                 />
             </FormField>
             <p className="mb-5 -mt-3 text-sm text-ink-600">{t("product.form.additionalCostPerUnitHint")}</p>
+            </>}
 
             <Controller
                 name={"image" as Path<T>}

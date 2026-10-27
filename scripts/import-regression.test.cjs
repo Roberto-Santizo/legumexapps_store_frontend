@@ -122,7 +122,7 @@ test("la página conserva carga inicial y editor sin panel separado", () => {
         "@/feature/product/api/productIngredient.api": ingredients,
         "@/shared/auth/usePermission": { usePermission: () => ({ hasPermission: permission => permissions.includes(permission) }) },
         "@/shared/component/pageContainer.component": { PageContainer: ({ children }) => React.createElement("main", null, children) },
-        "@/shared/component/buttonClassName": { buttonClassName: () => "" },
+        "@/shared/utils/buttonClassName": { buttonClassName: () => "" },
     })
     const previousStorage = globalThis.localStorage
     try {

@@ -1,0 +1,14 @@
+import { z } from "zod";
+const id = z.number().int().positive();
+export const genericOptionSchema = z.object({ packagingId: id, quantityBasis: z.enum(["per_unit", "per_intermediate", "per_box", "per_pallet"]), quantityValue: z.coerce.number().positive().nullable() });
+export const genericGroupSchema = z.object({ packagingGroupId: id, level: z.enum(["unit", "intermediate", "pallet"]), selectionMode: z.enum(["one", "all"]), isRequired: z.boolean(), options: z.array(genericOptionSchema) });
+export const genericProfileSchema = z.object({ reference: z.string().trim().min(1).max(60), displayName: z.string().trim().min(1).max(120), categoryId: id, presentationId: id, bagsPerBox: id.max(100000), boxesPerPallet: id.max(100000), unitsPerIntermediatePackage: id.nullable(), isActive: z.boolean(), groups: z.array(genericGroupSchema) });
+export type GenericProfileInput = z.infer<typeof genericProfileSchema>;
+const savedGroupSchema = genericGroupSchema.extend({ group: z.object({ displayName: z.string() }).optional(), options: z.array(genericOptionSchema.extend({ packaging: z.object({ displayName: z.string() }).optional() })) });
+export const genericSavedProfileSchema = genericProfileSchema.extend({ groups: z.array(savedGroupSchema), id, category: z.object({ displayName: z.string() }).nullable().optional(), presentation: z.object({ displayLabel: z.string() }).nullable().optional(), ready: z.boolean(), issues: z.array(z.object({ key: z.string(), params: z.record(z.string(), z.unknown()).optional() })) });
+export const genericAdminOptionsSchema = z.object({ categories: z.array(z.object({ id, displayName: z.string(), translations: z.array(z.object({ language: z.string(), displayName: z.string() })).default([]) })), presentations: z.array(z.object({ id, displayLabel: z.string() })), groups: z.array(z.object({ id, displayName: z.string() })), materials: z.array(z.object({ id, code: z.string(), displayName: z.string(), displayNameEn: z.string().nullable(), packagingRole: z.string(), unitCost: z.union([z.string(), z.number()]).nullable(), defaultQuantityBasis: z.enum(["per_box", "per_pallet"]).nullable().optional(), defaultQuantityValue: z.union([z.string(), z.number()]).nullable().optional(), materialType: z.string() })) });
+export type GenericAdminMaterial = z.infer<typeof genericAdminOptionsSchema>["materials"][number];
+export const genericImportPreviewSchema = z.object({ previewHash: z.string(), summary: z.object({ configurations: z.number(), errors: z.number() }), issues: z.array(z.object({ sheet: z.string().optional(), row: z.number(), field: z.string(), message: z.string() })) });
+export type GenericAdminOptions = z.infer<typeof genericAdminOptionsSchema>;
+export type GenericSavedProfile = z.infer<typeof genericSavedProfileSchema>;
+export type GenericLevel = GenericProfileInput["groups"][number]["level"];

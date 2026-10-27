@@ -40,7 +40,7 @@ export type QuoteDraftState = z.infer<typeof quoteDraftStateSchema>
 export type QuoteDraft = z.infer<typeof quoteDraftSchema>
 
 // Rango opcional sobre la última actividad (YYYY-MM-DD, null = sin límite) -- misma forma que
-// DashboardDateRange, para reusar DateRangeFilter.
+// DateRange, para reusar DateRangeFilter.
 export type QuoteDraftListFilters = {
     startDate: string | null
     endDate: string | null

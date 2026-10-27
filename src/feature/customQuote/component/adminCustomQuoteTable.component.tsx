@@ -2,7 +2,6 @@ import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import type { AdminCustomQuoteListItem } from "@/feature/customQuote/schema/adminCustomQuote.schema"
 import { CustomQuoteStatusBadge } from "@/feature/customQuote/component/customQuoteStatusBadge.component"
-import { Chip } from "@/shared/component/chip.component"
 import { ProductSummary, SalespersonSummary } from "@/feature/quote/component/quoteListCells.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { formatCurrency } from "@/shared/format/currency"
@@ -43,11 +42,6 @@ export function AdminCustomQuoteTable({ customQuotes }: Readonly<{ customQuotes:
                                 </Td>
                                 <Td className="whitespace-normal">
                                     <ProductSummary productDisplayName={customQuote.productDisplayName} variantLabel={customQuote.variantLabel} />
-                                    {customQuote.isOrganic && (
-                                        <div className="mt-1">
-                                            <Chip tone="fresh">{t("site.quoteRequest.form.organicBadge")}</Chip>
-                                        </div>
-                                    )}
                                 </Td>
                                 <Td>{customQuote.subCategoryName ?? "—"}</Td>
                                 <Td className="text-right">{customQuote.requestedPallets}</Td>

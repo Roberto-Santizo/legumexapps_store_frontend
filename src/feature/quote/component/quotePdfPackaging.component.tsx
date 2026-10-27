@@ -1,8 +1,8 @@
 import { View, Text, Svg, Path } from "@react-pdf/renderer"
 import { useTranslation } from "react-i18next"
-import { quotePdfStyles as styles, VERDE_PROFUNDO } from "./quotePdfDocument.styles"
-import { buildPdfPackagingMaterials } from "./quotePdfPackaging"
-import type { PdfPackagingKind, PdfPackagingSnapshot } from "./quotePdfPackaging"
+import { quotePdfStyles as styles, VERDE_PROFUNDO } from "../constant/quotePdfDocument.styles"
+import { buildPdfPackagingMaterials } from "../util/quotePdfPackaging"
+import type { PdfPackagingKind, PdfPackagingSnapshot } from "../util/quotePdfPackaging"
 
 const iconPaths: Record<PdfPackagingKind, string[]> = {
     unit: ["M7 3h10l-1 4 3 13H5L8 7Z", "M8 7h8M8 16h8"],

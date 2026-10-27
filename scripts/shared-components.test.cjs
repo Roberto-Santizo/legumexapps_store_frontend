@@ -121,7 +121,7 @@ test("credential login stores the session, returns to the protected page and sho
 
 test("quote order: results, steps, new quote and clearing the order", () => {
     const state = stateHarness()
-    const { useQuoteOrder } = loader({ react: { useState: state.useState } })("src/feature/quote/component/useQuoteOrder.ts")
+    const { useQuoteOrder } = loader({ react: { useState: state.useState } })("src/feature/quote/hook/useQuoteOrder.ts")
     let rotations = 0
     const useOrderRender = () => { state.begin(); return useQuoteOrder(() => { rotations++ }) }
     const order = useOrderRender
@@ -142,7 +142,7 @@ test("quote order: results, steps, new quote and clearing the order", () => {
 
 test("quote wizard content keeps the form as the first child of the same root on every step", () => {
     const { QuoteWizardContent } = loader({ ...i18n, "@/shared/component/spinner.component": { Spinner: "Spinner" } })("src/feature/quote/component/quoteWizardContent.component.tsx")
-    const { WIZARD_DETAILS_LAYOUT_CLASSNAME, WIZARD_STEP_LAYOUT_CLASSNAME } = loader()("src/feature/quote/component/quoteWizardLayout.ts")
+    const { WIZARD_DETAILS_LAYOUT_CLASSNAME, WIZARD_STEP_LAYOUT_CLASSNAME } = loader()("src/feature/quote/constant/quoteWizardLayout.ts")
     const props = { isLoadingCatalog: false, hasCatalogError: false, form: { type: "Form", props: {} }, result: { type: "Result", props: {} }, orderSummary: { type: "Summary", props: {} } }
     const total = QuoteWizardContent({ ...props, wizardStep: "total" })
     const pallets = QuoteWizardContent({ ...props, wizardStep: "pallets" })
@@ -158,4 +158,66 @@ test("quote wizard content keeps the form as the first child of the same root on
     assert.equal(QuoteWizardContent({ ...props, wizardStep: "total", isLoadingCatalog: true }).type, "Spinner")
     const error = QuoteWizardContent({ ...props, wizardStep: "total", hasCatalogError: true })
     assert.deepEqual([error.type, error.props.children], ["p", "common.loadError"])
+})
+
+test("subcategory category selector follows the active language without changing selected IDs", () => {
+    let language = "es"
+    const changes = []
+    const { CategorySelect } = loader({
+        "react-i18next": { useTranslation: () => ({ t, i18n: { resolvedLanguage: language, language } }) },
+        "@tanstack/react-query": { useQuery: () => ({ data: { data: [
+            { id: 1, displayName: "Congelados", isActive: true, translations: [{ language: "en", displayName: "Frozen products" }] },
+            { id: 2, displayName: "Sin traduccion", isActive: true, translations: [] },
+            { id: 3, displayName: "Vacia", isActive: true, translations: [{ language: "en", displayName: "  " }] },
+            { id: 4, displayName: "Inactiva", isActive: false, translations: [] },
+        ] } }) },
+        "@/feature/category/api/category.api": { getCategoriesAPI() {} },
+        "@/shared/component/searchableSelect.component": { SearchableSelect: "Select" },
+    })("src/feature/category/component/categorySelect.component.tsx")
+    const render = () => CategorySelect({ value: 1, onChange: value => changes.push(value) }).props
+    assert.equal(render().value.label, "Congelados")
+    language = "en-US"
+    assert.equal(render().value.label, "Frozen products")
+    assert.deepEqual(render().options.map(row => row.label), ["Frozen products", "Sin traduccion", "Vacia"])
+    render().onChange({ value: 2 })
+    render().onChange(null)
+    assert.deepEqual(changes, [2, undefined])
+    language = "es"
+    assert.equal(render().value.label, "Congelados")
+})
+
+test("product form translates both category selectors and preserves filtering and IDs on language change", () => {
+    let language = "en-US"
+    const state = stateHarness(), changes = []
+    const categories = [
+        { id: 1, displayName: "CONGELADO", isActive: true, translations: [{ language: "en", displayName: "FROZEN" }] },
+        { id: 2, displayName: "Otro", isActive: true, translations: [] },
+    ]
+    const subCategories = [
+        { id: 10, categoryId: 1, displayName: "Vegetales", isActive: true, translations: [{ language: "en", displayName: "Vegetables" }] },
+        { id: 11, categoryId: 1, displayName: "Sin traduccion", isActive: true, translations: [] },
+        { id: 12, categoryId: 2, displayName: "Otra categoria", isActive: true, translations: [] },
+        { id: 13, categoryId: 1, displayName: "Inactiva", isActive: false, translations: [] },
+    ]
+    const { ProductCategorySelect } = loader({
+        react: { useState: state.useState },
+        "react-i18next": { useTranslation: () => ({ t, i18n: { language, resolvedLanguage: language } }) },
+        "@tanstack/react-query": { useQuery: ({ queryKey }) => ({ data: { data: queryKey[0] === "categories" ? categories : subCategories } }) },
+        "@/feature/category/api/category.api": { getCategoriesAPI() {} },
+        "@/feature/category/api/subCategory.api": { getSubCategoriesAPI() {} },
+        "@/shared/component/searchableSelect.component": { SearchableSelect: "Select" },
+        "@/shared/component/formField.component": { FormField: "Field" },
+    })("src/feature/product/component/productCategorySelect.component.tsx")
+    const render = () => { state.begin(); return all(ProductCategorySelect({ inputId: "subcategory", value: 10, onChange: value => changes.push(value) })).filter(node => node.type === "Select").map(node => node.props) }
+    assert.equal(render()[0].value.label, "FROZEN")
+    assert.equal(render()[1].value.label, "Vegetables")
+    assert.deepEqual(render()[1].options.map(row => row.value), [10, 11])
+    assert.equal(render()[1].options[1].label, "Sin traduccion")
+    language = "es"
+    assert.equal(render()[0].value.label, "CONGELADO")
+    assert.equal(render()[1].value.label, "Vegetales")
+    assert.deepEqual(changes, [])
+    render()[0].onChange({ value: 2 })
+    assert.deepEqual(changes, [undefined])
+    assert.deepEqual(render()[1].options.map(row => row.value), [12])
 })

@@ -13,7 +13,7 @@ import { Modal } from "@/shared/component/modal.component"
 import { Input } from "@/shared/component/input.component"
 import { FormField } from "@/shared/component/formField.component"
 import { QuotePdfDocument } from "@/feature/quote/component/quotePdfDocument.component"
-import { calculateQuoteOrderTotal, calculateQuoteValidUntil, quotePdfDateFormatter } from "@/feature/quote/component/quotePdfSummary"
+import { calculateQuoteOrderTotal, calculateQuoteValidUntil, quotePdfDateFormatter } from "@/feature/quote/util/quotePdfSummary"
 import { formatCurrency } from "@/shared/format/currency"
 import type { QuoteDocumentLine } from "@/feature/quote/schema/quote.schema"
 
@@ -30,6 +30,9 @@ type QuotePdfButtonProps = {
     sendEmailAPI?: (formData: FormData) => Promise<{ message: string } | undefined>
     quoteDate?: Date
     orderClientName?: string
+    // Cotizador del admin: el paso del correo pide también el nombre del destinatario y lo manda como
+    // `recipientName` para que el envío quede registrado en las cotizaciones del pedido.
+    askRecipientName?: boolean
 }
 
 // Pasos del modal: primero solo el nombre (obligatorio siempre), luego una elección entre
@@ -75,20 +78,23 @@ function triggerBrowserDownload(blob: Blob, fileName: string): void {
 
 export function QuotePdfButton({
     lines,
-    showCostBreakdown = true,
+    showCostBreakdown = false,
     showTransport = false,
     showReferenceDisclaimer = false,
     sendEmailAPI,
     quoteDate,
     orderClientName,
+    askRecipientName = false,
 }: Readonly<QuotePdfButtonProps>) {
     const { t } = useTranslation()
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [step, setStep] = useState<PdfModalStep>("name")
     const [clientName, setClientName] = useState("")
     const [clientEmail, setClientEmail] = useState("")
+    const [recipientName, setRecipientName] = useState("")
     const [nameError, setNameError] = useState<string | undefined>(undefined)
     const [emailError, setEmailError] = useState<string | undefined>(undefined)
+    const [recipientNameError, setRecipientNameError] = useState<string | undefined>(undefined)
     const [confirmed, setConfirmed] = useState<ConfirmedPdfRequest | null>(null)
     const [isDownloading, setIsDownloading] = useState(false)
     const [isBuildingPdfForEmail, setIsBuildingPdfForEmail] = useState(false)
@@ -112,8 +118,10 @@ export function QuotePdfButton({
         setStep(orderClientName ? "choice" : "name")
         setClientName(orderClientName ?? "")
         setClientEmail("")
+        setRecipientName("")
         setNameError(undefined)
         setEmailError(undefined)
+        setRecipientNameError(undefined)
         setConfirmed(orderClientName ? { clientName: orderClientName, quoteDate: quoteDate ?? new Date() } : null)
         setIsDownloading(false)
         setIsBuildingPdfForEmail(false)
@@ -135,6 +143,11 @@ export function QuotePdfButton({
     const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
         setClientEmail(event.target.value)
         if (emailError) setEmailError(undefined)
+    }
+
+    const handleRecipientNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setRecipientName(event.target.value)
+        if (recipientNameError) setRecipientNameError(undefined)
     }
 
     // Paso 1 -> 2: solo valida el nombre. El correo todavía no se ha pedido.
@@ -191,7 +204,10 @@ export function QuotePdfButton({
 
     // Enviar por correo: valida el correo y, en el mismo paso, genera el PDF y lo envía.
     const handleSendEmail = async () => {
+        const trimmedRecipientName = recipientName.trim()
         const trimmedEmail = clientEmail.trim()
+        const missingRecipientName = askRecipientName && !trimmedRecipientName
+        if (missingRecipientName) setRecipientNameError("quote.pdf.modal.required")
         if (!trimmedEmail) {
             setEmailError("quote.pdf.modal.emailRequired")
             return
@@ -200,7 +216,7 @@ export function QuotePdfButton({
             setEmailError("quote.pdf.modal.emailInvalid")
             return
         }
-        if (!confirmed) return
+        if (missingRecipientName || !confirmed) return
 
         setIsBuildingPdfForEmail(true)
         let blob: Blob
@@ -229,6 +245,7 @@ export function QuotePdfButton({
         const formData = new FormData()
         formData.append("file", blob, fileName)
         formData.append("to", trimmedEmail)
+        if (askRecipientName) formData.append("recipientName", trimmedRecipientName)
         formData.append("subject", t("quote.pdf.modal.emailSubject", { clientName: confirmed.clientName }))
         formData.append("body", t("quote.pdf.modal.emailBody", {
             clientName: confirmed.clientName,
@@ -324,7 +341,26 @@ export function QuotePdfButton({
                                 </div>
                             ) : (
                                 <>
-                                    <p className="mb-4 text-sm text-ink-600">{t("quote.pdf.modal.emailStepDescription")}</p>
+                                    <p className="mb-4 text-sm text-ink-600">{t(askRecipientName ? "quote.pdf.modal.recordedEmailStepDescription" : "quote.pdf.modal.emailStepDescription")}</p>
+                                    {askRecipientName && (
+                                        <FormField
+                                            label={t("quote.pdf.modal.recipientNameLabel")}
+                                            htmlFor="quote-pdf-recipient-name"
+                                            error={recipientNameError ? t(recipientNameError) : undefined}
+                                            required
+                                        >
+                                            <Input
+                                                id="quote-pdf-recipient-name"
+                                                value={recipientName}
+                                                onChange={handleRecipientNameChange}
+                                                placeholder={t("quote.pdf.modal.recipientNamePlaceholder")}
+                                                hasError={!!recipientNameError}
+                                                maxLength={150}
+                                                autoComplete="name"
+                                                autoFocus
+                                            />
+                                        </FormField>
+                                    )}
                                     <FormField
                                         label={t("quote.pdf.modal.clientEmailLabel")}
                                         htmlFor="quote-pdf-client-email"
@@ -338,7 +374,7 @@ export function QuotePdfButton({
                                             onChange={handleEmailChange}
                                             placeholder={t("quote.pdf.modal.clientEmailPlaceholder")}
                                             hasError={!!emailError}
-                                            autoFocus
+                                            autoFocus={!askRecipientName}
                                         />
                                     </FormField>
                                     <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">

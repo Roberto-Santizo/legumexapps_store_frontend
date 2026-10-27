@@ -41,7 +41,7 @@ const directory = "src/feature/customQuote/component/"
 const materials = [{ rawMaterialId: 1, displayName: "Arándano entero" }, { rawMaterialId: 2, displayName: "Banano en rodajas" }]
 
 test("back-only navigation removes Continue and selection cards retain native keyboard semantics", () => {
-    const { CatalogQuoteNavigation, CatalogQuoteSelectionCards } = loadComponents()(directory + "catalogQuoteUi.component.tsx")
+    const { CatalogQuoteNavigation, CatalogQuoteSelectionCards } = loadComponents()("src/shared/component/catalogQuoteUi.component.tsx")
     const navigation = renderToStaticMarkup(React.createElement(CatalogQuoteNavigation, { onBack: () => {}, backOnly: true }))
     assert.ok(navigation.includes("Anterior"))
     assert.ok(!navigation.includes("Continuar"))
@@ -70,12 +70,14 @@ test("mix percentage controls preserve decimals, clamp buttons and remove select
     assert.equal(all(full).find(row => row.props?.["aria-label"] === "Aumentar porcentaje de Arándano entero").props.disabled, true)
 })
 
-test("mix summary covers empty, remaining, exact, overflow and invalid precision in both languages", () => {
+test("mix summary covers empty, single-material, remaining, exact, overflow and invalid precision in both languages", () => {
     for (const language of ["es", "en"]) {
         const { CatalogQuoteMixBuilder } = loadComponents({ language })(directory + "catalogQuoteMixBuilder.component.tsx")
-        for (const [percentages, key, amount] of [[{}, "remaining", "100.00"], [{ 1: "75" }, "remaining", "25.00"], [{ 1: "50", 2: "50" }, "valid"], [{ 1: "60", 2: "50" }, "over", "10.00"], [{ 1: "50.001", 2: "49.999" }, "precision"]]) {
+        // A blend needs two or more raw materials: one alone is never shown as valid, even at 100%.
+        for (const [percentages, key, amount] of [[{}, "remaining", "100.00"], [{ 1: "75" }, "minTwo"], [{ 1: "100" }, "minTwo"], [{ 1: "100", 2: "0" }, "minTwo"], [{ 1: "50", 2: "25" }, "remaining", "25.00"], [{ 1: "50", 2: "50" }, "valid"], [{ 1: "60", 2: "50" }, "over", "10.00"], [{ 1: "50.001", 2: "49.999" }, "precision"]]) {
             const html = renderToStaticMarkup(React.createElement(CatalogQuoteMixBuilder, { materials, percentages, onChange: () => {} }))
             assert.ok(html.includes(resources[language].catalogQuote.ui[key].replace("{{amount}}", amount)))
+            assert.equal(html.includes(resources[language].catalogQuote.ui.validHint), key === "valid")
             assert.ok(html.includes('aria-live="polite"'))
             assert.ok(html.includes('max="100"'))
         }
@@ -97,7 +99,7 @@ test("search offers matching backend materials and marks existing ingredients as
 })
 
 test("name search normalizes case, trim and accents and never expands its compatible input", () => {
-    const { searchCatalogMaterials: search } = loadComponents()(directory + "catalogMaterialSearch.ts")
+    const { searchCatalogMaterials: search } = loadComponents()("src/feature/customQuote/util/catalogMaterialSearch.ts")
     for (const query of ["Arándano", "ARÁNDANO", "  arandano  ", "ARA\u0301NDANO"]) assert.deepEqual(search(materials, query), [materials[0]])
     assert.deepEqual(search(materials, "banano"), [materials[1]])
     assert.deepEqual(search(materials, "dragon fruit"), [])
@@ -155,20 +157,22 @@ test("large compatible catalogs show eight initial results, expand and reset on 
     assert.deepEqual(harness.percentages, {})
 })
 
-test("all seven steps and exceptional states render with translated, accessible controls", () => {
+test("all six steps and exceptional states render with translated, accessible controls", () => {
     const state = { categoryId: 1, subCategoryId: 2, ingredientType: "fruit", isOrganic: false, percentages: { 1: "50", 2: "50" }, configurationId: 3, choices: {}, pallets: "2" }
     const fixed = [{ id: 1, packagingId: 1, displayName: "Bolsa del producto", isDefault: true }]
     const configuration = { id: 3, fingerprint: "fixture", presentationId: 1, displayLabel: "48 OZ", netWeightGrams: 1360, bagsPerBox: 6, boxesPerPallet: 117, unitsPerIntermediatePackage: 3, packaging: { unit: { fixed, groups: [] }, intermediate: { fixed: [{ ...fixed[0], displayName: "Empaque intermedio" }], groups: [] }, pallet: { fixed: [], groups: [{ key: "box", group: "Caja", options: [{ ...fixed[0], displayName: "Caja estándar" }, { ...fixed[0], id: 2, isDefault: false, displayName: "Caja alternativa" }] }] } } }
-    const query = { data: { categories: [{ id: 1, displayName: "Congelado", subCategories: [{ id: 2, displayName: "Mezclas de frutas", rawMaterials: materials.map(row => ({ ...row, ingredientType: "fruit" })), configurations: [configuration] }] }] } }
+    const query = { data: { categories: [{ id: 1, displayName: "Congelado", subCategories: [{ id: 2, displayName: "Mezclas de frutas", availability: "ready", compositionMode: "blend", rawMaterials: materials.map(row => ({ ...row, ingredientType: "fruit" })), configurations: [configuration] }] }] } }
     const review = { input: {}, calculation: { productDisplayName: "Mezcla personalizada", variantLabel: "6 × 48 OZ", bagsPerBox: 6, boxesPerPallet: 117, requestedPallets: 2, totalUnits: 1404, totalCost: 12345.67, configuration: { snapshot: {isOrganic:false, ingredientType:"fruit", quantity:{totalWeightGrams:"1909440"}}, rawMaterialMix: [{ rawMaterialId: 1, percentage: 50 }, { rawMaterialId: 2, percentage: 50 }], pallet: { boxesPerPallet: 117 } }, breakdown: { rawMaterials: materials, unitMaterials: fixed, intermediateMaterials: configuration.packaging.intermediate.fixed, palletMaterials: [{ ...fixed[0], displayName: "Caja estándar" }] } } }
     const screens = []
     for (const language of ["es", "en"]) {
-        for (const step of ["category", "subCategory", "profile", "mix", "configuration", "packaging", "result"]) {
-            const { CatalogQuoteWizard } = loadComponents({ language, slots: [state, step, null, false, "", {...review.calculation, totalWeightPounds: 4209.5}], query })(directory + "catalogQuoteWizard.component.tsx")
+        for (const step of ["category", "subCategory", "presentation", "mix", "packaging", "result"]) {
+            const { CatalogQuoteWizard } = loadComponents({ language, slots: [state, step, null, false, "", "", {...review.calculation, totalWeightPounds: 4209.5}], query })(directory + "catalogQuoteWizard.component.tsx")
             const html = renderToStaticMarkup(React.createElement(CatalogQuoteWizard, { onConfirmed: () => {} }))
-            assert.ok(html.includes('aria-current="step"')); assert.equal((html.match(/class="relative flex min-w-24/g) ?? []).length,7); assert.ok(!html.includes('>Review<')); assert.ok(!html.includes('>Revisi?n<'));
+            assert.ok(html.includes('aria-current="step"')); assert.equal((html.match(/class="relative flex min-w-24/g) ?? []).length,6); assert.ok(!html.includes('>Review<')); assert.ok(!html.includes('>Revisi?n<'));
             assert.ok(html.includes(resources[language].catalogQuote.steps[step].replace(/&/g, "&amp;")), `${language} ${step} heading`)
-            if (step === "profile") assert.doesNotMatch(html, /disabled=""/)
+            // Presentation has its own step before the mix; packaging only repeats it as a fixed row.
+            if (step === "presentation" || step === "packaging") assert.ok(html.includes("48 OZ"), `${language} ${step} presentation`)
+            if (step === "packaging") { assert.ok(html.includes("Caja alternativa")); assert.ok(html.includes("Empaque intermedio")); assert.ok(html.includes(resources[language].site.quoteRequest.form.wizard.materials.included)) }
             if (step === "result") { assert.match(html, /12,345\.67/); assert.ok(html.includes(materials[0].displayName)); assert.ok(html.includes("Empaque intermedio")); assert.ok(!html.includes('>Continuar<')); assert.ok(!html.includes('>Continue<')); assert.ok(!html.includes('>Confirm<')); }
             screens.push({ name: `${language}-${step}`, html })
         }
@@ -181,7 +185,7 @@ test("all seven steps and exceptional states render with translated, accessible 
         const largeMaterials = [...materials, { rawMaterialId: 3, displayName: "Mango en cubos" }, { rawMaterialId: 4, displayName: "Piña en trozos" }, ...Array.from({ length: 116 }, (_, index) => ({ rawMaterialId: index + 5, displayName: `Materia prima de prueba ${index + 5}` }))].map(row => ({ ...row, ingredientType: "fruit" }))
         const largeQuery = { data: { categories: [{ ...query.data.categories[0], subCategories: [{ ...query.data.categories[0].subCategories[0], rawMaterials: largeMaterials }] }] } }
         for (const [name, percentages, search] of [["empty-search", {}, ""], ["search", { 2: "25" }, "arandano"], ["multiple", { 1: "30", 2: "25", 3: "20" }, ""], ["exact", { 1: "50", 2: "25", 3: "25" }, ""], ["no-results", { 1: "50" }, "dragon fruit"]]) {
-            const { CatalogQuoteWizard } = loadComponents({ language, slots: [{ ...state, percentages }, "mix", null, false, "", null, 0, search, 8], query: largeQuery })(directory + "catalogQuoteWizard.component.tsx")
+            const { CatalogQuoteWizard } = loadComponents({ language, slots: [{ ...state, percentages }, "mix", null, false, "", "", null, null, false, search, 8], query: largeQuery })(directory + "catalogQuoteWizard.component.tsx")
             const html = renderToStaticMarkup(React.createElement(CatalogQuoteWizard, { onConfirmed: () => {} }))
             screens.push({ name: `${language}-mix-${name}`, html })
         }
@@ -199,4 +203,17 @@ test("all seven steps and exceptional states render with translated, accessible 
         const header = `<a class="inline-flex min-h-11 items-center gap-2 text-sm text-brand-700" href="#">← ${resources.es.customQuote.page.backToDefined}</a><h1 class="mb-3 mt-5 text-3xl font-bold sm:text-4xl">${resources.es.catalogQuote.title}</h1><p class="mb-8 max-w-2xl text-ink-600">${resources.es.catalogQuote.ui.intro}</p>`
         fs.writeFileSync(path.join(target, "review.html"), `<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Customize UI — test fixtures</title><style>${css}</style><main class="mx-auto max-w-site bg-customize-slate px-6 py-12 sm:px-10">${screens.map(screen => `<section data-fixture="${screen.name}" class="mx-auto mb-12 max-w-6xl">${header}${screen.html}</section>`).join("")}</main><script>addEventListener('load',()=>{const failures=[...document.querySelectorAll('[data-fixture]')].filter(el=>el.scrollWidth>el.clientWidth+1).map(el=>el.dataset.fixture);const result=document.createElement('pre');result.id='layout-result';result.textContent=JSON.stringify({width:innerWidth,viewportOverflow:document.documentElement.scrollWidth>innerWidth,failures});document.body.append(result);if(location.hash){document.querySelectorAll('[data-fixture]').forEach(el=>el.hidden=el.dataset.fixture!==location.hash.slice(1))}})</script></html>`)
     }
+})
+
+for (const language of ["es", "en"]) test(`shared material groups: included rows are read-only and optional groups offer "do not include" (${language})`, () => {
+ const { QuoteMaterialGroups } = loadComponents({language})("src/feature/quote/component/quoteMaterialGroups.component.tsx")
+ const option = (id, displayName) => ({ id, packagingId: id, displayName, unitCost: 0, isDefault: false })
+ const materials = resources[language].site.quoteRequest.form.wizard.materials
+ const generic = renderToStaticMarkup(React.createElement(QuoteMaterialGroups, { groups: [{ key: "pallet:catalog:9", level: "pallet", group: "Extras", isRequired: false, selectionMode: "one", options: [option(31, "Etiqueta")], selectedId: undefined }], included: { pallet: [option(1, "Stretch genérico")] }, onSelect: () => {} }))
+ for (const text of ["Stretch genérico", materials.included, materials.optional, materials.none, "Etiqueta"]) assert.ok(generic.includes(text), text)
+ const pressed = generic.split("<button").find(button => button.includes('aria-pressed="true"'))
+ assert.ok(pressed?.includes(materials.none), "an untouched optional group shows \"do not include\" as the current choice")
+ const fixed = renderToStaticMarkup(React.createElement(QuoteMaterialGroups, { groups: [{ key: "pallet:caja", level: "pallet", group: "Caja", options: [option(1, "Caja A"), { ...option(2, "Caja B"), isDefault: true }], selectedId: 2 }], onSelect: () => {} }))
+ assert.ok(fixed.includes(materials.chooseOne)); assert.ok(!fixed.includes(materials.none)); assert.ok(!fixed.includes(materials.included))
+ assert.equal(renderToStaticMarkup(React.createElement(QuoteMaterialGroups, { groups: [], onSelect: () => {} })), "")
 })

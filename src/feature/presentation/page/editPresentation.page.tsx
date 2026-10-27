@@ -13,7 +13,7 @@ import { PresentationForm } from "@/feature/presentation/component/presentationF
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 // Partial<UpdatePresentationInput>: netWeightGrams es requerido para guardar, pero una
 // presentación vieja de antes de esa regla puede tener null en la BD -- se precarga vacía
@@ -22,6 +22,7 @@ function toFormValues(presentation: PresentationResponse): Partial<UpdatePresent
     return {
         displayLabel: presentation.displayLabel,
         netWeightGrams: presentation.netWeightGrams ?? undefined,
+        netVolumeMl: presentation.netVolumeMl ?? null,
     }
 }
 

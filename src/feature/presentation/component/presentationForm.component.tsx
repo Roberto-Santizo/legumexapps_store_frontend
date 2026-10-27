@@ -45,6 +45,10 @@ export function PresentationForm<T extends UpdatePresentationInput>({
                 />
                 <p className="mt-1.5 text-sm text-ink-600">{t("presentation.form.netWeightGramsHint")}</p>
             </FormField>
+            <FormField label={t("presentation.form.netVolumeMl")} htmlFor="netVolumeMl" error={getFieldErrorMessage(t, errors.netVolumeMl as FieldError | undefined)}>
+                <Input id="netVolumeMl" type="number" min="0" step="0.001" {...register("netVolumeMl" as Path<T>, { setValueAs: value => value === "" ? null : Number(value) })} />
+                <p className="mt-1.5 text-sm text-ink-600">{t("presentation.form.netVolumeMlHint")}</p>
+            </FormField>
         </div>
     )
 }

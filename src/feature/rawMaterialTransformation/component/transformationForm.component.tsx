@@ -15,8 +15,8 @@ import type { TransformationCostCategory, TransformationFormValues } from "@/fea
 import { TransformationGeneralSection } from "@/feature/rawMaterialTransformation/component/transformationGeneralSection.component"
 import { TransformationCostSection } from "@/feature/rawMaterialTransformation/component/transformationCostSection.component"
 import { TransformationSummary } from "@/feature/rawMaterialTransformation/component/transformationSummary.component"
-import { useTransformationPreview } from "@/feature/rawMaterialTransformation/component/useTransformationPreview"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { useTransformationPreview } from "@/feature/rawMaterialTransformation/hook/useTransformationPreview"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 const CATEGORY_ICONS: Record<TransformationCostCategory, typeof HandCoins> = {
     direct_labor: HandCoins,

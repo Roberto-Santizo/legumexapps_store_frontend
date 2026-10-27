@@ -2,8 +2,8 @@ import { packagingName } from "@/shared/i18n/packagingName"
 import { useTranslation } from "react-i18next"
 import { Boxes, Package } from "lucide-react"
 import type { CustomQuoteCalculation } from "../schema/customQuote.schema"
-import { CatalogQuoteSection } from "./catalogQuoteUi.component"
-import { CatalogQuoteQuantities } from "./catalogQuoteQuantities.component"
+import { CatalogQuoteSection } from "@/shared/component/catalogQuoteUi.component"
+import { CatalogQuoteQuantities } from "@/shared/component/catalogQuoteQuantities.component"
 import { formatCurrency } from "@/shared/format/currency"
 
 export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonly<{ confirmed: CustomQuoteCalculation; mode?: "customer" | "admin" }>) {
@@ -17,7 +17,7 @@ export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonl
             <div className="grid gap-5 md:grid-cols-2">
                 <CatalogQuoteSection title={t("catalogQuote.ui.yourMix")} tone="coral">
                     <p className="mb-4 font-semibold">{confirmed.productDisplayName}</p>
-                    <p className="mb-4 text-sm text-ink-600">{t((confirmed.configuration.snapshot?.isOrganic ?? confirmed.isOrganic) ? "catalogQuote.organic" : "catalogQuote.conventional")} · {confirmed.configuration.snapshot && t(`catalogQuote.types.${confirmed.configuration.snapshot.ingredientType}`)}</p>
+                    <p className="mb-4 text-sm text-ink-600">{confirmed.configuration.snapshot && t(`catalogQuote.types.${confirmed.configuration.snapshot.ingredientType}`)}{confirmed.configuration.snapshot?.isOrganic && ` · ${t("catalogQuote.organic")}`}</p>
                     <ul className="space-y-3">
                         {confirmed.configuration.rawMaterialMix.map(line => <li key={line.rawMaterialId} className="flex justify-between gap-3 text-sm">
                             <span className="min-w-0 break-words">{confirmed.breakdown.rawMaterials.find(row => row.rawMaterialId === line.rawMaterialId)?.displayName}</span>

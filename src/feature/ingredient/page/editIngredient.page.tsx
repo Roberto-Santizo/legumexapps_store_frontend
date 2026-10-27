@@ -13,7 +13,7 @@ import { IngredientForm } from "@/feature/ingredient/component/ingredientForm.co
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 // costUnitId no es parte del form -- se fuerza server-side a la Libra, igual que materias primas.
 function toFormValues(ingredient: IngredientResponse): Partial<UpdateIngredientInput> {

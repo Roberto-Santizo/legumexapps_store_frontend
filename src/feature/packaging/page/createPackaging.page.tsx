@@ -12,7 +12,7 @@ import { PackagingForm } from "@/feature/packaging/component/packagingForm.compo
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 export function CreatePackagingPage() {
     const { t } = useTranslation()
@@ -56,7 +56,7 @@ export function CreatePackagingPage() {
 
             <Card>
                 <form onSubmit={onSubmit}>
-                    <PackagingForm register={register} errors={errors} packagingRole={watch("packagingRole")} />
+                    <PackagingForm register={register} errors={errors} packagingRole={watch("packagingRole")} classification={watch("classification")} />
                     <Button type="submit" disabled={createPackagingMutation.isPending}>
                         {createPackagingMutation.isPending ? t("common.saving") : t("common.save")}
                     </Button>

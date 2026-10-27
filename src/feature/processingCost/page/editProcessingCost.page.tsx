@@ -13,7 +13,7 @@ import { ProcessingCostForm } from "@/feature/processingCost/component/processin
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 function toFormValues(processingCost: ProcessingCostResponse): UpdateProcessingCostInput {
     const englishTranslation = processingCost.translations.find((translation) => translation.language === "en")

@@ -8,7 +8,7 @@ import type { TransformationDetail, TransformationFormValues } from "@/feature/r
 import { TransformationForm } from "@/feature/rawMaterialTransformation/component/transformationForm.component"
 import { TransformationPageHeader } from "@/feature/rawMaterialTransformation/component/transformationPageHeader.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { showErrorToast } from "@/shared/i18n/showErrorToast"
 
 function toFormValues(detail: TransformationDetail): DefaultValues<TransformationFormValues> {

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
-import { statusPillClassName } from "@/shared/component/statusPillClassName"
-import type { StatusPillTone } from "@/shared/component/statusPillClassName"
+import { statusPillClassName } from "@/shared/utils/statusPillClassName"
+import type { StatusPillTone } from "@/shared/utils/statusPillClassName"
 import type { CustomQuoteStatus } from "@/feature/customQuote/schema/adminCustomQuote.schema"
 
 const STATUS_TONES: Record<CustomQuoteStatus, StatusPillTone> = {

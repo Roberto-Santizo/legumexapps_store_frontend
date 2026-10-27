@@ -35,6 +35,9 @@ const quotableVariantSchema = z.object({
     unitMaterialOptionGroups: z.array(quotableMaterialOptionGroupSchema),
     intermediateMaterialOptionGroups: z.array(quotableMaterialOptionGroupSchema),
     palletMaterialOptionGroups: z.array(quotableMaterialOptionGroupSchema),
+    // SKUs that use the pallet kit: per type, one material is included and several are a required choice.
+    palletKit: z.array(z.object({ type: z.enum(["TARIMA", "ESQUINERO", "STRETCH"]), group: z.string(),
+        options: z.array(z.object({ id: z.number().int(), packagingId: z.number().int(), displayName: z.string(), displayNameEn: z.string().nullable().optional(), isDefault: z.boolean() })) })).default([]),
 })
 
 // El % lo fija el admin y el cliente nunca lo puede alterar, pero sí debe VER qué está
@@ -56,6 +59,7 @@ export const quotableProductSchema = z.object({
     subCategoryId: z.number().int(),
     subCategoryName: z.string(),
     subCategoryImageUrl: z.string().nullable(),
+    clientName: z.string().nullable().optional(),
     fixedRecipe: z.array(quotableFixedRawMaterialSchema),
     variants: z.array(quotableVariantSchema),
 })
@@ -72,13 +76,15 @@ export const calculateQuoteSchema = z.object({
     selectedUnitMaterialIds: z.array(z.number().int().positive()).max(50).optional(),
     selectedIntermediateMaterialIds: z.array(z.number().int().positive()).max(50).optional(),
     selectedPalletMaterialIds: z.array(z.number().int().positive()).max(50).optional(),
+    // Pallet kit type with several materials (e.g. corner board type): which one, never the quantity.
+    palletKitSelections: z.array(z.object({ type: z.enum(["TARIMA", "ESQUINERO", "STRETCH"]), packagingId: z.number().int().positive() })).max(3).optional(),
 })
 
 // Solo el wizard del representante: draftKey identifica el intento de cotización en curso para el
 // seguimiento de cotizaciones sin finalizar. El cotizador del admin nunca lo manda.
 const salespersonQuoteSchema = calculateQuoteSchema.extend({
     draftKey: z.string().uuid().optional(),
-    order: z.object({ id: z.string().uuid(), clientName: z.string().trim().min(1).max(150) }).optional(),
+    order: z.object({ id: z.string().uuid(), clientName: z.string().trim().min(1).max(150), clientId: z.number().int().positive().nullable().optional() }).optional(),
 })
 
 const rawMaterialLineSchema = z.object({
@@ -207,7 +213,7 @@ export const quoteLineSchema = z.object({
     adjustmentCost: z.coerce.number().optional(),
     totalCost: z.coerce.number(),
     breakdown: z.object({
-        order: z.object({ id: z.string().uuid(), clientName: z.string() }).optional(),
+        order: z.object({ id: z.string().uuid(), clientName: z.string(), clientId: z.number().int().positive().nullable().optional() }).optional(),
         production: z.object({ productId: z.number().int().optional(), skuCode: z.string().optional(), kind: z.enum(["fixed", "customizable"]).optional(), boxesPerPallet: z.number(), bagsPerBox: z.number(), netWeightGrams: z.number().nullable() }).optional(),
         rawMaterials: z.array(rawMaterialLineSchema),
         // Opcional: no existe en cotizaciones guardadas antes de este campo.
@@ -244,9 +250,18 @@ const quoteSalespersonSchema = z.object({
     email: z.string(),
 })
 
+// Autor: el representante o, si se guardó desde el cotizador del admin, el usuario staff (nunca ambos).
 export const adminQuoteSchema = savedQuoteSchema.extend({
-    salespersonId: z.number().int(),
-    quotingSalesperson: quoteSalespersonSchema,
+    salespersonId: z.number().int().nullable(),
+    quotingSalesperson: quoteSalespersonSchema.nullable(),
+    createdByUserId: z.number().int().nullable().optional(),
+    quotingUser: z.object({ id: z.number().int(), name: z.string() }).nullable().optional(),
+    // Envíos del PDF por correo desde el cotizador del admin, del más antiguo al más reciente.
+    emailDeliveries: z.array(z.object({
+        recipientName: z.string(),
+        recipientEmail: z.string(),
+        sentAt: z.coerce.date(),
+    })).default([]),
 })
 
 export type QuotableProduct = z.infer<typeof quotableProductSchema>
@@ -260,7 +275,7 @@ export type QuoteCalculation = z.infer<typeof quoteCalculationSchema>
 // es parte de lo que se cotiza): nombres + % de materia prima y gramos por unidad de cada ingrediente,
 // NUNCA costos. Las líneas de productos definidos no la traen (su receta es del producto, no del pedido).
 export type QuoteLineComposition = {
-    context?: { categoryName: string; subCategoryName: string; isOrganic: boolean; ingredientType: string }
+    context?: { categoryName: string; subCategoryName: string; isOrganic?: boolean; ingredientType: string }
     rawMaterials: { displayName: string; percentage: number }[]
     ingredients: { displayName: string; gramsPerUnit: number }[]
 }

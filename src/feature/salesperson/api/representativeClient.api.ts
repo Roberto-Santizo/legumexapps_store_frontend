@@ -16,6 +16,11 @@ export async function assignRepresentativeClientsAPI(id: number, clientIds: numb
     catch (error) { handleApiError(error) }
 }
 
+export async function assignAllRepresentativeClientsAPI(id: number) {
+    try { return mutationSchema.parse((await api.put(`/salespeople/${id}/clients/all`)).data) }
+    catch (error) { handleApiError(error) }
+}
+
 export async function removeRepresentativeClientAPI(id: number, clientId: number) {
     try { return mutationSchema.parse((await api.delete(`/salespeople/${id}/clients/${clientId}`)).data) }
     catch (error) { handleApiError(error) }

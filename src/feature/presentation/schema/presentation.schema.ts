@@ -3,6 +3,7 @@ import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
 
 export const createPresentationSchema = z.object({
     displayLabel: z.string().trim().min(1).max(40),
+    netVolumeMl: z.number().positive().max(99999999999.999).multipleOf(0.001).nullable().optional(),
     // Requerido: es el peso físico real de la presentación y alimenta directo el cálculo de %
     // en productos personalizables. Sin este dato el cálculo no puede convertir % -> gramos.
     netWeightGrams: z.number().positive(),
@@ -16,6 +17,7 @@ export const updatePresentationSchema = createPresentationSchema.partial().exten
 
 export const responsePresentationSchema = baseCatalogSchema.extend({
     displayLabel: z.string(),
+    netVolumeMl: z.coerce.number().nullable().optional(),
     // DECIMAL en Postgres: Sequelize lo devuelve como string en un SELECT normal, pero como
     // número tras un .update() -- z.coerce.number() acepta ambos formatos.
     netWeightGrams: z.coerce.number().nullable(),

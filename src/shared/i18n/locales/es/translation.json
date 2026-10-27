@@ -1,4 +1,110 @@
 {
+  "genericPackaging": {
+    "perIntermediate": "por intermedio",
+    "perUnit": "por unidad",
+    "title": "Empaques genéricos",
+    "hint": "Configura una sola vez la presentación, la logística y los materiales genéricos de cada categoría. El representante solo los elige al cotizar productos nuevos. Costos en USD.",
+    "reference": "Referencia de configuración",
+    "displayName": "Nombre",
+    "displayNameEn": "Nombre en inglés",
+    "category": "Categoría",
+    "presentation": "Presentación",
+    "bagsPerBox": "Unidades por caja",
+    "boxesPerPallet": "Cajas por pallet",
+    "unitsPerIntermediatePackage": "Unidades por empaque intermedio",
+    "group": "Grupo",
+    "material": "Material genérico",
+    "basis": "Base de consumo",
+    "quantity": "Cantidad",
+    "perBox": "Por caja",
+    "perPallet": "Por pallet",
+    "addMaterial": "Agregar material",
+    "addGroup": "Agregar grupo",
+    "ready": "Lista para cotizar",
+    "incomplete": "Configuración incompleta",
+    "new": "Crear configuración",
+    "edit": "Editar configuración",
+    "saved": "Información guardada.",
+    "import": "Carga masiva de configuraciones",
+    "template": "Descargar plantilla Excel",
+    "preview": "Validar archivo",
+    "confirm": "Confirmar importación",
+    "summary": "{{configurations}} configuraciones · {{errors}} errores",
+    "unitCost": "Costo unitario USD",
+    "usage": "Uso en la cotización",
+    "usages": {
+      "always": "Incluido siempre (no se puede quitar)",
+      "choose": "El representante elige uno",
+      "optional": "Opcional: el representante puede no incluirlo",
+      "optionalAll": "Opcional: incluye todo el grupo"
+    },
+    "form": {
+      "intro": "Completa los tres pasos. Lo que marques como «Incluido siempre» se suma solo a cada cotización; las alternativas las elige el representante.",
+      "backToList": "Volver a la lista",
+      "generalTitle": "Datos de la configuración",
+      "generalHint": "A qué categoría y presentación aplica esta configuración.",
+      "displayNamePlaceholder": "Ej. Bolsa 2 lb · 12 por caja",
+      "referencePlaceholder": "Ej. CFG-FRUTA-2LB",
+      "activeLabel": "Activa: disponible para cotizar",
+      "logisticsTitle": "Logística",
+      "logisticsHint": "Cómo se arma la caja y el pallet. El representante lo ve en la tarjeta de presentación.",
+      "intermediateHint": "Unidades por empaque intermedio: solo si usas bolsa grande que agrupa unidades.",
+      "unitsPerPallet": "{{count}} unidades por pallet",
+      "materialsTitle": "Materiales de empaque",
+      "materialsHint": "Agrega grupos por nivel y sus materiales genéricos. La tarima, los esquineros y el stretch no van aquí: el kit de paletizado se suma solo a cada cotización.",
+      "emptyLevel": "Sin grupos en este nivel.",
+      "removeGroup": "Quitar grupo {{group}}",
+      "removeMaterial": "Quitar material {{name}}",
+      "perUnitQuantity": "Cantidad por unidad",
+      "intermediateRule": "Se calcula con las unidades por empaque intermedio.",
+      "catalogConsumption": "Consumo del catálogo",
+      "unavailable": "{{name}} (ya no disponible)",
+      "noCatalogConsumption": "Este material no tiene consumo en el catálogo: ingrésalo aquí.",
+      "noMaterials": "Agrega al menos un material a este grupo.",
+      "createMaterial": "Crear material genérico",
+      "problemsTitle": "Antes de guardar, revisa:",
+      "saveChanges": "Guardar cambios"
+    },
+    "problems": {
+      "displayName": "Escribe el nombre de la configuración.",
+      "reference": "Escribe la referencia.",
+      "category": "Elige la categoría.",
+      "presentation": "Elige la presentación.",
+      "logistics": "Indica unidades por caja y cajas por pallet.",
+      "noGroups": "Agrega al menos un grupo de materiales.",
+      "intermediateUnits": "Indica las unidades por empaque intermedio para usar el nivel intermedio.",
+      "groupMissing": "Elige el grupo en {{level}}.",
+      "duplicateGroup": "El grupo {{group}} está repetido en {{level}}.",
+      "groupEmpty": "El grupo {{group}} no tiene materiales.",
+      "materialMissing": "Elige el material en el grupo {{group}}.",
+      "quantityMissing": "Indica la cantidad de {{material}}.",
+      "categoryUnavailable": "La categoría guardada ya no está activa. Elige otra o reactívala en Categorías.",
+      "presentationUnavailable": "La presentación guardada ya no está activa. Elige otra o reactívala en Presentaciones.",
+      "groupUnavailable": "El grupo {{group}} en {{level}} ya no está activo. Elige otro grupo, quítalo o reactívalo en Grupos de empaque.",
+      "materialUnavailable": "El material {{material}} del grupo {{group}} ya no está disponible. Elige otro, quítalo o reactívalo en Empaques."
+    },
+    "materialModal": {
+      "title": "Nuevo material genérico · {{level}}",
+      "hint": "Se agrega al catálogo de empaques como genérico y queda seleccionado en este grupo. El código interno se genera solo."
+    },
+    "list": {
+      "empty": "Todavía no hay configuraciones. Crea la primera para que el representante pueda cotizar productos nuevos.",
+      "intermediate": "{{count}} unidades por intermedio"
+    },
+    "usagesShort": {
+      "always": "Incluido siempre",
+      "choose": "Elige uno",
+      "optional": "Opcional",
+      "optionalAll": "Opcional (todo el grupo)"
+    },
+    "importHint": "Una fila por material: las filas con la misma referencia forman una configuración y sus datos van en la primera fila. Los materiales deben existir en Empaques como genéricos. La cantidad es opcional: en pallet se usa el consumo del catálogo.",
+    "kit": {
+      "hint": "Se suma solo a cada cotización de productos nuevos, por pallet. Si un tipo tiene varios materiales, el representante elige cuál. No lo agregues a las configuraciones.",
+      "missing": "Falta marcar materiales del kit en Empaques; mientras tanto no se pueden cotizar productos nuevos.",
+      "manage": "Administrar en Empaques",
+      "notSet": "Sin asignar"
+    }
+  },
   "productDetails": {
     "conventional": "Convencional",
     "materialTypes": {
@@ -65,9 +171,13 @@
     "noResults": "No hay clientes disponibles que coincidan con la búsqueda.",
     "selected": "Seleccionados: {{count}} de 100",
     "assign": "Asignar seleccionados",
+    "assignAll": "Asignar todos los clientes activos",
+    "assignAllHint": "Asigna todos los clientes activos a este representante, sin importar la búsqueda. Los clientes nuevos se asignan por separado.",
     "remove": "Quitar",
     "removeLabel": "Quitar la asignación de {{name}}",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "createHint": "Opcional: elige los clientes que este representante podrá cotizar. Se guardan junto con el representante; después puedes cambiarlos al editarlo.",
+    "assignAllCreateHint": "Incluye los {{count}} clientes activos. Los clientes que se creen después se asignan por separado."
   },
   "common": {
     "save": "Guardar",
@@ -151,7 +261,24 @@
     "importInstructions": "Cómo llenar la plantilla",
     "rowLabel": "Fila {{row}}",
     "show": "Mostrar",
-    "hide": "Ocultar"
+    "hide": "Ocultar",
+    "dateRange": {
+      "startDate": "Desde",
+      "endDate": "Hasta",
+      "presets": {
+        "last7": "Últimos 7 días",
+        "last30": "Últimos 30 días",
+        "last90": "Últimos 90 días",
+        "allTime": "Todo el tiempo"
+      },
+      "period": "Período",
+      "presetsShort": {
+        "last7": "7 días",
+        "last30": "30 días",
+        "last90": "90 días",
+        "allTime": "Todo"
+      }
+    }
   },
   "nav": {
     "groups": {
@@ -161,6 +288,31 @@
     }
   },
   "errors": {
+    "generic_packaging_import_association": "Grupo {{group}}, material {{material}}: debe ser genérico, estar activo y ser compatible con el nivel, base y cantidad configurados.",
+    "generic_packaging_import_invalid": "El campo {{field}} del grupo {{group}} y material {{material}} contiene un valor inválido. Revise las instrucciones de la plantilla.",
+    "generic_packaging_import_0": "Falta una hoja requerida.",
+    "generic_packaging_import_1": "Hay encabezados duplicados.",
+    "generic_packaging_import_2": "Falta una columna requerida.",
+    "generic_packaging_import_3": "Cada hoja admite un máximo de 5000 filas.",
+    "generic_packaging_import_4": "Reemplaza las fórmulas por valores antes de importar.",
+    "generic_packaging_import_5": "Falta la referencia del material o está duplicada.",
+    "generic_packaging_import_6": "Usa un ID genérico activo una sola vez y deja vacíos los otros campos del material.",
+    "generic_packaging_import_7": "Completa ambos nombres, un nivel válido y un costo USD no negativo con máximo 12 decimales.",
+    "generic_packaging_import_8": "Falta la referencia de configuración, está duplicada o ya existe. Esta carga solo crea registros nuevos.",
+    "generic_packaging_import_9": "Revisa el grupo, nivel, modo y obligatoriedad.",
+    "generic_packaging_import_10": "La referencia del material no existe en la hoja Materiales.",
+    "generic_packaging_import_11": "La configuración no existe en la hoja Configuraciones.",
+    "generic_packaging_import_12": "La asociación no corresponde a una configuración, grupo y nivel declarados.",
+    "generic_packaging_import_13": "Agrega al menos una configuración.",
+    "generic_packaging_field": "Revisa el valor y las relaciones del campo {{field}}.",
+    "generic_packaging_configuration": "La configuración de empaque está incompleta o no está disponible.",
+    "generic_packaging_selection": "La selección del grupo {{group}} no es válida o incluye materiales no permitidos.",
+    "generic_packaging_required": "Selecciona un material para el grupo {{group}}.",
+    "generic_packaging_unavailable": "El grupo obligatorio {{group}} no tiene todos sus materiales disponibles con costos y consumos válidos.",
+    "generic_packaging_duplicate": "Hay materiales o grupos duplicados en la configuración.",
+    "generic_packaging_consumption": "Revisa las cantidades y bases de consumo de los materiales.",
+    "generic_packaging_changed": "La configuración o sus materiales cambiaron. Valida nuevamente antes de confirmar.",
+    "generic_packaging_import": "Revisa el archivo: {{detail}}",
     "unexpected_response": "La respuesta del servidor no tiene el formato esperado",
     "zod": {
       "invalid_type": "Tipo de dato inválido",
@@ -271,9 +423,9 @@
         "noDestinationsForCountry": "Aún no hay destinos configurados para este país.",
         "submit": "Calcular cotización",
         "modeFinished": "Producto terminado",
-        "modeCustomizable": "Personalizar mi producto",
+        "modeCustomizable": "Producto nuevo",
         "modeFinishedHint": "Elige entre nuestras presentaciones ya armadas, con receta fija.",
-        "modeCustomizableHint": "Construye tu mezcla con nuestras configuraciones de empaque y logística disponibles.",
+        "modeCustomizableHint": "Personaliza tu producto o crea tu propia mezcla utilizando nuestros ingredientes, empaques y opciones logísticas disponibles.",
         "noProductsFinished": "Aún no hay productos terminados disponibles para cotizar.",
         "organicBadge": "100% Orgánico",
         "fixedRecipeTitle": "Composición",
@@ -310,7 +462,10 @@
               "unit": "El envase o bolsa de cada unidad.",
               "intermediate": "La bolsa grande que agrupa varias unidades.",
               "pallet": "La caja o material con que se arma el palet."
-            }
+            },
+            "included": "Incluido",
+            "optional": "Opcional",
+            "none": "No incluir"
           },
           "mode": {
             "title": "¿Qué quieres cotizar?",
@@ -351,7 +506,8 @@
         "palletMaterials": "Materiales de palet",
         "percentageCosts": "Cargos porcentuales",
         "transport": "Transporte",
-        "adjustment": "Ajuste adicional",
+        "adjustment": "Costo adicional por unidad",
+        "adjustmentDetail": "{{unitCost}} por unidad × {{count}} unidades · incluido en el total",
         "unitsQuantity": "{{count}} unidades",
         "palletsQuantity": "{{count}} palets",
         "intermediatePackagesQuantity": "{{count}} empaques intermedios",
@@ -820,7 +976,9 @@
       "unitCost": "Costo por unidad (USD)",
       "classification": "Clasificación",
       "isActive": "Material activo",
-      "displayNameEn": "Nombre (Inglés)"
+      "displayNameEn": "Nombre (Inglés)",
+      "generatedCode": "se asigna al guardar",
+      "generatedCodeHint": "Los materiales genéricos no llevan código del usuario: el sistema lo asigna con un solo formato (GEN-IND-0001, GEN-INT-0001 o GEN-PAL-0001)."
     },
     "list": {
       "title": "Empaques",
@@ -847,6 +1005,17 @@
       "rowErrorItem": "Fila {{row}}: {{message}}"
     },
     "consumption": {
+      "materialType": "Tipo de material",
+      "chooseType": "Selecciona el tipo de material",
+      "keepExisting": "Conservar consumo actual",
+      "fixedHelp": "Consumo automático: caja según las cajas por pallet de la variante; tarima: 1, esquineros: 4 y stretch: 93.3 metros por pallet. Para stretch, ingresa el costo por metro. No modifica asociaciones existentes. Otro: materiales sin consumo fijo (p. ej. fleje); la cantidad se define en cada SKU.",
+      "types": {
+        "CAJA": "Caja",
+        "TARIMA": "Tarima",
+        "ESQUINERO": "Esquinero",
+        "STRETCH": "Stretch",
+        "OTRO": "Otro (consumo en cada SKU)"
+      },
       "basis": "Forma de consumo",
       "quantity": "Cantidad",
       "per_box": "Por caja",
@@ -861,7 +1030,7 @@
       "unitRule": "1 por unidad"
     },
     "classifications": {
-      "specific": "Específico",
+      "specific": "Específico de cliente",
       "generic": "Genérico"
     },
     "filters": {
@@ -875,6 +1044,8 @@
     "form": {
       "displayLabel": "Nombre",
       "netWeightGrams": "Peso neto de UNA unidad (g)",
+      "netVolumeMl": "Volumen por unidad (ml), para jugos",
+      "netVolumeMlHint": "Opcional para otros productos. En jugos se usa este volumen para la receta; el peso fisico se conserva por separado.",
       "netWeightGramsHint": "Escribe el peso de una sola unidad (bolsa, botella...), no el del nombre completo. Ejemplo: en \"5x16oz\" la unidad es la bolsa de 16 oz, así que va 453.59 g, no 5 × 16 oz (2,267.96 g). Las cajas y unidades por caja se definen en cada SKU."
     },
     "list": {
@@ -908,6 +1079,8 @@
     },
     "form": {
       "image": "Foto del producto",
+      "chooseCategory": "Selecciona una categoría",
+      "chooseCategoryFirst": "Selecciona primero una categoría",
       "subCategoryId": "Subcategoría",
       "clientId": "Cliente",
       "displayName": "Nombre del producto",
@@ -942,7 +1115,7 @@
     "bulkImportSteps": {
       "title": "Carga masiva por Excel",
       "intro": "Cargue Productos y Variantes con sus materiales de empaque en un solo Excel; después cargue Recetas e Ingredientes (opcional). Cada archivo se valida completo y se guarda de forma atómica. Las imágenes se configuran en la edición del producto. Complete la receta y los empaques antes de cotizar.",
-      "requires1": "Paso 1 · Productos, Variantes y materiales — requiere Subcategorías, Clientes y Presentaciones activos; códigos MP y grupos existentes cuando se incluyen materiales.",
+      "requires1": "Paso 1 · Productos, Variantes y materiales — requiere Categorías, Subcategorías, Clientes y Presentaciones activos; códigos MP y grupos existentes cuando se incluyen materiales. Los productos importados se crean como no orgánicos. La columna Orgánico de plantillas anteriores se ignora. Para registrar un producto orgánico, usa la creación o edición individual.",
       "requires2": "Paso 2 · Recetas — referencia cada producto mediante el SKU de una variante del paso 1; requiere Materias Primas en su catálogo.",
       "requires3": "Paso 3 · Ingredientes (opcional) — referencia cada producto mediante el SKU de una variante del paso 1; requiere Ingredientes en su catálogo.",
       "subtitle": "Productos y variantes, recetas e ingredientes en 3 pasos",
@@ -958,13 +1131,15 @@
       "presentationId": "Presentación",
       "presentationImmutableHint": "La Presentación no se puede cambiar en un SKU ya creado. Crea un SKU nuevo para una Presentación distinta.",
       "boxesPerPallet": "Cajas por palet",
-      "bagsPerBox": "Bolsas por caja",
-      "bagsPerBoxHint": "Cuántas bolsas/piezas entran en una caja. Junto con \"Cajas por palet\" arriba, define el total de bolsas por palet (cajas × bolsas por caja) -- SÍ afecta el costo.",
+      "bagsPerBox": "Unidades por caja",
+      "bagsPerBoxHint": "Cantidad de unidades que contiene una caja. Junto con Cajas por palet, determina el total de unidades por palet (cajas por palet × unidades por caja) y afecta el costo.",
       "unitsPerIntermediatePackage": "Unidades por empaque intermedio",
       "unitsPerIntermediatePackageHint": "Solo si este producto usa empaque anidado (ej. varias bolsitas dentro de una bolsa grande, que a su vez va en la caja). Cuántas unidades pequeñas entran en una bolsa grande -- este dato SÍ afecta el costo.",
       "addButton": "Agregar variante",
       "skuCode": "SKU / Número de artículo",
-      "skuCodeHint": "Obligatorio, de 1 a 60 caracteres. Único entre todas las variantes, incluidas las inactivas, sin distinguir mayúsculas."
+      "skuCodeHint": "Obligatorio, de 1 a 60 caracteres. Único entre todas las variantes, incluidas las inactivas, sin distinguir mayúsculas.",
+      "usesPalletKit": "Usa kit de paletizado",
+      "usesPalletKitHint": "Activado: cada pallet lleva la tarima, los esquineros y el stretch del kit, y este SKU no puede repetirlos. Desactívalo solo si el producto lleva un paletizado distinto."
     },
     "list": {
       "title": "Variantes"
@@ -1201,61 +1376,91 @@
   },
   "dashboard": {
     "title": "Panel general",
-    "subtitle": "Productos más vendidos, representantes y materias primas para el rango de fechas seleccionado.",
-    "filters": {
-      "startDate": "Desde",
-      "endDate": "Hasta",
-      "presets": {
-        "last7": "Últimos 7 días",
-        "last30": "Últimos 30 días",
-        "last90": "Últimos 90 días",
-        "allTime": "Todo el tiempo"
-      }
+    "subtitle": "Cotizaciones guardadas por los representantes (no ventas), en hora de Guatemala.",
+    "retry": "Reintentar",
+    "period": {
+      "closed_one": "{{range}} · {{count}} día",
+      "closed_other": "{{range}} · {{count}} días",
+      "from": "Desde el {{date}}",
+      "until": "Hasta el {{date}}",
+      "allTime": "Todo el historial"
     },
     "overview": {
+      "title": "Resumen del período",
       "totalQuotes": "Cotizaciones guardadas",
       "totalRevenue": "Valor total cotizado",
       "totalPallets": "Palets solicitados",
       "uniqueSalespeople": "Representantes activos",
       "averageQuoteValue": "Valor promedio por cotización"
     },
+    "comparison": {
+      "versusPrevious": "frente al período anterior",
+      "srSuffix": "frente al período anterior",
+      "new": "Nuevo",
+      "note": "Las variaciones comparan con {{range}}: el mismo número de días inmediatamente antes.",
+      "unavailable": "Elige un rango con fecha de inicio y de fin para comparar con el período anterior."
+    },
+    "empty": {
+      "title": "No hay cotizaciones guardadas en este período",
+      "body": "Cuando los representantes guarden cotizaciones en estas fechas, aquí verás su valor, tendencia y rankings.",
+      "showAllTime": "Ver todo el historial"
+    },
     "trend": {
-      "title": "Cotizaciones en el tiempo",
-      "subtitleDaily": "Valor cotizado por día, según las cotizaciones guardadas.",
-      "subtitleWeekly": "Valor cotizado por semana, según las cotizaciones guardadas.",
-      "tooltipQuotes": "{{count}} cotizaciones",
+      "title": "Actividad de cotización",
+      "subtitleDaily_revenue": "Valor cotizado por día.",
+      "subtitleDaily_count": "Cotizaciones guardadas por día.",
+      "subtitleWeekly_revenue": "Valor cotizado por semana (de lunes a domingo).",
+      "subtitleWeekly_count": "Cotizaciones guardadas por semana (de lunes a domingo).",
+      "metricLabel": "Métrica de la gráfica",
+      "metrics": {
+        "revenue": "Valor",
+        "count": "Cotizaciones"
+      },
+      "columns": {
+        "day": "Día",
+        "week": "Semana"
+      },
+      "weekOf": "Semana del {{date}}",
+      "tooltipQuotes_one": "{{count}} cotización",
+      "tooltipQuotes_other": "{{count}} cotizaciones",
       "empty": "No hay cotizaciones en el rango seleccionado."
     },
     "topProducts": {
-      "title": "Productos más cotizados",
-      "subtitle": "Ordenados por valor cotizado (según cotizaciones guardadas).",
+      "title": "Productos",
+      "subtitle": "Los más cotizados, por valor cotizado.",
       "empty": "No hay datos de productos para este rango.",
-      "secondary": "{{count}} cotizaciones · {{pallets}} palets"
+      "secondary_one": "{{count}} cotización · {{pallets}} palets",
+      "secondary_other": "{{count}} cotizaciones · {{pallets}} palets"
     },
     "productRevenueShare": {
-      "title": "Participación del valor cotizado por producto",
-      "subtitle": "Proporción del valor total cotizado, productos principales de este rango.",
-      "empty": "No hay datos de ingresos para este rango.",
+      "title": "Participación en el valor total cotizado",
       "other": "Otros productos"
     },
     "topSalespeople": {
-      "title": "Mejores representantes",
-      "subtitle": "Ordenados por valor total cotizado.",
+      "title": "Representantes",
+      "subtitle": "Por valor total cotizado.",
       "empty": "No hay datos de representantes para este rango.",
-      "secondary": "{{count}} cotizaciones · {{pallets}} palets"
+      "admin": "Administración",
+      "secondary_one": "{{count}} cotización · {{pallets}} palets",
+      "secondary_other": "{{count}} cotizaciones · {{pallets}} palets"
     },
     "topRawMaterials": {
-      "title": "Materias primas más utilizadas",
-      "subtitle": "Ordenadas por costo total consumido en las cotizaciones.",
+      "title": "Materias primas",
+      "subtitle": "Las de mayor costo consumido en las cotizaciones del período.",
       "empty": "No hay datos de materias primas para este rango.",
-      "secondary": "{{count}} cotizaciones"
+      "secondary_one": "En {{count}} cotización",
+      "secondary_other": "En {{count}} cotizaciones"
     }
   },
   "adminQuote": {
     "list": {
       "emptyRange": "No hay cotizaciones de productos fijos para este rango de fechas.",
       "title": "Cotizaciones",
-      "description": "Todas las cotizaciones que han guardado los representantes, sin importar cuál.",
+      "description": "Todas las cotizaciones que han guardado los representantes, sin importar cuál, y las guardadas desde el cotizador interno.",
+      "adminAuthor": "Administración",
+      "sentTo_one": "Enviada por correo a {{name}}",
+      "sentTo_other": "Enviada por correo {{count}} veces · última a {{name}}",
+      "deliveriesTitle": "Envíos por correo",
       "searchPlaceholder": "Buscar por representante, empresa, correo o producto...",
       "empty": "No hay cotizaciones de productos fijos.",
       "noMatches": "Ninguna cotización coincide con la búsqueda.",
@@ -1299,9 +1504,28 @@
     "title": "Cotizador interno",
     "customizableTitle": "Cotizador interno de productos nuevos",
     "calculatedHint": "Cálculo interno completado. No se guardó una solicitud ni se modificaron las cotizaciones recibidas o el Dashboard.",
+    "fixedDescription": "Calcula cotizaciones con el desglose completo de costos (materia prima, empaque y materiales de palet). Calcular no guarda nada; usa «Guardar esta cotización» en el último paso para que aparezca a tu nombre en \"Cotizaciones\" y en el Dashboard.",
+    "save": "Guardar esta cotización",
+    "saving": "Guardando cotización...",
+    "saved": "Cotización guardada",
     "description": "Calcula cotizaciones con el desglose completo de costos (materia prima, empaque y materiales de palet). No se guarda ningún registro -- es solo una herramienta de consulta, no aparece en \"Cotizaciones\" ni afecta el panel de indicadores."
   },
   "quote": {
+    "clientSelection": {
+      "backToOrder": "Volver al pedido",
+      "changeClient": "Cambiar cliente",
+      "currentClient": "Cotizando para",
+      "prospectBadge": "Cliente nuevo",
+      "newProductIntro": "Arma el producto que tu cliente necesita. Te guiaremos paso a paso para elegir la mezcla, la presentación y el empaque, y calcular su cotización.",
+      "startNewProduct": "Cotizar producto nuevo",
+      "newClient": "+ Nuevo cliente",
+      "placeholder": "Selecciona el cliente del pedido",
+      "newName": "Nombre del nuevo cliente",
+      "confirmChange": "Cambiar de cliente eliminará todas las líneas y cálculos de este pedido. ¿Deseas continuar?",
+      "loadError": "No se pudieron cargar los clientes asignados. Intenta nuevamente.",
+      "newOnly": "Para un nuevo cliente puedes cotizar únicamente productos nuevos.",
+      "empty": "Este cliente no tiene productos definidos disponibles. Puedes cotizar un producto nuevo."
+    },
     "production": {
       "title": "Ficha de producción de la cotización",
       "download": "Descargar ficha de producción",
@@ -1366,6 +1590,9 @@
         "downloadOption": "Descargar PDF",
         "emailOption": "Enviar por correo",
         "emailStepDescription": "Ingresa el correo del cliente para enviarle la cotización en PDF.",
+        "recordedEmailStepDescription": "Ingresa a quién se la envías. Al enviar, las cotizaciones del pedido se guardan (si aún no lo estaban) y el envío queda registrado en \"Cotizaciones\" con este nombre y correo.",
+        "recipientNameLabel": "Nombre del destinatario",
+        "recipientNamePlaceholder": "Ej. María Pérez",
         "clientEmailLabel": "Correo del cliente",
         "clientEmailPlaceholder": "Ej. contacto@distribuidora.com",
         "emailRequired": "Ingresa el correo del cliente",
@@ -1582,7 +1809,7 @@
       "gramsPerUnit": "{{grams}} g por unidad",
       "presentation": "Presentación y palet",
       "presentationLabel": "Presentación",
-      "bagsPerBox": "Bolsas por caja",
+      "bagsPerBox": "Unidades por caja",
       "unitsPerIntermediatePackage": "Unidades por empaque intermedio",
       "noIntermediate": "Sin empaque intermedio",
       "totalUnits": "Unidades totales",
@@ -1597,6 +1824,13 @@
     }
   },
   "juice": {
+    "sharedCatalogHelp": "Completá los datos, variantes, presentaciones y empaques en esta misma pantalla. La receta de jugo se calcula por volumen.",
+    "productPermissionHelp": "Necesitás permiso para consultar Productos; para configurar variantes y empaques también necesitás permiso para editarlos.",
+    "linkPermissionHelp": "Se necesitan permisos de editar jugos y crear productos para vincular este jugo.",
+    "linkHelp": "Seleccioná la categoría y subcategoría para habilitar las variantes y empaques de este jugo aquí mismo.",
+    "linkProduct": "Habilitar configuración del jugo",
+    "sharedIngredients": "Usar catalogo de Ingredientes",
+    "manageVolumeRecipe": "Editar receta de jugo e ingredientes por litro",
     "title": "Jugos",
     "create": "Crear jugo",
     "edit": "Editar jugo",
@@ -1609,33 +1843,19 @@
     "rawMaterials": "Materias primas",
     "spiceMaterials": "Catálogo de especias",
     "recipe": "Receta por volumen",
-    "spices": "Especias por litro",
+    "spices": "Ingredientes por litro",
     "presentations": "Presentaciones",
-    "configTitle": "Constantes de jugos",
-    "globals": "Constantes globales",
-    "overrides": "Ajustes por cliente",
     "inherit": "Heredar global",
     "mixTotal": "Total activo: {{total}}%",
     "mixReady": "Receta completa",
     "mixIncomplete": "Debe sumar 100% para calcular costos",
     "validationError": "Revise los campos indicados.",
     "createHelp": "Guarde los datos del jugo primero; luego agregue la receta, las especias y las presentaciones. Cada sección se guarda por separado.",
-    "constantSections": {
-      "production": "Costos de producción (USD por libra)",
-      "logistics": "Costos logísticos por contenedor (USD por contenedor)",
-      "percentages": "Porcentajes (fracción decimal)",
-      "container": "Configuración de contenedor",
-      "fractionHelp": "Ingrese la fracción decimal: 0.065 = 6.5 %. Para 6.5 %, ingrese 0.065."
-    },
-    "constantsHelp": "Ingrese costos no negativos en USD. Todos los valores globales son obligatorios.",
-    "rateHelp": "Las tasas son fracciones: 0.02 = 2%.",
-    "initialize": "Las constantes aún no existen. Complete todos los campos para inicializarlas.",
-    "overrideHelp": "Un campo vacío hereda el valor global; 0 es un ajuste explícito. El cliente no se puede cambiar una vez creado.",
     "fields": {
       "code": "SKU / Número de artículo",
+      "subCategoryId": "Subcategoría",
       "displayName": "Nombre",
       "clientId": "Cliente",
-      "pricePerPound": "PRICE LB (USD/libra)",
       "image": "Imagen",
       "purchaseUnit": "Unidad de compra",
       "yieldPoundsPerLiter": "Rendimiento (lb/litro)",
@@ -1653,33 +1873,10 @@
       "secondStickerQuantityPerCase": "Segundas etiquetas por caja",
       "bottleUnitCost": "Costo unitario de botella (USD)",
       "capUnitCost": "Costo unitario de tapa (USD)",
-      "marginPerCase": "Margen por caja (USD)",
       "rawMaterialId": "Materia prima",
       "percentage": "Porcentaje de volumen (%)",
-      "spiceMaterialId": "Especia",
-      "gramsPerLiter": "Gramos por litro",
-      "directLaborPerPound": "Mano de obra directa (USD/lb)",
-      "indirectLaborPerPound": "Mano de obra indirecta (USD/lb)",
-      "financialPerPound": "Financiero (USD/lb)",
-      "fixedPerPound": "Fijo (USD/lb)",
-      "electricityPerPound": "Electricidad (USD/lb)",
-      "cleaningPerPound": "Limpieza (USD/lb)",
-      "laboratoryPerPound": "Laboratorio (USD/lb)",
-      "hppPerPound": "HPP (USD/lb)",
-      "palletizingPerContainer": "Tarimas, esquineros y fleje (USD/contenedor)",
-      "localCustomsPerContainer": "Aduana local (USD/contenedor)",
-      "miamiCustomsPerContainer": "Aduana Miami (USD/contenedor)",
-      "freightPerContainer": "Flete (USD/contenedor)",
-      "inOutPerContainer": "Entrada/salida (USD/contenedor)",
-      "accesorialPerContainer": "Accesorios (USD/contenedor)",
-      "storagePerContainer": "Almacenaje (USD/contenedor)",
-      "logisticMovementPerContainer": "Movimiento logístico (USD/contenedor)",
-      "unexpectedRate": "Imprevistos (fracción)",
-      "tariffRate": "Arancel (fracción)",
-      "portFeeRate": "Cargo portuario (fracción)",
-      "salesmanCommissionRate": "Comisión vendedor (fracción)",
-      "distributorCommissionRate": "Comisión distribuidor (fracción)",
-      "palletsPerContainer": "Tarimas por contenedor"
+      "ingredientId": "Ingrediente",
+      "gramsPerLiter": "Gramos por litro"
     },
     "units": {
       "LIBRA": "Libra",
@@ -1729,7 +1926,7 @@
       "productGroup": "Grupo de producto",
       "name": "Producto",
       "boxes": "Cajas por pallet",
-      "units": "Bolsas por caja",
+      "units": "Unidades por caja",
       "intermediate": "Unidades por empaque intermedio",
       "material": "Material",
       "type": "Tipo",
@@ -1785,8 +1982,8 @@
       "previous": "Anterior",
       "selectionHint": "Selecciona una opción para continuar.",
       "materialType": "Tipo de materia prima",
-      "certification": "Certificación",
-      "mixHint": "Agrega materias primas y ajusta sus porcentajes hasta completar exactamente 100.00%.",
+      "mixHint": "Agrega al menos dos materias primas y ajusta sus porcentajes hasta completar exactamente 100.00%.",
+      "minTwo": "Una mezcla necesita al menos dos materias primas, cada una mayor a 0%.",
       "mixEmpty": "Tu mezcla comienza aquí. Agrega tu primera materia prima.",
       "add": "Agregar materia prima",
       "search": "Buscar por nombre",
@@ -1832,16 +2029,29 @@
       "stepper": {
         "category": "Categoría",
         "subCategory": "Subcategoría",
-        "profile": "Tipo y certificación",
-        "mix": "Mezcla",
-        "configuration": "Configuración",
+        "presentation": "Presentación",
+        "mix": "Materia prima",
         "packaging": "Empaque y palets",
         "result": "Resultado"
+      },
+      "choose": "Elegir",
+      "chooseName": "Elegir {{name}}",
+      "yourRawMaterial": "Tu materia prima",
+      "singleHint": "Elige una materia prima; se usará al 100%.",
+      "singleEmpty": "Busca y elige la materia prima del producto.",
+      "composition": {
+        "single": "Materia prima individual",
+        "blend": "Mezcla de materias primas"
+      },
+      "availability": {
+        "missing_configuration": "Pendiente de configurar empaque",
+        "missing_recipe": "Sin receta de referencia: registra un producto fijo en esta subcategoría",
+        "missing_raw_materials": "Sin materias primas activas con costo para este tipo",
+        "missing_pallet_kit": "Falta configurar el kit de paletizado"
       }
     },
-    "title": "Personaliza tu producto",
+    "title": "Producto nuevo",
     "organic": "Orgánico",
-    "conventional": "Convencional",
     "continue": "Continuar",
     "another": "Crear otra mezcla",
     "retry": "Reintentar",
@@ -1860,11 +2070,11 @@
     "steps": {
       "category": "Selecciona una categoría",
       "subCategory": "Selecciona una subcategoría",
-      "profile": "Tipo de materia prima y certificación",
       "mix": "Construye tu mezcla",
-      "configuration": "Selecciona la configuración",
+      "presentation": "Elige la presentación",
       "packaging": "Empaques y palets",
-      "result": "Tu cotización personalizada"
+      "result": "Tu cotización personalizada",
+      "single": "Selecciona la materia prima"
     },
     "types": {
       "fruit": "Fruta",
@@ -1987,6 +2197,24 @@
       "recalculate": "Recalcular",
       "noCosts": "Sin conceptos en esta categoría.",
       "pounds": "Libras por unidad o lote"
+    }
+  },
+  "palletKit": {
+    "title": "Kit de paletizado",
+    "hint": "Tarima, esquineros y stretch que lleva cada pallet. Se suman solos a cada cotización con su cantidad fija; los materiales se crean en Empaques (genéricos de paletización) y aquí se eligen.",
+    "createMaterial": "Crear material en Empaques",
+    "complete": "El kit está completo: se suma a cada cotización.",
+    "incomplete": "Falta asignar algún tipo: mientras tanto no se puede cotizar.",
+    "empty": "Sin materiales asignados",
+    "chosen": "Varios materiales: el representante elige uno (nunca la cantidad).",
+    "choose": "Elige un material genérico",
+    "noCandidates": "No hay materiales genéricos disponibles de este tipo",
+    "add": "Agregar",
+    "remove": "Quitar {{name}} del kit",
+    "quantity": {
+      "TARIMA": "1 por pallet",
+      "ESQUINERO": "4 por pallet",
+      "STRETCH": "93.3 m por pallet"
     }
   }
 }

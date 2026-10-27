@@ -13,7 +13,7 @@ import { LeadForm } from "@/feature/lead/component/leadForm.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { formatDateTime } from "@/shared/format/date"
 
 function toFormValues(lead: LeadResponse): UpdateLeadInput {

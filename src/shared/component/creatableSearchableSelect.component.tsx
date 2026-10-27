@@ -2,7 +2,7 @@ import CreatableSelect from "react-select/creatable"
 import type { GroupBase, Props as ReactSelectProps } from "react-select"
 import { useTranslation } from "react-i18next"
 import { searchableSelectMessages } from "@/shared/i18n/searchableSelectMessages"
-import { buildSearchableSelectClassNames } from "@/shared/component/searchableSelectClassNames"
+import { buildSearchableSelectClassNames } from "@/shared/utils/searchableSelectClassNames"
 import type { SearchableSelectOption } from "@/shared/component/searchableSelect.component"
 
 type CreatableSearchableSelectProps = Omit<

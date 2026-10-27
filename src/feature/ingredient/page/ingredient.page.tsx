@@ -4,7 +4,7 @@ import { IngredientTable } from "@/feature/ingredient/component/ingredientTable.
 import { bulkImportIngredientsAPI, downloadIngredientImportTemplateAPI } from "@/feature/ingredient/api/ingredient.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 
 export function IngredientListPage() {

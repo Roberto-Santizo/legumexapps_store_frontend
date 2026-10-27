@@ -1,4 +1,5 @@
 import salespersonApi from "@/shared/api/salespersonApi"
+import { z } from "zod"
 import { handleApiError } from "@/shared/api/handleApiError"
 import {
     apiItemResponseSchema,
@@ -9,29 +10,23 @@ import {
 import {
     quotableProductSchema,
     quoteCalculationSchema,
-    quoteDestinationSchema,
     savedQuoteSchema,
 } from "@/feature/quote/schema/quote.schema"
 import type { SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 
 const quoteProductListResponseSchema = apiListResponseSchema(quotableProductSchema)
-const quoteDestinationListResponseSchema = apiListResponseSchema(quoteDestinationSchema)
 const saveQuoteResponseSchema = apiMutationResponseSchema(savedQuoteSchema)
 const quotePreviewResponseSchema = apiItemResponseSchema(quoteCalculationSchema)
 
-export async function getQuoteProductsAPI() {
-    try {
-        const { data } = await salespersonApi.get("/quotes/products")
-        return quoteProductListResponseSchema.parse(data)
-    } catch (error) {
-        handleApiError(error)
-    }
+export async function getQuoteClientsAPI() {
+    const { data } = await salespersonApi.get("/quotes/clients")
+    return z.object({ data: z.array(z.object({ id: z.number().int().positive(), name: z.string(), isActive: z.boolean() })) }).parse(data)
 }
 
-export async function getQuoteDestinationsAPI() {
+export async function getQuoteProductsAPI(clientId: number) {
     try {
-        const { data } = await salespersonApi.get("/quotes/destinations")
-        return quoteDestinationListResponseSchema.parse(data)
+        const { data } = await salespersonApi.get("/quotes/products", { params: { clientId } })
+        return quoteProductListResponseSchema.parse(data)
     } catch (error) {
         handleApiError(error)
     }

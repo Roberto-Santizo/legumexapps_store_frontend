@@ -1,4 +1,5 @@
 import { showErrorToast } from "@/shared/i18n/showErrorToast"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -9,15 +10,17 @@ import { createSalespersonSchema } from "@/feature/salesperson/schema/salesperso
 import type { CreateSalespersonInput } from "@/feature/salesperson/schema/salesperson.schema"
 import { createSalespersonAPI } from "@/feature/salesperson/api/salesperson.api"
 import { SalespersonForm } from "@/feature/salesperson/component/salespersonForm.component"
+import { InitialClientsPicker, type InitialClients } from "@/feature/salesperson/component/representativeClients.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 export function CreateSalespersonPage() {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
+    const [initialClients, setInitialClients] = useState<InitialClients>({ clientIds: [], assignAll: false })
 
     const {
         register,
@@ -40,7 +43,9 @@ export function CreateSalespersonPage() {
     })
 
     const onSubmit = handleSubmit((formData) => {
-        createSalespersonMutation.mutate(formData)
+        const clients = initialClients.assignAll ? { assignAllClients: true }
+            : initialClients.clientIds.length ? { clientIds: initialClients.clientIds } : {}
+        createSalespersonMutation.mutate({ ...formData, ...clients })
     })
 
     return (
@@ -55,6 +60,7 @@ export function CreateSalespersonPage() {
             <Card>
                 <form onSubmit={onSubmit}>
                     <SalespersonForm register={register} errors={errors} />
+                    <InitialClientsPicker value={initialClients} onChange={setInitialClients} disabled={createSalespersonMutation.isPending} />
                     <Button type="submit" disabled={createSalespersonMutation.isPending}>
                         {createSalespersonMutation.isPending ? t("common.saving") : t("common.save")}
                     </Button>

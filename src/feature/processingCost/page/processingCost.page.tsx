@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { ProcessingCostTable } from "@/feature/processingCost/component/processingCostTable.component"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 export function ProcessingCostListPage() {
     const { t } = useTranslation()

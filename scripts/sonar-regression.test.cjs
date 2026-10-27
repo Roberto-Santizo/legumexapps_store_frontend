@@ -28,16 +28,39 @@ function loader(overrides = {}) {
 
 const all = tree => !tree || typeof tree !== "object" ? [] : [tree, ...[].concat(tree.props?.children ?? []).flat(Infinity).flatMap(all)]
 
+test("product additional charge is visible only in administrator calculations", () => {
+    const { QuoteResultCard } = loader({
+        "react-i18next": { useTranslation: () => ({ t: (key, values = {}) => `${key} ${Object.values(values).join(" ")}`, i18n: { language: "es" } }) },
+        "@/shared/component/card.component": { Card: "Card" },
+        "@/shared/component/spinner.component": { Spinner: "Spinner" },
+    })("src/feature/quote/component/quoteResultCard.component.tsx")
+    const result = { requestedPallets: 1, totalUnits: 20, boxesPerPallet: 20, totalCost: 56,
+        breakdown: { rawMaterials: [], palletMaterials: [], adjustment: { unitCost: 0.3, totalUnits: 20, lineTotal: 6 } } }
+    for (const showCostBreakdown of [true, false]) {
+        const nodes = all(QuoteResultCard({ result, isPending: false, showCostBreakdown }))
+        const sections = nodes.filter(node => node.props.title?.trim() === "site.quoteRequest.result.adjustment")
+        assert.equal(sections.length, showCostBreakdown ? 1 : 0)
+        if (!showCostBreakdown) continue
+        assert.equal(sections[0].props.subtotal, 6)
+        const row = all(sections[0]).find(node => node.props.quantityLabel)
+        assert.ok(row.props.quantityLabel.includes("0.30"))
+        assert.ok(row.props.quantityLabel.includes("20"))
+        assert.equal(row.props.lineTotal, 6)
+    }
+    const nodes = all(QuoteResultCard({ result: { ...result, breakdown: { ...result.breakdown, adjustment: null } }, isPending: false, showCostBreakdown: false }))
+    assert.ok(!nodes.some(node => node.props.title?.trim() === "site.quoteRequest.result.adjustment"))
+})
+
 test("informational stepper retains list semantics, active step and horizontal scrolling without a tab stop", () => {
     const effects = []
-    const { CatalogQuoteStepper } = loader({ react: { useEffect: (callback, dependencies) => effects.push({ callback, dependencies }), useRef: value => ({ current: value }) }, "react-i18next": { useTranslation: () => ({ t: key => key }) }, "@/shared/component/button.component": { Button: "Button" } })("src/feature/customQuote/component/catalogQuoteUi.component.tsx")
+    const { CatalogQuoteStepper } = loader({ react: { useEffect: (callback, dependencies) => effects.push({ callback, dependencies }), useRef: value => ({ current: value }) }, "react-i18next": { useTranslation: () => ({ t: key => key }) }, "@/shared/component/button.component": { Button: "Button" } })("src/shared/component/catalogQuoteUi.component.tsx")
     const nodes = all(CatalogQuoteStepper({ step: "mix" }))
     const list = nodes.find(row => row.type === "ol")
     assert.equal(list.props.tabIndex, undefined)
     assert.ok(list.props.ref)
     assert.ok(list.props.className.includes("overflow-x-auto"))
     assert.equal(nodes.filter(row => row.props["aria-current"] === "step").length, 1)
-    assert.equal(nodes.filter(row => row.type === "li").length, 7)
+    assert.equal(nodes.filter(row => row.type === "li").length, 6)
     const circles = nodes.filter(row => row.type === "span" && row.props.className?.includes("relative z-10"))
     assert.ok(circles[0].props.className.includes("bg-brand-700 text-white"))
     const activeClasses = circles[3].props.className.split(" ")
@@ -50,9 +73,9 @@ test("informational stepper retains list semantics, active step and horizontal s
     assert.ok(all(active).includes(circles[3]))
     assert.equal(nodes.some(row => ["button", "a"].includes(row.type)), false)
     assert.ok(circles[4].props.className.includes("bg-canvas text-ink-600"))
-    assert.equal(circles.length, 7)
+    assert.equal(circles.length, 6)
     assert.equal(nodes.find(row => row.type === "nav").props["aria-label"], "catalogQuote.ui.progress")
-    const steps = ["category", "subCategory", "profile", "mix", "configuration", "packaging", "result"]
+    const steps = ["category", "subCategory", "presentation", "mix", "packaging", "result"]
     for (const [index, step] of steps.entries()) {
         const tree = all(CatalogQuoteStepper({ step }))
         const items = tree.filter(row => row.type === "li")
@@ -74,6 +97,7 @@ test("informational stepper retains list semantics, active step and horizontal s
 test("JuiceForm preserves zero, false and empty defaults while excluding the existing image from submissions", () => {
     let defaults
     const overrides = {
+        "./juiceCategorySelect.component": { JuiceCategorySelect: "JuiceCategorySelect" },
         react: { useId: () => "juice-test" },
         "react-i18next": { useTranslation: () => ({ t: key => key }) },
         "react-hook-form": { Controller: "Controller", useForm: options => {
@@ -140,6 +164,7 @@ test("public PDF download keeps normalized names, fallback and quote date", asyn
             assert.equal(downloads.at(-1), `Cotizacion_${expected}_2026-10-07.pdf`)
             assert.equal(h.built.length, 1)
             assert.equal(h.built[0].props.clientName, name.trim())
+            assert.equal(h.built[0].props.showCostBreakdown, false)
             assert.deepEqual(h.errors, [])
         }
     } finally {

@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom"
 import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { SiteNavigation } from "@/shared/layout/SiteNavigation"
 import { LanguageSwitch } from "@/shared/layout/LanguageSwitch"
 import { LegumexLogo } from "@/shared/component/legumexLogo.component"
+import { RepresentativeThemeToggle } from "@/shared/theme/RepresentativeThemeToggle"
 
 type SiteMobileMenuProps = {
     isOpen: boolean
@@ -38,7 +39,10 @@ export function SiteMobileMenu({ isOpen, onClose }: Readonly<SiteMobileMenuProps
                     {t("site.header.cta")}
                 </Link>
 
-                <LanguageSwitch />
+                <div className="flex items-center gap-2">
+                    <LanguageSwitch />
+                    <RepresentativeThemeToggle />
+                </div>
             </div>
         </div>
     )

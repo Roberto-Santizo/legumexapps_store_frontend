@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { UnitTable } from "@/feature/unit/component/unitTable.component"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 export function UnitListPage() {
     const { t } = useTranslation()

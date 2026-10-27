@@ -1,3 +1,4 @@
+import { catalogDisplayName } from "@/shared/utils/catalogDisplayName"
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { getCategoriesAPI } from "@/feature/category/api/category.api"
@@ -12,14 +13,15 @@ type CategorySelectProps = {
 }
 
 export function CategorySelect({ inputId, hasError, value, onChange }: Readonly<CategorySelectProps>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
+    const language = (i18n.resolvedLanguage ?? i18n.language).split("-")[0]
     const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: getCategoriesAPI })
 
     const options: SearchableSelectOption[] = (categoriesQuery.data?.data ?? [])
         .filter((category) => category.isActive)
         .map((category) => ({
             value: category.id,
-            label: category.displayName,
+            label: catalogDisplayName(category, language),
         }))
 
     return (

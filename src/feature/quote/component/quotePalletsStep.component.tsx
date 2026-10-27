@@ -4,9 +4,9 @@ import { Calculator, LoaderCircle, Scale } from "lucide-react"
 import type { QuotableProduct } from "@/feature/quote/schema/quote.schema"
 import { Button } from "@/shared/component/button.component"
 import { QuoteWizardBackButton } from "@/feature/quote/component/quoteWizardBackButton.component"
-import { CatalogQuoteSection } from "@/feature/customQuote/component/catalogQuoteUi.component"
-import { CatalogQuoteQuantities } from "@/feature/customQuote/component/catalogQuoteQuantities.component"
-import { calculateTotalOrderWeightKg, formatTotalOrderWeight } from "@/feature/quote/quoteWeight.util"
+import { CatalogQuoteSection } from "@/shared/component/catalogQuoteUi.component"
+import { CatalogQuoteQuantities } from "@/shared/component/catalogQuoteQuantities.component"
+import { calculateTotalOrderWeightKg, formatTotalOrderWeight } from "@/feature/quote/util/quoteWeight.util"
 
 type QuotableVariant = QuotableProduct["variants"][number]
 

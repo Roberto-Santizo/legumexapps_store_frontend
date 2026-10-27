@@ -17,15 +17,15 @@ import { Button } from "@/shared/component/button.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { saveJuiceRow } from "../api/juice.api"
 import { JuiceMixTotal } from "./juiceMixTotal.component"
+import { JuiceCategorySelect } from "./juiceCategorySelect.component"
 import type { JuiceField } from "../constant/juiceFields"
 import type { JuiceRow } from "../schema/juice.schema"
 
 type Props = {
     fields: JuiceField[]; schema: z.ZodType; responseSchema: z.ZodType<JuiceRow>; path: string;
     row?: JuiceRow; fixed?: Record<string, unknown>; readOnly?: boolean;
-    references?: { value: number; label: string }[]; excludedClients?: number[];
+    references?: { value: number; label: string }[];
     mixBaseUnits?: number;
-    fieldSections?: { titleKey: string; fields: JuiceField[]; fractionHelp?: boolean }[];
     layout?: "grid" | "product";
     onSaved?: (row: JuiceRow) => void;
 }
@@ -51,7 +51,7 @@ function parseNumberInput(value: unknown, nullable: boolean | undefined): number
     return Number(value)
 }
 
-export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {}, readOnly = false, references = [], excludedClients = [], mixBaseUnits, fieldSections, layout = "grid", onSaved }: Readonly<Props>) {
+export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {}, readOnly = false, references = [], mixBaseUnits, layout = "grid", onSaved }: Readonly<Props>) {
     const { t } = useTranslation()
     const formId = useId()
     const queryClient = useQueryClient()
@@ -63,6 +63,7 @@ export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {
         mutationFn: (body: unknown) => saveJuiceRow(path, responseSchema, body, Boolean(row)),
         onSuccess: result => {
             queryClient.invalidateQueries({ queryKey: ["juice"] })
+            for (const key of ["products", "quoteProducts", "adminQuoteProducts"]) queryClient.invalidateQueries({ queryKey: [key] })
             toast.success(result.message)
             onSaved?.(result.data)
         },
@@ -88,7 +89,7 @@ export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {
     const previewTotal = mixBaseUnits === undefined ? undefined : (mixBaseUnits + percentageToUnits(enteredPercentage)) / 1000000
     const isLocked = readOnly || mutation.isPending
     const clientOptions = (clientsQuery.data?.data ?? [])
-        .filter(client => (client.isActive && !excludedClients.includes(client.id)) || client.id === row?.clientId)
+        .filter(client => client.isActive || client.id === row?.clientId)
         .map(client => ({ value: client.id, label: client.name }))
 
     function fieldError(name: string): string | undefined {
@@ -96,7 +97,7 @@ export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {
         return error?.type === "custom" && error.message === "juice.mixCeiling" ? t("juice.mixCeiling") : getFieldErrorMessage(t, error as FieldError | undefined)
     }
 
-    function renderControl(field: JuiceField, inputId: string, hasError: boolean, describedBy: string | undefined) {
+    function renderControl(field: JuiceField, inputId: string, hasError: boolean) {
         if (field.kind === "reference" || field.kind === "client") {
             const options = field.kind === "client" ? clientOptions : references
             return <Controller name={field.name} control={control} render={({ field: controller }) =>
@@ -109,37 +110,25 @@ export function JuiceForm({ fields, schema, responseSchema, path, row, fixed = {
         </Select>
         const isNumber = field.kind === "number"
         const registration = isNumber ? register(field.name, { setValueAs: value => parseNumberInput(value, field.nullable) }) : register(field.name)
-        return <Input id={inputId} aria-describedby={describedBy} type={isNumber ? "number" : "text"} step={field.step} maxLength={field.maxLength} min={isNumber ? 0 : undefined} placeholder={field.nullable ? t("juice.inherit") : undefined} hasError={hasError} {...registration} />
+        return <Input id={inputId} type={isNumber ? "number" : "text"} step={field.step} maxLength={field.maxLength} min={isNumber ? 0 : undefined} placeholder={field.nullable ? t("juice.inherit") : undefined} hasError={hasError} {...registration} />
     }
 
-    const renderField = (field: JuiceField, fractionHelp = false) => {
+    const renderField = (field: JuiceField) => {
         const error = fieldError(field.name)
         const inputId = `${formId}-${field.name}`
+        if (field.kind === "subcategory") return <Controller key={field.name} name={field.name} control={control} render={({ field: controller }) => <JuiceCategorySelect inputId={inputId} value={controller.value as number | undefined} onChange={controller.onChange} disabled={isLocked} error={error} />} />
         if (field.kind === "image") return <Controller key={field.name} name={field.name} control={control} render={({ field: controller }) => <ImageUploadField label={t("juice.fields.image")} value={controller.value as string | null | undefined} initialImageUrl={row?.imageUrl as string | null | undefined} onChange={controller.onChange} errorMessage={error} />} />
-        const fractionHelpId = fractionHelp ? `${inputId}-fraction-help` : undefined
-        const fieldElement = <FormField key={field.name} htmlFor={inputId} label={t(`juice.fields.${field.name}`)} required={!field.optional} error={error}>
-            {renderControl(field, inputId, Boolean(error), fractionHelpId)}
+        return <FormField key={field.name} htmlFor={inputId} label={t(`juice.fields.${field.name}`)} required={!field.optional} error={error}>
+            {renderControl(field, inputId, Boolean(error))}
         </FormField>
-        if (!fractionHelpId) return fieldElement
-        return <div key={field.name} className="min-w-0">
-            {fieldElement}
-            <p id={fractionHelpId} className="-mt-3 mb-5 text-sm leading-relaxed text-ink-600">{t("juice.constantSections.fractionHelp")}</p>
-        </div>
     }
     return <form onSubmit={submit} noValidate>
         {previewTotal !== undefined && <JuiceMixTotal total={previewTotal} />}
         {clientsQuery.isError && <p role="alert" className="mb-4 text-danger">{clientsQuery.error.message}</p>}
         <fieldset disabled={isLocked}>
-            {fieldSections ? <div className="mb-6 space-y-8">
-                {fieldSections.map(section => <section key={section.titleKey} aria-labelledby={`${formId}-${section.titleKey}`}>
-                    <h3 id={`${formId}-${section.titleKey}`} className="mb-5 rounded-control border border-brand-300/40 bg-brand-300/15 px-4 py-3 text-base font-semibold text-ink-900">{t(section.titleKey)}</h3>
-                    <div className="grid min-w-0 gap-x-6 md:grid-cols-2">
-                        {section.fields.map(field => renderField(field, section.fractionHelp))}
-                    </div>
-                </section>)}
-            </div> : <div className={layout === "product" ? "min-w-0" : "grid min-w-0 gap-x-6 md:grid-cols-2"}>
+            <div className={layout === "product" ? "min-w-0" : "grid min-w-0 gap-x-6 md:grid-cols-2"}>
                 {fields.map(field => renderField(field))}
-            </div>}
+            </div>
         </fieldset>
         {mutation.isError && <p role="alert" className="mb-4 text-danger">{mutation.error.message}</p>}
         {!readOnly && <div className={layout === "product" ? "mt-6 flex border-t border-line pt-6" : "mt-2"}><Button type="submit" disabled={mutation.isPending || clientsQuery.isError}>{mutation.isPending ? t("common.saving") : t("common.save")}</Button></div>}

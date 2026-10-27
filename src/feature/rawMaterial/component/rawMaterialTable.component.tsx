@@ -5,6 +5,7 @@ import { PaginatedAdminTable } from "@/shared/component/paginatedAdminTable.comp
 import { EditLink } from "@/shared/component/editLink.component"
 import { formatCurrency } from "@/shared/format/currency"
 import { formatDateTime } from "@/shared/format/date"
+import { catalogDisplayName } from "@/shared/utils/catalogDisplayName"
 
 export function RawMaterialTable() {
     const { t, i18n } = useTranslation()
@@ -18,7 +19,7 @@ export function RawMaterialTable() {
             renderActions={(rawMaterial) => <EditLink to={`/admin/raw-materials/${rawMaterial.id}/edit`} permission="rawMaterials:edit" />}
             columns={[
                 { key: "code", header: t("rawMaterial.form.code"), render: (rawMaterial) => rawMaterial.code },
-                { key: "displayName", header: t("rawMaterial.form.displayName"), render: (rawMaterial) => rawMaterial.displayName },
+                { key: "displayName", header: t("rawMaterial.form.displayName"), render: (rawMaterial) => catalogDisplayName(rawMaterial, i18n.resolvedLanguage ?? i18n.language) },
                 {
                     key: "ingredientType",
                     header: t("rawMaterial.form.ingredientType"),

@@ -1,4 +1,4 @@
-import type { DashboardDateRange } from "@/feature/dashboard/schema/dashboard.schema"
+import type { DateRange } from "@/shared/schema/dateRange.schema"
 import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,7 +7,7 @@ import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Spinner } from "@/shared/component/spinner.component"
 import { Select } from "@/shared/component/select.component"
 import { FormField } from "@/shared/component/formField.component"
-import { DateRangeFilter } from "@/feature/dashboard/component/dateRangeFilter.component"
+import { DateRangeFilter } from "@/shared/component/dateRangeFilter.component"
 import { getAdminCustomQuotesAPI } from "@/feature/customQuote/api/adminCustomQuote.api"
 import { AdminCustomQuoteTable } from "@/feature/customQuote/component/adminCustomQuoteTable.component"
 import { CUSTOM_QUOTE_STATUSES } from "@/feature/customQuote/schema/adminCustomQuote.schema"
@@ -15,7 +15,7 @@ import type { AdminCustomQuoteListFilters, CustomQuoteStatus } from "@/feature/c
 
 // DateRangeFilter filtra la fecha de guardado en días de Guatemala, inicialmente sin límite;
 // el estado de seguimiento se filtra por separado.
-export function AdminCustomQuoteListPage({ embedded = false, dateRange, onDateChange }: Readonly<{ embedded?: boolean; dateRange?: DashboardDateRange; onDateChange?: (range: DashboardDateRange) => void }> = {}) {
+export function AdminCustomQuoteListPage({ embedded = false, dateRange, onDateChange }: Readonly<{ embedded?: boolean; dateRange?: DateRange; onDateChange?: (range: DateRange) => void }> = {}) {
     const { t } = useTranslation()
     const [filters, setFilters] = useState<AdminCustomQuoteListFilters>({ startDate: null, endDate: null, status: null })
 

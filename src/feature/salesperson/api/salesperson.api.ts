@@ -28,7 +28,8 @@ export async function getSalespersonByIdAPI(id: number) {
     }
 }
 
-export async function createSalespersonAPI(formData: CreateSalespersonInput) {
+// Optional initial clients are saved by the backend in the same transaction as the representative.
+export async function createSalespersonAPI(formData: CreateSalespersonInput & { clientIds?: number[]; assignAllClients?: boolean }) {
     try {
         const { data } = await api.post("/salespeople", formData)
         return salespersonMutationResponseSchema.parse(data)

@@ -1,15 +1,17 @@
+import { JuiceProductLink } from "../component/juiceProductLink.component"
+import { JuiceProductConfiguration } from "../component/juiceProductConfiguration.component"
 import { useQuery } from "@tanstack/react-query"
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { usePermission } from "@/shared/auth/usePermission"
 import { JuiceForm } from "../component/juiceForm.component"
 import { JuiceSection } from "../component/juiceSection.component"
 import { getJuiceRows } from "../api/juice.api"
-import { juiceInputSchema, juiceResponseSchema } from "../schema/juice.schema"
-import { juiceFields, mixResource, spicesResource, presentationsResource } from "../constant/juiceFields"
+import { juiceInputSchema, linkedJuiceInputSchema, juiceResponseSchema } from "../schema/juice.schema"
+import { juiceFields, linkedJuiceFields, mixResource, spicesResource } from "../constant/juiceFields"
 
 export function JuiceEditorPage() {
     const { t } = useTranslation()
@@ -19,6 +21,7 @@ export function JuiceEditorPage() {
     const { hasPermission } = usePermission()
     const id = juiceId ? Number(juiceId) : undefined
     const creating = id === undefined
+    const creatingLinked = creating && hasPermission("products:create")
     const validId = id !== undefined && Number.isInteger(id) && id > 0 && id <= 2147483647
     const query = useQuery({ queryKey: ["juice", "list"], queryFn: () => getJuiceRows("/admin/juices", juiceResponseSchema), enabled: validId, retry: false })
     const row = query.data?.find(juice => juice.id === id)
@@ -31,19 +34,20 @@ export function JuiceEditorPage() {
         if (!creating && isMissing) return <p role="alert" className="text-danger">{query.error?.message ?? t("juice.notFound")}</p>
         if (!creating && query.isLoading) return <p>{t("common.loading")}</p>
         return <div className="space-y-6">
-            <Card>
+            {!row?.productId && <Card>
                 {creating && <p className="mb-4 text-sm text-ink-600">{t("juice.createHelp")}</p>}
-                <JuiceForm key={`${row?.id ?? "new"}-${row?.updatedAt ?? ""}`} fields={juiceFields} layout="product" schema={juiceInputSchema} responseSchema={juiceResponseSchema} path={row ? `/admin/juices/${row.id}` : "/admin/juices"} row={row} readOnly={viewOnly} onSaved={saved => { if (creating) navigate(`/admin/juices/${saved.id}${hasPermission("juices:edit") ? "/edit" : ""}`) }} />
-            </Card>
+                <JuiceForm key={`${row?.id ?? "new"}-${row?.updatedAt ?? ""}`} fields={creatingLinked ? linkedJuiceFields : juiceFields} layout="product" schema={creatingLinked ? linkedJuiceInputSchema : juiceInputSchema} responseSchema={juiceResponseSchema} path={row ? `/admin/juices/${row.id}` : creatingLinked ? "/admin/juices/with-product" : "/admin/juices"} row={row} readOnly={viewOnly || Boolean(row?.productId)} onSaved={saved => { if (creating) navigate(`/admin/juices/${saved.id}${hasPermission("juices:edit") ? "/edit" : ""}`) }} />
+            </Card>}
+            {row?.productId && <JuiceProductConfiguration key={row.productId} productId={row.productId} readOnly={viewOnly} />}
             {!creating && validId && <>
                 <Link to="/admin/juices/materials" className={buttonClassName("secondary")}>{t("juice.materials")}</Link>
                 <JuiceSection resource={mixResource} juiceId={id} readOnly={!row?.isActive} />
                 <JuiceSection resource={spicesResource} juiceId={id} readOnly={!row?.isActive} />
-                <JuiceSection resource={presentationsResource} juiceId={id} readOnly={!row?.isActive} />
+                <Card><JuiceProductLink juiceId={id} productId={row?.productId} /></Card>
             </>}
         </div>
     }
-    return <PageContainer>
+    return <PageContainer className={creating ? undefined : "max-w-4xl"}>
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-2xl font-semibold text-ink-900">{t(titleKey)}{row ? ` · ${row.displayName}` : ""}</h1>
             <Link to="/admin/juices" className={buttonClassName("secondary")}>{t("common.back")}</Link>

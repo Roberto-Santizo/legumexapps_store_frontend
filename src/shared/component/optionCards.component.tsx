@@ -9,6 +9,8 @@ export type CardOption = {
     icon?: ReactNode
     subtitle?: string
     badge?: ReactNode
+    // Etiqueta bajo el texto (p. ej. el cliente dueño del producto en el cotizador admin).
+    tag?: ReactNode
 }
 
 type OptionCardsProps = {
@@ -105,6 +107,7 @@ export function OptionCards({
                                 {option.text}
                             </h3>
                             {option.subtitle && <p className="text-xs text-ink-600">{option.subtitle}</p>}
+                            {option.tag && <div className="mt-1">{option.tag}</div>}
                         </div>
                     </button>
                 )

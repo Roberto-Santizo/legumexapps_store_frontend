@@ -12,6 +12,8 @@ export const createProductVariantSchema = z.object({
     boxesPerPallet: z.number().int().positive(),
     bagsPerBox: z.number().int().positive(),
     unitsPerIntermediatePackage: z.number().int().positive().optional(),
+    // On: every pallet carries the standard pallet kit and the SKU may not repeat tarima, esquineros or stretch.
+    usesPalletKit: z.boolean().optional(),
 })
 
 // boxesPerPallet/bagsPerBox siguen siendo requeridos dentro del partial.
@@ -29,6 +31,7 @@ export const responseProductVariantSchema = baseCatalogSchema.extend({
     boxesPerPallet: z.number().int().nullable(),
     bagsPerBox: z.number().int().nullable(),
     unitsPerIntermediatePackage: z.number().int().nullable(),
+    usesPalletKit: z.boolean(),
 })
 
 export type CreateProductVariantInput = z.infer<typeof createProductVariantSchema>

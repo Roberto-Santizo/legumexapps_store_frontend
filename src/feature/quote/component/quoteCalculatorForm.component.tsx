@@ -4,15 +4,14 @@ import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import type { TFunction } from "i18next"
-import { Boxes, Check, Minus, Package, Pencil, Plus, Search, SlidersHorizontal } from "lucide-react"
+import { Minus, Package, Pencil, Plus, Search, SlidersHorizontal } from "lucide-react"
 import { calculateQuoteSchema } from "@/feature/quote/schema/quote.schema"
 import type { CalculateQuoteInput, QuotableProduct, QuoteDestination, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 import type { DestinationCountry } from "@/feature/destination/schema/destination.schema"
 import { Chip } from "@/shared/component/chip.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Select } from "@/shared/component/select.component"
-import { CatalogQuoteSection, CatalogQuoteSelectionCards } from "@/feature/customQuote/component/catalogQuoteUi.component"
+import { CatalogQuoteSection, CatalogQuoteSelectionCards } from "@/shared/component/catalogQuoteUi.component"
 import { SearchableSelect } from "@/shared/component/searchableSelect.component"
 import type { SearchableSelectOption } from "@/shared/component/searchableSelect.component"
 import { OptionCards } from "@/shared/component/optionCards.component"
@@ -23,11 +22,14 @@ import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 import { QuoteLiveTotal, QuoteMaterialGroups } from "@/feature/quote/component/quoteMaterialGroups.component"
 import { QuotePalletsStep } from "@/feature/quote/component/quotePalletsStep.component"
+import { QuotePresentationSection } from "@/feature/quote/component/quotePresentationSection.component"
+import { presentationDetails } from "@/feature/quote/util/quotePresentation.util"
 import { QuoteWizardBackButton } from "@/feature/quote/component/quoteWizardBackButton.component"
 import { QuoteWizardStepper } from "@/feature/quote/component/quoteWizardStepper.component"
 import type { QuoteWizardCrumb } from "@/feature/quote/component/quoteWizardStepper.component"
 import type { MaterialGroup, MaterialLevel, MaterialOption } from "@/feature/quote/component/quoteMaterialGroups.component"
-import { calculateTotalOrderWeightKg, formatTotalOrderWeight } from "@/feature/quote/quoteWeight.util"
+import { calculateTotalOrderWeightKg, formatTotalOrderWeight } from "@/feature/quote/util/quoteWeight.util"
+import { palletKitGroups, palletKitIncluded, palletKitSelections } from "@/feature/quote/util/quotePalletKit.util"
 
 type QuoteCalculatorFormProps = {
     products: QuotableProduct[]
@@ -51,6 +53,9 @@ type QuoteCalculatorFormProps = {
     // Cotización a la medida: el representante navega a su wizard independiente desde el paso
     // "mode". Sin esta prop (cotizador del admin) no hay paso "mode": el wizard arranca en categoría.
     customQuoteHref?: string
+    // Cotizador admin: ve el catálogo completo sin filtrar por cliente, así que cada tarjeta muestra
+    // el cliente dueño para distinguir productos parecidos. El representante ya eligió su cliente.
+    showClientName?: boolean
 }
 
 const LIVE_PREVIEW_DEBOUNCE_MS = 500
@@ -92,6 +97,11 @@ function buildSelectedMaterialIds(groups: MaterialGroup[]): SelectedMaterialIds 
     return selected
 }
 
+// Pallet kit choices travel apart from the SKU's own rows: one material per kit type, never a quantity.
+function buildMaterialSelection(groups: MaterialGroup[], kitGroups: MaterialGroup[]) {
+    return { ...buildSelectedMaterialIds(groups), ...palletKitSelections(kitGroups) }
+}
+
 // La elección vigente de un grupo de opciones: lo que el cliente tocó (si sigue siendo una opción
 // REAL de este grupo del SKU -- protege contra ids viejos de otra variante), o si no, el default
 // del grupo. Nunca se inventa una opción: si el grupo no tiene default configurado queda undefined
@@ -102,14 +112,6 @@ function resolveSelectedMaterialId(
 ): number | undefined {
     if (chosenId !== undefined && options.some((option) => option.id === chosenId)) return chosenId
     return options.find((option) => option.isDefault)?.id
-}
-
-// Subtítulo de la tarjeta de presentación: unidades por caja + cajas por palet.
-function variantDetails(variant: QuotableProduct["variants"][number], t: TFunction): string {
-    return [
-        t("site.quoteRequest.form.variantLabel.unitsPerBox", { count: variant.bagsPerBox }),
-        t("site.quoteRequest.form.variantLabel.boxesPerPallet", { count: variant.boxesPerPallet }),
-    ].join(" · ")
 }
 
 export function QuoteCalculatorForm({
@@ -123,6 +125,7 @@ export function QuoteCalculatorForm({
     draftKey,
     onProductChange,
     customQuoteHref,
+    showClientName = false,
 }: Readonly<QuoteCalculatorFormProps>) {
     const { t, i18n } = useTranslation()
     const navigate = useNavigate()
@@ -201,7 +204,9 @@ export function QuoteCalculatorForm({
         () => categoryProducts.filter((product) => product.subCategoryId === selectedSubCategoryId),
         [categoryProducts, selectedSubCategoryId]
     )
-    const visibleProducts = subCategoryProducts.filter((product) => product.displayName.toLocaleLowerCase().includes(productSearch.trim().toLocaleLowerCase()))
+    const normalizedSearch = productSearch.trim().toLocaleLowerCase()
+    const visibleProducts = subCategoryProducts.filter((product) => product.displayName.toLocaleLowerCase().includes(normalizedSearch)
+        || (showClientName && !!product.clientName?.toLocaleLowerCase().includes(normalizedSearch)))
     const productCardOptions: CardOption[] = visibleProducts.map((product) => ({
         value: product.id,
         text: product.displayName,
@@ -211,6 +216,7 @@ export function QuoteCalculatorForm({
                 {t("site.quoteRequest.form.organicBadge")}
             </span>
         ) : undefined,
+        tag: showClientName && product.clientName ? <Chip tone="fresh">{product.clientName}</Chip> : undefined,
     }))
 
     const selectedProduct = subCategoryProducts.find((product) => product.id === selectedProductId)
@@ -240,7 +246,10 @@ export function QuoteCalculatorForm({
               })
           )
         : []
-    const selectedMaterialIdsKey = JSON.stringify(buildSelectedMaterialIds(materialGroups))
+    const kitGroups = palletKitGroups(selectedVariant?.palletKit ?? [], materialSelection)
+    const kitIncluded = palletKitIncluded(selectedVariant?.palletKit ?? [])
+    const allMaterialGroups = [...materialGroups, ...kitGroups]
+    const selectedMaterialIdsKey = JSON.stringify(buildMaterialSelection(materialGroups, kitGroups))
 
     // Recálculo en vivo con debounce mientras el cliente está en el paso "pallets". Ante errores
     // simplemente no se muestra el total; el submit real sigue siendo la fuente de verdad.
@@ -357,7 +366,7 @@ export function QuoteCalculatorForm({
         // La elección de materiales vive en estado local y se agrega acá; el backend la revalida.
         const withMaterials: SalespersonQuoteInput = {
             ...formData,
-            ...buildSelectedMaterialIds(materialGroups),
+            ...buildMaterialSelection(materialGroups, kitGroups),
             ...(draftKey ? { draftKey } : {}),
         }
 
@@ -386,38 +395,14 @@ export function QuoteCalculatorForm({
         handleVariantChange()
     }
     const renderPresentationSection = (product: QuotableProduct) => (
-        <CatalogQuoteSection tone="sky" title={t("site.quoteRequest.form.variant")}>
-            {product.variants.length > 1 ? (
-                <>
-                    <CatalogQuoteSelectionCards
-                        value={selectedVariantId}
-                        options={product.variants.map((variant) => ({
-                            value: variant.id,
-                            text: variant.presentationLabel ?? product.displayName,
-                            subtitle: variantDetails(variant, t),
-                            icon: <Boxes size={22} aria-hidden="true" />,
-                        }))}
-                        onChange={(value) => selectVariant(Number(value))}
-                    />
-                    {errors.productVariantId && (
-                        <p role="alert" className="mt-3 text-sm text-danger">{getFieldErrorMessage(t, errors.productVariantId)}</p>
-                    )}
-                </>
-            ) : (
-                selectedVariant && (
-                    <div className="flex items-center gap-3 rounded-xl border border-line bg-linear-to-br from-customize-mint via-surface to-accent-coral-bg p-4">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface text-brand-700 ring-1 ring-line dark:text-brand-500">
-                            <Boxes size={20} aria-hidden="true" />
-                        </span>
-                        <div className="min-w-0">
-                            <p className="break-words font-semibold text-ink-900">{selectedVariant.presentationLabel ?? product.displayName}</p>
-                            <p className="text-sm text-ink-600">{variantDetails(selectedVariant, t)}</p>
-                        </div>
-                        <Check size={18} aria-hidden="true" className="ml-auto shrink-0 text-brand-700 dark:text-brand-500" />
-                    </div>
-                )
+        <QuotePresentationSection
+            options={product.variants.map((variant) => ({ id: variant.id, label: variant.presentationLabel ?? product.displayName, details: presentationDetails(variant, t) }))}
+            selectedId={selectedVariantId}
+            onSelect={selectVariant}
+            error={errors.productVariantId && (
+                <p role="alert" className="mt-3 text-sm text-danger">{getFieldErrorMessage(t, errors.productVariantId)}</p>
             )}
-        </CatalogQuoteSection>
+        />
     )
 
     const renderProductHeader = (product: QuotableProduct) => {
@@ -461,7 +446,7 @@ export function QuoteCalculatorForm({
     const canSubmit =
         !!selectedVariantId &&
         !!watchedRequestedPallets &&
-        materialGroups.every((group) => group.selectedId !== undefined)
+        allMaterialGroups.every((group) => group.selectedId !== undefined)
 
     const liveTotal = isLiveTotalAvailable ? (
         <QuoteLiveTotal total={livePreviewTotal} isLoading={isLivePreviewLoading} pallets={watchedRequestedPallets} />
@@ -677,7 +662,7 @@ export function QuoteCalculatorForm({
                                     </div>
                                 </FormField>
                             }
-                            materialsSection={<QuoteMaterialGroups groups={materialGroups} onSelect={handleMaterialSelect} />}
+                            materialsSection={<QuoteMaterialGroups groups={allMaterialGroups} included={{ pallet: kitIncluded }} onSelect={handleMaterialSelect} />}
                             destinationSection={renderDestinationSection()}
                             liveTotal={liveTotal}
                             canSubmit={canSubmit}
@@ -702,7 +687,7 @@ export function QuoteCalculatorForm({
                                         <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 pb-2.5">
                                             <dt className="text-ink-600">{t("site.quoteRequest.form.variant")}</dt>
                                             <dd className="text-right font-medium text-ink-900">
-                                                {selectedVariant.presentationLabel ?? selectedProduct.displayName} · {variantDetails(selectedVariant, t)}
+                                                {selectedVariant.presentationLabel ?? selectedProduct.displayName} · {presentationDetails(selectedVariant, t)}
                                             </dd>
                                         </div>
                                     )}
@@ -716,7 +701,7 @@ export function QuoteCalculatorForm({
                                             <dd className="font-medium text-ink-900">{formatTotalOrderWeight(totalWeightKg)}</dd>
                                         </div>
                                     )}
-                                    {materialGroups.map((group) => (
+                                    {allMaterialGroups.map((group) => (
                                         <div key={group.key} className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5">
                                             <dt className="text-ink-600">
                                                 {t(`site.quoteRequest.form.${group.level}MaterialLabel`)} · {group.group}

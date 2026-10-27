@@ -24,11 +24,14 @@ const dashboardTopProductSchema = z.object({
     totalRevenue: z.number(),
 })
 
+// Autor: un representante o, con isAdmin, el usuario staff que guardó desde el cotizador del admin.
 const dashboardTopSalespersonSchema = z.object({
-    salespersonId: z.number().int(),
+    salespersonId: z.number().int().nullable(),
+    userId: z.number().int().nullable(),
+    isAdmin: z.boolean(),
     name: z.string(),
     companyName: z.string().nullable(),
-    email: z.string(),
+    email: z.string().nullable(),
     quoteCount: z.number(),
     totalPallets: z.number(),
     totalRevenue: z.number(),
@@ -55,11 +58,6 @@ export const dashboardSummarySchema = z.object({
     topRawMaterials: z.array(dashboardTopRawMaterialSchema),
 })
 
+export type DashboardOverview = z.infer<typeof dashboardOverviewSchema>
 export type DashboardTrendPoint = z.infer<typeof dashboardTrendPointSchema>
 export type DashboardTopProduct = z.infer<typeof dashboardTopProductSchema>
-
-// "YYYY-MM-DD", tal como los produce un <input type="date">.
-export interface DashboardDateRange {
-    startDate: string | null
-    endDate: string | null
-}

@@ -13,7 +13,7 @@ import { DestinationForm } from "@/feature/destination/component/destinationForm
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 function toFormValues(destination: DestinationResponse): UpdateDestinationInput {
     return {

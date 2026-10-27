@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next"
 import { Boxes, FlaskConical, Layers, PackageOpen, PackagePlus, Wheat } from "lucide-react"
 import type { AdminCustomQuoteDetail } from "@/feature/customQuote/schema/adminCustomQuote.schema"
 import { Card } from "@/shared/component/card.component"
-import { Chip } from "@/shared/component/chip.component"
 import { Table, TableBody, TableContainer, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 
 // Ficha de fabricación de una cotización a la medida: lo que el representante armó, tal como quedó
@@ -119,9 +118,9 @@ export function CustomQuoteSpecification({ customQuote }: Readonly<{ customQuote
         <Card className="space-y-5">
             {configuration.snapshot && <SpecSection icon={<Layers size={15} />} title={t("catalogQuote.context")}>
                 <p>{configuration.snapshot.category.displayName} / {configuration.snapshot.subCategory.displayName}</p>
-                <p>{t(configuration.snapshot.isOrganic ? "catalogQuote.organic" : "catalogQuote.conventional")} · {t(`catalogQuote.types.${configuration.snapshot.ingredientType}`)}</p>
+                <p>{t(`catalogQuote.types.${configuration.snapshot.ingredientType}`)}{configuration.snapshot.isOrganic && ` · ${t("catalogQuote.organic")}`}</p>
                 <p>{t("catalogQuote.quantities", { boxes: configuration.snapshot.quantity.totalBoxes, units: configuration.snapshot.quantity.totalUnits, weight: (Number(configuration.snapshot.quantity.totalWeightGrams) / 1000).toFixed(2) })}</p>
-                {configuration.snapshot.source && <details className="mt-3 text-sm text-ink-600"><summary>{t("catalogQuote.audit")}</summary><p>{t("adminCustomQuote.spec.sku")}: {configuration.snapshot.source.skuCode} · {t("catalogQuote.sourceVariant")}: {configuration.snapshot.source.productVariantId}</p></details>}
+                {configuration.snapshot.source && "skuCode" in configuration.snapshot.source && <details className="mt-3 text-sm text-ink-600"><summary>{t("catalogQuote.audit")}</summary><p>{t("adminCustomQuote.spec.sku")}: {configuration.snapshot.source.skuCode} · {t("catalogQuote.sourceVariant")}: {configuration.snapshot.source.productVariantId}</p></details>}
             </SpecSection>}
             <SpecSection icon={<Wheat size={15} />} title={t("adminCustomQuote.spec.recipe")}>
                 <ul className="space-y-1.5">
@@ -132,11 +131,6 @@ export function CustomQuoteSpecification({ customQuote }: Readonly<{ customQuote
                         </li>
                     ))}
                 </ul>
-                {customQuote.isOrganic && (
-                    <div className="mt-3">
-                        <Chip tone="fresh">{t("site.quoteRequest.form.organicBadge")}</Chip>
-                    </div>
-                )}
             </SpecSection>
 
             <SpecSection icon={<FlaskConical size={15} />} title={t("adminCustomQuote.spec.ingredients")}>

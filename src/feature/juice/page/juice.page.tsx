@@ -5,7 +5,7 @@ import { getClientsAPI } from "@/feature/client/api/client.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { useStatusToggle } from "@/shared/hook/useStatusToggle"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { PaginatedAdminTable } from "@/shared/component/paginatedAdminTable.component"
 import { StatusBadge } from "@/shared/component/statusBadge.component"
 import { StatusToggleButton } from "@/shared/component/statusToggleButton.component"
@@ -39,7 +39,6 @@ export function JuiceListPage() {
                 { key: "displayName", header: t("juice.fields.displayName"), render: juice => juice.displayName },
                 { key: "clientId", header: t("juice.fields.clientId"), render: juice => clientName(juice.clientId) },
                 { key: "code", header: t("juice.fields.code"), render: juice => juice.code },
-                { key: "pricePerPound", header: t("juice.fields.pricePerPound"), render: juice => juice.pricePerPound },
                 { key: "status", header: t("common.status"), render: juice => <StatusBadge isActive={juice.isActive} /> },
             ]}
             renderActions={juice => <div className="flex flex-wrap gap-3">
@@ -54,7 +53,6 @@ export function JuiceListPage() {
             <h1 className="text-2xl font-semibold text-ink-900">{t("juice.title")}</h1>
             <div className="flex flex-wrap gap-3">
                 <Link to="/admin/juices/materials" className={buttonClassName("secondary")}>{t("juice.materials")}</Link>
-                {hasPermission("juiceConfig:edit") && <Link to="/admin/juice-config" className={buttonClassName("secondary")}>{t("juice.configTitle")}</Link>}
                 {hasPermission("juices:create") && <Link to="/admin/juices/create" className={buttonClassName()}>{t("juice.create")}</Link>}
             </div>
         </div>

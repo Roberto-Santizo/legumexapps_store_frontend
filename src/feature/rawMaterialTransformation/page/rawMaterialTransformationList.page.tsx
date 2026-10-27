@@ -8,7 +8,7 @@ import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { PaginatedAdminTable } from "@/shared/component/paginatedAdminTable.component"
 import { EditLink } from "@/shared/component/editLink.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { formatDateTime } from "@/shared/format/date"
 
 const linkClassName = "rounded-action font-medium text-ink-900 underline decoration-focus underline-offset-4 hover:text-focus focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"

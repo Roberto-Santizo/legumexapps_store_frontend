@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Spinner } from "@/shared/component/spinner.component"
 import type { QuoteWizardStep } from "@/feature/quote/component/quoteCalculatorForm.component"
-import { WIZARD_DETAILS_LAYOUT_CLASSNAME, WIZARD_STEP_LAYOUT_CLASSNAME } from "@/feature/quote/component/quoteWizardLayout"
+import { WIZARD_DETAILS_LAYOUT_CLASSNAME, WIZARD_STEP_LAYOUT_CLASSNAME } from "@/feature/quote/constant/quoteWizardLayout"
 
 type QuoteWizardContentProps = {
     isLoadingCatalog: boolean

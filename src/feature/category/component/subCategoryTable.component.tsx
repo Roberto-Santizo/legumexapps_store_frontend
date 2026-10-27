@@ -9,15 +9,16 @@ import { EditLink } from "@/shared/component/editLink.component"
 import { StatusBadge } from "@/shared/component/statusBadge.component"
 import { StatusToggleButton } from "@/shared/component/statusToggleButton.component"
 import { useStatusToggle } from "@/shared/hook/useStatusToggle"
+import { catalogDisplayName } from "@/shared/utils/catalogDisplayName"
 
 export function SubCategoryTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
+    const language = i18n.resolvedLanguage ?? i18n.language
     const { hasPermission } = usePermission()
     const { isPending, toggle } = useStatusToggle({ mutationFn: updateSubCategoryStatusAPI, invalidateKey: "subCategories" })
 
-
     const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: getCategoriesAPI, retry: false })
-    const categoryNameById = new Map((categoriesQuery.data?.data ?? []).map((category) => [category.id, category.displayName]))
+    const categoryNameById = new Map((categoriesQuery.data?.data ?? []).map((category) => [category.id, catalogDisplayName(category, language)]))
 
     return (
         <PaginatedAdminTable<SubCategoryResponse>
@@ -32,13 +33,13 @@ export function SubCategoryTable() {
                         <StatusToggleButton
                             isActive={subCategory.isActive}
                             isPending={isPending}
-                            onToggle={() => toggle(subCategory.id, subCategory.displayName, subCategory.isActive)}
+                            onToggle={() => toggle(subCategory.id, catalogDisplayName(subCategory, language), subCategory.isActive)}
                         />
                     )}
                 </div>
             )}
             columns={[
-                { key: "displayName", header: t("subCategory.form.displayName"), render: (subCategory) => subCategory.displayName },
+                { key: "displayName", header: t("subCategory.form.displayName"), render: (subCategory) => catalogDisplayName(subCategory, language) },
                 {
                     key: "categoryId",
                     header: t("subCategory.form.categoryId"),

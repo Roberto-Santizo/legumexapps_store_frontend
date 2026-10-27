@@ -70,22 +70,40 @@ for (const language of ["es", "en"]) {
         const { PackagingForm } = h.load("src/feature/packaging/component/packagingForm.component.tsx")
         const tree = PackagingForm({ register: name => ({ name }), errors: {}, packagingRole: "pallet", editing: true })
         const base = nodes(tree).find(node => node.type === "BaseFields")
-        const classification = nodes(base.props.roleField).find(node => node.type === "select" && node.props.id === "classification")
+        const classification = nodes(base.props.leadingField).find(node => node.type === "select" && node.props.id === "classification")
         assert.deepEqual(nodes(classification).filter(node => node.type === "option").map(node => node.props.value), ["specific", "generic"])
         assert.ok(nodes(tree).some(node => node.type === "input" && node.props.name === "isActive"))
         assert.ok(nodes(tree).some(node => node.type === "ConsumptionFields"))
+        assert.equal(base.props.systemCode, undefined, "specific materials ask for their code")
+    })
+    test(`generic materials show the system code instead of a code input (${language})`, () => {
+        const h = harness(language)
+        const { PackagingForm } = h.load("src/feature/packaging/component/packagingForm.component.tsx")
+        const base = nodes(PackagingForm({ register: name => ({ name }), errors: {}, packagingRole: "unit", classification: "generic", currentCode: "GEN-IND-0007" })).find(node => node.type === "BaseFields")
+        assert.ok(JSON.stringify(base.props.systemCode).includes("GEN-IND-0007"))
+        const created = nodes(PackagingForm({ register: name => ({ name }), errors: {}, packagingRole: "unit", classification: "generic" })).find(node => node.type === "BaseFields")
+        assert.ok(created.props.systemCode)
     })
 }
-test("schemas preserve four-decimal costs and require classification for both material types", () => {
+test("schemas preserve twelve-decimal costs and require classification for both material types", () => {
     const h = harness()
-    const { createPackagingSchema, responsePackagingSchema } = h.load("src/feature/packaging/schema/packaging.schema.ts")
+    const { createPackagingSchema, updatePackagingSchema, responsePackagingSchema } = h.load("src/feature/packaging/schema/packaging.schema.ts")
     const base = { displayNameEn: "Generic", code: "GEN-1", displayName: "Generic", packagingRole: "unit", unitCost: 0.1234 }
     for (const classification of ["specific", "generic"]) {
         assert.equal(createPackagingSchema.parse({ ...base, classification }).unitCost, 0.1234)
-        assert.equal(responsePackagingSchema.parse({ ...base, classification, id: 1, isActive: true, createdAt: "2026-10-12", updatedAt: "2026-10-12" }).classification, classification)
+        assert.equal(responsePackagingSchema.parse({ ...base, classification, materialType: "INDIVIDUAL", id: 1, isActive: true, createdAt: "2026-10-12", updatedAt: "2026-10-12" }).classification, classification)
     }
     assert.equal(createPackagingSchema.safeParse(base).success, false)
-    assert.equal(createPackagingSchema.safeParse({ ...base, classification: "generic", unitCost: 0.12345 }).success, false)
+    for (const unitCost of [0, 0.12345, 0.123456789012, 0.000000000001, 999999.9999]) {
+        for (const classification of ["specific", "generic"]) {
+            assert.equal(createPackagingSchema.parse({ ...base, classification, unitCost }).unitCost, unitCost)
+            assert.equal(updatePackagingSchema.parse({ ...base, classification, unitCost }).unitCost, unitCost)
+        }
+    }
+    for (const unitCost of [-1, Infinity, NaN, 1000000, 0.1234567890123]) {
+        assert.equal(createPackagingSchema.safeParse({ ...base, classification: "generic", unitCost }).success, false)
+        assert.equal(updatePackagingSchema.safeParse({ ...base, classification: "generic", unitCost }).success, false)
+    }
 })
 
 
@@ -115,8 +133,8 @@ test("new forms require English while historical edit forms can retain a missing
 })
 test("packaging PDFs and draft summaries use the selected stored language without mutating snapshots", () => {
     const h = harness()
-    const { buildPdfPackagingMaterials } = h.load("src/feature/quote/component/quotePdfPackaging.ts")
-    const { buildPackagingConfiguration } = h.load("src/feature/quote/component/quotePackagingConfig.ts")
+    const { buildPdfPackagingMaterials } = h.load("src/feature/quote/util/quotePdfPackaging.ts")
+    const { buildPackagingConfiguration } = h.load("src/feature/quote/util/quotePackagingConfig.ts")
     const snapshot = { unitMaterials: [{ displayName: "Bolsa", displayNameEn: "Bag", optionGroup: null }], palletMaterials: [{ displayName: "Caja", displayNameEn: "Box", optionGroup: "Carton", materialType: "CAJA" }] }
     const before = JSON.stringify(snapshot)
     assert.equal(buildPdfPackagingMaterials(snapshot, "es")[0].name, "Bolsa")
@@ -124,4 +142,26 @@ test("packaging PDFs and draft summaries use the selected stored language withou
     assert.equal(buildPackagingConfiguration(snapshot, "en")[1].groups[0].material, "Box")
     assert.equal(buildPackagingConfiguration(snapshot, "es")[1].groups[0].material, "Caja")
     assert.equal(JSON.stringify(snapshot), before)
+})
+
+for (const language of ["es", "en"]) {
+    test(`individual material type selector replaces editable consumption (${language})`, () => {
+        const h = harness(language)
+        const { PackagingConsumptionFields } = h.load("src/feature/packaging/component/packagingConsumptionFields.component.tsx")
+        const registered = []
+        const tree = PackagingConsumptionFields({ register: (name, options) => { registered.push(name); return { name, ...options } }, errors: {} })
+        assert.deepEqual(registered, ["materialType"])
+        const select = nodes(tree).find(node => node.type === "select")
+        assert.equal(select.props.required, true)
+        assert.deepEqual(nodes(tree).filter(node => node.type === "option").map(node => node.props.value), ["", "CAJA", "TARIMA", "ESQUINERO", "STRETCH", "OTRO"])
+        assert.equal(nodes(tree).some(node => node.type === "input"), false)
+    })
+}
+
+test("the packaging form no longer marks the pallet kit: it is managed in its own section", () => {
+    const h = harness("es")
+    const { PackagingForm } = h.load("src/feature/packaging/component/packagingForm.component.tsx")
+    const tree = nodes(PackagingForm({ register: name => ({ name }), errors: {}, packagingRole: "pallet", classification: "generic" }))
+    assert.equal(tree.some(node => node.props?.id === "palletKitType"), false)
+    assert.ok(tree.some(node => node.type === "ConsumptionFields"))
 })

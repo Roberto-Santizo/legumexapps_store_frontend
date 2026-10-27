@@ -11,7 +11,7 @@ import { DEFAULT_COST_CONCEPTS } from "@/feature/rawMaterialTransformation/const
 import { TransformationForm } from "@/feature/rawMaterialTransformation/component/transformationForm.component"
 import { TransformationPageHeader } from "@/feature/rawMaterialTransformation/component/transformationPageHeader.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { showErrorToast } from "@/shared/i18n/showErrorToast"
 
 export function CreateRawMaterialTransformationPage() {

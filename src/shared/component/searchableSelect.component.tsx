@@ -2,7 +2,7 @@ import ReactSelect from "react-select"
 import { useTranslation } from "react-i18next"
 import { searchableSelectMessages } from "@/shared/i18n/searchableSelectMessages"
 import type { GroupBase, Props as ReactSelectProps } from "react-select"
-import { buildSearchableSelectClassNames } from "@/shared/component/searchableSelectClassNames"
+import { buildSearchableSelectClassNames } from "@/shared/utils/searchableSelectClassNames"
 
 export type SearchableSelectOption = {
     value: number

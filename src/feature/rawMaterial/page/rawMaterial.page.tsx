@@ -4,7 +4,7 @@ import { RawMaterialTable } from "@/feature/rawMaterial/component/rawMaterialTab
 import { bulkImportRawMaterialsAPI, downloadRawMaterialImportTemplateAPI } from "@/feature/rawMaterial/api/rawMaterial.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { BulkImportPanel } from "@/shared/component/bulkImportPanel.component"
 
 export function RawMaterialListPage() {

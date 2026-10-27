@@ -12,7 +12,7 @@ import { CreateUnitForm } from "@/feature/unit/component/createUnit.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 export function CreateUnitPage() {
     const { t } = useTranslation()

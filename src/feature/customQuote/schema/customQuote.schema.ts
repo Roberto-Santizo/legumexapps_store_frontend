@@ -19,7 +19,6 @@ export const customQuoteConfigurationSchema = z.object({
     snapshot: catalogSnapshotSchema.optional(),
     subCategoryId: z.number().int(),
     presentationId: z.number().int(),
-    isOrganic: z.boolean(),
     requestedPallets: z.number().int(),
     destinationId: z.number().int().nullable(),
     rawMaterialMix: z.array(z.object({ rawMaterialId: z.number().int(), percentage: z.number() })),
@@ -41,7 +40,6 @@ export const customQuoteConfigurationSchema = z.object({
 export const customQuoteCalculationSchema = quoteLineSchema.extend({
     subCategoryId: z.number().int(),
     presentationId: z.number().int(),
-    isOrganic: z.boolean(),
     bagsPerBox: z.number().int(),
     unitsPerIntermediatePackage: z.number().int().nullable(),
     configuration: customQuoteConfigurationSchema,

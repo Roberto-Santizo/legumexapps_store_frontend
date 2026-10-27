@@ -9,6 +9,7 @@ import { AuthProvider } from '@/shared/auth/AuthContext'
 import { SalespersonAuthProvider } from '@/shared/auth/salesperson/SalespersonAuthContext'
 import { ErrorBoundary } from '@/shared/component/errorBoundary.component'
 import App from './App.tsx'
+import { RepresentativeThemeProvider } from '@/shared/theme/RepresentativeThemeProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -17,7 +18,9 @@ createRoot(document.getElementById('root')!).render(
         <BrowserRouter>
           <AuthProvider>
             <SalespersonAuthProvider>
-              <App />
+              <RepresentativeThemeProvider>
+                <App />
+              </RepresentativeThemeProvider>
             </SalespersonAuthProvider>
           </AuthProvider>
         </BrowserRouter>

@@ -13,7 +13,7 @@ import { SubCategoryForm } from "@/feature/category/component/subCategoryForm.co
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 function toFormValues(subCategory: SubCategoryResponse): UpdateSubCategoryInput {
     const englishTranslation = subCategory.translations.find((translation) => translation.language === "en")

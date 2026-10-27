@@ -8,7 +8,7 @@ import { bulkImportProductRawMaterialsAPI, downloadProductRawMaterialImportTempl
 import { bulkImportProductIngredientsAPI, downloadProductIngredientImportTemplateAPI } from "@/feature/product/api/productIngredient.api"
 import { usePermission } from "@/shared/auth/usePermission"
 import { PageContainer } from "@/shared/component/pageContainer.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 export function ProductListPage() {
     const { t } = useTranslation()

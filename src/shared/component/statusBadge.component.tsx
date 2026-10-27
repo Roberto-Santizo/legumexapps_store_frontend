@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { statusPillClassName } from "@/shared/component/statusPillClassName"
+import { statusPillClassName } from "@/shared/utils/statusPillClassName"
 
 export function StatusBadge({ isActive }: Readonly<{ isActive: boolean }>) {
     const { t } = useTranslation()

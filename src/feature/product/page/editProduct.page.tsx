@@ -19,7 +19,7 @@ import { ProductVariantIntermediateMaterialSection } from "@/feature/product/com
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 function toFormValues(product: ProductResponse): UpdateProductInput {
     const englishTranslation = product.translations.find((translation) => translation.language === "en")
@@ -100,6 +100,7 @@ export function EditProductPage() {
                             control={control}
                             errors={errors}
                             currentImageUrl={productQuery.data.data.imageUrl}
+                            directCostsOnly={Boolean(productQuery.data.data.juice)}
                         />
                         <Button type="submit" disabled={updateProductMutation.isPending}>
                             {updateProductMutation.isPending ? t("common.saving") : t("common.save")}
@@ -117,7 +118,7 @@ export function EditProductPage() {
                         <ProductVariantSection productId={productId} />
                     </Card>
 
-                    <Card>
+                    {productQuery.data.data.juice ? <Card><Link className="font-medium underline" to={`/admin/juices/${productQuery.data.data.juice.id}/edit`}>{t("juice.manageVolumeRecipe")}</Link><p>{t("juice.sharedCatalogHelp")}</p></Card> : <>                    <Card>
                         <h2 className="mb-4 text-lg font-semibold text-ink-900">
                             {t("productRawMaterial.list.title")}
                         </h2>
@@ -133,6 +134,7 @@ export function EditProductPage() {
                         <ProductIngredientSection productId={productId} />
                     </Card>
 
+</>}
                     <Card>
                         <h2 className="mb-4 text-lg font-semibold text-ink-900">
                             {t("productVariantUnitMaterial.list.title")}

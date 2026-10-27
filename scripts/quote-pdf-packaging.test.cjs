@@ -53,7 +53,7 @@ function mixedOrderFixture() {
 
 test("mixed orders consolidate physical quantities and keep missing historical quantities unknown", async () => {
     const { load } = await setup
-    const { productionMaterials, consolidateProductionMaterials } = load("src/feature/quote/component/quoteProductionData.ts")
+    const { productionMaterials, consolidateProductionMaterials } = load("src/feature/quote/util/quoteProductionData.ts")
     const lines = mixedOrderFixture()
     const before = JSON.stringify(lines)
     const totals = consolidateProductionMaterials(lines)
@@ -86,7 +86,7 @@ test("renders both mixed customer PDF and printable production report with all m
 
 test("PDF presentation uses structured types, omits unused levels and never mutates snapshots", async () => {
     const { load } = await setup
-    const { buildPdfPackagingMaterials: build } = load("src/feature/quote/component/quotePdfPackaging.ts")
+    const { buildPdfPackagingMaterials: build } = load("src/feature/quote/util/quotePdfPackaging.ts")
     const snapshot = Object.freeze({ unitMaterials: Object.freeze([Object.freeze(pouch)]), palletMaterials: Object.freeze([Object.freeze(box)]) })
     assert.deepEqual(build(snapshot), [{ name: pouch.displayName, kind: "unit" }, { name: box.displayName, kind: "other" }])
     assert.deepEqual(build({}), [])
@@ -97,7 +97,7 @@ test("PDF presentation uses structured types, omits unused levels and never muta
 test("confirmed customizable snapshots render commercial composition and certification without source identity", async () => {
     const { renderer, load } = await setup
     const { QuotePdfDocument } = load("src/feature/quote/component/quotePdfDocument.component.tsx")
-    const { toCustomQuoteDocumentLine } = load("src/feature/customQuote/component/customQuoteComposition.ts")
+    const { toCustomQuoteDocumentLine } = load("src/feature/customQuote/util/customQuoteComposition.ts")
     const output = path.resolve("artifacts/quote-packaging")
     fs.mkdirSync(output, { recursive: true })
     for (const isOrganic of [false, true]) {

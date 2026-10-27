@@ -7,9 +7,11 @@ import { EditLink } from "@/shared/component/editLink.component"
 import { StatusBadge } from "@/shared/component/statusBadge.component"
 import { StatusToggleButton } from "@/shared/component/statusToggleButton.component"
 import { useStatusToggle } from "@/shared/hook/useStatusToggle"
+import { catalogDisplayName } from "@/shared/utils/catalogDisplayName"
 
 export function CategoryTable() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
+    const language = i18n.resolvedLanguage ?? i18n.language
     const { hasPermission } = usePermission()
     const { isPending, toggle } = useStatusToggle({ mutationFn: updateCategoryStatusAPI, invalidateKey: "categories" })
 
@@ -26,14 +28,13 @@ export function CategoryTable() {
                         <StatusToggleButton
                             isActive={category.isActive}
                             isPending={isPending}
-                            onToggle={() => toggle(category.id, category.displayName, category.isActive)}
+                            onToggle={() => toggle(category.id, catalogDisplayName(category, language), category.isActive)}
                         />
                     )}
                 </div>
             )}
             columns={[
-                { key: "displayName", header: t("category.form.displayName"), render: (category) => category.displayName },
-                { key: "urlSlug", header: t("category.form.urlSlug"), render: (category) => category.urlSlug },
+                { key: "displayName", header: t("category.form.displayName"), render: (category) => catalogDisplayName(category, language) },
                 {
                     key: "status",
                     header: t("common.status"),

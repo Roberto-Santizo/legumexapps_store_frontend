@@ -2,13 +2,13 @@ import { useRef } from "react"
 import { Document, Page, View, Text, Image } from "@react-pdf/renderer"
 import { useTranslation } from "react-i18next"
 import type { QuoteDocumentLine, QuoteLine, QuoteLineComposition } from "@/feature/quote/schema/quote.schema"
-import { quotePdfStyles as styles } from "@/feature/quote/component/quotePdfDocument.styles"
+import { quotePdfStyles as styles } from "@/feature/quote/constant/quotePdfDocument.styles"
 import {
     QUOTE_VALIDITY_DAYS,
     calculateQuoteOrderTotal,
     calculateQuoteValidUntil,
     quotePdfDateFormatter as pdfDateFormatter,
-} from "@/feature/quote/component/quotePdfSummary"
+} from "@/feature/quote/util/quotePdfSummary"
 import { QuotePdfPackaging } from "@/feature/quote/component/quotePdfPackaging.component"
 import { formatCurrency } from "@/shared/format/currency"
 
@@ -42,7 +42,7 @@ function CompositionSection({ composition }: Readonly<{ composition: QuoteLineCo
                 ))}
             </View>
             {composition.context && <Text style={styles.packagingConfigFixed}>
-                {composition.context.categoryName} · {composition.context.subCategoryName} · {t(composition.context.isOrganic ? "catalogQuote.organic" : "catalogQuote.conventional")} · {t(`catalogQuote.types.${composition.context.ingredientType}`)}
+                {composition.context.categoryName} · {composition.context.subCategoryName} · {t(`catalogQuote.types.${composition.context.ingredientType}`)}{composition.context.isOrganic ? ` · ${t("catalogQuote.organic")}` : ""}
             </Text>}
             {composition.ingredients.length > 0 && (
                 <Text style={styles.packagingConfigFixed}>
@@ -71,8 +71,8 @@ type QuotePdfDocumentProps = {
     showCostBreakdown?: boolean
     // Transporte apagado para todos por ahora; independiente de showCostBreakdown.
     showTransport?: boolean
-    // Aviso "cotización de referencia" (solo representante): un bloque único por documento, cerca del
-    // total del pedido.
+    // Aviso "cotización de referencia" (todo PDF que llega al cliente, de representante o admin): un
+    // bloque único por documento, cerca del total del pedido.
     showReferenceDisclaimer?: boolean
 }
 
@@ -82,7 +82,7 @@ export function QuotePdfDocument({
     clientName,
     quoteDate,
     lines,
-    showCostBreakdown = true,
+    showCostBreakdown = false,
     showTransport = false,
     showReferenceDisclaimer = false,
 }: Readonly<QuotePdfDocumentProps>) {
@@ -250,12 +250,21 @@ export function QuotePdfDocument({
                                         <Text style={styles.breakdownValue}>{formatCurrency(line.transportCost)}</Text>
                                     </View>
                                 )}
-                                {line.breakdown.adjustment && (
-                                    <View style={styles.breakdownRow}>
-                                        <Text style={styles.breakdownLabel}>{t("quote.pdf.document.adjustment")}</Text>
-                                        <Text style={styles.breakdownValue}>{formatCurrency(line.breakdown.adjustment.lineTotal)}</Text>
-                                    </View>
-                                )}
+                            </View>
+                        )}
+
+                        {showCostBreakdown && line.breakdown.adjustment && (
+                            <View style={styles.breakdownSection}>
+                                <View style={styles.breakdownRow}>
+                                    <Text style={styles.breakdownLabel}>{t("site.quoteRequest.result.adjustment")}</Text>
+                                    <Text style={styles.breakdownValue}>{formatCurrency(line.breakdown.adjustment.lineTotal)}</Text>
+                                </View>
+                                <Text style={styles.breakdownLabel}>
+                                    {t("site.quoteRequest.result.adjustmentDetail", {
+                                        unitCost: formatCurrency(line.breakdown.adjustment.unitCost),
+                                        count: line.breakdown.adjustment.totalUnits.toLocaleString("es-MX"),
+                                    })}
+                                </Text>
                             </View>
                         )}
 

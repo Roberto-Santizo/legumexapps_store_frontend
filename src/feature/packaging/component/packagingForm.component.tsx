@@ -10,11 +10,14 @@ import { Select } from "@/shared/component/select.component"
 type PackagingFormProps<T extends UpdatePackagingInput> = {
     register: UseFormRegister<T>
     packagingRole?: string
+    classification?: string
+    // Code already assigned by the system to a generic material being edited.
+    currentCode?: string
     editing?: boolean
     errors: FieldErrors<T>
 }
 
-export function PackagingForm<T extends UpdatePackagingInput>({ register, errors, packagingRole, editing }: Readonly<PackagingFormProps<T>>) {
+export function PackagingForm<T extends UpdatePackagingInput>({ register, errors, packagingRole, classification = "specific", currentCode, editing }: Readonly<PackagingFormProps<T>>) {
     const { t } = useTranslation()
 
     const classificationField = (
@@ -46,11 +49,19 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, errors
         </FormField>
     )
 
+    // Specific materials keep the client's code; generic ones never take a user code.
+    const systemCode = classification === "generic" ? (
+        <div className="mb-5 rounded-control border border-info-border bg-info-bg px-4 py-3 text-sm text-ink-900">
+            <p className="font-semibold">{t("packaging.form.code")}: {currentCode ?? t("packaging.form.generatedCode")}</p>
+            <p className="text-ink-600">{t("packaging.form.generatedCodeHint")}</p>
+        </div>
+    ) : undefined
+
     return (
         <div>
-            <PackagingBaseFields register={register} errors={errors} requireEnglish={!editing} roleField={<>{classificationField}{roleField}</>} />
+            <PackagingBaseFields register={register} errors={errors} requireEnglish={!editing} leadingField={classificationField} systemCode={systemCode} roleField={roleField} />
             {editing && <label className="mb-4 flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" {...register("isActive" as Path<T>)} />{t("packaging.form.isActive")}</label>}
-            {packagingRole === "pallet" && <PackagingConsumptionFields register={register} errors={errors} />}
+            {packagingRole === "pallet" && <PackagingConsumptionFields register={register} errors={errors} preserveExisting={editing} />}
         </div>
     )
 }

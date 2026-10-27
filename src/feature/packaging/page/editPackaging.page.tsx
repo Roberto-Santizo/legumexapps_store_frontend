@@ -13,11 +13,13 @@ import { PackagingForm } from "@/feature/packaging/component/packagingForm.compo
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 
 function toFormValues(packaging: PackagingResponse): Partial<UpdatePackagingInput> {
     return {
+        // The type is stored: no longer guessed from the consumption.
+        materialType: packaging.packagingRole === "pallet" && packaging.materialType !== "INDIVIDUAL" && packaging.materialType !== "INTERMEDIO" ? packaging.materialType : undefined,
         defaultQuantityBasis: packaging.defaultQuantityBasis ?? null,
         defaultQuantityValue: packaging.defaultQuantityValue == null ? null : Number(packaging.defaultQuantityValue),
         classification: packaging.classification,
@@ -91,7 +93,8 @@ export function EditPackagingPage() {
 
                 {packagingQuery.data && (
                     <form onSubmit={onSubmit}>
-                        <PackagingForm editing register={register} errors={errors} packagingRole={watch("packagingRole")} />
+                        <PackagingForm editing register={register} errors={errors} packagingRole={watch("packagingRole")} classification={watch("classification")}
+                            currentCode={packagingQuery.data.data.classification === "generic" && watch("packagingRole") === packagingQuery.data.data.packagingRole ? packagingQuery.data.data.code : undefined} />
                         <Button type="submit" disabled={updatePackagingMutation.isPending}>
                             {updatePackagingMutation.isPending ? t("common.saving") : t("common.save")}
                         </Button>

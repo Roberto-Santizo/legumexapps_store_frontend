@@ -27,6 +27,7 @@ export const updateProductSchema = createProductSchema.partial().extend({
 })
 
 export const responseProductSchema = baseCatalogSchema.extend({
+    juice: z.object({ id: z.number().int() }).nullable().optional(),
     subCategoryId: z.number().int(),
     clientId: z.number().int(),
     // Solo lectura -- viene del include del backend (product.service.ts::CLIENT_INCLUDE), para

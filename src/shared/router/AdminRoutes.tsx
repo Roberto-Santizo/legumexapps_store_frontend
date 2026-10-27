@@ -1,4 +1,4 @@
-﻿import { Suspense } from "react"
+import { Suspense } from "react"
 import { Navigate, Route } from "react-router-dom"
 import { AppLayout } from "@/shared/layout/AppLayout"
 import { Spinner } from "@/shared/component/spinner.component"
@@ -6,6 +6,8 @@ import { ProtectedRoute } from "@/shared/auth/ProtectedRoute"
 import { AccessDenied, PermissionGate } from "@/shared/auth/PermissionGate"
 import { usePermission } from "@/shared/auth/usePermission"
 import { lazyWithRetry } from "@/shared/router/lazyWithRetry"
+const PalletKitPage = lazyWithRetry(() => import("@/feature/palletKit/page/palletKit.page").then(module => ({ default: module.PalletKitPage })))
+const GenericPackagingPage = lazyWithRetry(() => import("@/feature/genericPackaging/page/genericPackaging.page").then(module => ({ default: module.GenericPackagingPage })))
 const PackagingGroupPage = lazyWithRetry(() => import("@/feature/packagingGroup/page/packagingGroup.page").then(module => ({ default: module.PackagingGroupPage })))
 
 const CategoryListPage = lazyWithRetry(() =>
@@ -135,8 +137,18 @@ const DashboardPage = lazyWithRetry(() =>
     import("@/feature/dashboard/page/dashboard.page").then((module) => ({ default: module.DashboardPage }))
 )
 
+// Las páginas contenedoras de quote reciben aquí las vistas de customQuote y productionOrder, así
+// quote no importa features que dependen de él.
+const CustomizableQuoteListView = lazyWithRetry(() =>
+    import("@/feature/customQuote/page/adminCustomQuoteList.page").then((module) => ({ default: module.AdminCustomQuoteListPage }))
+)
+const ProductionOrdersView = lazyWithRetry(() =>
+    import("@/feature/productionOrder/component/productionOrders.component").then((module) => ({ default: module.ProductionOrders }))
+)
 const AdminQuoteListPage = lazyWithRetry(() =>
-    import("@/feature/quote/page/adminQuotes.page").then((module) => ({ default: module.AdminQuotesPage }))
+    import("@/feature/quote/page/adminQuotes.page").then(({ AdminQuotesPage }) => ({
+        default: () => <AdminQuotesPage customizableQuotes={CustomizableQuoteListView} productionReports={ProductionOrdersView} />,
+    }))
 )
 const QuoteDraftListPage = lazyWithRetry(() =>
     import("@/feature/quoteDraft/page/quoteDraft.page").then((module) => ({ default: module.QuoteDraftListPage }))
@@ -148,7 +160,12 @@ const AdminCustomQuoteDetailPage = lazyWithRetry(() =>
     import("@/feature/customQuote/page/adminCustomQuoteDetail.page").then((module) => ({ default: module.AdminCustomQuoteDetailPage }))
 )
 const AdminQuoteCalculatorPage = lazyWithRetry(() =>
-    import("@/feature/quote/page/adminQuoteCalculator.page").then((module) => ({ default: module.AdminQuoteCalculatorPage }))
+    Promise.all([
+        import("@/feature/quote/page/adminQuoteCalculator.page"),
+        import("@/feature/customQuote/page/adminCatalogQuoteCalculator.page"),
+    ]).then(([{ AdminQuoteCalculatorPage: Page }, { AdminCatalogQuoteCalculatorPage }]) => ({
+        default: () => <Page customizableCalculator={AdminCatalogQuoteCalculatorPage} />,
+    }))
 )
 
 const SalespersonListPage = lazyWithRetry(() =>
@@ -181,10 +198,11 @@ const SiteImageListPage = lazyWithRetry(() =>
 const JuiceListPage = lazyWithRetry(() => import("@/feature/juice/page/juice.page").then(module => ({ default: module.JuiceListPage })))
 const JuiceEditorPage = lazyWithRetry(() => import("@/feature/juice/page/juiceEditor.page").then(module => ({ default: module.JuiceEditorPage })))
 const JuiceMaterialsPage = lazyWithRetry(() => import("@/feature/juice/page/juiceMaterials.page").then(module => ({ default: module.JuiceMaterialsPage })))
-const JuiceConfigPage = lazyWithRetry(() => import("@/feature/juice/page/juiceConfig.page").then(module => ({ default: module.JuiceConfigPage })))
 
 const routes = [
     { path: "dashboard", component: DashboardPage, permission: "dashboard:view" },
+    { path: "generic-packaging", component: GenericPackagingPage, permission: "genericPackaging:view" },
+    { path: "pallet-kit", component: PalletKitPage, permission: "palletKit:view" },
 
     { path: "quotes", component: AdminQuoteListPage, permission: ["quotes:view", "customQuotes:view"] },
     { path: "quote-drafts", component: QuoteDraftListPage, permission: "quoteDrafts:view" },
@@ -237,7 +255,6 @@ const routes = [
     { path: "juices/materials", component: JuiceMaterialsPage, permission: "juices:view" },
     { path: "juices/:juiceId", component: JuiceEditorPage, permission: "juices:view" },
     { path: "juices/:juiceId/edit", component: JuiceEditorPage, permission: "juices:edit" },
-    { path: "juice-config", component: JuiceConfigPage, permission: "juiceConfig:edit" },
 
     { path: "products", component: ProductListPage, permission: "products:view" },
     { path: "products/create", component: CreateProductPage, permission: "products:create" },

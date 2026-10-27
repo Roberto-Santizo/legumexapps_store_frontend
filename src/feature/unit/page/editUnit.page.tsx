@@ -14,7 +14,7 @@ import { EditUnitForm } from "@/feature/unit/component/editUnit.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 // Partial: una unidad antigua con displayName libre no tiene key en este catálogo; se precarga
 // vacía para que el admin elija una.

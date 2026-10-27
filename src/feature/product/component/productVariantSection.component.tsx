@@ -18,6 +18,7 @@ import { getPresentationsAPI } from "@/feature/presentation/api/presentation.api
 import { PresentationSelect } from "@/feature/presentation/component/presentationSelect.component"
 import { FormField } from "@/shared/component/formField.component"
 import { Input } from "@/shared/component/input.component"
+import { Checkbox } from "@/shared/component/checkbox.component"
 import { Button } from "@/shared/component/button.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
@@ -35,6 +36,7 @@ function toFormValues(variant: ProductVariantResponse): Partial<VariantFormInput
         boxesPerPallet: variant.boxesPerPallet ?? undefined,
         bagsPerBox: variant.bagsPerBox ?? undefined,
         unitsPerIntermediatePackage: variant.unitsPerIntermediatePackage ?? undefined,
+        usesPalletKit: variant.usesPalletKit,
     }
 }
 
@@ -56,7 +58,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
         handleSubmit,
         reset,
         formState: { errors },
-    } = useForm<VariantFormInput>({ resolver: zodResolver(variantFormSchema) })
+    } = useForm<VariantFormInput>({ resolver: zodResolver(variantFormSchema), defaultValues: { usesPalletKit: true } })
 
     const invalidate = () => Promise.all([
         queryClient.invalidateQueries({ queryKey: ["productVariants"] }),
@@ -68,7 +70,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
         onSuccess: (data) => {
             invalidate()
             toast.success(data.message)
-            reset({})
+            reset({ usesPalletKit: true })
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => showErrorToast(error),
@@ -81,7 +83,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
             invalidate()
             toast.success(data.message)
             setEditingId(null)
-            reset({})
+            reset({ usesPalletKit: true })
             setFormResetKey((key) => key + 1)
         },
         onError: (error) => showErrorToast(error),
@@ -111,7 +113,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
 
     function cancelEdit() {
         setEditingId(null)
-        reset({})
+        reset({ usesPalletKit: true })
     }
 
     return (
@@ -125,6 +127,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                             <Th>{t("productVariant.form.boxesPerPallet")}</Th>
                             <Th>{t("productVariant.form.bagsPerBox")}</Th>
                             <Th>{t("productVariant.form.unitsPerIntermediatePackage")}</Th>
+                            <Th>{t("productVariant.form.usesPalletKit")}</Th>
                             <Th>{t("common.actions")}</Th>
                         </TableRow>
                     </TableHead>
@@ -136,6 +139,7 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                                 <Td>{variant.boxesPerPallet ?? "-"}</Td>
                                 <Td>{variant.bagsPerBox ?? "-"}</Td>
                                 <Td>{variant.unitsPerIntermediatePackage ?? "-"}</Td>
+                                <Td>{t(variant.usesPalletKit ? "common.yes" : "common.no")}</Td>
                                 <Td className="space-x-3">
                                     <button
                                         type="button"
@@ -240,6 +244,11 @@ export function ProductVariantSection({ productId }: Readonly<{ productId: numbe
                 <p className="mb-5 -mt-3 text-sm text-ink-600 sm:col-span-2">
                     {t("productVariant.form.unitsPerIntermediatePackageHint")}
                 </p>
+
+                <div className="mb-5 sm:col-span-2">
+                    <Checkbox id="usesPalletKit" label={t("productVariant.form.usesPalletKit")} className="-mx-3" {...register("usesPalletKit")} />
+                    <p className="text-sm text-ink-600">{t("productVariant.form.usesPalletKitHint")}</p>
+                </div>
 
                 <div className="flex gap-3 sm:col-span-2">
                     <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

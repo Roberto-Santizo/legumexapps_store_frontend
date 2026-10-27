@@ -14,7 +14,7 @@ import { RepresentativeClients } from "@/feature/salesperson/component/represent
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 function toFormValues(salesperson: SalespersonResponse): UpdateSalespersonInput {
     return {

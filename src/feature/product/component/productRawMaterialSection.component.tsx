@@ -22,6 +22,7 @@ import { Button } from "@/shared/component/button.component"
 import { Table, TableBody, TableContainer, TableEmpty, TableHead, TableRow, Td, Th } from "@/shared/component/table.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
+import { catalogDisplayName } from "@/shared/utils/catalogDisplayName"
 
 // percentage es el % real que el backend convierte a gramos sobre el peso neto de la
 // presentación -- no puede quedar vacío, o esa materia prima "cuesta" $0 sin aviso.
@@ -46,7 +47,7 @@ type ProductRawMaterialSectionProps = {
 }
 
 export function ProductRawMaterialSection({ productId }: Readonly<ProductRawMaterialSectionProps>) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const queryClient = useQueryClient()
     const [editingId, setEditingId] = useState<number | null>(null)
     // Fuerza a que el <form> se desmonte/remonte tras guardar -- reset({}) limpia el estado de
@@ -65,7 +66,7 @@ export function ProductRawMaterialSection({ productId }: Readonly<ProductRawMate
     const productRawMaterials = (productRawMaterialsQuery.data?.data ?? []).filter(
         (productRawMaterial) => productRawMaterial.productId === productId
     )
-    const rawMaterialNameById = new Map((rawMaterialsQuery.data?.data ?? []).map((rawMaterial) => [rawMaterial.id, rawMaterial.displayName]))
+    const rawMaterialNameById = new Map((rawMaterialsQuery.data?.data ?? []).map((rawMaterial) => [rawMaterial.id, catalogDisplayName(rawMaterial, i18n.resolvedLanguage ?? i18n.language)]))
 
     // Total en vivo de los % ya guardados, para que el admin vea si la receta ya suma 100 antes
     // de intentar cotizar (ver comentario de RECIPE_PERCENTAGE_TOLERANCE arriba).

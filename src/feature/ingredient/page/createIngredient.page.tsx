@@ -12,7 +12,7 @@ import { IngredientForm } from "@/feature/ingredient/component/ingredientForm.co
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
-import { buttonClassName } from "@/shared/component/buttonClassName"
+import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 export function CreateIngredientPage() {
     const { t } = useTranslation()

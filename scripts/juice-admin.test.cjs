@@ -52,8 +52,137 @@ const mixOutput = nodes => {
 
 const juiceFieldsModule = () => loader()("src/feature/juice/constant/juiceFields.ts")
 
+function juiceConfigurationHarness(permissions = ["products:view", "products:edit"]) {
+    const writes = [], invalidations = [], resets = []
+    const product = { subCategoryId: 3, clientId: 4, displayName: "Synthetic juice", isOrganic: false, imageUrl: null, translations: [] }
+    const components = ["ProductForm", "ProductVariantSection", "ProductVariantUnitMaterialSection", "ProductVariantIntermediateMaterialSection", "ProductVariantPalletMaterialSection"]
+    const overrides = {
+        ...i18n,
+        react: { ...require("react"), useEffect: fn => fn() },
+        "@/shared/auth/usePermission": { usePermission: () => ({ hasPermission: key => permissions.includes(key) }) },
+        "@/feature/product/api/product.api": { getProductByIdAPI() {}, updateProductAPI: async (...args) => { writes.push(args); return { message: "saved" } } },
+        "react-hook-form": { useForm: () => ({ register() {}, control: {}, reset: value => resets.push(value), handleSubmit: fn => () => fn({ displayName: "Updated synthetic juice" }), formState: { errors: {} } }) },
+        "@tanstack/react-query": {
+            useQuery: () => ({ data: { data: product }, isLoading: false, isError: false }),
+            useQueryClient: () => ({ invalidateQueries: options => invalidations.push(options) }),
+            useMutation: options => ({ isPending: false, mutate: async value => { options.onSuccess(await options.mutationFn(value)) } }),
+        },
+        sonner: { toast: { success() {} } },
+        "@/shared/i18n/showErrorToast": { showErrorToast() {} },
+        ...stubs([["card", "Card"], ["button", "Button"]]),
+    }
+    for (const component of components) {
+        const filename = component[0].toLowerCase() + component.slice(1)
+        overrides[`@/feature/product/component/${filename}.component`] = { [component]: component }
+    }
+    return { ...loader(overrides)("src/feature/juice/component/juiceProductConfiguration.component.tsx"), writes, invalidations, resets }
+}
+
+test("juice editor embeds shared variants and every packaging level for its linked product", () => {
+    const { JuiceProductConfiguration } = juiceConfigurationHarness()
+    const nodes = all(JuiceProductConfiguration({ productId: 8 }))
+    for (const type of ["ProductVariantSection", "ProductVariantUnitMaterialSection", "ProductVariantIntermediateMaterialSection", "ProductVariantPalletMaterialSection"]) {
+        assert.equal(nodes.find(node => node.type === type).props.productId, 8)
+    }
+    assert.equal(nodes.some(node => node.props?.to?.startsWith("/admin/products")), false)
+    for (const props of [{ productId: 8, readOnly: true }]) {
+        assert.equal(all(JuiceProductConfiguration(props)).some(node => node.type === "ProductVariantSection"), false)
+    }
+    const limited = juiceConfigurationHarness(["products:view"])
+    assert.equal(all(limited.JuiceProductConfiguration({ productId: 8 })).some(node => node.type === "ProductVariantSection"), false)
+})
+
+test("commercial juice details save in place and readonly mode cannot submit", async () => {
+    const harness = juiceConfigurationHarness()
+    const nodes = all(harness.JuiceProductIdentity({ productId: 8, readOnly: false }))
+    assert.equal(nodes.find(node => node.type === "ProductForm").props.directCostsOnly, true)
+    nodes.find(node => node.type === "form").props.onSubmit()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.deepEqual(harness.writes, [[8, { displayName: "Updated synthetic juice" }]])
+    assert.ok(harness.invalidations.some(row => row.queryKey[0] === "quoteProducts"))
+    const readonly = all(harness.JuiceProductIdentity({ productId: 8, readOnly: true }))
+    assert.equal(readonly.find(node => node.type === "fieldset").props.disabled, true)
+    readonly.find(node => node.type === "form").props.onSubmit()
+    assert.equal(harness.writes.length, 1)
+})
+
+test("juice category selection filters active subcategories and clears the previous choice", () => {
+    const state = stateHarness(), selected = []
+    const load = loader({
+        ...i18n,
+        react: { ...require("react"), useState: state.useState },
+        "@/feature/category/api/category.api": { getCategoriesAPI() {} },
+        "@/feature/category/api/subCategory.api": { getSubCategoriesAPI() {} },
+        "@tanstack/react-query": { useQuery: ({ queryKey }) => ({ data: { data: queryKey[0] === "categories" ? [
+            { id: 1, displayName: "Synthetic category", isActive: true }, { id: 2, displayName: "Inactive", isActive: false },
+        ] : [
+            { id: 3, categoryId: 1, displayName: "Synthetic subcategory", isActive: true },
+            { id: 4, categoryId: 2, displayName: "Other parent", isActive: true },
+            { id: 5, categoryId: 1, displayName: "Inactive subcategory", isActive: false },
+        ] }, isLoading: false, isError: false }) },
+        ...stubs([["formField", "FormField"], ["searchableSelect", "SearchableSelect"]]),
+    })
+    const { JuiceCategorySelect } = load("src/feature/juice/component/juiceCategorySelect.component.tsx")
+    state.begin()
+    let selects = all(JuiceCategorySelect({ inputId: "test", onChange: id => selected.push(id) })).filter(node => node.type === "SearchableSelect")
+    assert.deepEqual(selects[0].props.options.map(row => row.value), [1])
+    assert.equal(selects[1].props.isDisabled, true)
+    selects[0].props.onChange({ value: 1 })
+    assert.deepEqual(selected, [undefined])
+    state.begin()
+    selects = all(JuiceCategorySelect({ inputId: "test", onChange: id => selected.push(id) })).filter(node => node.type === "SearchableSelect")
+    assert.deepEqual(selects[1].props.options.map(row => row.value), [3])
+    selects[1].props.onChange({ value: 3 })
+    assert.deepEqual(selected, [undefined, 3])
+})
+
+test("juice recipe ingredients reference the existing ingredient catalog", () => {
+    const { spicesResource } = juiceFieldsModule()
+    assert.equal(spicesResource.referencePath, "/ingredients")
+    assert.equal(spicesResource.referenceName, "ingredientId")
+})
+
+test("juice product linking requires both permissions and an explicit subcategory", async () => {
+    const state = stateHarness()
+    const saved = [], invalidated = []
+    let permissions = ["juices:edit"]
+    const load = loader({
+        ...i18n,
+        react: { ...require("react"), useState: state.useState },
+        "react-router-dom": { Link: "Link" },
+        "@/shared/auth/usePermission": { usePermission: () => ({ hasPermission: key => permissions.includes(key) }) },
+        "./juiceCategorySelect.component": { JuiceCategorySelect: "JuiceCategorySelect" },
+        "@/shared/component/button.component": { Button: "Button" },
+        "../api/juice.api": { saveJuiceRow: async (...args) => { saved.push(args); return { data: { productId: 8, juiceId: 1 } } } },
+        "@tanstack/react-query": {
+            useQueryClient: () => ({ invalidateQueries: options => invalidated.push(options) }),
+            useMutation: options => ({ isPending: false, mutate: async () => { await options.mutationFn(); options.onSuccess() } }),
+        },
+    })
+    const { JuiceProductLink } = load("src/feature/juice/component/juiceProductLink.component.tsx")
+    state.begin()
+    assert.equal(all(JuiceProductLink({ juiceId: 1 })).some(node => node.type === "Button"), false)
+    permissions = ["juices:edit", "products:create"]
+    state.begin()
+    let tree = all(JuiceProductLink({ juiceId: 1 }))
+    assert.equal(tree.find(node => node.type === "Button").props.disabled, true)
+    tree.find(node => node.type === "JuiceCategorySelect").props.onChange(3)
+    state.begin()
+    tree = all(JuiceProductLink({ juiceId: 1 }))
+    assert.equal(tree.find(node => node.type === "Button").props.disabled, false)
+    await tree.find(node => node.type === "Button").props.onClick()
+    assert.equal(saved[0][0], "/admin/juices/1/product")
+    assert.deepEqual(saved[0][2], { subCategoryId: 3 })
+    assert.equal(invalidated.length, 2)
+    permissions = ["products:edit"]
+    state.begin()
+    tree = all(JuiceProductLink({ juiceId: 1, productId: 8 }))
+    assert.equal(tree.some(node => node.type === "Link"), false)
+    assert.equal(tree.some(node => node.type === "JuiceCategorySelect"), false)
+})
+
 test("juice cell values never render object stringification", () => {
-    const { formatJuiceCellValue, juiceRowLabel } = loader()("src/feature/juice/component/juiceSectionRows.ts")
+    const { formatJuiceCellValue, juiceRowLabel } = loader()("src/feature/juice/util/juiceSectionRows.ts")
     assert.equal(formatJuiceCellValue("LIBRA"), "LIBRA")
     assert.equal(formatJuiceCellValue(""), "")
     assert.equal(formatJuiceCellValue(0), "0")
@@ -68,16 +197,15 @@ test("juice cell values never render object stringification", () => {
 })
 
 test("juice editor decisions keep title, path and recipe base", () => {
-    const { juiceEditorTitleKey, juiceRowPath, recipeMixBaseUnits, buildReferenceOptions } = loader()("src/feature/juice/component/juiceSectionRows.ts")
-    const { mixResource, overridesResource, presentationsResource } = juiceFieldsModule()
-    const row = { id: 4, clientId: 9, isActive: true, percentage: 42.123456 }
+    const { juiceEditorTitleKey, juiceRowPath, recipeMixBaseUnits, buildReferenceOptions } = loader()("src/feature/juice/util/juiceSectionRows.ts")
+    const { mixResource, presentationsResource } = juiceFieldsModule()
+    const row = { id: 4, isActive: true, percentage: 42.123456 }
     assert.equal(juiceEditorTitleKey(true, row), "juice.viewDetails")
     assert.equal(juiceEditorTitleKey(true, undefined), "juice.viewDetails")
     assert.equal(juiceEditorTitleKey(false, row), "common.edit")
     assert.equal(juiceEditorTitleKey(false, undefined), "juice.add")
-    assert.equal(juiceRowPath(mixResource, undefined, false), "/admin/juices/mix")
-    assert.equal(juiceRowPath(mixResource, row, false), "/admin/juices/mix/4")
-    assert.equal(juiceRowPath(overridesResource, row, true), "/admin/juice-config/client-overrides/9")
+    assert.equal(juiceRowPath(mixResource, undefined), "/admin/juices/mix")
+    assert.equal(juiceRowPath(mixResource, row), "/admin/juices/mix/4")
     assert.equal(recipeMixBaseUnits(presentationsResource, 100000000, row), undefined)
     assert.equal(recipeMixBaseUnits(mixResource, 100000000, row), 100000000 - 42123456)
     assert.equal(recipeMixBaseUnits(mixResource, 100000000, { ...row, isActive: false }), 100000000)
@@ -87,17 +215,10 @@ test("juice editor decisions keep title, path and recipe base", () => {
     assert.deepEqual(buildReferenceOptions(references, [], undefined), [])
 })
 
-test("constant field steps: pallets whole, rates six decimals, money four decimals", () => {
-    const steps = Object.fromEntries(juiceFieldsModule().constantFields.map(field => [field.name, field.step]))
-    assert.equal(steps.palletsPerContainer, "1")
-    for (const name of ["unexpectedRate", "tariffRate", "portFeeRate", "salesmanCommissionRate", "distributorCommissionRate"]) assert.equal(steps[name], "0.000001")
-    for (const name of ["directLaborPerPound", "freightPerContainer", "storagePerContainer"]) assert.equal(steps[name], "0.0001")
-    assert.equal(Object.keys(steps).length, 22)
-})
-
 function juiceFormHarness({ watched = {}, clients = [], errors = {} } = {}) {
     const registered = {}
     const overrides = {
+        "./juiceCategorySelect.component": { JuiceCategorySelect: "JuiceCategorySelect" },
         ...i18n,
         react: { useId: () => "form" },
         "react-hook-form": {
@@ -116,30 +237,19 @@ function juiceFormHarness({ watched = {}, clients = [], errors = {} } = {}) {
 
 test("juice form number inputs keep blank/null/value parsing for nullable and required fields", () => {
     const h = juiceFormHarness()
-    const nodes = h.render({ fields: [{ name: "tariffRate", kind: "number", step: "0.000001", nullable: true, optional: true }, { name: "pricePerPound", kind: "number", step: "0.0001" }, { name: "code", maxLength: 60 }] })
+    const nodes = h.render({ fields: [{ name: "tariffRate", kind: "number", step: "0.000001", nullable: true, optional: true }, { name: "costPerUnit", kind: "number", step: "0.0001" }, { name: "code", maxLength: 60 }] })
     assert.equal(h.registered.tariffRate.setValueAs(""), null)
-    assert.equal(h.registered.pricePerPound.setValueAs(""), undefined)
+    assert.equal(h.registered.costPerUnit.setValueAs(""), undefined)
     assert.equal(h.registered.tariffRate.setValueAs(null), null)
-    assert.equal(h.registered.pricePerPound.setValueAs(null), null)
-    assert.equal(h.registered.pricePerPound.setValueAs("0.065"), 0.065)
+    assert.equal(h.registered.costPerUnit.setValueAs(null), null)
+    assert.equal(h.registered.costPerUnit.setValueAs("0.065"), 0.065)
     assert.equal(h.registered.code, undefined)
     const inputs = Object.fromEntries(nodes.filter(node => node.type === "Input").map(node => [node.props.name, node.props]))
     assert.deepEqual([inputs.tariffRate.type, inputs.tariffRate.min, inputs.tariffRate.placeholder], ["number", 0, "juice.inherit"])
-    assert.deepEqual([inputs.pricePerPound.type, inputs.pricePerPound.min, inputs.pricePerPound.placeholder], ["number", 0, undefined])
+    assert.deepEqual([inputs.costPerUnit.type, inputs.costPerUnit.min, inputs.costPerUnit.placeholder], ["number", 0, undefined])
     assert.deepEqual([inputs.code.type, inputs.code.min, inputs.code.maxLength], ["text", undefined, 60])
     const required = Object.fromEntries(nodes.filter(node => node.type === "FormField").map(node => [node.props.htmlFor, node.props.required]))
-    assert.deepEqual(required, { "form-tariffRate": false, "form-pricePerPound": true, "form-code": true })
-})
-
-test("juice form fraction help is linked only on the sectioned rate inputs", () => {
-    const h = juiceFormHarness()
-    const rate = { name: "tariffRate", kind: "number", step: "0.000001" }
-    const money = { name: "hppPerPound", kind: "number", step: "0.0001" }
-    const nodes = h.render({ fields: [rate, money], fieldSections: [{ titleKey: "rates", fields: [rate], fractionHelp: true }, { titleKey: "money", fields: [money] }] })
-    const inputs = Object.fromEntries(nodes.filter(node => node.type === "Input").map(node => [node.props.name, node.props]))
-    assert.equal(inputs.tariffRate["aria-describedby"], "form-tariffRate-fraction-help")
-    assert.equal(inputs.hppPerPound["aria-describedby"], undefined)
-    assert.ok(nodes.some(node => node.type === "p" && node.props.id === "form-tariffRate-fraction-help"))
+    assert.deepEqual(required, { "form-tariffRate": false, "form-costPerUnit": true, "form-code": true })
 })
 
 test("juice form recipe preview total and its output element", () => {
@@ -156,12 +266,12 @@ test("juice form recipe preview total and its output element", () => {
 })
 
 test("juice form client and reference selects keep their option lists", () => {
-    const clients = [{ id: 1, name: "Acme", isActive: true }, { id: 2, name: "Inactive current", isActive: false }, { id: 3, name: "Has override", isActive: true }, { id: 4, name: "Inactive other", isActive: false }]
+    const clients = [{ id: 1, name: "Acme", isActive: true }, { id: 2, name: "Inactive current", isActive: false }, { id: 3, name: "Other active", isActive: true }, { id: 4, name: "Inactive other", isActive: false }]
     const h = juiceFormHarness({ clients })
-    const nodes = h.render({ fields: [{ name: "clientId", kind: "client" }, { name: "rawMaterialId", kind: "reference" }], row: { id: 9, clientId: 2 }, excludedClients: [3], references: [{ value: 10, label: "OR — Orange" }] })
+    const nodes = h.render({ fields: [{ name: "clientId", kind: "client" }, { name: "rawMaterialId", kind: "reference" }], row: { id: 9, clientId: 2 }, references: [{ value: 10, label: "OR — Orange" }] })
     const selectFor = (name, value, onChange = () => {}) => nodes.find(node => node.type === "Controller" && node.props.name === name).props.render({ field: { value, onChange } })
     const client = selectFor("clientId", 2)
-    assert.deepEqual(client.props.options.map(option => option.value), [1, 2])
+    assert.deepEqual(client.props.options.map(option => option.value), [1, 2, 3])
     assert.deepEqual(client.props.value, { value: 2, label: "Inactive current" })
     const changes = []
     selectFor("rawMaterialId", 99, value => changes.push(value)).props.onChange({ value: 10 })
@@ -169,11 +279,10 @@ test("juice form client and reference selects keep their option lists", () => {
     assert.equal(selectFor("rawMaterialId", 99).props.value, null)
 })
 
-function juiceSectionHarness({ rows = { data: [] }, references = { data: [] }, clients = { data: { data: [] } }, permissions = [] } = {}) {
+function juiceSectionHarness({ rows = { data: [] }, references = { data: [] }, permissions = [] } = {}) {
     const state = stateHarness()
     const toggles = []
     const queryFor = key => {
-        if (key[0] === "clients") return { isError: false, ...clients }
         if (key.length === 3) return { isLoading: false, isError: false, ...rows }
         return { isError: false, ...references }
     }
@@ -183,7 +292,6 @@ function juiceSectionHarness({ rows = { data: [] }, references = { data: [] }, c
         "@tanstack/react-query": { useQuery: options => queryFor(options.queryKey) },
         "@/shared/auth/usePermission": { usePermission: () => ({ hasPermission: permission => permissions.includes(permission) }) },
         "@/shared/hook/useStatusToggle": { useStatusToggle: () => ({ isPending: false, toggle: (...args) => toggles.push(args) }) },
-        "@/feature/client/api/client.api": { getClientsAPI() {} },
         "../api/juice.api": { getJuiceRows() {}, setJuiceStatus() {} },
         "./juiceForm.component": { JuiceForm: "JuiceForm" },
         "@/shared/component/table.component": Object.fromEntries(["Table", "TableBody", "TableContainer", "TableEmpty", "TableHead", "TableRow", "Td", "Th"].map(name => [name, name])),
@@ -225,31 +333,28 @@ test("juice section recipe total is an output with ready/incomplete state", () =
 })
 
 test("juice section permissions gate create, edit and status actions", () => {
-    const { mixResource, overridesResource } = juiceFieldsModule()
+    const { mixResource } = juiceFieldsModule()
     const actions = nodes => ({ add: nodes.some(node => node.type === "Button"), edit: nodes.some(node => node.type === "button" && text(node) === "common.edit"), toggle: nodes.filter(node => node.type === "StatusToggleButton").length, view: nodes.filter(node => node.type === "button" && text(node) === "juice.viewDetails").length })
     const data = { data: [mixRows[0], { ...mixRows[1], isActive: false }] }
     assert.deepEqual(actions(juiceSectionHarness({ rows: data }).render({ resource: mixResource, juiceId: 5 })), { add: false, edit: false, toggle: 0, view: 2 })
     assert.deepEqual(actions(juiceSectionHarness({ rows: data, permissions: ["juices:create", "juices:edit"] }).render({ resource: mixResource, juiceId: 5 })), { add: true, edit: true, toggle: 2, view: 2 })
     assert.deepEqual(actions(juiceSectionHarness({ rows: data, permissions: ["juices:create", "juices:edit"] }).render({ resource: mixResource, juiceId: 5, readOnly: true })), { add: false, edit: false, toggle: 0, view: 2 })
-    const override = { data: [{ id: 7, clientId: 3, isActive: true }] }
-    assert.deepEqual(actions(juiceSectionHarness({ rows: override, permissions: ["juices:create", "juices:edit"] }).render({ resource: overridesResource })), { add: false, edit: false, toggle: 0, view: 1 })
-    assert.deepEqual(actions(juiceSectionHarness({ rows: override, permissions: ["juiceConfig:edit"] }).render({ resource: overridesResource })), { add: true, edit: true, toggle: 1, view: 1 })
+    assert.deepEqual(actions(juiceSectionHarness({ rows: data, permissions: ["juiceConfig:edit"] }).render({ resource: mixResource, juiceId: 5 })), { add: false, edit: false, toggle: 0, view: 2 })
 })
 
-test("juice section status toggle sends the row id (or client id) and a text label", () => {
-    const { presentationsResource, overridesResource, mixResource } = juiceFieldsModule()
+test("juice section status toggle sends the row id and a text label", () => {
+    const { presentationsResource, mixResource } = juiceFieldsModule()
     const toggleOf = (resource, data) => {
-        const h = juiceSectionHarness({ rows: { data }, permissions: ["juices:edit", "juiceConfig:edit"] })
+        const h = juiceSectionHarness({ rows: { data }, permissions: ["juices:edit"] })
         h.render({ resource, juiceId: 5 }).find(node => node.type === "StatusToggleButton").props.onToggle()
         return h.toggles[0]
     }
     assert.deepEqual(toggleOf(presentationsResource, [{ id: 3, isActive: true, displayLabel: "6x354 ML" }]), [3, "6x354 ML", true])
     assert.deepEqual(toggleOf(mixResource, [mixRows[0]]), [1, "juice.recipe", true])
-    assert.deepEqual(toggleOf(overridesResource, [{ id: 7, clientId: 3, isActive: false }]), [3, "juice.overrides", false])
 })
 
 test("juice section modal: create, view and edit keep their form configuration", () => {
-    const { mixResource, overridesResource } = juiceFieldsModule()
+    const { mixResource } = juiceFieldsModule()
     const h = juiceSectionHarness({ rows: { data: mixRows }, references: { data: mixReferences }, permissions: ["juices:create", "juices:edit"] })
     const props = { resource: mixResource, juiceId: 5 }
     assert.equal(h.modal(props), undefined)
@@ -275,15 +380,6 @@ test("juice section modal: create, view and edit keep their form configuration",
     assert.equal(modal.find(node => node.type === "JuiceForm").props.readOnly, false)
     modal.find(node => node.type === "JuiceForm").props.onSaved()
     assert.equal(h.modal(props), undefined)
-
-    const overrides = juiceSectionHarness({ rows: { data: [{ id: 7, clientId: 3, isActive: true }, { id: 8, clientId: 4, isActive: false }] }, clients: { data: { data: [{ id: 3, name: "Acme" }] } }, permissions: ["juiceConfig:edit"] })
-    overrides.render({ resource: overridesResource }).find(node => node.type === "button" && text(node) === "common.edit").props.onClick()
-    const overrideModal = overrides.modal({ resource: overridesResource })
-    const overrideForm = overrideModal.find(node => node.type === "JuiceForm").props
-    assert.deepEqual([overrideForm.path, overrideForm.mixBaseUnits], ["/admin/juice-config/client-overrides/3", undefined])
-    assert.deepEqual(overrideForm.excludedClients, [3, 4])
-    assert.ok(!overrideForm.fields.some(field => field.name === "clientId"))
-    assert.ok(overrideModal.some(node => node.type === "p" && node.props.children === "Acme"))
 })
 
 function juiceEditorHarness({ juiceId, pathname = "/admin/juices/create", query = { isLoading: false, isError: false } }) {
@@ -293,9 +389,11 @@ function juiceEditorHarness({ juiceId, pathname = "/admin/juices/create", query 
         "@tanstack/react-query": { useQuery: options => { enabled.push(options.enabled); return query } },
         "react-router-dom": { Link: "Link", useNavigate: () => () => {}, useParams: () => ({ juiceId }), useLocation: () => ({ pathname }) },
         "@/shared/auth/usePermission": { usePermission: () => ({ hasPermission: () => true }) },
-        "@/shared/component/buttonClassName": { buttonClassName: () => "button" },
+        "@/shared/utils/buttonClassName": { buttonClassName: () => "button" },
         "../component/juiceForm.component": { JuiceForm: "JuiceForm" },
         "../component/juiceSection.component": { JuiceSection: "JuiceSection" },
+        "../component/juiceProductLink.component": { JuiceProductLink: "JuiceProductLink" },
+        "../component/juiceProductConfiguration.component": { JuiceProductConfiguration: "JuiceProductConfiguration" },
         "../api/juice.api": { getJuiceRows() {} },
         ...stubs([["pageContainer", "PageContainer"], ["card", "Card"]]),
     }
@@ -308,17 +406,23 @@ function juiceEditorHarness({ juiceId, pathname = "/admin/juices/create", query 
         loading: nodes.some(node => node.type === "p" && text(node) === "common.loading"),
         form: nodes.find(node => node.type === "JuiceForm")?.props,
         sections: nodes.filter(node => node.type === "JuiceSection").length,
+        configuration: nodes.find(node => node.type === "JuiceProductConfiguration")?.props,
     }
 }
 
 test("juice editor page: create, view, edit, invalid id, not found and loading", () => {
     const juice = { id: 5, isActive: true, displayName: "Carrot Pineapple", updatedAt: "x" }
     const create = juiceEditorHarness({ juiceId: undefined })
-    assert.deepEqual([create.title, create.alert, create.loading, create.form.readOnly, create.form.path, create.sections], ["juice.create", undefined, false, false, "/admin/juices", 0])
+    assert.deepEqual([create.title, create.alert, create.loading, create.form.readOnly, create.form.path, create.sections], ["juice.create", undefined, false, false, "/admin/juices/with-product", 0])
+    assert.equal(create.form.fields[0].name, "subCategoryId")
     const view = juiceEditorHarness({ juiceId: "5", pathname: "/admin/juices/5", query: { isLoading: false, isError: false, data: [juice] } })
-    assert.deepEqual([view.title, view.form.readOnly, view.form.path, view.sections], ["juice.view · Carrot Pineapple", true, "/admin/juices/5", 3])
+    assert.deepEqual([view.title, view.form.readOnly, view.form.path, view.sections], ["juice.view · Carrot Pineapple", true, "/admin/juices/5", 2])
     const edit = juiceEditorHarness({ juiceId: "5", pathname: "/admin/juices/5/edit", query: { isLoading: false, isError: false, data: [juice] } })
-    assert.deepEqual([edit.title, edit.form.readOnly, edit.sections], ["juice.edit · Carrot Pineapple", false, 3])
+    assert.deepEqual([edit.title, edit.form.readOnly, edit.sections], ["juice.edit · Carrot Pineapple", false, 2])
+    const linked = juiceEditorHarness({ juiceId: "5", pathname: "/admin/juices/5/edit", query: { isLoading: false, isError: false, data: [{ ...juice, productId: 8 }] } })
+    assert.equal(linked.form, undefined)
+    assert.equal(linked.configuration.productId, 8)
+    assert.equal(linked.configuration.readOnly, false)
     const inactive = juiceEditorHarness({ juiceId: "5", pathname: "/admin/juices/5/edit", query: { isLoading: false, isError: false, data: [{ ...juice, isActive: false }] } })
     assert.deepEqual([inactive.title, inactive.form.readOnly], ["juice.view · Carrot Pineapple", true])
     for (const juiceId of ["abc", "0", "2147483648", "1.5"]) {
@@ -439,4 +543,15 @@ test("initial product import confirm is enabled only for a clean preview with va
     const nodes = none.render()
     assert.equal(none.confirmButton(nodes), undefined)
     assert.equal(nodes.find(node => node.type === "output"), undefined)
+})
+
+test("active juice catalog has no selling price, margin or logistics configuration", () => {
+    const { juiceFields, presentationsResource } = juiceFieldsModule()
+    assert.ok(!juiceFields.some(field => field.name === "pricePerPound"))
+    assert.ok(!presentationsResource.fields.some(field => field.name === "marginPerCase"))
+    const schemas = loader()("src/feature/juice/schema/juice.schema.ts")
+    assert.equal(schemas.juiceInputSchema.safeParse({ code: "SYN", displayName: "Synthetic", clientId: 1 }).success, true)
+    assert.equal(schemas.juiceInputSchema.safeParse({ code: "SYN", displayName: "Synthetic", clientId: 1, pricePerPound: 2 }).success, false)
+    const routes = fs.readFileSync("src/shared/router/AdminRoutes.tsx", "utf8")
+    assert.ok(!routes.includes('path: "juice-config"'))
 })

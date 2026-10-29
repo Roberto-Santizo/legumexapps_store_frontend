@@ -13,6 +13,9 @@ function loader(overrides = {}) {
         const module = { exports: {} }; cache.set(file, module)
         const source = ts.transpileModule(fs.readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText
         const localRequire = name => {
+            // Los mocks parciales de react conservan el resto de la API real (p. ej. createContext al importar);
+            // los componentes se llaman como funciones, sin renderizador: useContext = sin proveedor.
+            if (name === "react" && name in overrides) return { ...require("react"), useContext: () => null, ...overrides.react }
             if (name in overrides) return overrides[name]
             if (name.startsWith("@/") || name.startsWith(".")) {
                 const base = name.startsWith("@/") ? path.resolve("src", name.slice(2)) : path.resolve(path.dirname(file), name)
@@ -43,7 +46,7 @@ test("representative fixed catalog is keyed by customer and is unavailable befor
         "../component/quoteOrderClient.component": { QuoteOrderClient: "Client" },
         "@/feature/quote/hook/useQuoteOrder": { useQuoteOrder: () => ({ quotedLines: [], formResetKey: 0, handleQuoteAnother() {} }) },
     }
-    for (const [file, name] of [["quoteCalculatorForm", "QuoteCalculatorForm"], ["quoteWizardContent", "QuoteWizardContent"], ["quoteResultCard", "QuoteResultCard"], ["quotedOrderSummary", "QuotedOrderSummary"], ["quotePdfButton", "QuotePdfButton"]]) overrides[`@/feature/quote/component/${file}.component`] = { [name]: name }
+    for (const [file, name] of [["quoteCalculatorForm", "QuoteCalculatorForm"], ["quoteWizardContent", "QuoteWizardContent"], ["quoteResultCard", "QuoteResultCard"], ["quotedOrderSummary", "QuotedOrderSummary"], ["quotePdfButton", "QuotePdfButton"], ["representativeOrderSummary", "RepresentativeOrderSummary"]]) overrides[`@/feature/quote/component/${file}.component`] = { [name]: name }
     const Page = loader(overrides)("src/feature/quote/page/quoteRequest.page.tsx").QuoteRequestPage
     assert.ok(!nodes(Page()).some(node => node.type === "QuoteWizardContent")); assert.equal(queries.at(-1).enabled, false)
     for (const clientId of [11, 12]) {
@@ -64,14 +67,14 @@ test("customer selector offers only assigned customers and confirms before disca
     const Component = loader({
         react: { useState: () => [true, () => {}] },
         "react-i18next": { useTranslation: () => ({ t: key => key }) },
-        "@tanstack/react-query": { useQuery: () => ({ data: { data: [{ id: 11, name: "Walmart" }, { id: 12, name: "HEB" }] }, isLoading: false, isError: false }) },
+        "@tanstack/react-query": { useQuery: () => ({ data: { data: [{ id: 11, name: "Walmart" }, { id: 12, name: "HEB", email: "compras@heb.com" }] }, isLoading: false, isError: false }) },
         "@/shared/auth/salesperson/useSalespersonAuth": { useSalespersonAuth: () => ({ salesperson: { id: 42 } }) },
         "@/shared/component/searchableSelect.component": { SearchableSelect: "Select" },
         "@/shared/component/input.component": { Input: "Input" },
         "@/shared/component/formField.component": { FormField: "Field" },
         "../api/quote.api": { getQuoteClientsAPI: () => {} },
     })("src/feature/quote/component/quoteOrderClient.component.tsx").QuoteOrderClient
-    const props = { name: "Walmart", clientId: 11, selected: true, hasLines: true, onSelect: (...args) => selected.push(args), onChange: name => changes.push(name), onReset: () => resets.push(true) }
+    const props = { name: "Walmart", clientId: 11, email: "", selected: true, hasLines: true, onEmailChange: () => {}, onSelect: (...args) => selected.push(args), onChange: name => changes.push(name), onReset: () => resets.push(true) }
     const previousWindow = globalThis.window
     try {
         const select = nodes(Component(props)).find(node => node.type === "Select")
@@ -83,7 +86,8 @@ test("customer selector offers only assigned customers and confirms before disca
         globalThis.window.confirm = () => true
         select.props.onChange({ value: 12, label: "HEB" })
         select.props.onChange({ value: 0, label: "New" })
-        assert.deepEqual(selected, [[12, "HEB"], [null, ""]]); assert.equal(resets.length, 2)
+        // El correo registrado del cliente precarga el del pedido; un prospecto empieza sin correo.
+        assert.deepEqual(selected, [[12, "HEB", "compras@heb.com"], [null, "", ""]]); assert.equal(resets.length, 2)
         assert.ok(!nodes(Component(props)).some(node => node.type === "Input"))
         const input = nodes(Component({ ...props, clientId: null, name: "", hasLines: false })).find(node => node.type === "Input")
         input.props.onChange({ target: { value: "New prospect" } }); assert.deepEqual(changes, ["New prospect"])
@@ -176,18 +180,37 @@ test("catalog page sends confirmed document lines to existing PDF/email actions 
     let slots=[],cursor=0
     const react={useState:initial=>{const i=cursor++;if(!(i in slots))slots[i]=initial;return [slots[i],value=>{slots[i]=typeof value==="function"?value(slots[i]):value}]}}
     const send=async()=>({message:"sent"})
-    const order={selected:true,clientId:11,lines:[],clientName:"Customer",identity:{id:"order",clientName:"Customer",clientId:11},addLine:line=>order.lines.push(line),clear:()=>{order.lines=[]},setClientName:()=>{}}
-    const Page=loader({react,"react-router-dom":{Link:"Link"},"react-i18next":{useTranslation:()=>({t:key=>key})},"@/feature/quote/hook/useSharedQuoteOrder":{useSharedQuoteOrder:()=>order},"@/feature/quote/component/quoteOrderClient.component":{QuoteOrderClient:"Client"},"../component/catalogQuoteWizard.component":{CatalogQuoteWizard:"Wizard"},"@/feature/quote/component/quotePdfButton.component":{QuotePdfButton:"Pdf"},"@/feature/quote/component/quotedOrderSummary.component":{QuotedOrderSummary:"Summary"},"@/feature/quote/api/quote.api":{sendQuotePdfEmailAPI:send},"@/shared/component/siteContainer.component":{SiteContainer:"Container"}})("src/feature/customQuote/page/catalogQuoteRequest.page.tsx").CatalogQuoteRequestPage
+    const order={id:"order",selected:true,clientId:11,lines:[],clientName:"Customer",identity:{id:"order",clientName:"Customer",clientId:11},addLine:line=>order.lines.push(line),clear:()=>{order.lines=[]},setClientName:()=>{}}
+    const Page=loader({react,"react-router-dom":{Link:"Link"},"react-i18next":{useTranslation:()=>({t:key=>key})},"@/feature/quote/hook/useSharedQuoteOrder":{useSharedQuoteOrder:()=>order},"@/feature/quote/component/quoteOrderClient.component":{QuoteOrderClient:"Client"},"../component/catalogQuoteWizard.component":{CatalogQuoteWizard:"Wizard"},"@/feature/quote/component/representativeOrderSummary.component":{RepresentativeOrderSummary:"Summary"},"@/shared/component/siteContainer.component":{SiteContainer:"Container"}})("src/feature/customQuote/page/catalogQuoteRequest.page.tsx").CatalogQuoteRequestPage
     const nodes=tree=>!tree||typeof tree!=="object"?[]:[tree,...[].concat(tree.props?.children??[]).flat(Infinity).flatMap(nodes)]
     const render=()=>{cursor=0;return nodes(Page())}
-    const persisted={totalCost:19,composition:{rawMaterials:[{displayName:"Mango",percentage:100}]},configuration:{snapshot:{isOrganic:true}}}
+    const persisted={id:5,totalUnits:10,requestedPallets:1,breakdown:{production:{kind:"customizable"},rawMaterials:[],palletMaterials:[]},composition:{rawMaterials:[{displayName:"Mango",percentage:100}]},configuration:{snapshot:{isOrganic:true}}}
     render().find(row=>row.type==="Wizard").props.onConfirmed(persisted)
     const summary=render().find(row=>row.type==="Summary")
     assert.equal(summary.props.lines[0],persisted)
-    assert.equal(summary.props.pdfAction.props.lines[0],persisted)
-    assert.equal(summary.props.pdfAction.props.sendEmailAPI,send)
-    assert.equal(summary.props.pdfAction.props.showCostBreakdown,false)
-    assert.equal(summary.props.pdfAction.props.orderClientName,"Customer")
+    assert.equal(summary.props.orderId,"order")
+    assert.equal(summary.props.clientName,"Customer")
+
+    // The representative summary hands the same lines to the existing PDF/email actions, without amounts
+    // until management approves; then with the final price from the server and no more products.
+    let review=null
+    const Summary=loader({react:{useMemo:factory=>factory()},"@/feature/quote/hook/useQuoteOrderReview":{useQuoteOrderReview:(orderId,enabled)=>({review,isLoading:false,isError:false,isRefreshing:false,isSubmitting:false,submit(){},refresh(){},orderId,enabled})},"@/feature/quote/component/quotedOrderSummary.component":{QuotedOrderSummary:"OrderSummary"},"@/feature/quote/component/quotePdfButton.component":{QuotePdfButton:"Pdf"},"@/feature/quote/component/quoteOrderReviewPanel.component":{QuoteOrderReviewPanel:"Review"},"@/feature/quote/api/quote.api":{sendQuotePdfEmailAPI:send}})("src/feature/quote/component/representativeOrderSummary.component.tsx").RepresentativeOrderSummary
+    const quoteAnother=()=>{}
+    const pending=Summary({orderId:"order",clientName:"Customer",lines:[persisted],onQuoteAnother:quoteAnother,onClear(){}})
+    assert.equal(pending.props.lines[0],persisted)
+    assert.equal(pending.props.onQuoteAnother,quoteAnother)
+    assert.equal(pending.props.showCostBreakdown,false)
+    assert.equal(pending.props.reviewPanel.type,"Review")
+    assert.equal(pending.props.pdfAction.props.lines[0],persisted)
+    assert.equal(pending.props.pdfAction.props.sendEmailAPI,send)
+    assert.equal(pending.props.pdfAction.props.showCostBreakdown,false)
+    assert.equal(pending.props.pdfAction.props.orderClientName,"Customer")
+    review={orderId:"order",status:"approved",submittedAt:new Date(),reviewedAt:new Date(),finalPrice:25,lines:[{kind:"fixed",quoteId:5,finalPrice:99},{kind:"customizable",quoteId:5,finalPrice:25}]}
+    const approved=Summary({orderId:"order",clientName:"Customer",lines:[persisted],onQuoteAnother:quoteAnother,onClear(){}})
+    assert.equal(approved.props.lines[0].finalPrice,25)
+    assert.equal(approved.props.pdfAction.props.lines[0].finalPrice,25)
+    assert.equal(approved.props.onQuoteAnother,undefined)
+    assert.equal(persisted.finalPrice,undefined)
 })
 test("exact percentage UI accepts 100.00 and rejects tolerance, invalid precision and negative values", () => {
     const { exactMix } = loader()(statePath)
@@ -253,6 +276,22 @@ test("Ready-made input remains unchanged; strict Customize rejects authored pric
     const schema=load("src/feature/customQuote/schema/catalogQuote.schema.ts").catalogInputSchema
     const input={categoryId:1,subCategoryId:2,configurationId:3,ingredientType:"fruit",requestedPallets:1,rawMaterialMix:[{rawMaterialId:1,percentage:100}]}
     assert.equal(schema.safeParse(input).success,true); assert.equal(schema.safeParse({...input,totalCost:1}).success,false); assert.equal(schema.safeParse({...input,isOrganic:true}).success,false)
+})
+
+test("representative responses parse without amounts and drop any that slip through; admin lines still require them", () => {
+    const load=loader(); const quote=load("src/feature/quote/schema/quote.schema.ts"); const custom=load("src/feature/customQuote/schema/catalogQuote.schema.ts")
+    const breakdown={production:{productId:5,skuCode:"PIN-1",boxesPerPallet:10,bagsPerBox:10,netWeightGrams:453.59237},rawMaterials:[{rawMaterialId:1,displayName:"Piña",percentage:100,quantityPerUnit:1,totalUnits:200}],ingredients:[],unitMaterials:[{packagingId:20,displayName:"Bolsa",optionGroup:null,quantityPerUnit:1,totalUnits:200}],intermediateMaterials:[],palletMaterials:[{packagingId:40,displayName:"Caja",optionGroup:null,quantityPerPallet:10,requestedPallets:2}],language:"es"}
+    const line={productVariantId:10,destinationId:null,productDisplayName:"Piña",variantLabel:"PIN-1",requestedPallets:2,totalUnits:200,boxesPerPallet:10,breakdown}
+    const amountKeys=value=>!value||typeof value!=="object"?[]:Object.entries(value).flatMap(([key,child])=>[...(/cost|lineTotal|baseAmount/i.test(key)?[key]:[]),...amountKeys(child)])
+    const saved=quote.savedRepresentativeQuoteSchema.parse({...line,id:9,createdAt:"2026-10-28T12:00:00Z"})
+    assert.equal(saved.id,9); assert.deepEqual(saved.breakdown.rawMaterials,breakdown.rawMaterials)
+    const leaked={...line,totalCost:507.4,rawMaterialCost:100,breakdown:{...breakdown,rawMaterials:[{...breakdown.rawMaterials[0],unitCost:0.5,lineTotal:100}],transport:{destinationId:null,displayName:"",baseCost:0}}}
+    assert.deepEqual(amountKeys(quote.representativeQuoteCalculationSchema.parse(leaked)),[])
+    assert.equal(quote.quoteCalculationSchema.safeParse(line).success,false)
+    const configuration={subCategoryId:2,presentationId:3,requestedPallets:2,destinationId:null,rawMaterialMix:[{rawMaterialId:1,percentage:100}],ingredients:[],pallet:{boxesPerPallet:10,bagsPerBox:10,unitsPerIntermediatePackage:null},packaging:{unit:[],intermediate:[],pallet:[]}}
+    const catalogLine={...line,subCategoryId:2,presentationId:3,bagsPerBox:10,unitsPerIntermediatePackage:null,configuration}
+    assert.equal(custom.catalogPreviewSchema.safeParse({...catalogLine,previewToken:"token"}).success,true)
+    assert.deepEqual(amountKeys(custom.catalogConfirmedSchema.parse({...catalogLine,totalCost:1,id:4,status:"new",createdAt:"2026-10-28T12:00:00Z"})),[])
 })
 
 function wizardHarness(previewAPI, confirmAPI, mode = "customer") {
@@ -410,8 +449,10 @@ test("calculator selector opens customizable admin and preserves fixed preview s
     const saveAdminQuoteAPI=async input=>{saves.push(input);return {message:"created",data:{id:nextId++}}}
     const sendAdminQuotePdfEmailAPI=async formData=>{emails.push(formData);return {message:"sent"}}
     const useState=initial=>{const index=cursor++;if(!(index in slots))slots[index]=typeof initial==="function"?initial():initial;return[slots[index],value=>{slots[index]=typeof value==="function"?value(slots[index]):value}]}
+    const useRef=initial=>{const index=cursor++;if(!(index in slots))slots[index]={current:initial};return slots[index]}
+    const setAdminOrderPricingAPI=async(_orderId,amount)=>({data:{profitPerPound:Number(amount),lines:[70,71].map(quoteId=>({kind:"fixed",quoteId,finalPrice:quoteId}))}})
     const order={wizardStep:"product",quotedLines:[],currentResult:null,formResetKey:0,clearCurrentResult:()=>calls.push("clear"),addQuotedLine:()=>{},handleClearOrder:()=>calls.push("clear-order")}
-    const overrides={react:{...React,useState},"react-i18next":{useTranslation:()=>({t:key=>key})},"react-router-dom":{useSearchParams:()=>[params,next=>{params=next}]},"@tanstack/react-query":{useQuery:()=>({data:{data:[]}}),useQueryClient:()=>({invalidateQueries:({queryKey})=>calls.push(["invalidate",queryKey])}),useMutation:options=>{const key=typeof options.mutationFn==="string"?options.mutationFn:"save";mutations[key]=options;return {isPending:false,mutate:input=>calls.push([key,input])}}},sonner:{toast:{success:message=>calls.push(["toast",message])}},"@/feature/quote/api/adminQuote.api":{previewAdminQuoteAPI:"fixed-preview",saveAdminQuoteAPI,sendAdminQuotePdfEmailAPI},"@/feature/quote/hook/useQuoteOrder":{useQuoteOrder:()=>order},"@/shared/component/pageContainer.component":{PageContainer:"Container"},"@/shared/component/button.component":{Button:"Button"}}
+    const overrides={react:{...React,useState,useRef},"react-i18next":{useTranslation:()=>({t:key=>key})},"react-router-dom":{useSearchParams:()=>[params,next=>{params=next}]},"@tanstack/react-query":{useQuery:()=>({data:{data:[]}}),useQueryClient:()=>({invalidateQueries:({queryKey})=>calls.push(["invalidate",queryKey])}),useMutation:options=>{const key=typeof options.mutationFn==="string"?options.mutationFn:options.mutationFn.name==="saveLine"?"save":"pricing";mutations[key]=options;return {isPending:false,mutate:input=>calls.push([key,input])}}},sonner:{toast:{success:message=>calls.push(["toast",message])}},"@/feature/quote/api/adminQuote.api":{previewAdminQuoteAPI:"fixed-preview",saveAdminQuoteAPI,sendAdminQuotePdfEmailAPI,setAdminOrderPricingAPI},"@/feature/quote/hook/useQuoteOrder":{useQuoteOrder:()=>order},"@/shared/component/pageContainer.component":{PageContainer:"Container"},"@/shared/component/button.component":{Button:"Button"}}
     for(const [file,name] of [["quoteCalculatorForm","QuoteCalculatorForm"],["quoteWizardContent","QuoteWizardContent"],["quoteResultCard","QuoteResultCard"],["quotedOrderSummary","QuotedOrderSummary"],["quotePdfButton","QuotePdfButton"]])overrides[`@/feature/quote/component/${file}.component`]={ [name]:name }
     const Page=loader(overrides)("src/feature/quote/page/adminQuoteCalculator.page.tsx").AdminQuoteCalculatorPage
     const nodes=tree=>!tree||typeof tree!=="object"?[]:[tree,...[].concat(tree.props?.children??[]).flat(Infinity).flatMap(nodes)]
@@ -436,15 +477,21 @@ test("calculator selector opens customizable admin and preserves fixed preview s
     assert.equal(saveButton().props.disabled,true)
     assert.ok(saveButton().props.children.includes("adminQuoteCalculator.saved"))
     assert.deepEqual(calls.slice(-4),[["toast","created"],["invalidate",["adminQuotes"]],["invalidate",["productionOrders"]],["invalidate",["dashboardSummary"]]])
-    // El PDF del admin lleva el mismo aviso de "cotización de referencia" que el del representante y pide el destinatario.
+    // Sin la ganancia aplicada no hay PDF para el cliente: nunca saldría el costo como precio.
     const pending={totalCost:30}
     mutations["fixed-preview"].onSuccess({data:pending},{productVariantId:11,requestedPallets:1})
     order.quotedLines=[result,pending]
+    assert.equal(render().props.orderSummary.props.pdfAction,undefined)
+    // Aplicar la ganancia guarda la línea pendiente (la guardada no se repite) y habilita el PDF con precios finales.
+    mutations.pricing.onSuccess(await mutations.pricing.mutationFn("0.5"))
+    assert.equal(saves.length,2)
+    // El PDF del admin lleva el mismo aviso de "cotización de referencia" que el del representante y pide el destinatario.
     const pdf=render().props.orderSummary.props.pdfAction
+    assert.deepEqual(pdf.props.lines.map(line=>line.finalPrice),[70,71])
     assert.equal(pdf.type,"QuotePdfButton")
     assert.equal(pdf.props.showReferenceDisclaimer,true)
     assert.equal(pdf.props.askRecipientName,true)
-    // Enviar guarda primero la línea pendiente (la guardada no se repite) y registra el envío en ambas.
+    // Enviar no vuelve a guardar las líneas ya guardadas y registra el envío en ambas.
     const formData=new FormData()
     assert.deepEqual(await pdf.props.sendEmailAPI(formData),{message:"sent"})
     assert.equal(saves.length,2)
@@ -457,7 +504,10 @@ test("calculator selector opens customizable admin and preserves fixed preview s
     const next={totalCost:13}
     mutations["fixed-preview"].onSuccess({data:next},{productVariantId:12,requestedPallets:1})
     render()
-    await mutations.save.mutationFn(next)
+    // Dos acciones simultáneas sobre la misma línea comparten el guardado en curso: una sola cotización.
+    const savesBefore=saves.length
+    await Promise.all([mutations.save.mutationFn(next),mutations.save.mutationFn(next)])
+    assert.equal(saves.length,savesBefore+1)
     assert.notEqual(saves.at(-1).orderId,saves[0].orderId)
     order.quotedLines=[]
     order.currentResult=null

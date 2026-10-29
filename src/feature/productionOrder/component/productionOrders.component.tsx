@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { getProductionOrdersAPI } from "@/feature/productionOrder/api/productionOrder.api"
 import { QuoteProductionButton } from "@/feature/quote/component/quoteProductionButton.component"
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
+import { toCustomQuoteDocumentLine } from "@/feature/customQuote/util/customQuoteComposition"
 import { Card } from "@/shared/component/card.component"
 import { Spinner } from "@/shared/component/spinner.component"
 import { Input } from "@/shared/component/input.component"
@@ -31,11 +32,7 @@ export function ProductionOrders() {
             <ul className="my-4 space-y-2">{order.lines.map(line => <li key={`${line.quoteKind}:${line.id}`} className="text-sm">{line.productDisplayName} · {line.variantLabel} · {line.requestedPallets} {t("quote.production.pallets")}</li>)}</ul>
             <div className="flex flex-wrap gap-3">
                 <QuoteProductionButton lines={order.lines} clientName={order.clientName} orderId={order.id} salespersonName={order.salesperson.name} quoteDate={order.createdAt} />
-                <QuotePdfButton lines={order.lines.map(line => ({ ...line, composition: line.configuration ? {
-                    context: line.configuration.snapshot ? { categoryName: line.configuration.snapshot.category.displayName, subCategoryName: line.configuration.snapshot.subCategory.displayName, isOrganic: line.configuration.snapshot.isOrganic, ingredientType: line.configuration.snapshot.ingredientType } : undefined,
-                    rawMaterials: line.configuration.rawMaterialMix.map(raw => ({ displayName: line.breakdown.rawMaterials.find(row => row.rawMaterialId === raw.rawMaterialId)?.displayName ?? `#${raw.rawMaterialId}`, percentage: raw.percentage })),
-                    ingredients: (line.breakdown.ingredients ?? []).map(row => ({ displayName: row.displayName, gramsPerUnit: row.gramsPerUnit })),
-                } : undefined }))} orderClientName={order.clientName || undefined} quoteDate={order.createdAt} showCostBreakdown={false} showReferenceDisclaimer />
+                <QuotePdfButton lines={order.lines.map(line => (line.configuration ? toCustomQuoteDocumentLine({ ...line, configuration: line.configuration }) : line))} orderClientName={order.clientName || undefined} quoteDate={order.createdAt} showCostBreakdown={false} showReferenceDisclaimer />
             </div>
         </Card>)}
     </div>

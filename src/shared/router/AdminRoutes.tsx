@@ -150,6 +150,12 @@ const AdminQuoteListPage = lazyWithRetry(() =>
         default: () => <AdminQuotesPage customizableQuotes={CustomizableQuoteListView} productionReports={ProductionOrdersView} />,
     }))
 )
+const QuoteReviewListPage = lazyWithRetry(() =>
+    import("@/feature/quoteReview/page/quoteReviewList.page").then((module) => ({ default: module.QuoteReviewListPage }))
+)
+const QuoteReviewDetailPage = lazyWithRetry(() =>
+    import("@/feature/quoteReview/page/quoteReviewDetail.page").then((module) => ({ default: module.QuoteReviewDetailPage }))
+)
 const QuoteDraftListPage = lazyWithRetry(() =>
     import("@/feature/quoteDraft/page/quoteDraft.page").then((module) => ({ default: module.QuoteDraftListPage }))
 )
@@ -205,6 +211,8 @@ const routes = [
     { path: "pallet-kit", component: PalletKitPage, permission: "palletKit:view" },
 
     { path: "quotes", component: AdminQuoteListPage, permission: ["quotes:view", "customQuotes:view"] },
+    { path: "quote-reviews", component: QuoteReviewListPage, permission: "quotes:review" },
+    { path: "quote-reviews/:orderId", component: QuoteReviewDetailPage, permission: "quotes:review" },
     { path: "quote-drafts", component: QuoteDraftListPage, permission: "quoteDrafts:view" },
     { path: "custom-quotes", component: AdminCustomQuoteListPage, permission: "customQuotes:view" },
     { path: "custom-quotes/:customQuoteId", component: AdminCustomQuoteDetailPage, permission: "customQuotes:view" },

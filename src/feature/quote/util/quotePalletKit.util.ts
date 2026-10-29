@@ -10,7 +10,7 @@ const KIT_KEY = "pallet:kit:"
 export function palletKitGroups(palletKit: PalletKit, selection: Record<string, number>): MaterialGroup[] {
     return palletKit.filter((part) => part.options.length > 1).map((part) => {
         const key = `${KIT_KEY}${part.type}`
-        const options = part.options.map((option) => ({ ...option, unitCost: 0 }))
+        const options = part.options
         return { key, level: "pallet" as const, group: part.group, options, selectedId: options.find((option) => option.id === selection[key])?.id }
     })
 }

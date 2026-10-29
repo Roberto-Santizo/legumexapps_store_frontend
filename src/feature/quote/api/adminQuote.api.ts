@@ -4,6 +4,7 @@ import { handleApiError } from "@/shared/api/handleApiError"
 import { apiItemResponseSchema, apiListResponseSchema, apiMessageResponseSchema, apiMutationResponseSchema } from "@/shared/api/apiResponse.schema"
 import { adminQuoteSchema, quotableProductSchema, quoteCalculationSchema, savedQuoteSchema } from "@/feature/quote/schema/quote.schema"
 import type { CalculateQuoteInput } from "@/feature/quote/schema/quote.schema"
+import { quoteOrderPricingSchema } from "@/feature/quote/schema/quoteOrderReview.schema"
 
 const adminQuoteListResponseSchema = apiListResponseSchema(adminQuoteSchema)
 const EMPTY_DATE_RANGE: Readonly<DateRange> = Object.freeze({ startDate: null, endDate: null })
@@ -55,6 +56,19 @@ export async function sendAdminQuotePdfEmailAPI(formData: FormData) {
     try {
         const { data } = await api.post("/admin/quotes/send-email", formData)
         return apiMessageResponseSchema.parse(data)
+    } catch (error) {
+        handleApiError(error)
+    }
+}
+
+const adminOrderPricingResponseSchema = apiItemResponseSchema(quoteOrderPricingSchema)
+
+// Ganancia por libra del pedido del admin, ya guardado (sin revisión gerencial: queda aprobado). El
+// monto viaja como texto: el backend valida rango y decimales sin redondear lo que escribió el admin.
+export async function setAdminOrderPricingAPI(orderId: string, profitPerPound: string) {
+    try {
+        const { data } = await api.put(`/admin/quote-reviews/${orderId}/admin-pricing`, { profitPerPound })
+        return adminOrderPricingResponseSchema.parse(data)
     } catch (error) {
         handleApiError(error)
     }

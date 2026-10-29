@@ -1,14 +1,19 @@
 import { packagingName } from "@/shared/i18n/packagingName"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Truck, Wheat, FlaskConical, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent } from "lucide-react"
-import type { QuoteLine } from "@/feature/quote/schema/quote.schema"
+import { Truck, Wheat, FlaskConical, PackageOpen, PackagePlus, Layers, FileSpreadsheet, SlidersHorizontal, Cog, Percent, TrendingUp } from "lucide-react"
+import type { QuoteDocumentLine, QuoteLine } from "@/feature/quote/schema/quote.schema"
+import type { QuoteProfitLine } from "@/feature/quote/schema/quoteOrderReview.schema"
+import { hasQuoteAmounts, linePrice } from "@/feature/quote/util/quoteAmounts"
 import { Card } from "@/shared/component/card.component"
 import { Spinner } from "@/shared/component/spinner.component"
-import { formatCurrency } from "@/shared/format/currency"
+import { formatCurrency, formatUnitAmount } from "@/shared/format/currency"
+
+type QuoteLineProfit = Pick<QuoteProfitLine, "netPounds" | "profitPerPound" | "profitTotal" | "finalPrice">
 
 type QuoteResultCardProps = {
-    result: QuoteLine | null
+    // Con montos (admin) o sin ellos (representante: precio pendiente de la revisión gerencial).
+    result: QuoteDocumentLine | null
     isPending: boolean
     showCostBreakdown?: boolean
     // Transporte apagado para todos por ahora: default false e independiente de showCostBreakdown, que
@@ -16,6 +21,9 @@ type QuoteResultCardProps = {
     showTransport?: boolean
     // Aviso "cotización de referencia": solo lo activa el wizard del representante.
     showReferenceDisclaimer?: boolean
+    // Ganancia por libra calculada por el backend (revisión gerencial o calculadora admin): se agrega
+    // al final del desglose admin, después de todos los costos. Nunca se calcula en el navegador.
+    profit?: QuoteLineProfit | null
 }
 
 // Grupos de opciones: una fila elegida de un grupo se muestra como "Caja: caja de
@@ -69,14 +77,225 @@ function CostSection({
     )
 }
 
+// Desglose de costos por sección: solo para una línea con montos (las del admin).
+function QuoteCostBreakdown({
+    result,
+    showCostBreakdown,
+    showTransport,
+    profit,
+}: Readonly<{ result: QuoteLine; showCostBreakdown: boolean; showTransport: boolean; profit?: QuoteLineProfit | null }>) {
+    const { t, i18n } = useTranslation()
+    const format = formatCurrency
+    const { breakdown } = result
+
+    return (
+        <div className="space-y-4">
+            {showCostBreakdown && breakdown.production && <p className="text-sm text-ink-600">{t("quote.production.productCode")}: {breakdown.production.skuCode || t("quote.production.customNoSku")}</p>}
+            {showCostBreakdown && breakdown.rawMaterials.length > 0 && (
+                <CostSection
+                    icon={<Wheat size={15} />}
+                    title={t("site.quoteRequest.result.rawMaterials")}
+                    subtotal={result.rawMaterialCost}
+                    format={format}
+                >
+                    {breakdown.rawMaterials.map((line) => (
+                        <CostRow
+                            key={line.rawMaterialId}
+                            label={line.code ? `${line.code} · ${line.displayName}` : line.displayName}
+                            quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
+                                count: line.totalUnits.toLocaleString("es-MX"),
+                            })}
+                            lineTotal={line.lineTotal}
+                            format={format}
+                        />
+                    ))}
+                </CostSection>
+            )}
+
+            {showCostBreakdown && breakdown.ingredients && breakdown.ingredients.length > 0 && (
+                <CostSection
+                    icon={<FlaskConical size={15} />}
+                    title={t("site.quoteRequest.result.ingredients")}
+                    subtotal={result.ingredientCost ?? 0}
+                    format={format}
+                >
+                    {breakdown.ingredients.map((line) => (
+                        <CostRow
+                            key={line.ingredientId}
+                            label={t("site.quoteRequest.result.ingredientLabel", {
+                                name: line.code ? `${line.code} · ${line.displayName}` : line.displayName,
+                                grams: line.gramsPerUnit.toLocaleString("es-MX", { maximumFractionDigits: 3 }),
+                            })}
+                            quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
+                                count: line.totalUnits.toLocaleString("es-MX"),
+                            })}
+                            lineTotal={line.lineTotal}
+                            format={format}
+                        />
+                    ))}
+                </CostSection>
+            )}
+
+            {showCostBreakdown && breakdown.unitMaterials && breakdown.unitMaterials.length > 0 && (
+                <CostSection
+                    icon={<PackageOpen size={15} />}
+                    title={t("site.quoteRequest.result.unitPackaging")}
+                    subtotal={result.unitPackagingCost}
+                    format={format}
+                >
+                    {breakdown.unitMaterials.map((line) => (
+                        <CostRow
+                            key={line.packagingId}
+                            label={materialLineLabel(line, i18n.language)}
+                            quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
+                                count: line.totalUnits.toLocaleString("es-MX"),
+                            })}
+                            lineTotal={line.lineTotal}
+                            format={format}
+                        />
+                    ))}
+                </CostSection>
+            )}
+
+            {showCostBreakdown && breakdown.intermediateMaterials && breakdown.intermediateMaterials.length > 0 && (
+                <CostSection
+                    icon={<PackagePlus size={15} />}
+                    title={t("site.quoteRequest.result.intermediatePackaging")}
+                    subtotal={result.intermediatePackagingCost}
+                    format={format}
+                >
+                    {breakdown.intermediateMaterials.map((line) => (
+                        <CostRow
+                            key={line.packagingId}
+                            label={materialLineLabel(line, i18n.language)}
+                            quantityLabel={t("site.quoteRequest.result.intermediatePackagesQuantity", {
+                                count: line.packagesNeeded.toLocaleString("es-MX"),
+                            })}
+                            lineTotal={line.lineTotal}
+                            format={format}
+                        />
+                    ))}
+                </CostSection>
+            )}
+
+            {showCostBreakdown && breakdown.processingCosts && breakdown.processingCosts.length > 0 && (
+                <CostSection
+                    icon={<Cog size={15} />}
+                    title={t("site.quoteRequest.result.processingCosts")}
+                    subtotal={result.processingCostTotal ?? 0}
+                    format={format}
+                >
+                    {breakdown.processingCosts.map((line) => (
+                        <CostRow key={line.processingCostId} label={line.displayName} lineTotal={line.lineTotal} format={format} />
+                    ))}
+                </CostSection>
+            )}
+
+            {showCostBreakdown && breakdown.palletMaterials.length > 0 && (
+                <CostSection
+                    icon={<Layers size={15} />}
+                    title={t("site.quoteRequest.result.palletMaterials")}
+                    subtotal={result.palletMaterialCost}
+                    format={format}
+                >
+                    {breakdown.palletMaterials.map((line) => (
+                        <CostRow
+                            key={line.packagingId}
+                            label={materialLineLabel(line, i18n.language)}
+                            quantityLabel={t("site.quoteRequest.result.palletsQuantity", { count: line.requestedPallets })}
+                            lineTotal={line.lineTotal}
+                            format={format}
+                        />
+                    ))}
+                </CostSection>
+            )}
+
+            {showCostBreakdown && breakdown.percentageCosts && breakdown.percentageCosts.length > 0 && (
+                <CostSection
+                    icon={<Percent size={15} />}
+                    title={t("site.quoteRequest.result.percentageCosts")}
+                    subtotal={result.percentageCostTotal ?? 0}
+                    format={format}
+                >
+                    {breakdown.percentageCosts.map((line) => (
+                        <CostRow
+                            key={line.processingCostId}
+                            label={line.displayName}
+                            quantityLabel={t("site.quoteRequest.result.percentageOfBase", { value: line.value })}
+                            lineTotal={line.lineTotal}
+                            format={format}
+                        />
+                    ))}
+                </CostSection>
+            )}
+
+            {showTransport && (
+                <CostSection
+                    icon={<Truck size={15} />}
+                    title={t("site.quoteRequest.result.transport")}
+                    subtotal={result.transportCost}
+                    format={format}
+                >
+                    <CostRow label={breakdown.transport.displayName} lineTotal={result.transportCost} format={format} />
+                </CostSection>
+            )}
+
+            {showCostBreakdown && breakdown.adjustment && (
+                <CostSection
+                    icon={<SlidersHorizontal size={15} />}
+                    title={t("site.quoteRequest.result.adjustment")}
+                    subtotal={breakdown.adjustment.lineTotal}
+                    format={format}
+                >
+                    <CostRow
+                        label={t("site.quoteRequest.result.adjustment")}
+                        quantityLabel={t("site.quoteRequest.result.adjustmentDetail", {
+                            unitCost: format(breakdown.adjustment.unitCost),
+                            count: breakdown.adjustment.totalUnits.toLocaleString("es-MX"),
+                        })}
+                        lineTotal={breakdown.adjustment.lineTotal}
+                        format={format}
+                    />
+                </CostSection>
+            )}
+
+            {profit && <QuoteProfitSection totalCost={result.totalCost} profit={profit} />}
+        </div>
+    )
+}
+
+// Ganancia de la línea, fuera del costo: costo total + ganancia por libra × libras netas = precio final.
+function QuoteProfitSection({ totalCost, profit }: Readonly<{ totalCost: number; profit: QuoteLineProfit }>) {
+    const { t, i18n } = useTranslation()
+    const format = formatCurrency
+    const pounds = profit.netPounds.toLocaleString(i18n.language, { maximumFractionDigits: 2 })
+
+    return (
+        <CostSection icon={<TrendingUp size={15} />} title={t("quote.profit.title")} subtotal={profit.profitTotal} format={format}>
+            <CostRow label={t("quote.profit.totalCost")} lineTotal={totalCost} format={format} />
+            <CostRow
+                label={t("quote.profit.perPound", { amount: formatUnitAmount(profit.profitPerPound) })}
+                quantityLabel={t("quote.profit.netPounds", { pounds })}
+                lineTotal={profit.profitTotal}
+                format={format}
+            />
+            <div className="flex items-start justify-between gap-3 py-2 text-sm">
+                <p className="font-semibold text-ink-900">{t("quote.profit.finalPrice")}</p>
+                <p className="shrink-0 font-display text-base font-extrabold text-ink-900">{format(profit.finalPrice)}</p>
+            </div>
+        </CostSection>
+    )
+}
+
 export function QuoteResultCard({
     result,
     isPending,
     showCostBreakdown = true,
     showTransport = false,
     showReferenceDisclaimer = false,
+    profit,
 }: Readonly<QuoteResultCardProps>) {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
     // Sistema solo en USD: los montos se muestran con el formatter compartido.
     const format = formatCurrency
 
@@ -97,26 +316,34 @@ export function QuoteResultCard({
         )
     }
 
-    const { breakdown } = result
-    const costPerPallet = result.totalCost / result.requestedPallets
+    const amounts = hasQuoteAmounts(result) ? result : null
+    const price = linePrice(result)
 
     return (
         <Card>
-            <div className={`mb-5 flex items-start gap-3 border-b border-line pb-5 ${showTransport ? "justify-between" : "justify-end"}`}>
-                {showTransport && (
+            <div className={`mb-5 flex items-start gap-3 border-b border-line pb-5 ${showTransport && amounts ? "justify-between" : "justify-end"}`}>
+                {showTransport && amounts && (
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">
                             {t("site.quoteRequest.result.destination")}
                         </p>
-                        <p className="font-display text-lg font-bold text-ink-900">{breakdown.transport.displayName}</p>
+                        <p className="font-display text-lg font-bold text-ink-900">{amounts.breakdown.transport.displayName}</p>
                     </div>
                 )}
-                <div className="text-right">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">
-                        {t("site.quoteRequest.result.total")}
-                    </p>
-                    <p className="font-display text-2xl font-extrabold text-ink-900">{format(result.totalCost)}</p>
-                </div>
+                {price !== null ? (
+                    <div className="text-right">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">
+                            {t("site.quoteRequest.result.total")}
+                        </p>
+                        <p className="font-display text-2xl font-extrabold text-ink-900">{format(price)}</p>
+                    </div>
+                ) : (
+                    // Representante: sin montos hasta la revisión gerencial.
+                    <div className="text-right">
+                        <p className="font-semibold text-ink-900">{t("quote.pendingReview.title")}</p>
+                        <p className="mt-1 text-sm text-ink-600">{t("quote.pendingReview.description")}</p>
+                    </div>
+                )}
             </div>
 
             {/* Aviso "cotización de referencia" (solo representante), cerca del total. */}
@@ -126,7 +353,7 @@ export function QuoteResultCard({
                 </p>
             )}
 
-            <div className="mb-5 grid grid-cols-3 gap-3 text-center">
+            <div className={`mb-5 grid gap-3 text-center ${price !== null ? "grid-cols-3" : "grid-cols-2"}`}>
                 <div className="rounded-[10px] bg-canvas p-3">
                     <p className="text-lg font-bold text-ink-900">{result.requestedPallets}</p>
                     <p className="text-xs text-ink-600">{t("site.quoteRequest.result.pallets")}</p>
@@ -143,182 +370,15 @@ export function QuoteResultCard({
                         <p className="text-xs text-ink-600">{t("site.quoteRequest.result.boxesPerPallet")}</p>
                     </div>
                 )}
-                <div className="rounded-[10px] bg-canvas p-3">
-                    <p className="text-lg font-bold text-ink-900">{format(costPerPallet)}</p>
-                    <p className="text-xs text-ink-600">{t("site.quoteRequest.result.perPallet")}</p>
-                </div>
-            </div>
-
-            <div className="space-y-4">
-                {showCostBreakdown && breakdown.production && <p className="text-sm text-ink-600">{t("quote.production.productCode")}: {breakdown.production.skuCode || t("quote.production.customNoSku")}</p>}
-                {showCostBreakdown && breakdown.rawMaterials.length > 0 && (
-                    <CostSection
-                        icon={<Wheat size={15} />}
-                        title={t("site.quoteRequest.result.rawMaterials")}
-                        subtotal={result.rawMaterialCost}
-                        format={format}
-                    >
-                        {breakdown.rawMaterials.map((line) => (
-                            <CostRow
-                                key={line.rawMaterialId}
-                                label={line.code ? `${line.code} · ${line.displayName}` : line.displayName}
-                                quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
-                                    count: line.totalUnits.toLocaleString("es-MX"),
-                                })}
-                                lineTotal={line.lineTotal}
-                                format={format}
-                            />
-                        ))}
-                    </CostSection>
-                )}
-
-                {showCostBreakdown && breakdown.ingredients && breakdown.ingredients.length > 0 && (
-                    <CostSection
-                        icon={<FlaskConical size={15} />}
-                        title={t("site.quoteRequest.result.ingredients")}
-                        subtotal={result.ingredientCost ?? 0}
-                        format={format}
-                    >
-                        {breakdown.ingredients.map((line) => (
-                            <CostRow
-                                key={line.ingredientId}
-                                label={t("site.quoteRequest.result.ingredientLabel", {
-                                    name: line.code ? `${line.code} · ${line.displayName}` : line.displayName,
-                                    grams: line.gramsPerUnit.toLocaleString("es-MX", { maximumFractionDigits: 3 }),
-                                })}
-                                quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
-                                    count: line.totalUnits.toLocaleString("es-MX"),
-                                })}
-                                lineTotal={line.lineTotal}
-                                format={format}
-                            />
-                        ))}
-                    </CostSection>
-                )}
-
-                {showCostBreakdown && breakdown.unitMaterials && breakdown.unitMaterials.length > 0 && (
-                    <CostSection
-                        icon={<PackageOpen size={15} />}
-                        title={t("site.quoteRequest.result.unitPackaging")}
-                        subtotal={result.unitPackagingCost}
-                        format={format}
-                    >
-                        {breakdown.unitMaterials.map((line) => (
-                            <CostRow
-                                key={line.packagingId}
-                                label={materialLineLabel(line, i18n.language)}
-                                quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
-                                    count: line.totalUnits.toLocaleString("es-MX"),
-                                })}
-                                lineTotal={line.lineTotal}
-                                format={format}
-                            />
-                        ))}
-                    </CostSection>
-                )}
-
-                {showCostBreakdown && breakdown.intermediateMaterials && breakdown.intermediateMaterials.length > 0 && (
-                    <CostSection
-                        icon={<PackagePlus size={15} />}
-                        title={t("site.quoteRequest.result.intermediatePackaging")}
-                        subtotal={result.intermediatePackagingCost}
-                        format={format}
-                    >
-                        {breakdown.intermediateMaterials.map((line) => (
-                            <CostRow
-                                key={line.packagingId}
-                                label={materialLineLabel(line, i18n.language)}
-                                quantityLabel={t("site.quoteRequest.result.intermediatePackagesQuantity", {
-                                    count: line.packagesNeeded.toLocaleString("es-MX"),
-                                })}
-                                lineTotal={line.lineTotal}
-                                format={format}
-                            />
-                        ))}
-                    </CostSection>
-                )}
-
-                {showCostBreakdown && breakdown.processingCosts && breakdown.processingCosts.length > 0 && (
-                    <CostSection
-                        icon={<Cog size={15} />}
-                        title={t("site.quoteRequest.result.processingCosts")}
-                        subtotal={result.processingCostTotal ?? 0}
-                        format={format}
-                    >
-                        {breakdown.processingCosts.map((line) => (
-                            <CostRow key={line.processingCostId} label={line.displayName} lineTotal={line.lineTotal} format={format} />
-                        ))}
-                    </CostSection>
-                )}
-
-                {showCostBreakdown && breakdown.palletMaterials.length > 0 && (
-                    <CostSection
-                        icon={<Layers size={15} />}
-                        title={t("site.quoteRequest.result.palletMaterials")}
-                        subtotal={result.palletMaterialCost}
-                        format={format}
-                    >
-                        {breakdown.palletMaterials.map((line) => (
-                            <CostRow
-                                key={line.packagingId}
-                                label={materialLineLabel(line, i18n.language)}
-                                quantityLabel={t("site.quoteRequest.result.palletsQuantity", { count: line.requestedPallets })}
-                                lineTotal={line.lineTotal}
-                                format={format}
-                            />
-                        ))}
-                    </CostSection>
-                )}
-
-                {showCostBreakdown && breakdown.percentageCosts && breakdown.percentageCosts.length > 0 && (
-                    <CostSection
-                        icon={<Percent size={15} />}
-                        title={t("site.quoteRequest.result.percentageCosts")}
-                        subtotal={result.percentageCostTotal ?? 0}
-                        format={format}
-                    >
-                        {breakdown.percentageCosts.map((line) => (
-                            <CostRow
-                                key={line.processingCostId}
-                                label={line.displayName}
-                                quantityLabel={t("site.quoteRequest.result.percentageOfBase", { value: line.value })}
-                                lineTotal={line.lineTotal}
-                                format={format}
-                            />
-                        ))}
-                    </CostSection>
-                )}
-
-                {showTransport && (
-                    <CostSection
-                        icon={<Truck size={15} />}
-                        title={t("site.quoteRequest.result.transport")}
-                        subtotal={result.transportCost}
-                        format={format}
-                    >
-                        <CostRow label={breakdown.transport.displayName} lineTotal={result.transportCost} format={format} />
-                    </CostSection>
-                )}
-
-                {showCostBreakdown && breakdown.adjustment && (
-                    <CostSection
-                        icon={<SlidersHorizontal size={15} />}
-                        title={t("site.quoteRequest.result.adjustment")}
-                        subtotal={breakdown.adjustment.lineTotal}
-                        format={format}
-                    >
-                        <CostRow
-                            label={t("site.quoteRequest.result.adjustment")}
-                            quantityLabel={t("site.quoteRequest.result.adjustmentDetail", {
-                                unitCost: format(breakdown.adjustment.unitCost),
-                                count: breakdown.adjustment.totalUnits.toLocaleString("es-MX"),
-                            })}
-                            lineTotal={breakdown.adjustment.lineTotal}
-                            format={format}
-                        />
-                    </CostSection>
+                {price !== null && (
+                    <div className="rounded-[10px] bg-canvas p-3">
+                        <p className="text-lg font-bold text-ink-900">{format(price / result.requestedPallets)}</p>
+                        <p className="text-xs text-ink-600">{t("site.quoteRequest.result.perPallet")}</p>
+                    </div>
                 )}
             </div>
+
+            {amounts && <QuoteCostBreakdown result={amounts} showCostBreakdown={showCostBreakdown} showTransport={showTransport} profit={profit} />}
         </Card>
     )
 }

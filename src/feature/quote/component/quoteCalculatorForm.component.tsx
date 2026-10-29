@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { Minus, Package, Pencil, Plus, Search, SlidersHorizontal } from "lucide-react"
 import { calculateQuoteSchema } from "@/feature/quote/schema/quote.schema"
-import type { CalculateQuoteInput, QuotableProduct, QuoteDestination, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
+import type { CalculateQuoteInput, QuotableProduct, QuoteDestination, RepresentativeQuoteLine, SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 import type { DestinationCountry } from "@/feature/destination/schema/destination.schema"
 import { Chip } from "@/shared/component/chip.component"
 import { FormField } from "@/shared/component/formField.component"
@@ -21,6 +21,8 @@ import { Button } from "@/shared/component/button.component"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
 import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 import { QuoteLiveTotal, QuoteMaterialGroups } from "@/feature/quote/component/quoteMaterialGroups.component"
+import type { LiveTotal } from "@/feature/quote/component/quoteMaterialGroups.component"
+import { liveTotalOf } from "@/feature/quote/util/quoteAmounts"
 import { QuotePalletsStep } from "@/feature/quote/component/quotePalletsStep.component"
 import { QuotePresentationSection } from "@/feature/quote/component/quotePresentationSection.component"
 import { presentationDetails } from "@/feature/quote/util/quotePresentation.util"
@@ -42,7 +44,7 @@ type QuoteCalculatorFormProps = {
     showDestination?: boolean
     // Recálculo en vivo: solo lo pasa el wizard del representante. Si está presente, el form llama al
     // preview con debounce al cambiar material, variante o palets y muestra un total estimado.
-    previewAPI?: (formData: SalespersonQuoteInput) => Promise<{ data: { totalCost: number } } | undefined>
+    previewAPI?: (formData: SalespersonQuoteInput) => Promise<{ data: RepresentativeQuoteLine } | undefined>
     // Seguimiento de cotizaciones sin finalizar -- solo el wizard del representante lo pasa: la
     // página dueña genera/rota la clave y el form solo la reenvía en cada preview y en el submit
     // (mismo intento = misma clave mientras cambian SKU/palets/materiales). onProductChange avisa
@@ -141,7 +143,7 @@ export function QuoteCalculatorForm({
     // variante (id de un SKU ajeno -> 422 invalid_*_material_selection). Se limpia al cambiar de
     // producto o de variante; lo vigente (tocado o default) sale de resolveSelectedMaterialId.
     const [materialSelection, setMaterialSelection] = useState<Record<string, number>>({})
-    const [livePreviewTotal, setLivePreviewTotal] = useState<number | null>(null)
+    const [livePreviewTotal, setLivePreviewTotal] = useState<LiveTotal>(null)
     const [isLivePreviewLoading, setIsLivePreviewLoading] = useState(false)
     // El paso "total" es de solo lectura (el resultado real lo muestra el padre vía
     // QuoteResultCard) -- nunca debe poder alcanzarse manualmente por breadcrumb antes de haber
@@ -279,7 +281,7 @@ export function QuoteCalculatorForm({
             })
                 .then((response) => {
                     if (cancelled) return
-                    setLivePreviewTotal(response ? response.data.totalCost : null)
+                    setLivePreviewTotal(response ? liveTotalOf(response.data) : null)
                 })
                 .catch(() => {
                     if (!cancelled) setLivePreviewTotal(null)

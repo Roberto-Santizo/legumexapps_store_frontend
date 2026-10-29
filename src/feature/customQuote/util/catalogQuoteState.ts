@@ -20,7 +20,7 @@ export function catalogMaterialGroups(configuration: CatalogConfiguration | unde
         const key = `${level}:catalog:${group.packagingGroupId ?? group.key}`
         const chosen = group.options.find(option => option.packagingId === choices[key]) ?? (group.isRequired && group.selectionMode === "one" && group.options.length === 1 ? group.options[0] : undefined)
         const selectedIds = group.selectionMode === "all" ? (chosen ? group.options.map(option => option.id) : []) : chosen ? [chosen.id] : []
-        return { key, level, group: group.group, groupId: group.groupId, isRequired: group.isRequired, selectionMode: group.selectionMode, selectedIds, options: group.options.map(option => ({ ...option, unitCost: 0 })), selectedId: chosen?.id }
+        return { key, level, group: group.group, groupId: group.groupId, isRequired: group.isRequired, selectionMode: group.selectionMode, selectedIds, options: group.options, selectedId: chosen?.id }
     }))
 }
 // Pallet kit types with several materials (e.g. wooden or cardboard corner boards) become a required chooser;
@@ -30,7 +30,7 @@ export function palletKitGroups(catalog: CatalogDiscovery | undefined, choices: 
     return (catalog?.palletKit ?? []).filter(part => part.options.length > 1).map(part => {
         const key = `${KIT_KEY}${part.type}`
         const chosen = part.options.find(option => option.packagingId === choices[key])
-        return { key, level: "pallet" as const, group: part.group, isRequired: true, selectionMode: "one" as const, selectedIds: chosen ? [chosen.id] : [], options: part.options.map(option => ({ ...option, unitCost: 0 })), selectedId: chosen?.id }
+        return { key, level: "pallet" as const, group: part.group, isRequired: true, selectionMode: "one" as const, selectedIds: chosen ? [chosen.id] : [], options: part.options, selectedId: chosen?.id }
     })
 }
 export function emptyCatalogSelection() {

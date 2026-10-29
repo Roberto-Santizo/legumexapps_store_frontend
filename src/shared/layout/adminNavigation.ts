@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react"
 import {
     Boxes,
     Calculator,
+    ClipboardCheck,
     Carrot,
     FlaskConical,
     ClipboardList,
@@ -46,6 +47,7 @@ export const NAV_GROUPS: NavGroup[] = [
         labelKey: "nav.groups.quotes",
         items: [
             { url: "/admin/quotes", labelKey: "adminQuote.list.title", icon: ClipboardList, permission: ["quotes:view", "customQuotes:view"] },
+            { url: "/admin/quote-reviews", labelKey: "quoteReview.list.title", icon: ClipboardCheck, permission: "quotes:review" },
             { url: "/admin/quote-drafts", labelKey: "quoteDraft.list.title", icon: FileClock, permission: "quoteDrafts:view" },
             { url: "/admin/quotes/calculator", labelKey: "adminQuoteCalculator.title", icon: Calculator, permission: "quotes:calculate" },
         ],

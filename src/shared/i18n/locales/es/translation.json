@@ -1524,7 +1524,11 @@
       "confirmChange": "Cambiar de cliente eliminará todas las líneas y cálculos de este pedido. ¿Deseas continuar?",
       "loadError": "No se pudieron cargar los clientes asignados. Intenta nuevamente.",
       "newOnly": "Para un nuevo cliente puedes cotizar únicamente productos nuevos.",
-      "empty": "Este cliente no tiene productos definidos disponibles. Puedes cotizar un producto nuevo."
+      "empty": "Este cliente no tiene productos definidos disponibles. Puedes cotizar un producto nuevo.",
+      "email": "Correo del cliente",
+      "emailInvalid": "Escribe un correo válido.",
+      "emailHint": "Cuando gerencia apruebe el precio final, la cotización se enviará a este correo con copia para ti.",
+      "emailWillBeSaved": "Este cliente aún no tiene correo: se guardará en su ficha para las próximas cotizaciones."
     },
     "production": {
       "title": "Ficha de producción de la cotización",
@@ -1567,6 +1571,33 @@
         "pallet": "Paletización"
       }
     },
+    "orderReview": {
+      "title": "Revisión gerencial",
+      "status": {
+        "pending": "Pendiente de revisión",
+        "approved": "Aprobado"
+      },
+      "pending": "Enviado a revisión el {{date}}. Cuando gerencia apruebe el precio final, la cotización se enviará sola a {{email}} y aquí verás el precio.",
+      "refresh": "Actualizar estado",
+      "approved": "Aprobado el {{date}}. El precio final ya aparece en el pedido y en el PDF. Para agregar productos, empieza un pedido nuevo.",
+      "loadError": "No se pudo consultar el estado de la revisión.",
+      "notSubmitted": "El pedido todavía no se envió a revisión gerencial. Escribe el correo del cliente y envíalo.",
+      "submit": "Enviar a revisión gerencial",
+      "approvedSent": "Aprobado el {{date}}. La cotización con el precio final se envió a {{email}} (con copia para ti). Para agregar productos, empieza un pedido nuevo.",
+      "approvedEmailFailed": "Aprobado el {{date}}, pero no se pudo enviar la cotización a {{email}}. Gerencia puede reenviarla, o envíala tú con el botón del PDF.",
+      "sendsTo": "Al calcular, el pedido se envía a revisión. La cotización aprobada será enviada a:",
+      "changeEmail": "Cambiar",
+      "emailThisOrder": "Si el cliente ya tiene un correo registrado, este cambio aplica solo a este pedido.",
+      "submitting": "Enviando el pedido a revisión gerencial…",
+      "submitError": "No se pudo enviar el pedido a revisión gerencial. Intenta de nuevo.",
+      "updateError": "No se pudo enviar a revisión el último producto agregado. Gerencia todavía ve el pedido sin él.",
+      "unsentLines": "Hay productos nuevos que todavía no se enviaron a revisión gerencial. Confirma el correo del cliente y envíalos."
+    },
+    "pendingReview": {
+      "title": "Precio pendiente de revisión gerencial",
+      "description": "Gerencia revisará los costos y definirá el precio final de esta cotización.",
+      "pdfNotice": "Precios pendientes de revisión gerencial. Este documento detalla productos, cantidades y empaques; no incluye precios."
+    },
     "orderSummary": {
       "title": "Pedido en curso",
       "itemCount": "{{count}} productos cotizados",
@@ -1604,6 +1635,7 @@
         "sendSuccess": "Correo enviado a {{email}} con el PDF adjunto.",
         "emailSubject": "Cotización Legumex – {{clientName}}",
         "emailBody": "Hola,\n\nAdjunto la cotización solicitada para {{clientName}}.\n\nFecha de cotización: {{quoteDate}}\nVálida hasta: {{validUntil}}\nTotal de cotización: {{total}}\n\nSaludos,\nLegumex",
+        "emailBodyPendingReview": "Hola,\n\nAdjunto el detalle de la cotización solicitada para {{clientName}}.\n\nFecha de cotización: {{quoteDate}}\nLos precios están pendientes de revisión gerencial.\n\nSaludos,\nLegumex",
         "error": "No se pudo generar el PDF. Intenta de nuevo.",
         "emailUnavailable": "El envío por correo no está disponible"
       },
@@ -1658,6 +1690,20 @@
           "ingredient": "{{name}} ({{grams}} g por unidad)"
         }
       }
+    },
+    "profit": {
+      "title": "Ganancia",
+      "totalCost": "Costo total",
+      "perPound": "Ganancia de {{amount}} por libra",
+      "netPounds": "{{pounds}} lb netas",
+      "netPoundsTotal": "Libras netas del pedido",
+      "finalPrice": "Precio final",
+      "label": "Ganancia por libra (USD)",
+      "help": "De 0 a {{max}} USD por libra, con máximo cuatro decimales.",
+      "adminTitle": "Ganancia por libra del pedido",
+      "adminDescription": "Tus pedidos no pasan por revisión gerencial: define aquí tu ganancia por libra. Al aplicarla se guardan las cotizaciones pendientes y el pedido queda aprobado con el precio final (pantalla, PDF y correo).",
+      "apply": "Aplicar ganancia",
+      "stale": "Agregaste productos después de aplicar la ganancia: vuelve a aplicarla para calcular el precio final de todo el pedido."
     }
   },
   "destination": {
@@ -2062,7 +2108,7 @@
     "logistics": "{{units}} unidades por caja · {{boxes}} cajas por palet",
     "previewError": "No se pudo calcular esta configuración. Revisa las opciones e inténtalo de nuevo.",
     "confirmError": "No se pudo confirmar. Reintenta para recuperar la misma cotización de forma segura.",
-    "changed": "Los datos de la cotización cambiaron. Revisa el total actualizado antes de continuar nuevamente.",
+    "changed": "Los datos de la cotización cambiaron. Revisa la configuración actualizada antes de continuar nuevamente.",
     "context": "Contexto de la solicitud",
     "audit": "Trazabilidad interna de configuración",
     "sourceVariant": "Variante fuente",
@@ -2215,6 +2261,83 @@
       "TARIMA": "1 por pallet",
       "ESQUINERO": "4 por pallet",
       "STRETCH": "93.3 m por pallet"
+    }
+  },
+  "quoteReview": {
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobado"
+    },
+    "noClient": "Sin cliente",
+    "adminAuthor": "Administración",
+    "lineKind": {
+      "fixed": "Producto definido",
+      "customizable": "Producto nuevo"
+    },
+    "linePallets_one": "{{count}} pallet",
+    "linePallets_other": "{{count}} pallets",
+    "lineUnreadable": "No se pudo leer el desglose de esta línea.",
+    "list": {
+      "title": "Revisiones gerenciales",
+      "description": "Pedidos que los representantes enviaron a revisión. Abre uno para revisar sus costos, definir la ganancia por libra y aprobar el precio final.",
+      "filterLabel": "Filtrar por estado",
+      "filter": {
+        "pending": "Pendientes",
+        "approved": "Aprobadas",
+        "all": "Todas"
+      }
+    },
+    "table": {
+      "status": "Estado",
+      "client": "Cliente",
+      "salesperson": "Representante",
+      "submittedAt": "Enviado",
+      "profitPerPound": "Ganancia por libra",
+      "finalPrice": "Precio final",
+      "reviewedBy": "Aprobado por",
+      "empty": "No hay pedidos en este estado."
+    },
+    "detail": {
+      "back": "Volver a revisiones",
+      "loadError": "No se pudo cargar la revisión. Verifica el enlace o vuelve a la lista.",
+      "lineCount": "Productos",
+      "linesTitle": "Productos del pedido",
+      "approvedTitle": "Precio final aprobado",
+      "approvedDescription": "El representante ya ve este precio final en su pedido y en el PDF. Un pedido aprobado no se puede cambiar."
+    },
+    "profit": {
+      "title": "Ganancia por libra",
+      "description": "Escribe el monto que deseas ganar por libra neta. Se aplica igual a cada producto según sus libras.",
+      "calculate": "Calcular",
+      "approve": "Aprobar y enviar al cliente",
+      "approveHint": "Calcula primero el precio final con el monto que deseas aprobar.",
+      "approveNoEmail": "Aprobar precio final",
+      "sendsTo": "Al aprobar, la cotización con el precio final se enviará a {{email}} con copia al representante."
+    },
+    "notification": {
+      "label": "Aviso por correo",
+      "resend": "Reenviar aviso",
+      "resent": "Aviso reenviado.",
+      "status": {
+        "pending": "Pendiente de envío",
+        "sent": "Enviado",
+        "failed": "No se pudo enviar",
+        "not_configured": "Sin destinatario configurado",
+        "not_required": "No requerido"
+      }
+    },
+    "clientEmail": {
+      "label": "Cotización al cliente",
+      "pdfError": "No se pudo generar el PDF de la cotización. Intenta de nuevo.",
+      "resend": "Reenviar al cliente",
+      "resent": "Cotización enviada al cliente.",
+      "status": {
+        "pending": "Se enviará a {{email}} al aprobar",
+        "sending": "Enviando a {{email}}…",
+        "sent": "Enviada a {{email}}",
+        "failed": "No se pudo enviar a {{email}}",
+        "not_required": "Sin correo del cliente"
+      }
     }
   }
 }

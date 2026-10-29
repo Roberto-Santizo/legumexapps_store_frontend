@@ -5,7 +5,7 @@ import { apiErrorResponse } from "@/shared/api/apiErrorResponse"
 import { Check, Leaf, Layers, Minus, Plus } from "lucide-react"
 import { discoverCatalogAPI, previewCatalogAPI, confirmCatalogAPI } from "../api/catalogQuote.api"
 import { discoverAdminCatalogAPI, previewAdminCatalogAPI } from "../api/adminCatalogQuote.api"
-import type { CustomQuoteCalculation } from "../schema/customQuote.schema"
+import type { RepresentativeCustomQuoteCalculation } from "../schema/customQuote.schema"
 import type { CatalogConfirmed, CatalogDiscovery, CatalogInput, CatalogPreview } from "../schema/catalogQuote.schema"
 import { reconcileCatalogChoices, changeCatalogSelection, emptyCatalogSelection, resolveCatalogSelection, validComposition } from "../util/catalogQuoteState"
 import { toCustomQuoteDocumentLine } from "../util/customQuoteComposition"
@@ -21,6 +21,8 @@ import { QuotePalletsStep } from "@/feature/quote/component/quotePalletsStep.com
 import { QuotePresentationSection } from "@/feature/quote/component/quotePresentationSection.component"
 import { presentationDetails } from "@/feature/quote/util/quotePresentation.util"
 import { QuoteLiveTotal, QuoteMaterialGroups } from "@/feature/quote/component/quoteMaterialGroups.component"
+import type { LiveTotal } from "@/feature/quote/component/quoteMaterialGroups.component"
+import { liveTotalOf } from "@/feature/quote/util/quoteAmounts"
 import { CatalogQuoteMixBuilder } from "./catalogQuoteMixBuilder.component"
 import { CatalogQuoteProfileStep } from "./catalogQuoteProfileStep.component"
 import { CatalogQuoteResultStep } from "./catalogQuoteResultStep.component"
@@ -49,8 +51,9 @@ export function CatalogQuoteWizard(props: Readonly<Props>) {
     const [errorKey, setError] = useState("")
     const [serverError, setServerError] = useState("")
     const error = serverError || (errorKey ? t(errorKey) : "")
-    const [confirmed, setConfirmed] = useState<CustomQuoteCalculation | null>(null)
-    const [liveTotal, setLiveTotal] = useState<number | null>(null)
+    // Admin: con montos; representante: sin montos (precio pendiente de la revisión gerencial).
+    const [confirmed, setConfirmed] = useState<RepresentativeCustomQuoteCalculation | null>(null)
+    const [liveTotal, setLiveTotal] = useState<LiveTotal>(null)
     const [liveLoading, setLiveLoading] = useState(false)
     const processing = useRef(false)
     const needsPriceReview = useRef(false)
@@ -85,7 +88,7 @@ export function CatalogQuoteWizard(props: Readonly<Props>) {
             const preview = isAdmin ? previewAdminCatalogAPI(request) : previewCatalogAPI(request)
             preview.then(calculation => {
                 if (cancelled || current !== sequence.current) return
-                setLiveTotal(calculation.totalCost)
+                setLiveTotal(liveTotalOf(calculation))
                 if (!isAdmin) setQuotePreview({ input: request, calculation: calculation as CatalogPreview })
             }).catch(() => { if (!cancelled) setLiveTotal(null) })
                 .finally(() => { if (!cancelled) setLiveLoading(false) })
@@ -118,7 +121,7 @@ export function CatalogQuoteWizard(props: Readonly<Props>) {
             if (current !== sequence.current) return
             previewReady = true
             setQuotePreview({ input, calculation })
-            setLiveTotal(calculation.totalCost); setLiveLoading(false)
+            setLiveTotal(liveTotalOf(calculation)); setLiveLoading(false)
             if (needsPriceReview.current) {
                 needsPriceReview.current = false
                 setError("catalogQuote.changed")
@@ -156,7 +159,7 @@ export function CatalogQuoteWizard(props: Readonly<Props>) {
             const calculation = await previewCatalogAPI(requestInput)
             if (current === sequence.current) {
                 setQuotePreview({ input: requestInput, calculation })
-                setLiveTotal(calculation.totalCost); setLiveLoading(false)
+                setLiveTotal(liveTotalOf(calculation)); setLiveLoading(false)
                 needsPriceReview.current = false
             }
         } catch { /* Keep the selections and let the next click request a fresh preview. */ }

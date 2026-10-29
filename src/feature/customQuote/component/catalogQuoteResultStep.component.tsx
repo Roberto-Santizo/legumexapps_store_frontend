@@ -1,12 +1,13 @@
 import { packagingName } from "@/shared/i18n/packagingName"
 import { useTranslation } from "react-i18next"
 import { Boxes, Package } from "lucide-react"
-import type { CustomQuoteCalculation } from "../schema/customQuote.schema"
+import type { RepresentativeCustomQuoteCalculation } from "../schema/customQuote.schema"
+import { hasQuoteAmounts } from "@/feature/quote/util/quoteAmounts"
 import { CatalogQuoteSection } from "@/shared/component/catalogQuoteUi.component"
 import { CatalogQuoteQuantities } from "@/shared/component/catalogQuoteQuantities.component"
 import { formatCurrency } from "@/shared/format/currency"
 
-export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonly<{ confirmed: CustomQuoteCalculation; mode?: "customer" | "admin" }>) {
+export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonly<{ confirmed: RepresentativeCustomQuoteCalculation; mode?: "customer" | "admin" }>) {
     const { t, i18n } = useTranslation()
     const packagingByLevel = {
         unit: confirmed.breakdown.unitMaterials ?? [],
@@ -45,9 +46,17 @@ export function CatalogQuoteResultStep({ confirmed, mode = "customer" }: Readonl
                 </CatalogQuoteSection>
             </div>
             <p className="mt-5 rounded-control border border-danger-border bg-danger-bg px-3 py-2.5 text-sm font-medium text-danger">{t("site.quoteRequest.result.referenceDisclaimer")}</p>
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-customize-slate p-6">
-                <div><p className="font-semibold">{t("catalogQuote.ui.costSummary")}</p><p className="mt-1 text-sm text-ink-600">{t(mode === "admin" ? "adminQuoteCalculator.calculatedHint" : "catalogQuote.confirmedHint")}</p></div>
-                <p className="text-3xl font-bold text-brand-700">{formatCurrency(confirmed.totalCost)}</p>
-            </div>
+            {hasQuoteAmounts(confirmed) ? (
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-customize-slate p-6">
+                    <div><p className="font-semibold">{t("catalogQuote.ui.costSummary")}</p><p className="mt-1 text-sm text-ink-600">{t(mode === "admin" ? "adminQuoteCalculator.calculatedHint" : "catalogQuote.confirmedHint")}</p></div>
+                    <p className="text-3xl font-bold text-brand-700">{formatCurrency(confirmed.totalCost)}</p>
+                </div>
+            ) : (
+                // Representante: sin montos hasta la revisión gerencial.
+                <div className="mt-5 rounded-2xl bg-customize-slate p-6">
+                    <p className="font-semibold">{t("quote.pendingReview.title")}</p>
+                    <p className="mt-1 text-sm text-ink-600">{t("quote.pendingReview.description")}</p>
+                </div>
+            )}
         </>
 }

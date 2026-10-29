@@ -3,13 +3,13 @@ import { responseDestinationSchema } from "@/feature/destination/schema/destinat
 
 // Grupos de opciones: `id` es el id de la FILA del join
 // (ProductVariantUnitMaterial/IntermediateMaterial/PalletMaterial), el mismo que
-// calculateQuoteSchema.selectedXMaterialIds espera al cotizar -- no el packagingId.
+// calculateQuoteSchema.selectedXMaterialIds espera al cotizar -- no el packagingId. Sin costo: el
+// representante nunca ve el costo de un empaque.
 const quotableMaterialOptionSchema = z.object({
     id: z.number().int(),
     packagingId: z.number().int(),
     displayName: z.string(),
     displayNameEn: z.string().nullable().optional(),
-    unitCost: z.number(),
     isDefault: z.boolean(),
 })
 
@@ -87,22 +87,28 @@ const salespersonQuoteSchema = calculateQuoteSchema.extend({
     order: z.object({ id: z.string().uuid(), clientName: z.string().trim().min(1).max(150), clientId: z.number().int().positive().nullable().optional() }).optional(),
 })
 
-const rawMaterialLineSchema = z.object({
+// Cada línea del desglose tiene dos formas: lo que se cotiza (cantidades, nombres, receta) y, solo para
+// el admin, sus montos (unitCost/lineTotal). El representante recibe la primera: el backend nunca le
+// manda un monto (pricing/services/representativeQuoteView.ts).
+const rawMaterialQuantitySchema = z.object({
     rawMaterialId: z.number().int(),
     code: z.string().optional(),
     percentage: z.number().optional(),
     gramsPerUnit: z.number().optional(),
     quantityUnit: z.string().optional(),
     displayName: z.string(),
-    unitCost: z.number(),
     quantityPerUnit: z.number(),
     totalUnits: z.number(),
+})
+
+const rawMaterialLineSchema = rawMaterialQuantitySchema.extend({
+    unitCost: z.number(),
     lineTotal: z.number(),
 })
 
 // Ingrediente agregado (sal, azúcar...) -- línea aparte de la materia prima, fuera del 100% de la
-// receta (ver quote.service.ts::buildIngredientLines en el backend). Solo lo usa el desglose admin.
-const ingredientLineSchema = z.object({
+// receta (ver quote.service.ts::buildIngredientLines en el backend).
+const ingredientQuantitySchema = z.object({
     ingredientId: z.number().int(),
     code: z.string().optional(),
     quantityUnit: z.string().optional(),
@@ -110,36 +116,44 @@ const ingredientLineSchema = z.object({
     grams: z.number(),
     referenceNetWeightGrams: z.number(),
     gramsPerUnit: z.number(),
-    unitCost: z.number(),
     quantityPerUnit: z.number(),
     totalUnits: z.number(),
+})
+
+const ingredientLineSchema = ingredientQuantitySchema.extend({
+    unitCost: z.number(),
     lineTotal: z.number(),
 })
 
-// optionGroup: grupo de opciones de la fila costeada, null = fila fija. Solo lo usa el
-// desglose admin ("Caja: caja de envío").
-const unitMaterialLineSchema = z.object({
+// optionGroup: grupo de opciones de la fila, null = fila fija ("Caja: caja de envío" en el desglose).
+const unitMaterialQuantitySchema = z.object({
     packagingId: z.number().int(),
     code: z.string().optional(),
     displayName: z.string(),
     displayNameEn: z.string().nullable().optional(),
     optionGroup: z.string().nullable(),
-    unitCost: z.number(),
     quantityPerUnit: z.number(),
     totalUnits: z.number(),
+})
+
+const unitMaterialLineSchema = unitMaterialQuantitySchema.extend({
+    unitCost: z.number(),
     lineTotal: z.number(),
 })
 
-const intermediateMaterialLineSchema = z.object({
+const intermediateMaterialQuantitySchema = z.object({
     packagingId: z.number().int(),
     code: z.string().optional(),
     displayName: z.string(),
     displayNameEn: z.string().nullable().optional(),
     optionGroup: z.string().nullable(),
-    unitCost: z.number(),
     unitsPerPackage: z.number(),
     totalUnits: z.number(),
     packagesNeeded: z.number(),
+})
+
+const intermediateMaterialLineSchema = intermediateMaterialQuantitySchema.extend({
+    unitCost: z.number(),
     lineTotal: z.number(),
 })
 
@@ -159,15 +173,18 @@ const percentageCostLineSchema = z.object({
     lineTotal: z.number(),
 })
 
-const palletMaterialLineSchema = z.object({
+const palletMaterialQuantitySchema = z.object({
     packagingId: z.number().int(),
     code: z.string().optional(),
     displayName: z.string(),
     displayNameEn: z.string().nullable().optional(),
     optionGroup: z.string().nullable(),
-    unitCost: z.number(),
     quantityPerPallet: z.number(),
     requestedPallets: z.number(),
+})
+
+const palletMaterialLineSchema = palletMaterialQuantitySchema.extend({
+    unitCost: z.number(),
     lineTotal: z.number(),
 })
 
@@ -184,11 +201,29 @@ const adjustmentLineSchema = z.object({
     lineTotal: z.number(),
 })
 
-// Línea cotizada COMPARTIDA por los dos mundos: una cotización de producto definido (quoteCalculationSchema,
-// que agrega productVariantId) y una cotización a la medida (feature/customQuote, que agrega su propia
-// configuración y no tiene SKU). Es lo único que necesitan QuoteResultCard, QuotedOrderSummary, el PDF y
-// buildPackagingConfiguration -- ninguno lee productVariantId, así que aceptan cualquiera de las dos.
-export const quoteLineSchema = z.object({
+const representativeBreakdownSchema = z.object({
+    order: z.object({ id: z.string().uuid(), clientName: z.string(), clientId: z.number().int().positive().nullable().optional() }).optional(),
+    production: z.object({ productId: z.number().int().optional(), skuCode: z.string().optional(), kind: z.enum(["fixed", "customizable"]).optional(), boxesPerPallet: z.number(), bagsPerBox: z.number(), netWeightGrams: z.number().nullable() }).optional(),
+    rawMaterials: z.array(rawMaterialQuantitySchema),
+    // Opcional: no existe en cotizaciones guardadas antes de este campo.
+    ingredients: z.array(ingredientQuantitySchema).optional(),
+    // Opcional: no existe en cotizaciones guardadas antes de este campo.
+    unitMaterials: z.array(unitMaterialQuantitySchema).optional(),
+    // Array (no un objeto único o null): el nivel intermedio admite N filas fijas + N grupos,
+    // igual que unit/pallet.
+    intermediateMaterials: z.array(intermediateMaterialQuantitySchema).optional(),
+    palletMaterials: z.array(palletMaterialQuantitySchema),
+    language: z.enum(["es", "en"]).optional(),
+})
+
+// Línea cotizada tal como la recibe el REPRESENTANTE: lo que se cotiza, sin ningún monto. Es además la
+// forma común que aceptan QuoteResultCard, QuotedOrderSummary, el PDF y buildPackagingConfiguration:
+// la línea del admin (quoteLineSchema) la extiende con los montos, y esos componentes solo los muestran
+// si la línea los trae (util/quoteAmounts.ts).
+export const representativeQuoteLineSchema = z.object({
+    // Id de la cotización guardada (Quote o CustomQuote, según breakdown.production.kind): enlaza la línea
+    // del pedido con su precio final de la revisión gerencial. Ausente en un cálculo sin guardar.
+    id: z.number().int().optional(),
     // null cuando no se mandó destino -- ver transportLineSchema.destinationId arriba.
     destinationId: z.number().int().nullable(),
     productDisplayName: z.string(),
@@ -196,8 +231,15 @@ export const quoteLineSchema = z.object({
     requestedPallets: z.number().int(),
     totalUnits: z.number(),
     // Opcional: no se guarda como columna de Quote, así que una cotización releída de la BD no lo trae;
-    // la respuesta en vivo (la única que ve el representante) siempre lo incluye.
+    // la respuesta en vivo siempre lo incluye.
     boxesPerPallet: z.number().int().optional(),
+    breakdown: representativeBreakdownSchema,
+})
+
+// Línea cotizada del ADMIN, COMPARTIDA por los dos mundos: producto definido (quoteCalculationSchema,
+// que agrega productVariantId) y cotización a la medida (feature/customQuote, que agrega su propia
+// configuración y no tiene SKU).
+export const quoteLineSchema = representativeQuoteLineSchema.extend({
     rawMaterialCost: z.coerce.number(),
     // Opcional + coerce: DECIMAL de Quote (string al releer de la BD) que no existe en cotizaciones antiguas.
     ingredientCost: z.coerce.number().optional(),
@@ -212,16 +254,10 @@ export const quoteLineSchema = z.object({
     // Opcional: no existe en cotizaciones guardadas antes de este campo.
     adjustmentCost: z.coerce.number().optional(),
     totalCost: z.coerce.number(),
-    breakdown: z.object({
-        order: z.object({ id: z.string().uuid(), clientName: z.string(), clientId: z.number().int().positive().nullable().optional() }).optional(),
-        production: z.object({ productId: z.number().int().optional(), skuCode: z.string().optional(), kind: z.enum(["fixed", "customizable"]).optional(), boxesPerPallet: z.number(), bagsPerBox: z.number(), netWeightGrams: z.number().nullable() }).optional(),
+    breakdown: representativeBreakdownSchema.extend({
         rawMaterials: z.array(rawMaterialLineSchema),
-        // Opcional: no existe en cotizaciones guardadas antes de este campo.
         ingredients: z.array(ingredientLineSchema).optional(),
-        // Opcional: no existe en cotizaciones guardadas antes de este campo.
         unitMaterials: z.array(unitMaterialLineSchema).optional(),
-        // Array (no un objeto único o null): el nivel intermedio admite N filas fijas + N grupos,
-        // igual que unit/pallet.
         intermediateMaterials: z.array(intermediateMaterialLineSchema).optional(),
         // Opcional: no existe en cotizaciones guardadas antes de este campo.
         processingCosts: z.array(processingCostLineSchema).optional(),
@@ -230,8 +266,16 @@ export const quoteLineSchema = z.object({
         percentageCosts: z.array(percentageCostLineSchema).optional(),
         transport: transportLineSchema,
         adjustment: adjustmentLineSchema.nullable().optional(),
-        language: z.enum(["es", "en"]).optional(),
     }),
+})
+
+export const representativeQuoteCalculationSchema = representativeQuoteLineSchema.extend({
+    productVariantId: z.number().int(),
+})
+
+export const savedRepresentativeQuoteSchema = representativeQuoteCalculationSchema.extend({
+    id: z.number().int(),
+    createdAt: z.coerce.date(),
 })
 
 export const quoteCalculationSchema = quoteLineSchema.extend({
@@ -270,6 +314,8 @@ export type CalculateQuoteInput = z.infer<typeof calculateQuoteSchema>
 export type SalespersonQuoteInput = z.infer<typeof salespersonQuoteSchema>
 export type QuoteLine = z.infer<typeof quoteLineSchema>
 export type QuoteCalculation = z.infer<typeof quoteCalculationSchema>
+export type RepresentativeQuoteLine = z.infer<typeof representativeQuoteLineSchema>
+export type RepresentativeQuoteCalculation = z.infer<typeof representativeQuoteCalculationSchema>
 
 // Composición que el PDF muestra para una línea A LA MEDIDA (la receta la armó el representante, así que
 // es parte de lo que se cotiza): nombres + % de materia prima y gramos por unidad de cada ingrediente,
@@ -280,5 +326,7 @@ export type QuoteLineComposition = {
     ingredients: { displayName: string; gramsPerUnit: number }[]
 }
 
-// Lo que acepta el PDF: cualquier línea cotizada, con composición opcional.
-export type QuoteDocumentLine = QuoteLine & { composition?: QuoteLineComposition }
+// Lo que acepta el PDF: cualquier línea cotizada (con o sin montos), con composición opcional y, en un
+// pedido del representante ya aprobado por gerencia, su precio final (nunca se guarda en el navegador:
+// sale de la revisión, ver util/quoteAmounts.ts::withFinalPrices).
+export type QuoteDocumentLine = RepresentativeQuoteLine & { composition?: QuoteLineComposition; finalPrice?: number }

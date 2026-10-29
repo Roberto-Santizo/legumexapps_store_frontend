@@ -9,18 +9,19 @@ import {
 } from "@/shared/api/apiResponse.schema"
 import {
     quotableProductSchema,
-    quoteCalculationSchema,
-    savedQuoteSchema,
+    representativeQuoteCalculationSchema,
+    savedRepresentativeQuoteSchema,
 } from "@/feature/quote/schema/quote.schema"
 import type { SalespersonQuoteInput } from "@/feature/quote/schema/quote.schema"
 
 const quoteProductListResponseSchema = apiListResponseSchema(quotableProductSchema)
-const saveQuoteResponseSchema = apiMutationResponseSchema(savedQuoteSchema)
-const quotePreviewResponseSchema = apiItemResponseSchema(quoteCalculationSchema)
+// El representante nunca recibe montos: sus precios quedan para la revisión gerencial.
+const saveQuoteResponseSchema = apiMutationResponseSchema(savedRepresentativeQuoteSchema)
+const quotePreviewResponseSchema = apiItemResponseSchema(representativeQuoteCalculationSchema)
 
 export async function getQuoteClientsAPI() {
     const { data } = await salespersonApi.get("/quotes/clients")
-    return z.object({ data: z.array(z.object({ id: z.number().int().positive(), name: z.string(), isActive: z.boolean() })) }).parse(data)
+    return z.object({ data: z.array(z.object({ id: z.number().int().positive(), name: z.string(), email: z.string().nullable().optional(), isActive: z.boolean() })) }).parse(data)
 }
 
 export async function getQuoteProductsAPI(clientId: number) {

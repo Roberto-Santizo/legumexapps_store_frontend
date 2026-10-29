@@ -1,11 +1,12 @@
-import type { QuoteDocumentLine } from "@/feature/quote/schema/quote.schema"
-import type { CustomQuoteCalculation } from "@/feature/customQuote/schema/customQuote.schema"
+import type { QuoteDocumentLine, RepresentativeQuoteLine } from "@/feature/quote/schema/quote.schema"
+import type { RepresentativeCustomQuoteCalculation } from "@/feature/customQuote/schema/customQuote.schema"
 
 // Convierte una cotización a la medida en una línea del PDF/resumen: la línea compartida + su
 // composición (la receta que armó el representante). El % sale de la configuración guardada y el
 // nombre (ya traducido) del desglose, emparejados por id; los gramos por unidad de cada ingrediente
-// salen del desglose. Solo nombres y cantidades, nunca costos.
-export function toCustomQuoteDocumentLine(line: CustomQuoteCalculation): QuoteDocumentLine {
+// salen del desglose. Solo nombres y cantidades, nunca costos (la línea conserva sus montos solo si los
+// trae: la del admin).
+export function toCustomQuoteDocumentLine<Line extends RepresentativeQuoteLine & Pick<RepresentativeCustomQuoteCalculation, "configuration">>(line: Line): Line & QuoteDocumentLine {
     const rawMaterialNames = new Map(line.breakdown.rawMaterials.map((rawMaterial) => [rawMaterial.rawMaterialId, rawMaterial.displayName]))
     return {
         ...line,

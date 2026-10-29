@@ -1,18 +1,21 @@
 import { useRef, useState } from "react"
 import { z } from "zod"
-import { quoteLineSchema } from "../schema/quote.schema"
+import { representativeQuoteLineSchema } from "../schema/quote.schema"
 import type { QuoteDocumentLine } from "../schema/quote.schema"
 import { useSalespersonAuth } from "@/shared/auth/salesperson/useSalespersonAuth"
 import { QUOTE_ORDER_STORAGE_PREFIX } from "@/shared/auth/salesperson/salespersonAuthStorage"
 
-type Order = { id: string; clientName: string; clientId: number | null; selected: boolean; lines: QuoteDocumentLine[] }
-const storedLineSchema = quoteLineSchema.extend({ composition: z.object({
+// clientEmail: a dónde irá la cotización aprobada; se precarga con el correo del cliente registrado.
+type Order = { id: string; clientName: string; clientId: number | null; clientEmail: string; selected: boolean; lines: QuoteDocumentLine[] }
+// Pedido del representante: líneas sin montos. Un pedido guardado antes con montos se lee igual y los
+// pierde al parsear (zod descarta las claves que no conoce).
+const storedLineSchema = representativeQuoteLineSchema.extend({ composition: z.object({
     context: z.object({ categoryName: z.string(), subCategoryName: z.string(), isOrganic: z.boolean().optional(), ingredientType: z.string() }).optional(),
     rawMaterials: z.array(z.object({ displayName: z.string(), percentage: z.number() })),
     ingredients: z.array(z.object({ displayName: z.string(), gramsPerUnit: z.number() })),
 }).optional() })
-const storedOrderSchema = z.object({ id: z.string().uuid(), clientName: z.string().max(150), clientId: z.number().int().positive().nullable(), selected: z.boolean(), lines: z.array(storedLineSchema) })
-const emptyOrder = (): Order => ({ id: crypto.randomUUID(), clientName: "", clientId: null, selected: false, lines: [] })
+const storedOrderSchema = z.object({ id: z.string().uuid(), clientName: z.string().max(150), clientId: z.number().int().positive().nullable(), clientEmail: z.string().max(254).default(""), selected: z.boolean(), lines: z.array(storedLineSchema) })
+const emptyOrder = (): Order => ({ id: crypto.randomUUID(), clientName: "", clientId: null, clientEmail: "", selected: false, lines: [] })
 
 // One customer order across both routes, retained when navigating or refreshing this tab.
 export function useSharedQuoteOrder() {
@@ -36,7 +39,8 @@ export function useSharedQuoteOrder() {
         ...order,
         identity: { id: order.id, clientName: order.clientName.trim(), clientId: order.clientId },
         isCurrentOrder: (id: string) => current.current.id === id,
-        selectClient: (clientId: number | null, clientName: string) => update({ ...emptyOrder(), selected: true, clientId, clientName }),
+        selectClient: (clientId: number | null, clientName: string, clientEmail = "") => update({ ...emptyOrder(), selected: true, clientId, clientName, clientEmail }),
+        setClientEmail: (clientEmail: string) => update({ ...current.current, clientEmail }),
         setClientName: (clientName: string) => { if (!current.current.lines.length && current.current.clientId === null) update({ ...current.current, id: crypto.randomUUID(), clientName }) },
         addLine: (line: QuoteDocumentLine) => {
             const active = current.current

@@ -1524,7 +1524,11 @@
       "confirmChange": "Changing the customer will remove all lines and calculations from this order. Do you want to continue?",
       "loadError": "Assigned customers could not be loaded. Please try again.",
       "newOnly": "For a new customer you can only quote new products.",
-      "empty": "This customer has no ready-made products available. You can quote a new product."
+      "empty": "This customer has no ready-made products available. You can quote a new product.",
+      "email": "Client email",
+      "emailInvalid": "Enter a valid email.",
+      "emailHint": "When management approves the final price, the quote will be sent to this email with a copy to you.",
+      "emailWillBeSaved": "This client has no email yet: it will be saved to their record for future quotes."
     },
     "production": {
       "title": "Quote production sheet",
@@ -1567,6 +1571,33 @@
         "pallet": "Pallet materials"
       }
     },
+    "orderReview": {
+      "title": "Management review",
+      "status": {
+        "pending": "Pending review",
+        "approved": "Approved"
+      },
+      "pending": "Sent to review on {{date}}. When management approves the final price, the quote will be sent automatically to {{email}} and you will see the price here.",
+      "refresh": "Refresh status",
+      "approved": "Approved on {{date}}. The final price now appears in the order and in the PDF. To add products, start a new order.",
+      "loadError": "The review status could not be loaded.",
+      "notSubmitted": "The order has not been sent to management review yet. Enter the client's email and send it.",
+      "submit": "Send to management review",
+      "approvedSent": "Approved on {{date}}. The quote with the final price was sent to {{email}} (with a copy to you). To add products, start a new order.",
+      "approvedEmailFailed": "Approved on {{date}}, but the quote could not be sent to {{email}}. Management can resend it, or send it yourself with the PDF button.",
+      "sendsTo": "Calculating sends the order to review. The approved quote will be sent to:",
+      "changeEmail": "Change",
+      "emailThisOrder": "If the client already has a saved email, this change applies to this order only.",
+      "submitting": "Sending the order to management review…",
+      "submitError": "The order could not be sent to management review. Try again.",
+      "updateError": "The last product added could not be sent to review. Management still sees the order without it.",
+      "unsentLines": "There are new products not yet sent to management review. Confirm the client's email and send them."
+    },
+    "pendingReview": {
+      "title": "Price pending management review",
+      "description": "Management will review the costs and set the final price for this quote.",
+      "pdfNotice": "Prices pending management review. This document details products, quantities and packaging; it does not include prices."
+    },
     "orderSummary": {
       "title": "Order in progress",
       "itemCount": "{{count}} products quoted",
@@ -1604,6 +1635,7 @@
         "sendSuccess": "Email sent to {{email}} with the PDF attached.",
         "emailSubject": "Legumex Quote – {{clientName}}",
         "emailBody": "Hello,\n\nPlease find attached the quote requested for {{clientName}}.\n\nQuote date: {{quoteDate}}\nValid until: {{validUntil}}\nQuote Total: {{total}}\n\nBest regards,\nLegumex",
+        "emailBodyPendingReview": "Hello,\n\nPlease find attached the details of the quote requested for {{clientName}}.\n\nQuote date: {{quoteDate}}\nPrices are pending management review.\n\nBest regards,\nLegumex",
         "error": "The PDF could not be generated. Please try again.",
         "emailUnavailable": "Email delivery is unavailable"
       },
@@ -1658,6 +1690,20 @@
           "ingredient": "{{name}} ({{grams}} g per unit)"
         }
       }
+    },
+    "profit": {
+      "title": "Profit",
+      "totalCost": "Total cost",
+      "perPound": "Profit of {{amount}} per pound",
+      "netPounds": "{{pounds}} net lb",
+      "netPoundsTotal": "Order net pounds",
+      "finalPrice": "Final price",
+      "label": "Profit per pound (USD)",
+      "help": "From 0 to {{max}} USD per pound, with at most four decimals.",
+      "adminTitle": "Order profit per pound",
+      "adminDescription": "Your orders skip management review: set your profit per pound here. Applying it saves any pending quotes and approves the order with the final price (screen, PDF and email).",
+      "apply": "Apply profit",
+      "stale": "You added products after applying the profit: apply it again to price the whole order."
     }
   },
   "destination": {
@@ -2062,7 +2108,7 @@
     "logistics": "{{units}} units per box · {{boxes}} boxes per pallet",
     "previewError": "Unable to calculate this configuration. Check your choices and try again.",
     "confirmError": "Unable to confirm. Retry to recover the same quotation safely.",
-    "changed": "Quote data changed. Check the updated total before continuing again.",
+    "changed": "Quote data changed. Check the updated configuration before continuing again.",
     "context": "Request context",
     "audit": "Internal configuration trace",
     "sourceVariant": "Source variant",
@@ -2215,6 +2261,83 @@
       "TARIMA": "1 per pallet",
       "ESQUINERO": "4 per pallet",
       "STRETCH": "93.3 m per pallet"
+    }
+  },
+  "quoteReview": {
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved"
+    },
+    "noClient": "No client",
+    "adminAuthor": "Administration",
+    "lineKind": {
+      "fixed": "Defined product",
+      "customizable": "New product"
+    },
+    "linePallets_one": "{{count}} pallet",
+    "linePallets_other": "{{count}} pallets",
+    "lineUnreadable": "This line's breakdown could not be read.",
+    "list": {
+      "title": "Management reviews",
+      "description": "Orders that representatives sent for review. Open one to check its costs, set the profit per pound and approve the final price.",
+      "filterLabel": "Filter by status",
+      "filter": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "all": "All"
+      }
+    },
+    "table": {
+      "status": "Status",
+      "client": "Client",
+      "salesperson": "Representative",
+      "submittedAt": "Submitted",
+      "profitPerPound": "Profit per pound",
+      "finalPrice": "Final price",
+      "reviewedBy": "Approved by",
+      "empty": "There are no orders with this status."
+    },
+    "detail": {
+      "back": "Back to reviews",
+      "loadError": "The review could not be loaded. Check the link or go back to the list.",
+      "lineCount": "Products",
+      "linesTitle": "Order products",
+      "approvedTitle": "Approved final price",
+      "approvedDescription": "The representative now sees this final price in their order and in the PDF. An approved order cannot be changed."
+    },
+    "profit": {
+      "title": "Profit per pound",
+      "description": "Enter the amount you want to earn per net pound. It applies equally to every product based on its pounds.",
+      "calculate": "Calculate",
+      "approve": "Approve and send to client",
+      "approveHint": "First calculate the final price with the amount you want to approve.",
+      "approveNoEmail": "Approve final price",
+      "sendsTo": "On approval, the quote with the final price will be sent to {{email}} with a copy to the representative."
+    },
+    "notification": {
+      "label": "Email notice",
+      "resend": "Resend notice",
+      "resent": "Notice resent.",
+      "status": {
+        "pending": "Waiting to send",
+        "sent": "Sent",
+        "failed": "Could not be sent",
+        "not_configured": "No recipient configured",
+        "not_required": "Not required"
+      }
+    },
+    "clientEmail": {
+      "label": "Quote to client",
+      "pdfError": "The quote PDF could not be generated. Try again.",
+      "resend": "Resend to client",
+      "resent": "Quote sent to the client.",
+      "status": {
+        "pending": "Will be sent to {{email}} on approval",
+        "sending": "Sending to {{email}}…",
+        "sent": "Sent to {{email}}",
+        "failed": "Could not be sent to {{email}}",
+        "not_required": "No client email"
+      }
     }
   }
 }

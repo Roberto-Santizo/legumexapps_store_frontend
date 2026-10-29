@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { quoteLineSchema } from "@/feature/quote/schema/quote.schema"
+import { quoteLineSchema, representativeQuoteLineSchema } from "@/feature/quote/schema/quote.schema"
 import { catalogSnapshotSchema } from "./catalogSnapshot.schema"
 
 // Espejo de backend features/customQuote (catálogo, request y respuesta). Los DECIMAL del catálogo
@@ -35,14 +35,21 @@ export const customQuoteConfigurationSchema = z.object({
     }),
 })
 
-// La línea cotizada compartida (misma que un producto definido, sin productVariantId) + lo propio de
-// una cotización a la medida.
-export const customQuoteCalculationSchema = quoteLineSchema.extend({
+// Lo propio de una cotización a la medida, sobre la línea cotizada compartida (misma que un producto
+// definido, sin productVariantId).
+const customQuoteFields = {
     subCategoryId: z.number().int(),
     presentationId: z.number().int(),
     bagsPerBox: z.number().int(),
     unitsPerIntermediatePackage: z.number().int().nullable(),
     configuration: customQuoteConfigurationSchema,
-})
+}
 
+// Lo que recibe el representante: sin ningún monto (precio pendiente de la revisión gerencial).
+export const representativeCustomQuoteCalculationSchema = representativeQuoteLineSchema.extend(customQuoteFields)
+
+// Admin: con montos.
+export const customQuoteCalculationSchema = quoteLineSchema.extend(customQuoteFields)
+
+export type RepresentativeCustomQuoteCalculation = z.infer<typeof representativeCustomQuoteCalculationSchema>
 export type CustomQuoteCalculation = z.infer<typeof customQuoteCalculationSchema>

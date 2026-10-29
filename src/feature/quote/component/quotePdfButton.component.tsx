@@ -13,7 +13,8 @@ import { Modal } from "@/shared/component/modal.component"
 import { Input } from "@/shared/component/input.component"
 import { FormField } from "@/shared/component/formField.component"
 import { QuotePdfDocument } from "@/feature/quote/component/quotePdfDocument.component"
-import { calculateQuoteOrderTotal, calculateQuoteValidUntil, quotePdfDateFormatter } from "@/feature/quote/util/quotePdfSummary"
+import { buildFileName, calculateQuoteOrderTotal, calculateQuoteValidUntil, quotePdfDateFormatter } from "@/feature/quote/util/quotePdfSummary"
+import { clientLinePrice, linePrice } from "@/feature/quote/util/quoteAmounts"
 import { formatCurrency } from "@/shared/format/currency"
 import type { QuoteDocumentLine } from "@/feature/quote/schema/quote.schema"
 
@@ -47,19 +48,6 @@ type PdfModalStep = "name" | "choice" | "email"
 type ConfirmedPdfRequest = {
     clientName: string
     quoteDate: Date
-}
-
-const fileNameDateFormatter = new Intl.DateTimeFormat("en-CA") // YYYY-MM-DD, seguro para nombres de archivo
-
-function buildFileName(clientName: string, quoteDate: Date): string {
-    let safeName = clientName
-        .trim()
-        .toUpperCase()
-        .replace(/[^A-Z0-9]+/g, "_")
-    // The replacement above collapses each run to one underscore, including at the edges.
-    if (safeName.startsWith("_")) safeName = safeName.slice(1)
-    if (safeName.endsWith("_")) safeName = safeName.slice(0, -1)
-    return `Cotizacion_${safeName || "CLIENTE"}_${fileNameDateFormatter.format(quoteDate)}.pdf`
 }
 
 // Descarga un blob ya generado sin depender de un <a href> visible en el DOM -- se crea,
@@ -238,7 +226,7 @@ export function QuotePdfButton({
             setIsBuildingPdfForEmail(false)
         }
 
-        const total = calculateQuoteOrderTotal(lines)
+        const total = calculateQuoteOrderTotal(lines, showCostBreakdown ? linePrice : clientLinePrice)
         const validUntil = calculateQuoteValidUntil(confirmed.quoteDate)
         const fileName = buildFileName(confirmed.clientName, confirmed.quoteDate)
 
@@ -247,12 +235,18 @@ export function QuotePdfButton({
         formData.append("to", trimmedEmail)
         if (askRecipientName) formData.append("recipientName", trimmedRecipientName)
         formData.append("subject", t("quote.pdf.modal.emailSubject", { clientName: confirmed.clientName }))
-        formData.append("body", t("quote.pdf.modal.emailBody", {
-            clientName: confirmed.clientName,
-            quoteDate: quotePdfDateFormatter.format(confirmed.quoteDate),
-            validUntil: quotePdfDateFormatter.format(validUntil),
-            total: formatCurrency(total),
-        }))
+        // Sin total (líneas del representante): el correo no menciona ningún monto.
+        formData.append("body", total === null
+            ? t("quote.pdf.modal.emailBodyPendingReview", {
+                clientName: confirmed.clientName,
+                quoteDate: quotePdfDateFormatter.format(confirmed.quoteDate),
+            })
+            : t("quote.pdf.modal.emailBody", {
+                clientName: confirmed.clientName,
+                quoteDate: quotePdfDateFormatter.format(confirmed.quoteDate),
+                validUntil: quotePdfDateFormatter.format(validUntil),
+                total: formatCurrency(total),
+            }))
 
         sendEmailMutation.mutate(formData)
     }

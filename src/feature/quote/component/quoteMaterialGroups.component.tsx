@@ -52,8 +52,12 @@ function toCardOptions(group: MaterialGroup, defaultLabel: string, noneLabel: st
     return group.isRequired === false ? [{ value: 0, text: noneLabel, subtitle: undefined, icon: <X size={22} /> }, ...options] : options
 }
 
+// Un monto; "pending" = la configuración es válida pero el precio queda para la revisión gerencial
+// (lo que ve el representante); null = sin cálculo todavía o con error.
+export type LiveTotal = number | "pending" | null
+
 type QuoteLiveTotalProps = {
-    total: number | null
+    total: LiveTotal
     isLoading: boolean
     pallets: number | undefined
 }
@@ -62,6 +66,14 @@ type QuoteLiveTotalProps = {
 // sola instancia, en el panel de cantidad del paso combinado palets + materiales.
 export function QuoteLiveTotal({ total, isLoading, pallets }: Readonly<QuoteLiveTotalProps>) {
     const { t } = useTranslation()
+    if (total === "pending" && !isLoading) {
+        return (
+            <div aria-live="polite">
+                <p className="font-semibold text-ink-900">{t("quote.pendingReview.title")}</p>
+                <p className="mt-1 text-sm text-ink-600">{t("quote.pendingReview.description")}</p>
+            </div>
+        )
+    }
     return (
         <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">{t("site.quoteRequest.form.livePreview.label")}</p>
@@ -72,7 +84,7 @@ export function QuoteLiveTotal({ total, isLoading, pallets }: Readonly<QuoteLive
                         {t("site.quoteRequest.form.livePreview.loading")}
                     </span>
                 ) : (
-                    <p className="font-display text-3xl font-bold text-brand-700 dark:text-brand-500">{total !== null ? formatCurrency(total) : "-"}</p>
+                    <p className="font-display text-3xl font-bold text-brand-700 dark:text-brand-500">{typeof total === "number" ? formatCurrency(total) : "-"}</p>
                 )}
             </div>
             {pallets ? <p className="mt-1 text-xs text-ink-600">{t("site.quoteRequest.form.livePreview.forPallets", { count: pallets })}</p> : null}

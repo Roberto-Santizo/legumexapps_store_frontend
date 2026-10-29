@@ -2,15 +2,19 @@ import { useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react"
-import type { QuoteLine } from "@/feature/quote/schema/quote.schema"
+import type { QuoteDocumentLine } from "@/feature/quote/schema/quote.schema"
+import { hasQuoteAmounts, linePrice } from "@/feature/quote/util/quoteAmounts"
+import { calculateQuoteOrderTotal } from "@/feature/quote/util/quotePdfSummary"
 import { QuoteResultCard } from "@/feature/quote/component/quoteResultCard.component"
 import { Card } from "@/shared/component/card.component"
 import { Button } from "@/shared/component/button.component"
 import { formatCurrency } from "@/shared/format/currency"
 
 type QuotedOrderSummaryProps = {
-    lines: QuoteLine[]
-    onQuoteAnother: () => void
+    // Con montos (admin) o sin ellos (representante: precios pendientes de la revisión gerencial).
+    lines: QuoteDocumentLine[]
+    // Ausente = el pedido ya no admite más productos (aprobado por gerencia: se empieza otro).
+    onQuoteAnother?: () => void
     onClear: () => void
     showCostBreakdown?: boolean
     // Transporte apagado para todos por ahora; independiente de showCostBreakdown.
@@ -19,6 +23,8 @@ type QuotedOrderSummaryProps = {
     showReferenceDisclaimer?: boolean
     // Slot para <QuotePdfButton>, en la misma fila que "Nueva cotización".
     pdfAction?: ReactNode
+    // Slot para el estado de la revisión gerencial (pedido del representante), sobre las acciones.
+    reviewPanel?: ReactNode
 }
 
 
@@ -30,14 +36,15 @@ export function QuotedOrderSummary({
     showTransport = false,
     showReferenceDisclaimer = false,
     pdfAction,
+    reviewPanel,
 }: Readonly<QuotedOrderSummaryProps>) {
     const { t } = useTranslation()
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
-    const total = lines.reduce((sum, line) => sum + line.totalCost, 0)
+    const total = calculateQuoteOrderTotal(lines)
 
 
-    const lineIdsRef = useRef(new WeakMap<QuoteLine, string>())
-    const getLineId = (line: QuoteLine) => {
+    const lineIdsRef = useRef(new WeakMap<QuoteDocumentLine, string>())
+    const getLineId = (line: QuoteDocumentLine) => {
         const existingId = lineIdsRef.current.get(line)
         if (existingId) return existingId
         const newId = crypto.randomUUID()
@@ -59,17 +66,23 @@ export function QuotedOrderSummary({
                         </p>
                     </div>
                 </div>
-                <div className="text-right">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">
-                        {t("quote.orderSummary.total")}
-                    </p>
-                    <p className="font-display text-xl font-extrabold text-ink-900">{formatCurrency(total)}</p>
-                </div>
+                {total !== null ? (
+                    <div className="text-right">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">
+                            {t("quote.orderSummary.total")}
+                        </p>
+                        <p className="font-display text-xl font-extrabold text-ink-900">{formatCurrency(total)}</p>
+                    </div>
+                ) : (
+                    <p className="max-w-48 text-right text-sm font-semibold text-ink-900">{t("quote.pendingReview.title")}</p>
+                )}
             </div>
 
             <div className="mb-4 divide-y divide-line/60">
                 {lines.map((line, index) => {
                     const isExpanded = expandedIndex === index
+                    const amounts = hasQuoteAmounts(line) ? line : null
+                    const price = linePrice(line)
                     return (
                         <div key={getLineId(line)}>
                             <button
@@ -86,16 +99,16 @@ export function QuotedOrderSummary({
                                     </p>
                                     <p className="text-xs text-ink-600">
                                         {/* Transporte apagado para todos por ahora (gateado por showTransport). */}
-                                        {showTransport
+                                        {showTransport && amounts
                                             ? t("quote.orderSummary.lineSummary", {
-                                                  destination: line.breakdown.transport.displayName,
+                                                  destination: amounts.breakdown.transport.displayName,
                                                   pallets: line.requestedPallets,
                                               })
                                             : t("quote.orderSummary.lineSummaryNoDestination", { pallets: line.requestedPallets })}
                                     </p>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-2">
-                                    <p className="font-semibold text-ink-900">{formatCurrency(line.totalCost)}</p>
+                                    {price !== null && <p className="font-semibold text-ink-900">{formatCurrency(price)}</p>}
                                     {isExpanded ? (
                                         <ChevronUp size={16} className="text-ink-600" />
                                     ) : (
@@ -119,10 +132,14 @@ export function QuotedOrderSummary({
                 })}
             </div>
 
+            {reviewPanel}
+
             <div className="flex flex-wrap items-center gap-4">
-                <Button type="button" onClick={onQuoteAnother}>
-                    {t("quote.orderSummary.quoteAnother")}
-                </Button>
+                {onQuoteAnother && (
+                    <Button type="button" onClick={onQuoteAnother}>
+                        {t("quote.orderSummary.quoteAnother")}
+                    </Button>
+                )}
                 {pdfAction}
                 <button
                     type="button"

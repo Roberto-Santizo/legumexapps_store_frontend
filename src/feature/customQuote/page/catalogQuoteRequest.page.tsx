@@ -4,12 +4,11 @@ import { useTranslation } from "react-i18next"
 import { ArrowLeft } from "lucide-react"
 import { buttonClassName } from "@/shared/utils/buttonClassName"
 import { CatalogQuoteWizard } from "../component/catalogQuoteWizard.component"
-import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
-import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary.component"
-import { sendQuotePdfEmailAPI } from "@/feature/quote/api/quote.api"
+import { RepresentativeOrderSummary } from "@/feature/quote/component/representativeOrderSummary.component"
 import { SiteContainer } from "@/shared/component/siteContainer.component"
 import { useSharedQuoteOrder } from "@/feature/quote/hook/useSharedQuoteOrder"
 import { QuoteOrderClient } from "@/feature/quote/component/quoteOrderClient.component"
+import { QuoteOrderEmailContext } from "@/feature/quote/util/quoteOrderEmailContext"
 
 export function CatalogQuoteRequestPage() {
     const { t } = useTranslation()
@@ -24,9 +23,9 @@ export function CatalogQuoteRequestPage() {
             <p className="max-w-2xl text-base leading-relaxed text-ink-600">{t("catalogQuote.ui.intro")}</p>
         </div>
         <div className="mx-auto max-w-6xl space-y-6">
-            <QuoteOrderClient name={order.clientName} clientId={order.clientId} selected={order.selected} hasLines={lines.length > 0} onSelect={order.selectClient} onChange={order.setClientName} onReset={reset} />
-            {order.selected && order.identity.clientName && <CatalogQuoteWizard key={`${order.id}-${resetKey}`} order={order.identity} onConfirmed={order.addLine} />}
-            {!!lines.length && <QuotedOrderSummary lines={lines} onQuoteAnother={reset} onClear={() => { order.clear(); reset() }} showCostBreakdown={false} showReferenceDisclaimer pdfAction={<QuotePdfButton lines={lines} orderClientName={order.identity.clientName} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={sendQuotePdfEmailAPI} />} />}
+            <QuoteOrderClient name={order.clientName} clientId={order.clientId} email={order.clientEmail} selected={order.selected} hasLines={lines.length > 0} onSelect={order.selectClient} onChange={order.setClientName} onEmailChange={order.setClientEmail} onReset={reset} />
+            {order.selected && order.identity.clientName && <QuoteOrderEmailContext.Provider value={{ email: order.clientEmail, onChange: order.setClientEmail }}><CatalogQuoteWizard key={`${order.id}-${resetKey}`} order={order.identity} onConfirmed={order.addLine} /></QuoteOrderEmailContext.Provider>}
+            {!!lines.length && <RepresentativeOrderSummary orderId={order.id} clientName={order.identity.clientName} clientEmail={order.clientEmail} onClientEmailChange={order.setClientEmail} lines={lines} onQuoteAnother={reset} onClear={() => { order.clear(); reset() }} />}
         </div>
     </SiteContainer>
 }

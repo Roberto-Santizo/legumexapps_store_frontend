@@ -4,7 +4,6 @@ import { QuotedOrderSummary } from "@/feature/quote/component/quotedOrderSummary
 import { QuotePdfButton } from "@/feature/quote/component/quotePdfButton.component"
 import { QuoteOrderReviewPanel } from "@/feature/quote/component/quoteOrderReviewPanel.component"
 import { useQuoteOrderReview } from "@/feature/quote/hook/useQuoteOrderReview"
-import { sendQuotePdfEmailAPI } from "@/feature/quote/api/quote.api"
 import { withFinalPrices } from "@/feature/quote/util/quoteAmounts"
 
 type RepresentativeOrderSummaryProps = {
@@ -18,17 +17,18 @@ type RepresentativeOrderSummaryProps = {
 }
 
 // Pedido en curso del representante (productos definidos y nuevos): sin montos hasta que gerencia lo
-// aprueba; entonces la pantalla, el PDF y el correo muestran el precio final que manda el servidor.
-// Aprobado, ya no admite más productos: se empieza un pedido nuevo.
+// aprueba y autoriza el envío comercial; entonces la pantalla y el PDF muestran el precio final que manda
+// el servidor. El representante no envía cotizaciones por correo: eso solo lo autoriza gerencia.
+// Aprobado o rechazado, ya no admite más productos: se empieza un pedido nuevo.
 export function RepresentativeOrderSummary({ orderId, clientName, clientEmail, onClientEmailChange, lines, onQuoteAnother, onClear }: Readonly<RepresentativeOrderSummaryProps>) {
     const review = useQuoteOrderReview(orderId, lines.length, clientEmail)
     const pricedLines = useMemo(() => withFinalPrices(lines, review.review), [lines, review.review])
-    const isApproved = review.review?.status === "approved"
+    const isClosed = review.review?.status === "approved" || review.review?.status === "rejected"
 
     return (
         <QuotedOrderSummary
             lines={pricedLines}
-            onQuoteAnother={isApproved ? undefined : onQuoteAnother}
+            onQuoteAnother={isClosed ? undefined : onQuoteAnother}
             onClear={onClear}
             showCostBreakdown={false}
             showReferenceDisclaimer
@@ -47,7 +47,7 @@ export function RepresentativeOrderSummary({ orderId, clientName, clientEmail, o
                     onRefresh={review.refresh}
                 />
             }
-            pdfAction={<QuotePdfButton lines={pricedLines} orderClientName={clientName} showCostBreakdown={false} showReferenceDisclaimer sendEmailAPI={sendQuotePdfEmailAPI} />}
+            pdfAction={<QuotePdfButton lines={pricedLines} orderClientName={clientName} showCostBreakdown={false} showReferenceDisclaimer />}
         />
     )
 }

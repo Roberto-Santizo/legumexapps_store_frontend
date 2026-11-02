@@ -1454,15 +1454,15 @@
   },
   "adminQuote": {
     "list": {
-      "emptyRange": "No hay cotizaciones de productos fijos para este rango de fechas.",
+      "emptyRange": "No hay cotizaciones aprobadas de productos fijos para este rango de fechas.",
       "title": "Cotizaciones",
-      "description": "Todas las cotizaciones que han guardado los representantes, sin importar cuál, y las guardadas desde el cotizador interno.",
+      "description": "Cotizaciones con precio final aprobado por gerencia (de los representantes y del cotizador interno), con su desglose completo y la ganancia por libra.",
       "adminAuthor": "Administración",
       "sentTo_one": "Enviada por correo a {{name}}",
       "sentTo_other": "Enviada por correo {{count}} veces · última a {{name}}",
       "deliveriesTitle": "Envíos por correo",
       "searchPlaceholder": "Buscar por representante, empresa, correo o producto...",
-      "empty": "No hay cotizaciones de productos fijos.",
+      "empty": "No hay cotizaciones aprobadas de productos fijos.",
       "noMatches": "Ninguna cotización coincide con la búsqueda.",
       "summary": "{{date}} · {{pallets}} palets · {{destination}}",
       "summaryNoDestination": "{{date}} · {{pallets}} palets"
@@ -1525,10 +1525,10 @@
       "loadError": "No se pudieron cargar los clientes asignados. Intenta nuevamente.",
       "newOnly": "Para un nuevo cliente puedes cotizar únicamente productos nuevos.",
       "empty": "Este cliente no tiene productos definidos disponibles. Puedes cotizar un producto nuevo.",
-      "email": "Correo del cliente",
+      "email": "Correo del cliente (opcional)",
       "emailInvalid": "Escribe un correo válido.",
-      "emailHint": "Cuando gerencia apruebe el precio final, la cotización se enviará a este correo con copia para ti.",
-      "emailWillBeSaved": "Este cliente aún no tiene correo: se guardará en su ficha para las próximas cotizaciones."
+      "emailHint": "Opcional. Ingresa el correo del cliente si deseas que pueda recibir información o la cotización.",
+      "emailWillBeSaved": "Opcional. Este cliente aún no tiene correo: si lo ingresas, se guardará en su ficha para las próximas cotizaciones."
     },
     "production": {
       "title": "Ficha de producción de la cotización",
@@ -1537,7 +1537,7 @@
       "clientName": "Cliente del pedido",
       "clientLocked": "Todas las líneas pertenecen a este cliente. Para otro cliente, inicia un pedido nuevo.",
       "mixedOrderHint": "Puedes agregar productos fijos y nuevos al mismo pedido. El PDF incluirá todas las líneas.",
-      "description": "Pedidos agrupados por cliente y representante. Descarga el detalle completo para compartirlo con producción e imprimirlo sin acceso a la aplicación.",
+      "description": "Pedidos aprobados por gerencia, agrupados por cliente y representante. Descarga el detalle completo para compartirlo con producción e imprimirlo sin acceso a la aplicación.",
       "search": "Buscar por cliente, representante, producto o folio",
       "empty": "No hay pedidos para este filtro.",
       "order": "Folio del pedido",
@@ -1575,23 +1575,29 @@
       "title": "Revisión gerencial",
       "status": {
         "pending": "Pendiente de revisión",
-        "approved": "Aprobado"
+        "approved": "Aprobado",
+        "rejected": "Rechazado"
       },
-      "pending": "Enviado a revisión el {{date}}. Cuando gerencia apruebe el precio final, la cotización se enviará sola a {{email}} y aquí verás el precio.",
+      "pending": "Enviado a revisión el {{date}}. Gerencia revisará el precio y decidirá; aquí verás su decisión.",
       "refresh": "Actualizar estado",
-      "approved": "Aprobado el {{date}}. El precio final ya aparece en el pedido y en el PDF. Para agregar productos, empieza un pedido nuevo.",
       "loadError": "No se pudo consultar el estado de la revisión.",
-      "notSubmitted": "El pedido todavía no se envió a revisión gerencial. Escribe el correo del cliente y envíalo.",
+      "notSubmitted": "El pedido todavía no se envió a revisión gerencial.",
       "submit": "Enviar a revisión gerencial",
-      "approvedSent": "Aprobado el {{date}}. La cotización con el precio final se envió a {{email}} (con copia para ti). Para agregar productos, empieza un pedido nuevo.",
-      "approvedEmailFailed": "Aprobado el {{date}}, pero no se pudo enviar la cotización a {{email}}. Gerencia puede reenviarla, o envíala tú con el botón del PDF.",
-      "sendsTo": "Al calcular, el pedido se envía a revisión. La cotización aprobada será enviada a:",
+      "sendsTo": "Al calcular, el pedido se envía a revisión gerencial.",
       "changeEmail": "Cambiar",
       "emailThisOrder": "Si el cliente ya tiene un correo registrado, este cambio aplica solo a este pedido.",
       "submitting": "Enviando el pedido a revisión gerencial…",
       "submitError": "No se pudo enviar el pedido a revisión gerencial. Intenta de nuevo.",
       "updateError": "No se pudo enviar a revisión el último producto agregado. Gerencia todavía ve el pedido sin él.",
-      "unsentLines": "Hay productos nuevos que todavía no se enviaron a revisión gerencial. Confirma el correo del cliente y envíalos."
+      "unsentLines": "Hay productos que todavía no se enviaron a revisión gerencial porque el correo del cliente no es válido. Corrígelo o bórralo (es opcional) y envíalos.",
+      "clientEmailLabel": "Correo del cliente:",
+      "approvedNotSent": "Aprobado el {{date}}. Gerencia aún no autorizó el envío de la cotización comercial; cuando lo haga, te llegará por correo. Para agregar productos, empieza un pedido nuevo.",
+      "approvedSending": "Aprobado el {{date}}. La cotización se está enviando a tu correo.",
+      "approvedSentToYou": "Aprobado el {{date}}. Gerencia te envió por correo la cotización con el precio final (el cliente no la recibió). Para agregar productos, empieza un pedido nuevo.",
+      "approvedSentWithClient": "Aprobado el {{date}}. Gerencia te envió la cotización con el precio final, con copia a {{email}}. Para agregar productos, empieza un pedido nuevo.",
+      "approvedDeliveryFailed": "Aprobado el {{date}}, pero el envío de la cotización falló. Gerencia lo reintentará.",
+      "rejected": "Gerencia rechazó este pedido el {{date}}. No se envió nada al cliente. Para cotizar de nuevo, empieza un pedido nuevo.",
+      "rejectionReason": "Motivo:"
     },
     "pendingReview": {
       "title": "Precio pendiente de revisión gerencial",
@@ -1835,9 +1841,9 @@
       "product": "Producto · presentación",
       "subCategory": "Tipo",
       "pallets": "Palets",
-      "total": "Total",
+      "total": "Precio final",
       "view": "Ver detalle",
-      "empty": "No hay cotizaciones de productos nuevos."
+      "empty": "No hay cotizaciones aprobadas de productos nuevos."
     },
     "detail": {
       "title": "Cotización a la medida #{{id}}",
@@ -2266,7 +2272,8 @@
   "quoteReview": {
     "status": {
       "pending": "Pendiente",
-      "approved": "Aprobado"
+      "approved": "Aprobado",
+      "rejected": "Rechazado"
     },
     "noClient": "Sin cliente",
     "adminAuthor": "Administración",
@@ -2279,12 +2286,13 @@
     "lineUnreadable": "No se pudo leer el desglose de esta línea.",
     "list": {
       "title": "Revisiones gerenciales",
-      "description": "Pedidos que los representantes enviaron a revisión. Abre uno para revisar sus costos, definir la ganancia por libra y aprobar el precio final.",
+      "description": "Pedidos que los representantes enviaron a revisión. Abre uno para revisar sus costos, definir la ganancia por libra y aprobarlo o rechazarlo.",
       "filterLabel": "Filtrar por estado",
       "filter": {
         "pending": "Pendientes",
         "approved": "Aprobadas",
-        "all": "Todas"
+        "all": "Todas",
+        "rejected": "Rechazadas"
       }
     },
     "table": {
@@ -2294,7 +2302,7 @@
       "submittedAt": "Enviado",
       "profitPerPound": "Ganancia por libra",
       "finalPrice": "Precio final",
-      "reviewedBy": "Aprobado por",
+      "reviewedBy": "Revisado por",
       "empty": "No hay pedidos en este estado."
     },
     "detail": {
@@ -2303,16 +2311,20 @@
       "lineCount": "Productos",
       "linesTitle": "Productos del pedido",
       "approvedTitle": "Precio final aprobado",
-      "approvedDescription": "El representante ya ve este precio final en su pedido y en el PDF. Un pedido aprobado no se puede cambiar."
+      "approvedDescription": "Un pedido aprobado no se puede cambiar. El representante ve el precio final solo cuando autorizas el envío de la cotización.",
+      "clientEmail": "Correo del cliente",
+      "noClientEmail": "Sin correo",
+      "rejectedTitle": "Cotización rechazada",
+      "rejectedDescription": "El representante ve el rechazo y su motivo. No se envió nada al cliente y el pedido quedó cerrado.",
+      "rejectionReason": "Motivo"
     },
     "profit": {
       "title": "Ganancia por libra",
       "description": "Escribe el monto que deseas ganar por libra neta. Se aplica igual a cada producto según sus libras.",
       "calculate": "Calcular",
-      "approve": "Aprobar y enviar al cliente",
-      "approveHint": "Calcula primero el precio final con el monto que deseas aprobar.",
-      "approveNoEmail": "Aprobar precio final",
-      "sendsTo": "Al aprobar, la cotización con el precio final se enviará a {{email}} con copia al representante."
+      "approve": "Aprobar",
+      "approveHint": "Calcula primero el precio final con el monto que deseas aprobar. Para rechazar no hace falta.",
+      "reject": "Rechazar"
     },
     "notification": {
       "label": "Aviso por correo",
@@ -2326,18 +2338,63 @@
         "not_required": "No requerido"
       }
     },
-    "clientEmail": {
-      "label": "Cotización al cliente",
+    "delivery": {
+      "label": "Cotización comercial",
       "pdfError": "No se pudo generar el PDF de la cotización. Intenta de nuevo.",
-      "resend": "Reenviar al cliente",
-      "resent": "Cotización enviada al cliente.",
+      "send": "Enviar cotización",
+      "retry": "Reintentar envío",
+      "sent": "Cotización enviada.",
       "status": {
-        "pending": "Se enviará a {{email}} al aprobar",
-        "sending": "Enviando a {{email}}…",
-        "sent": "Enviada a {{email}}",
-        "failed": "No se pudo enviar a {{email}}",
-        "not_required": "Sin correo del cliente"
+        "notSent": "Aprobada sin enviar",
+        "pending": "Pendiente de envío",
+        "sending": "Enviando…",
+        "sent": "Enviada",
+        "failed": "No se pudo enviar. Puedes reintentarlo.",
+        "not_required": "No requerido"
+      },
+      "recipients": {
+        "representative": "Solo al representante",
+        "representative_and_client": "Al representante, con copia a {{email}}"
       }
+    },
+    "decision": {
+      "noticeFailed": "La decisión quedó guardada, pero no se pudo avisar al representante por correo."
+    },
+    "deliveryModal": {
+      "approveTitle": "Aprobar cotización",
+      "approveDescription": "Elige cómo distribuir la cotización con el precio final. Nada se envía hasta que confirmes.",
+      "sendTitle": "Enviar cotización",
+      "sendDescription": "Elige a quién enviar la cotización aprobada. Se envía una sola vez.",
+      "option": {
+        "none": {
+          "title": "Aprobar sin enviar",
+          "description": "Se guarda el precio final. El representante recibe un aviso sin precios ni PDF."
+        },
+        "representative": {
+          "title": "Enviar al representante",
+          "description": "El PDF con el precio final va solo al correo del representante. El cliente no lo recibe."
+        },
+        "representative_and_client": {
+          "title": "Enviar al representante con copia al cliente",
+          "description": "El PDF con el precio final va al representante, con copia al correo del cliente."
+        }
+      },
+      "clientEmail": "Correo del cliente",
+      "clientEmailSaved": "Puedes cambiarlo: el correo que confirmes queda en este pedido.",
+      "clientEmailNew": "El pedido no tiene correo del cliente. Escríbelo para copiarlo: queda en este pedido y en la ficha del cliente si no tenía uno.",
+      "confirm": {
+        "approve": "Aprobar",
+        "approveAndSend": "Aprobar y enviar",
+        "send": "Enviar"
+      }
+    },
+    "rejectModal": {
+      "title": "Rechazar cotización",
+      "description": "El representante recibirá un aviso con el motivo. No se envía nada al cliente y el pedido queda cerrado.",
+      "reason": "Motivo del rechazo",
+      "placeholder": "Ej.: no contamos con el producto solicitado, no podemos cumplir la entrega o la rentabilidad no es suficiente.",
+      "hint": "Mínimo {{min}} caracteres ({{count}}/{{max}}).",
+      "confirm": "Rechazar cotización"
     }
   }
 }

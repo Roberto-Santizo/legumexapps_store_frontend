@@ -1,14 +1,16 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
-import { ArrowLeft, Mail } from "lucide-react"
+import { ArrowLeft, Mail, Send } from "lucide-react"
 import { QuoteOrderPricingSummary } from "@/feature/quote/component/quoteOrderPricingSummary.component"
 import { useQuoteReview } from "@/feature/quoteReview/hook/useQuoteReview"
 import { quoteReviewLines } from "@/feature/quoteReview/util/quoteReviewLines"
 import { QuoteReviewStatusBadge } from "@/feature/quoteReview/component/quoteReviewStatusBadge.component"
 import { QuoteReviewLineCard } from "@/feature/quoteReview/component/quoteReviewLineCard.component"
 import { QuoteReviewProfitPanel } from "@/feature/quoteReview/component/quoteReviewProfitPanel.component"
+import { QuoteReviewDeliveryModal } from "@/feature/quoteReview/component/quoteReviewDeliveryModal.component"
+import type { QuoteReviewDeliveryRequest } from "@/feature/quoteReview/util/quoteReviewDelivery"
 import type { QuoteReview } from "@/feature/quoteReview/schema/quoteReview.schema"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Card } from "@/shared/component/card.component"
@@ -47,28 +49,36 @@ function NotificationField({ review, onResend, isResending }: Readonly<{ review:
     )
 }
 
-// Cotización al cliente: a qué correo va (o fue) y, si el envío no salió (falló, quedó interrumpido o
-// nunca empezó), reenviarla con el PDF regenerado.
-function ClientEmailField({ review, retryable, onResend, isResending }: Readonly<{ review: QuoteReview; retryable: boolean; onResend: () => void; isResending: boolean }>) {
+// Cotización comercial: si gerencia ya autorizó enviarla, a quién y cómo salió. Aprobada sin enviar (o
+// con un envío fallido o interrumpido) se puede enviar desde aquí; hay un solo envío exitoso por pedido.
+function DeliveryField({ review, available, suggestedClientEmail, onDeliver, isDelivering }: Readonly<{ review: QuoteReview; available: boolean; suggestedClientEmail: string | null; onDeliver: (request: QuoteReviewDeliveryRequest) => void; isDelivering: boolean }>) {
     const { t } = useTranslation()
-    const canResend = retryable && !!review.pricing
+    const [choosing, setChoosing] = useState(false)
+    const recipients = review.deliveryRecipients ? t(`quoteReview.delivery.recipients.${review.deliveryRecipients}`, { email: review.clientEmail ?? "" }) : null
+    const canSend = available && !!review.pricing
     return (
-        <Field label={t("quoteReview.clientEmail.label")}>
-            <span className={review.clientEmailStatus === "failed" ? "text-danger" : undefined}>
-                {t(`quoteReview.clientEmail.status.${review.clientEmailStatus}`, { email: review.clientEmail ?? "" })}
+        <Field label={t("quoteReview.delivery.label")}>
+            <span className={review.deliveryStatus === "failed" ? "text-danger" : undefined}>
+                {t(`quoteReview.delivery.status.${review.deliveryRecipients ? review.deliveryStatus : "notSent"}`)}
             </span>
-            {canResend && (
-                <Button variant="secondary" className="mt-2 gap-2" onClick={onResend} disabled={isResending} aria-busy={isResending}>
-                    {isResending ? <Spinner /> : <Mail size={16} aria-hidden="true" />}
-                    {t("quoteReview.clientEmail.resend")}
+            {recipients && <span className="block text-xs text-ink-600">{recipients}</span>}
+            {canSend && (
+                <Button variant="secondary" className="mt-2 gap-2" onClick={() => setChoosing(true)} disabled={isDelivering} aria-busy={isDelivering}>
+                    {isDelivering ? <Spinner /> : <Send size={16} aria-hidden="true" />}
+                    {t(review.deliveryStatus === "pending" ? "quoteReview.delivery.send" : "quoteReview.delivery.retry")}
                 </Button>
+            )}
+            {choosing && (
+                <QuoteReviewDeliveryModal mode="send" suggestedClientEmail={suggestedClientEmail} onClose={() => setChoosing(false)}
+                    onConfirm={request => { setChoosing(false); onDeliver(request) }} />
             )}
         </Field>
     )
 }
 
 // Revisión gerencial de un pedido (enlace del correo de aviso): cada línea con su desglose de costos,
-// el monto de ganancia por libra y la aprobación. Aprobado, queda de solo lectura con el precio final.
+// el monto de ganancia por libra y la decisión (aprobar eligiendo el envío, o rechazar con motivo).
+// Aprobado queda de solo lectura con el precio final; rechazado, con su motivo.
 export function QuoteReviewDetailPage() {
     const { t, i18n } = useTranslation()
     const { orderId = "" } = useParams()
@@ -95,10 +105,11 @@ export function QuoteReviewDetailPage() {
                         <Field label={t("quoteReview.table.salesperson")}>{info.submittingSalesperson?.name ?? t("quoteReview.adminAuthor")}</Field>
                         <Field label={t("quoteReview.table.submittedAt")}>{dateTime(info.createdAt, i18n.language)}</Field>
                         <Field label={t("quoteReview.detail.lineCount")}>{detail.lines.length}</Field>
-                        {info.status === "approved"
-                            ? <Field label={t("quoteReview.table.reviewedBy")}>{[info.reviewingUser?.name, info.reviewedAt && dateTime(info.reviewedAt, i18n.language)].filter(Boolean).join(" · ") || "—"}</Field>
-                            : <NotificationField review={info} onResend={review.resendNotification} isResending={review.isResending} />}
-                        {info.clientEmailStatus !== "not_required" && <ClientEmailField review={info} retryable={detail.clientEmailRetryable} onResend={review.resendClientEmail} isResending={review.isResendingClientEmail} />}
+                        {info.status === "pending"
+                            ? <NotificationField review={info} onResend={review.resendNotification} isResending={review.isResending} />
+                            : <Field label={t("quoteReview.table.reviewedBy")}>{[info.reviewingUser?.name, info.reviewedAt && dateTime(info.reviewedAt, i18n.language)].filter(Boolean).join(" · ") || "—"}</Field>}
+                        {info.salespersonId !== null && <Field label={t("quoteReview.detail.clientEmail")}>{info.clientEmail ?? t("quoteReview.detail.noClientEmail")}</Field>}
+                        {info.status === "approved" && info.deliveryStatus !== "not_required" && <DeliveryField review={info} available={detail.deliveryAvailable} suggestedClientEmail={detail.suggestedClientEmail} onDeliver={review.deliver} isDelivering={review.isDelivering} />}
                     </dl>
                 </Card>
 
@@ -115,15 +126,24 @@ export function QuoteReviewDetailPage() {
                                 <p className="mb-4 text-sm text-ink-600">{t("quoteReview.detail.approvedDescription")}</p>
                                 <QuoteOrderPricingSummary pricing={info.pricing} />
                             </Card>
+                        ) : info.status === "rejected" ? (
+                            <Card>
+                                <h2 className="mb-1 font-display text-lg font-bold text-ink-900">{t("quoteReview.detail.rejectedTitle")}</h2>
+                                <p className="mb-4 text-sm text-ink-600">{t("quoteReview.detail.rejectedDescription")}</p>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-ink-600">{t("quoteReview.detail.rejectionReason")}</p>
+                                <p className="mt-1 text-sm text-ink-900 wrap-break-word whitespace-pre-line">{info.rejectionReason}</p>
+                            </Card>
                         ) : (
                             <QuoteReviewProfitPanel
                                 preview={review.preview}
-                                clientEmail={info.clientEmail}
+                                suggestedClientEmail={detail.suggestedClientEmail}
                                 onAmountChange={review.clearPreview}
                                 onCalculate={review.calculate}
                                 isCalculating={review.isCalculating}
                                 onApprove={review.approve}
                                 isApproving={review.isApproving}
+                                onReject={review.reject}
+                                isRejecting={review.isRejecting}
                             />
                         )}
                     </div>

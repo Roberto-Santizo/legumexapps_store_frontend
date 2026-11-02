@@ -45,7 +45,10 @@ export function AdminCustomQuoteTable({ customQuotes }: Readonly<{ customQuotes:
                                 </Td>
                                 <Td>{customQuote.subCategoryName ?? "—"}</Td>
                                 <Td className="text-right">{customQuote.requestedPallets}</Td>
-                                <Td className="text-right font-semibold">{formatCurrency(customQuote.totalCost)}</Td>
+                                <Td className="text-right">
+                                    <p className="font-semibold">{formatCurrency(customQuote.profit.finalPrice)}</p>
+                                    <p className="text-xs text-ink-600">{t("quote.profit.totalCost")}: {formatCurrency(customQuote.totalCost)}</p>
+                                </Td>
                                 <Td>
                                     <Link
                                         to={`/admin/custom-quotes/${customQuote.id}`}

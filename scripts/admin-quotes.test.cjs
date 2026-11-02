@@ -67,10 +67,10 @@ test("old custom quote list redirects to the unified customizable view",()=>{
  const h=harness(parent);h.setParams("status=pending");const node=h.render("AdminCustomQuoteListRedirect")[0];assert.equal(node.type,"Navigate");assert.equal(node.props.to,"/admin/quotes?status=pending&type=customizable");assert.equal(node.props.replace,true)
 })
 test("existing fixed search and inline detail retain their own data and query",()=>{
- const h=harness("src/feature/quote/page/adminQuote.page.tsx");const quote={id:1,productDisplayName:"Mango",variantLabel:"500g",quotingSalesperson:{name:"Ana",email:"ana@example.com"},createdAt:new Date(),requestedPallets:1,totalCost:20,breakdown:{},emailDeliveries:[]};h.setQuery({data:{data:[quote]}})
+ const h=harness("src/feature/quote/page/adminQuote.page.tsx");const quote={id:1,productDisplayName:"Mango",variantLabel:"500g",quotingSalesperson:{name:"Ana",email:"ana@example.com"},createdAt:new Date(),requestedPallets:1,totalCost:20,breakdown:{},emailDeliveries:[],profit:{netPounds:40,profitPerPound:0.25,profitTotal:10,finalPrice:30}};h.setQuery({data:{data:[quote]}})
  let tree=h.render("AdminQuoteListPage");assert.equal(h.queries.at(-1).queryKey[0],"adminQuotes")
  tree.find(n=>n.type==="Input").props.onChange({target:{value:"absent"}});assert.ok(h.render("AdminQuoteListPage").some(n=>n.props.children==="adminQuote.list.noMatches"))
- h.render("AdminQuoteListPage").find(n=>n.type==="Input").props.onChange({target:{value:"Ana"}});tree=h.render("AdminQuoteListPage");tree.find(n=>n.type==="button").props.onClick();assert.equal(h.render("AdminQuoteListPage").find(n=>n.type==="FixedDetail").props.result,quote)
+ h.render("AdminQuoteListPage").find(n=>n.type==="Input").props.onChange({target:{value:"Ana"}});tree=h.render("AdminQuoteListPage");tree.find(n=>n.type==="button").props.onClick();const detail=h.render("AdminQuoteListPage").find(n=>n.type==="FixedDetail");assert.equal(detail.props.result,quote);assert.equal(detail.props.profit,quote.profit);assert.equal(detail.props.showCostBreakdown,true)
 })
 test("customizable date/status filters remain independent and preserve API inputs",()=>{
  const h=harness("src/feature/customQuote/page/adminCustomQuoteList.page.tsx");let tree=h.render("AdminCustomQuoteListPage");assert.equal(h.queries.at(-1).queryKey[0],"adminCustomQuotes")

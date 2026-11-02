@@ -50,7 +50,7 @@ test("profit per pound accepts 0 to 5 USD with at most four decimals, as the bac
 test("review detail and list parse the backend payload, including DECIMAL strings", () => {
     const { quoteReviewDetailSchema, quoteReviewSchema } = load("src/feature/quoteReview/schema/quoteReview.schema.ts")
     const review = {
-        id: 1, orderId, salespersonId: 4, clientId: 9, clientName: "MIAMI AGRO", clientEmail: "compras@miami.com", clientEmailStatus: "sent", status: "approved", linesDigest: "a".repeat(64),
+        id: 1, orderId, salespersonId: 4, clientId: 9, clientName: "MIAMI AGRO", clientEmail: "compras@miami.com", deliveryStatus: "sent", deliveryRecipients: "representative_and_client", rejectionReason: null, status: "approved", linesDigest: "a".repeat(64),
         profitPerPound: "0.2500", reviewedByUserId: 1, reviewedAt: "2026-10-28T18:00:00.000Z", notificationStatus: "sent",
         notificationAttempts: 1, notifiedAt: null, createdAt: "2026-10-28T17:00:00.000Z", updatedAt: "2026-10-28T18:00:00.000Z",
         pricing: { profitPerPound: 0.25, netPounds: 100, totalCost: 115, profitTotal: 25, finalPrice: 140, lines: [{ kind: "fixed", quoteId: 7, productDisplayName: "PIÑA", totalCost: 115, netPounds: 100, profitPerPound: 0.25, profitTotal: 25, finalPrice: 140 }] },
@@ -62,8 +62,13 @@ test("review detail and list parse the backend payload, including DECIMAL string
     // El detalle (sin includes en la respuesta de aprobar) y una revisión pendiente sin ganancia.
     const pending = quoteReviewSchema.parse({ ...review, status: "pending", profitPerPound: null, pricing: null, reviewedAt: null, submittingSalesperson: undefined, reviewingUser: undefined })
     assert.equal(pending.pricing, null)
-    const detail = quoteReviewDetailSchema.parse({ review, lines: [savedLine()], linesDigest: "b".repeat(64), clientEmailRetryable: false })
+    const detail = quoteReviewDetailSchema.parse({ review, lines: [savedLine()], linesDigest: "b".repeat(64), deliveryAvailable: false, suggestedClientEmail: "compras@miami.com" })
     assert.equal(detail.lines[0].productDisplayName, "PIÑA DESHIDRATADA")
+    // Rechazada: sin ganancia, con su motivo y sin envío; la respuesta de rechazar dice si se avisó al representante.
+    const rejected = quoteReviewDetailSchema.parse({ review: { ...review, status: "rejected", rejectionReason: "Sin producto", profitPerPound: null, pricing: null, deliveryStatus: "pending", deliveryRecipients: null }, lines: [], linesDigest: "b".repeat(64), deliveryAvailable: false, suggestedClientEmail: null, representativeNotified: false })
+    assert.equal(rejected.review.rejectionReason, "Sin producto")
+    assert.equal(rejected.representativeNotified, false)
+    assert.throws(() => quoteReviewSchema.parse({ ...review, status: "lost" }))
 })
 
 test("review lines keep the saved cost breakdown and pair the profit by table and id", () => {
@@ -91,7 +96,8 @@ test("management review screens are routed and gated by quotes:review", () => {
 })
 
 test("profit and review texts exist in Spanish and English", () => {
-    const keys = ["quote.profit.finalPrice", "quote.profit.help", "quote.profit.stale", "quoteReview.list.title", "quoteReview.profit.approve", "quoteReview.notification.status.not_configured", "quoteReview.detail.loadError"]
+    const keys = ["quote.profit.finalPrice", "quote.profit.help", "quote.profit.stale", "quoteReview.list.title", "quoteReview.profit.approve", "quoteReview.profit.reject", "quoteReview.notification.status.not_configured", "quoteReview.detail.loadError",
+        "quoteReview.status.rejected", "quoteReview.rejectModal.reason", "quoteReview.deliveryModal.option.none.title", "quoteReview.delivery.status.notSent", "quote.orderReview.rejected", "quote.orderReview.approvedNotSent"]
     for (const language of ["es", "en"]) {
         const resources = require(`../src/shared/i18n/locales/${language}/translation.json`)
         for (const key of keys) assert.equal(typeof key.split(".").reduce((node, part) => node?.[part], resources), "string", `${language}:${key}`)
@@ -130,7 +136,7 @@ test("the client email rule matches the backend schema", () => {
     for (const value of ["", "compras", "a..b@example.invalid", "a@b", "a b@c.com", `${"a".repeat(250)}@c.com`]) assert.equal(isValidClientEmail(value), false, value)
 })
 
-test("next to Calculate, the representative sees where the approved quote goes; the admin calculator shows nothing", () => {
+test("next to Calculate, the representative sees that the order goes to review and the optional client email; the admin calculator shows nothing", () => {
     const render = context => loader({
         react: { ...require("react"), useContext: () => context, useState: initial => [initial, () => {}] },
         "react-i18next": { useTranslation: () => ({ t: key => key }) },
@@ -138,8 +144,11 @@ test("next to Calculate, the representative sees where the approved quote goes; 
     const text = tree => !tree || typeof tree !== "object" ? String(tree ?? "") : [].concat(tree.props?.children ?? []).flat(Infinity).map(text).join(" ")
     assert.equal(render(null), null)
     assert.match(text(render({ email: "compras@cliente.com", onChange: () => {} })), /compras@cliente\.com/)
-    // Sin correo válido, el campo se pide ahí mismo.
-    assert.equal(render({ email: "", onChange: () => {} }).props.children.props.id, "quote-sends-to-email")
+    // Sin correo no se pide aquí: es opcional y el campo ya está bajo el cliente.
+    const withoutEmail = render({ email: "", onChange: () => {} })
+    assert.equal(withoutEmail.type, "p")
+    assert.match(text(withoutEmail), /quote\.orderReview\.sendsTo/)
+    assert.doesNotMatch(text(withoutEmail), /clientEmailLabel/)
 })
 
 test("a pending review whose update failed offers to send it again", () => {
@@ -147,7 +156,7 @@ test("a pending review whose update failed offers to send it again", () => {
         "react-i18next": { useTranslation: () => ({ t: key => key, i18n: { language: "es" } }) },
     })("src/feature/quote/component/quoteOrderReviewPanel.component.tsx")
     const nodes = tree => !tree || typeof tree !== "object" ? [] : [tree, ...[].concat(tree.props?.children ?? []).flat(Infinity).flatMap(nodes)]
-    const review = { orderId, status: "pending", submittedAt: new Date("2026-10-28T17:00:00Z"), reviewedAt: null, clientEmail: "compras@cliente.com", clientEmailStatus: "pending" }
+    const review = { orderId, status: "pending", submittedAt: new Date("2026-10-28T17:00:00Z"), reviewedAt: null, clientEmail: "compras@cliente.com", deliveryStatus: "pending", deliveryRecipients: null }
     let submitted = 0
     const props = { review, isLoading: false, isError: false, isRefreshing: false, isSubmitting: false, isSubmitError: true, clientEmail: "compras@cliente.com", onClientEmailChange: () => {}, onSubmit: () => submitted++, onRefresh: () => {} }
     const retry = nodes(QuoteOrderReviewPanel(props)).find(node => node.props?.onClick === props.onSubmit)
@@ -157,7 +166,7 @@ test("a pending review whose update failed offers to send it again", () => {
     assert.ok(!nodes(QuoteOrderReviewPanel({ ...props, isSubmitError: false })).some(node => node.props?.onClick === props.onSubmit))
 })
 
-test("a product calculated without the client's email stays pending to send until the representative sends it", () => {
+test("the order reaches management without the client's email; only a typed but invalid email holds it until fixed or cleared", () => {
     // Mini renderer: hooks keep their slots between renders and effects run after each render, when their deps change.
     let slots = [], cursor = 0, effects = []
     const React = {
@@ -171,7 +180,7 @@ test("a product calculated without the client's email stays pending to send unti
     const sent = []
     // Stable like TanStack Query's mutate.
     const mutate = email => sent.push(email)
-    let pending = false, review = { status: "pending" }
+    let review = { status: "pending" }
     const reviewOf = loader({
         react: React,
         sonner: { toast: { success: () => {} } },
@@ -180,7 +189,7 @@ test("a product calculated without the client's email stays pending to send unti
         "@tanstack/react-query": {
             useQueryClient: () => ({ getQueryData: () => review, setQueryData: () => {} }),
             useQuery: () => ({ data: review, isSuccess: true, isLoading: false, isError: false, isFetching: false, refetch: () => {} }),
-            useMutation: () => ({ mutate, isPending: pending, isError: false }),
+            useMutation: () => ({ mutate, isPending: false, isError: false }),
         },
     })("src/feature/quote/hook/useQuoteOrderReview.ts").useQuoteOrderReview
     const render = (lineCount, email) => {
@@ -190,17 +199,94 @@ test("a product calculated without the client's email stays pending to send unti
         cursor = 0
         return reviewOf(orderId, lineCount, email)
     }
-    // First product with an email: sent on its own.
-    assert.equal(render(1, "compras@cliente.com").hasUnsentLines, false)
-    assert.deepEqual(sent, ["compras@cliente.com"])
-    // Second product calculated with the email cleared: nothing is sent and it stays pending.
-    assert.equal(render(2, "").hasUnsentLines, true)
-    // Typing the email back does not send a half-typed address on its own; the backup stays visible.
-    assert.equal(render(2, "compras@cli").hasUnsentLines, true)
-    const ready = render(2, "compras@cliente.com")
-    assert.equal(ready.hasUnsentLines, true)
-    assert.deepEqual(sent, ["compras@cliente.com"])
-    ready.submit()
-    assert.deepEqual(sent, ["compras@cliente.com", "compras@cliente.com"])
-    assert.equal(render(2, "compras@cliente.com").hasUnsentLines, false)
+    // First product without email: sent on its own, without an email (never an empty or invented one).
+    assert.equal(render(1, "").hasUnsentLines, false)
+    assert.deepEqual(sent, [undefined])
+    // Second product with a valid email: sent with it.
+    assert.equal(render(2, " compras@cliente.com ").hasUnsentLines, false)
+    assert.deepEqual(sent, [undefined, "compras@cliente.com"])
+    // Third product with a half-typed email: held, and the backup asks to fix it.
+    assert.equal(render(3, "compras@cli").hasUnsentLines, true)
+    assert.equal(sent.length, 2)
+    const held = render(3, "compras@cli")
+    held.submit() // An invalid email is never sent.
+    assert.equal(sent.length, 2)
+    // Clearing it is enough (the email is optional): the backup sends without it.
+    const cleared = render(3, "")
+    cleared.submit()
+    assert.deepEqual(sent, [undefined, "compras@cliente.com", undefined])
+    assert.equal(render(3, "").hasUnsentLines, false)
+    // A decided order (approved or rejected) is never sent again.
+    review = { status: "rejected" }
+    render(4, "")
+    assert.equal(sent.length, 3)
+})
+
+test("the representative panel: an empty email can be sent, an invalid one cannot; rejected shows its reason; approved says what management sent", () => {
+    const { QuoteOrderReviewPanel } = loader({
+        "react-i18next": { useTranslation: () => ({ t: (key, values) => `${key}${values ? JSON.stringify(values) : ""}`, i18n: { language: "es" } }) },
+    })("src/feature/quote/component/quoteOrderReviewPanel.component.tsx")
+    const nodes = tree => !tree || typeof tree !== "object" ? [] : [tree, ...[].concat(tree.props?.children ?? []).flat(Infinity).flatMap(nodes)]
+    const text = tree => nodes(tree).flatMap(node => [].concat(node.props?.children ?? [])).filter(child => typeof child === "string").join(" ")
+    const onSubmit = () => {}
+    const base = { isLoading: false, isError: false, isRefreshing: false, isSubmitting: false, isSubmitError: false, hasUnsentLines: false, clientEmail: "", onClientEmailChange: () => {}, onSubmit, onRefresh: () => {} }
+    const submitButton = props => nodes(QuoteOrderReviewPanel({ ...base, review: null, ...props })).find(node => node.props?.onClick === onSubmit)
+    assert.equal(submitButton({}).props.disabled, false)
+    assert.equal(submitButton({ clientEmail: "compras@cli" }).props.disabled, true)
+    const decided = { orderId, submittedAt: new Date("2026-10-28T17:00:00Z"), reviewedAt: new Date("2026-10-29T17:00:00Z"), clientEmail: null }
+    const rejected = text(QuoteOrderReviewPanel({ ...base, review: { ...decided, status: "rejected", deliveryStatus: "pending", deliveryRecipients: null, rejectionReason: "No contamos con el producto" } }))
+    assert.match(rejected, /quote\.orderReview\.rejected/)
+    assert.match(rejected, /No contamos con el producto/)
+    const approved = review => text(QuoteOrderReviewPanel({ ...base, review: { ...decided, status: "approved", ...review } }))
+    assert.match(approved({ deliveryStatus: "pending", deliveryRecipients: null }), /approvedNotSent/)
+    assert.match(approved({ deliveryStatus: "sent", deliveryRecipients: "representative" }), /approvedSentToYou/)
+    assert.match(approved({ deliveryStatus: "sent", deliveryRecipients: "representative_and_client", clientEmail: "compras@cliente.com" }), /approvedSentWithClient.*compras@cliente\.com/)
+    assert.match(approved({ deliveryStatus: "failed", deliveryRecipients: "representative" }), /approvedDeliveryFailed/)
+})
+
+test("management's delivery decision: only the copy to the client carries its email, and it must be valid", () => {
+    const { quoteReviewDeliveryRequest } = load("src/feature/quoteReview/util/quoteReviewDelivery.ts")
+    assert.deepEqual(quoteReviewDeliveryRequest("none", "compras@cliente.com"), { delivery: "none" })
+    assert.deepEqual(quoteReviewDeliveryRequest("representative", "compras@cliente.com"), { delivery: "representative" })
+    assert.deepEqual(quoteReviewDeliveryRequest("representative_and_client", " compras@cliente.com "), { delivery: "representative_and_client", clientEmail: "compras@cliente.com" })
+    for (const email of ["", "compras@cli", "no es correo"]) assert.equal(quoteReviewDeliveryRequest("representative_and_client", email), null, email)
+})
+
+test("the representative has no way to email a quote: no API, no route call and no email action in their summary", () => {
+    const files = []
+    const walk = dir => { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) { const full = path.join(dir, entry.name); if (entry.isDirectory()) walk(full); else if (/\.tsx?$/.test(entry.name)) files.push(full) } }
+    walk("src")
+    for (const file of files) assert.doesNotMatch(fs.readFileSync(file, "utf8"), /["'`]\/quotes\/send-email/, file)
+    assert.doesNotMatch(fs.readFileSync("src/feature/quote/api/quote.api.ts", "utf8"), /sendQuotePdfEmailAPI/)
+    assert.doesNotMatch(fs.readFileSync("src/feature/quote/component/representativeOrderSummary.component.tsx", "utf8"), /sendEmailAPI/)
+})
+
+test("management approves only the lines it calculated: a reloaded detail with other lines drops the calculation, and the approval sends that calculation's digest", async () => {
+    let slots = [], cursor = 0, mutations = []
+    const React = { useState: initial => { const index = cursor++; if (!(index in slots)) slots[index] = initial; return [slots[index], value => { slots[index] = value }] } }
+    let detail = { linesDigest: "a".repeat(64), review: {} }
+    const approved = []
+    const useQuoteReview = loader({
+        react: React,
+        sonner: { toast: { success() {}, error() {}, warning() {} } },
+        "react-i18next": { useTranslation: () => ({ t: key => key }) },
+        "@/shared/i18n/showErrorToast": { showErrorToast() {} },
+        "@/feature/quoteReview/util/quoteReviewClientPdf": { buildQuoteReviewClientPdf: async () => ({}) },
+        "@/feature/quoteReview/api/quoteReview.api": { approveQuoteReviewAPI: async (_orderId, input) => { approved.push(input) } },
+        "@tanstack/react-query": {
+            useQueryClient: () => ({ invalidateQueries() {} }),
+            useQuery: () => ({ data: { data: detail }, refetch() {} }),
+            useMutation: options => { mutations.push(options); return { mutate() {}, isPending: false } },
+        },
+    })("src/feature/quoteReview/hook/useQuoteReview.ts").useQuoteReview
+    const render = () => { cursor = 0; mutations = []; return useQuoteReview(orderId) }
+    render()
+    // mutations: [preview, approve, reject, notify, deliver]
+    mutations[0].onSuccess({ data: { finalPrice: 10, linesDigest: "a".repeat(64) } }, "0.25")
+    assert.deepEqual(render().preview, { amount: "0.25", pricing: { finalPrice: 10 }, linesDigest: "a".repeat(64) })
+    await mutations[1].mutationFn({ delivery: "none" })
+    assert.equal(approved[0].linesDigest, "a".repeat(64))
+    // The representative added a line and the detail reloaded: the old calculation no longer allows approving.
+    detail = { linesDigest: "b".repeat(64), review: {} }
+    assert.equal(render().preview, null)
 })

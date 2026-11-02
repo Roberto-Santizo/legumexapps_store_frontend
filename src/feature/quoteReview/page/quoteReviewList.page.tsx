@@ -12,7 +12,7 @@ import type { QuoteReviewStatus } from "@/feature/quoteReview/schema/quoteReview
 type StatusFilter = QuoteReviewStatus | "all"
 
 // Pedidos que los representantes enviaron a revisión gerencial (y los del admin, que nacen aprobados).
-// Primero los pendientes: es lo que gerencia tiene que atender.
+// Primero los pendientes: es lo que gerencia tiene que atender; también aprobados y rechazados.
 export function QuoteReviewListPage() {
     const { t } = useTranslation()
     const [status, setStatus] = useState<StatusFilter>("pending")
@@ -44,7 +44,7 @@ export function QuoteReviewListPage() {
                     label={t("quoteReview.list.filterLabel")}
                     value={status}
                     onChange={setStatus}
-                    options={(["pending", "approved", "all"] as const).map(value => ({ value, label: t(`quoteReview.list.filter.${value}`) }))}
+                    options={(["pending", "approved", "rejected", "all"] as const).map(value => ({ value, label: t(`quoteReview.list.filter.${value}`) }))}
                 />
             </div>
 

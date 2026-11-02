@@ -152,6 +152,7 @@ export function AdminCustomQuoteDetailPage() {
                             isPending={false}
                             showCostBreakdown
                             showTransport={customQuote.destinationId !== null}
+                            profit={customQuote.profit}
                         />
                     </div>
                 </div>

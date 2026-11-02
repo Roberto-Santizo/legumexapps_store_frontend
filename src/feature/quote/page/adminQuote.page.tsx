@@ -103,9 +103,10 @@ export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }
                                     )}
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
-                                    <p className="font-display text-lg font-extrabold text-ink-900">
-                                        {formatCurrency(quote.totalCost)}
-                                    </p>
+                                    <div className="text-right">
+                                        <p className="text-xs text-ink-600">{t("quote.profit.totalCost")}: {formatCurrency(quote.totalCost)}</p>
+                                        <p className="font-display text-lg font-extrabold text-ink-900">{formatCurrency(quote.profit.finalPrice)}</p>
+                                    </div>
                                     {isExpanded ? (
                                         <ChevronUp size={20} className="text-ink-600" />
                                     ) : (
@@ -130,7 +131,7 @@ export function AdminQuoteListPage({ embedded = false, dateRange, onDateChange }
                                             </ul>
                                         </section>
                                     )}
-                                    <QuoteResultCard result={quote} isPending={false} />
+                                    <QuoteResultCard result={quote} isPending={false} showCostBreakdown profit={quote.profit} />
                                     <div className="mt-4"><QuoteProductionButton lines={[quote]} clientName={quote.breakdown.order?.clientName ?? ""} orderId={`fixed-${quote.id}`} salespersonName={authorName(quote)} quoteDate={quote.createdAt} /></div>
                                 </div>
                             )}

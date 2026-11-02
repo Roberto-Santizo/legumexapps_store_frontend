@@ -1454,15 +1454,15 @@
   },
   "adminQuote": {
     "list": {
-      "emptyRange": "No fixed product quotes for this date range.",
+      "emptyRange": "No approved fixed product quotes for this date range.",
       "title": "Quotes",
-      "description": "All quotes representatives have saved, regardless of which representative, plus those saved from the internal calculator.",
+      "description": "Quotes with a final price approved by management (from representatives and the internal calculator), with their full breakdown and profit per pound.",
       "adminAuthor": "Administration",
       "sentTo_one": "Emailed to {{name}}",
       "sentTo_other": "Emailed {{count}} times · last to {{name}}",
       "deliveriesTitle": "Email deliveries",
       "searchPlaceholder": "Search by representative, company, email or product...",
-      "empty": "No fixed product quotes.",
+      "empty": "No approved fixed product quotes.",
       "noMatches": "No quote matches the search.",
       "summary": "{{date}} · {{pallets}} pallets · {{destination}}",
       "summaryNoDestination": "{{date}} · {{pallets}} pallets"
@@ -1525,10 +1525,10 @@
       "loadError": "Assigned customers could not be loaded. Please try again.",
       "newOnly": "For a new customer you can only quote new products.",
       "empty": "This customer has no ready-made products available. You can quote a new product.",
-      "email": "Client email",
+      "email": "Client email (optional)",
       "emailInvalid": "Enter a valid email.",
-      "emailHint": "When management approves the final price, the quote will be sent to this email with a copy to you.",
-      "emailWillBeSaved": "This client has no email yet: it will be saved to their record for future quotes."
+      "emailHint": "Optional. Enter the client's email if you want them to be able to receive information or the quote.",
+      "emailWillBeSaved": "Optional. This client has no email yet: if you enter one, it will be saved on their record for future quotes."
     },
     "production": {
       "title": "Quote production sheet",
@@ -1537,7 +1537,7 @@
       "clientName": "Order customer",
       "clientLocked": "All lines belong to this customer. Start a new order for another customer.",
       "mixedOrderHint": "Add fixed and new products to the same order. The PDF includes all lines.",
-      "description": "Orders grouped by customer and salesperson. Download the complete details to share with production and print without application access.",
+      "description": "Management-approved orders, grouped by customer and salesperson. Download the complete details to share with production and print without application access.",
       "search": "Search customer, salesperson, product or order number",
       "empty": "No orders match this filter.",
       "order": "Order number",
@@ -1575,23 +1575,29 @@
       "title": "Management review",
       "status": {
         "pending": "Pending review",
-        "approved": "Approved"
+        "approved": "Approved",
+        "rejected": "Rejected"
       },
-      "pending": "Sent to review on {{date}}. When management approves the final price, the quote will be sent automatically to {{email}} and you will see the price here.",
+      "pending": "Sent for review on {{date}}. Management will review the price and decide; you will see the decision here.",
       "refresh": "Refresh status",
-      "approved": "Approved on {{date}}. The final price now appears in the order and in the PDF. To add products, start a new order.",
       "loadError": "The review status could not be loaded.",
-      "notSubmitted": "The order has not been sent to management review yet. Enter the client's email and send it.",
+      "notSubmitted": "The order has not been sent to management review yet.",
       "submit": "Send to management review",
-      "approvedSent": "Approved on {{date}}. The quote with the final price was sent to {{email}} (with a copy to you). To add products, start a new order.",
-      "approvedEmailFailed": "Approved on {{date}}, but the quote could not be sent to {{email}}. Management can resend it, or send it yourself with the PDF button.",
-      "sendsTo": "Calculating sends the order to review. The approved quote will be sent to:",
+      "sendsTo": "When you calculate, the order is sent to management review.",
       "changeEmail": "Change",
       "emailThisOrder": "If the client already has a saved email, this change applies to this order only.",
       "submitting": "Sending the order to management review…",
       "submitError": "The order could not be sent to management review. Try again.",
       "updateError": "The last product added could not be sent to review. Management still sees the order without it.",
-      "unsentLines": "There are new products not yet sent to management review. Confirm the client's email and send them."
+      "unsentLines": "Some products have not been sent to management review because the client's email is not valid. Fix it or clear it (it is optional) and send them.",
+      "clientEmailLabel": "Client email:",
+      "approvedNotSent": "Approved on {{date}}. Management has not authorized sending the commercial quote yet; once it does, you will get it by email. To add products, start a new order.",
+      "approvedSending": "Approved on {{date}}. The quote is being sent to your email.",
+      "approvedSentToYou": "Approved on {{date}}. Management emailed you the quote with the final price (the client did not receive it). To add products, start a new order.",
+      "approvedSentWithClient": "Approved on {{date}}. Management sent you the quote with the final price, copying {{email}}. To add products, start a new order.",
+      "approvedDeliveryFailed": "Approved on {{date}}, but sending the quote failed. Management will retry it.",
+      "rejected": "Management rejected this order on {{date}}. Nothing was sent to the client. To quote again, start a new order.",
+      "rejectionReason": "Reason:"
     },
     "pendingReview": {
       "title": "Price pending management review",
@@ -1835,9 +1841,9 @@
       "product": "Product · presentation",
       "subCategory": "Type",
       "pallets": "Pallets",
-      "total": "Total",
+      "total": "Final price",
       "view": "View details",
-      "empty": "No new product quotes."
+      "empty": "No approved new product quotes."
     },
     "detail": {
       "title": "Custom quote #{{id}}",
@@ -2266,7 +2272,8 @@
   "quoteReview": {
     "status": {
       "pending": "Pending",
-      "approved": "Approved"
+      "approved": "Approved",
+      "rejected": "Rejected"
     },
     "noClient": "No client",
     "adminAuthor": "Administration",
@@ -2279,12 +2286,13 @@
     "lineUnreadable": "This line's breakdown could not be read.",
     "list": {
       "title": "Management reviews",
-      "description": "Orders that representatives sent for review. Open one to check its costs, set the profit per pound and approve the final price.",
+      "description": "Orders that representatives sent for review. Open one to check its costs, set the profit per pound and approve or reject it.",
       "filterLabel": "Filter by status",
       "filter": {
         "pending": "Pending",
         "approved": "Approved",
-        "all": "All"
+        "all": "All",
+        "rejected": "Rejected"
       }
     },
     "table": {
@@ -2294,7 +2302,7 @@
       "submittedAt": "Submitted",
       "profitPerPound": "Profit per pound",
       "finalPrice": "Final price",
-      "reviewedBy": "Approved by",
+      "reviewedBy": "Reviewed by",
       "empty": "There are no orders with this status."
     },
     "detail": {
@@ -2303,16 +2311,20 @@
       "lineCount": "Products",
       "linesTitle": "Order products",
       "approvedTitle": "Approved final price",
-      "approvedDescription": "The representative now sees this final price in their order and in the PDF. An approved order cannot be changed."
+      "approvedDescription": "An approved order cannot change. The representative sees the final price only once you authorize sending the quote.",
+      "clientEmail": "Client email",
+      "noClientEmail": "No email",
+      "rejectedTitle": "Quote rejected",
+      "rejectedDescription": "The representative sees the rejection and its reason. Nothing was sent to the client and the order is closed.",
+      "rejectionReason": "Reason"
     },
     "profit": {
       "title": "Profit per pound",
       "description": "Enter the amount you want to earn per net pound. It applies equally to every product based on its pounds.",
       "calculate": "Calculate",
-      "approve": "Approve and send to client",
-      "approveHint": "First calculate the final price with the amount you want to approve.",
-      "approveNoEmail": "Approve final price",
-      "sendsTo": "On approval, the quote with the final price will be sent to {{email}} with a copy to the representative."
+      "approve": "Approve",
+      "approveHint": "First calculate the final price with the amount you want to approve. Rejecting does not need it.",
+      "reject": "Reject"
     },
     "notification": {
       "label": "Email notice",
@@ -2326,18 +2338,63 @@
         "not_required": "Not required"
       }
     },
-    "clientEmail": {
-      "label": "Quote to client",
+    "delivery": {
+      "label": "Commercial quote",
       "pdfError": "The quote PDF could not be generated. Try again.",
-      "resend": "Resend to client",
-      "resent": "Quote sent to the client.",
+      "send": "Send quote",
+      "retry": "Retry sending",
+      "sent": "Quote sent.",
       "status": {
-        "pending": "Will be sent to {{email}} on approval",
-        "sending": "Sending to {{email}}…",
-        "sent": "Sent to {{email}}",
-        "failed": "Could not be sent to {{email}}",
-        "not_required": "No client email"
+        "notSent": "Approved without sending",
+        "pending": "Pending delivery",
+        "sending": "Sending…",
+        "sent": "Sent",
+        "failed": "Could not be sent. You can retry.",
+        "not_required": "Not required"
+      },
+      "recipients": {
+        "representative": "Only to the representative",
+        "representative_and_client": "To the representative, copying {{email}}"
       }
+    },
+    "decision": {
+      "noticeFailed": "The decision was saved, but the representative could not be notified by email."
+    },
+    "deliveryModal": {
+      "approveTitle": "Approve quote",
+      "approveDescription": "Choose how to distribute the quote with the final price. Nothing is sent until you confirm.",
+      "sendTitle": "Send quote",
+      "sendDescription": "Choose who receives the approved quote. It is sent only once.",
+      "option": {
+        "none": {
+          "title": "Approve without sending",
+          "description": "The final price is saved. The representative gets a notice without prices or PDF."
+        },
+        "representative": {
+          "title": "Send to the representative",
+          "description": "The PDF with the final price goes only to the representative's email. The client does not receive it."
+        },
+        "representative_and_client": {
+          "title": "Send to the representative, copying the client",
+          "description": "The PDF with the final price goes to the representative, copying the client's email."
+        }
+      },
+      "clientEmail": "Client email",
+      "clientEmailSaved": "You can change it: the email you confirm is kept on this order.",
+      "clientEmailNew": "The order has no client email. Enter it to copy them: it is kept on this order and on the client's record if they had none.",
+      "confirm": {
+        "approve": "Approve",
+        "approveAndSend": "Approve and send",
+        "send": "Send"
+      }
+    },
+    "rejectModal": {
+      "title": "Reject quote",
+      "description": "The representative will get a notice with the reason. Nothing is sent to the client and the order is closed.",
+      "reason": "Rejection reason",
+      "placeholder": "E.g.: we do not have the requested product, we cannot meet the delivery, or the profitability is not enough.",
+      "hint": "At least {{min}} characters ({{count}}/{{max}}).",
+      "confirm": "Reject quote"
     }
   }
 }

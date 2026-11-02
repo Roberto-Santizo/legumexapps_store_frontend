@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { quoteLineSchema } from "@/feature/quote/schema/quote.schema"
+import { approvedQuoteProfitSchema } from "@/feature/quote/schema/quoteOrderReview.schema"
 import { customQuoteConfigurationSchema } from "@/feature/customQuote/schema/customQuote.schema"
 
 // Espejo de los DTOs de backend adminCustomQuote.service.ts; los DECIMAL ya llegan como número.
@@ -30,6 +31,8 @@ export const adminCustomQuoteListItemSchema = z.object({
     requestedPallets: z.number().int(),
     totalUnits: z.number(),
     totalCost: z.number(),
+    // El listado solo trae líneas de pedidos aprobados por gerencia.
+    profit: approvedQuoteProfitSchema,
 })
 
 // Detalle = la línea cotizada compartida (así QuoteResultCard muestra el desglose completo tal cual) +
@@ -48,6 +51,8 @@ export const adminCustomQuoteDetailSchema = quoteLineSchema.extend({
     bagsPerBox: z.number().int(),
     unitsPerIntermediatePackage: z.number().int().nullable(),
     configuration: customQuoteConfigurationSchema,
+    // Ganancia y precio final aprobados; null si el pedido aún no se aprueba.
+    profit: approvedQuoteProfitSchema.nullable(),
 })
 
 export const adminCustomQuoteStatusResultSchema = z.object({

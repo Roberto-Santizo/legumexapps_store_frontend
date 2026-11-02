@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { responseDestinationSchema } from "@/feature/destination/schema/destination.schema"
+import { approvedQuoteProfitSchema } from "@/feature/quote/schema/quoteOrderReview.schema"
 
 // Grupos de opciones: `id` es el id de la FILA del join
 // (ProductVariantUnitMaterial/IntermediateMaterial/PalletMaterial), el mismo que
@@ -306,6 +307,8 @@ export const adminQuoteSchema = savedQuoteSchema.extend({
         recipientEmail: z.string(),
         sentAt: z.coerce.date(),
     })).default([]),
+    // El listado solo trae líneas de pedidos aprobados, cada una con su ganancia y precio final.
+    profit: approvedQuoteProfitSchema,
 })
 
 export type QuotableProduct = z.infer<typeof quotableProductSchema>

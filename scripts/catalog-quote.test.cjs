@@ -41,7 +41,7 @@ test("representative fixed catalog is keyed by customer and is unavailable befor
         sonner: { toast: { error() {}, success() {} } },
         "@/shared/auth/salesperson/useSalespersonAuth": { useSalespersonAuth: () => ({ salesperson: { id: 42, name: "Representative" }, logout() {} }) },
         "@/shared/component/siteContainer.component": { SiteContainer: "Container" },
-        "@/feature/quote/api/quote.api": { getQuoteProductsAPI: id => { requests.push(id) }, previewQuoteAPI() {}, saveQuoteAPI() {}, sendQuotePdfEmailAPI() {} },
+        "@/feature/quote/api/quote.api": { getQuoteProductsAPI: id => { requests.push(id) }, previewQuoteAPI() {}, saveQuoteAPI() {} },
         "../hook/useSharedQuoteOrder": { useSharedQuoteOrder: () => shared },
         "../component/quoteOrderClient.component": { QuoteOrderClient: "Client" },
         "@/feature/quote/hook/useQuoteOrder": { useQuoteOrder: () => ({ quotedLines: [], formResetKey: 0, handleQuoteAnother() {} }) },
@@ -179,7 +179,6 @@ test("shared order survives navigation and refresh, preserves custom composition
 test("catalog page sends confirmed document lines to existing PDF/email actions without another confirmation",()=>{
     let slots=[],cursor=0
     const react={useState:initial=>{const i=cursor++;if(!(i in slots))slots[i]=initial;return [slots[i],value=>{slots[i]=typeof value==="function"?value(slots[i]):value}]}}
-    const send=async()=>({message:"sent"})
     const order={id:"order",selected:true,clientId:11,lines:[],clientName:"Customer",identity:{id:"order",clientName:"Customer",clientId:11},addLine:line=>order.lines.push(line),clear:()=>{order.lines=[]},setClientName:()=>{}}
     const Page=loader({react,"react-router-dom":{Link:"Link"},"react-i18next":{useTranslation:()=>({t:key=>key})},"@/feature/quote/hook/useSharedQuoteOrder":{useSharedQuoteOrder:()=>order},"@/feature/quote/component/quoteOrderClient.component":{QuoteOrderClient:"Client"},"../component/catalogQuoteWizard.component":{CatalogQuoteWizard:"Wizard"},"@/feature/quote/component/representativeOrderSummary.component":{RepresentativeOrderSummary:"Summary"},"@/shared/component/siteContainer.component":{SiteContainer:"Container"}})("src/feature/customQuote/page/catalogQuoteRequest.page.tsx").CatalogQuoteRequestPage
     const nodes=tree=>!tree||typeof tree!=="object"?[]:[tree,...[].concat(tree.props?.children??[]).flat(Infinity).flatMap(nodes)]
@@ -191,10 +190,11 @@ test("catalog page sends confirmed document lines to existing PDF/email actions 
     assert.equal(summary.props.orderId,"order")
     assert.equal(summary.props.clientName,"Customer")
 
-    // The representative summary hands the same lines to the existing PDF/email actions, without amounts
-    // until management approves; then with the final price from the server and no more products.
+    // The representative summary hands the same lines to the PDF action (download only: the representative
+    // never emails a quote), without amounts until management approves and authorizes sending; then with
+    // the final price from the server and no more products. A rejected order takes no more products either.
     let review=null
-    const Summary=loader({react:{useMemo:factory=>factory()},"@/feature/quote/hook/useQuoteOrderReview":{useQuoteOrderReview:(orderId,enabled)=>({review,isLoading:false,isError:false,isRefreshing:false,isSubmitting:false,submit(){},refresh(){},orderId,enabled})},"@/feature/quote/component/quotedOrderSummary.component":{QuotedOrderSummary:"OrderSummary"},"@/feature/quote/component/quotePdfButton.component":{QuotePdfButton:"Pdf"},"@/feature/quote/component/quoteOrderReviewPanel.component":{QuoteOrderReviewPanel:"Review"},"@/feature/quote/api/quote.api":{sendQuotePdfEmailAPI:send}})("src/feature/quote/component/representativeOrderSummary.component.tsx").RepresentativeOrderSummary
+    const Summary=loader({react:{useMemo:factory=>factory()},"@/feature/quote/hook/useQuoteOrderReview":{useQuoteOrderReview:(orderId,enabled)=>({review,isLoading:false,isError:false,isRefreshing:false,isSubmitting:false,submit(){},refresh(){},orderId,enabled})},"@/feature/quote/component/quotedOrderSummary.component":{QuotedOrderSummary:"OrderSummary"},"@/feature/quote/component/quotePdfButton.component":{QuotePdfButton:"Pdf"},"@/feature/quote/component/quoteOrderReviewPanel.component":{QuoteOrderReviewPanel:"Review"}})("src/feature/quote/component/representativeOrderSummary.component.tsx").RepresentativeOrderSummary
     const quoteAnother=()=>{}
     const pending=Summary({orderId:"order",clientName:"Customer",lines:[persisted],onQuoteAnother:quoteAnother,onClear(){}})
     assert.equal(pending.props.lines[0],persisted)
@@ -202,10 +202,17 @@ test("catalog page sends confirmed document lines to existing PDF/email actions 
     assert.equal(pending.props.showCostBreakdown,false)
     assert.equal(pending.props.reviewPanel.type,"Review")
     assert.equal(pending.props.pdfAction.props.lines[0],persisted)
-    assert.equal(pending.props.pdfAction.props.sendEmailAPI,send)
+    assert.equal(pending.props.pdfAction.props.sendEmailAPI,undefined)
     assert.equal(pending.props.pdfAction.props.showCostBreakdown,false)
     assert.equal(pending.props.pdfAction.props.orderClientName,"Customer")
-    review={orderId:"order",status:"approved",submittedAt:new Date(),reviewedAt:new Date(),finalPrice:25,lines:[{kind:"fixed",quoteId:5,finalPrice:99},{kind:"customizable",quoteId:5,finalPrice:25}]}
+    // Approved without sending: the server sends no prices, so the lines stay without them.
+    review={orderId:"order",status:"approved",submittedAt:new Date(),reviewedAt:new Date(),deliveryStatus:"pending",deliveryRecipients:null}
+    const approvedNotSent=Summary({orderId:"order",clientName:"Customer",lines:[persisted],onQuoteAnother:quoteAnother,onClear(){}})
+    assert.equal(approvedNotSent.props.lines[0].finalPrice,undefined)
+    assert.equal(approvedNotSent.props.onQuoteAnother,undefined)
+    review={orderId:"order",status:"rejected",submittedAt:new Date(),reviewedAt:new Date(),deliveryStatus:"pending",deliveryRecipients:null,rejectionReason:"Sin producto"}
+    assert.equal(Summary({orderId:"order",clientName:"Customer",lines:[persisted],onQuoteAnother:quoteAnother,onClear(){}}).props.onQuoteAnother,undefined)
+    review={orderId:"order",status:"approved",submittedAt:new Date(),reviewedAt:new Date(),deliveryStatus:"sent",deliveryRecipients:"representative",finalPrice:25,lines:[{kind:"fixed",quoteId:5,finalPrice:99},{kind:"customizable",quoteId:5,finalPrice:25}]}
     const approved=Summary({orderId:"order",clientName:"Customer",lines:[persisted],onQuoteAnother:quoteAnother,onClear(){}})
     assert.equal(approved.props.lines[0].finalPrice,25)
     assert.equal(approved.props.pdfAction.props.lines[0].finalPrice,25)

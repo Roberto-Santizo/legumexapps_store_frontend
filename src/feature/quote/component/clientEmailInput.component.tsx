@@ -13,14 +13,14 @@ type ClientEmailInputProps = {
     onDone?: () => void
 }
 
-// Campo del correo del cliente del pedido (a dónde irá la cotización aprobada).
+// Campo opcional del correo del cliente del pedido: vacío es válido; si se escribe, debe ser un correo.
 export function ClientEmailInput({ id, email, hint, autoFocus, onChange, onDone }: Readonly<ClientEmailInputProps>) {
     const { t } = useTranslation()
     const trimmed = email.trim()
     const showError = trimmed !== "" && !isValidClientEmail(trimmed)
     const finish = () => { if (isValidClientEmail(trimmed)) onDone?.() }
     return <>
-        <FormField label={t("quote.clientSelection.email")} htmlFor={id} required error={showError ? t("quote.clientSelection.emailInvalid") : undefined}>
+        <FormField label={t("quote.clientSelection.email")} htmlFor={id} error={showError ? t("quote.clientSelection.emailInvalid") : undefined}>
             <Input id={id} type="email" inputMode="email" autoComplete="email" preserveCase maxLength={254} value={email} hasError={showError} aria-invalid={showError}
                 aria-describedby={`${id}-hint`} placeholder="compras@cliente.com" autoFocus={autoFocus}
                 onChange={event => onChange(event.target.value)} onBlur={finish}

@@ -4,7 +4,6 @@ import { handleApiError } from "@/shared/api/handleApiError"
 import {
     apiItemResponseSchema,
     apiListResponseSchema,
-    apiMessageResponseSchema,
     apiMutationResponseSchema,
 } from "@/shared/api/apiResponse.schema"
 import {
@@ -50,16 +49,6 @@ export async function previewQuoteAPI(formData: SalespersonQuoteInput) {
     try {
         const { data } = await salespersonApi.post("/quotes/preview", formData)
         return quotePreviewResponseSchema.parse(data)
-    } catch (error) {
-        handleApiError(error)
-    }
-}
-
-
-export async function sendQuotePdfEmailAPI(formData: FormData) {
-    try {
-        const { data } = await salespersonApi.post("/quotes/send-email", formData)
-        return apiMessageResponseSchema.parse(data)
     } catch (error) {
         handleApiError(error)
     }

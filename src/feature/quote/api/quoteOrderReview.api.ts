@@ -18,11 +18,11 @@ export async function getQuoteOrderReviewAPI(orderId: string) {
     }
 }
 
-// Envía el pedido a revisión gerencial (el backend avisa por correo) con el correo del cliente al que irá
-// la cotización aprobada. Reenviarlo sin cambios no duplica.
-export async function submitQuoteOrderReviewAPI(orderId: string, clientEmail: string) {
+// Envía el pedido a revisión gerencial (el backend avisa por correo). El correo del cliente es opcional:
+// sin él no se manda el campo (nunca vacío ni inventado). Reenviarlo sin cambios no duplica.
+export async function submitQuoteOrderReviewAPI(orderId: string, clientEmail: string | undefined) {
     try {
-        const { data } = await salespersonApi.post(`/quote-reviews/${orderId}`, { clientEmail })
+        const { data } = await salespersonApi.post(`/quote-reviews/${orderId}`, clientEmail ? { clientEmail } : {})
         return submitResponseSchema.parse(data)
     } catch (error) {
         handleApiError(error)

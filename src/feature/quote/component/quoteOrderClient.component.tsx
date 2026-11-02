@@ -13,8 +13,8 @@ import { isValidClientEmail } from "../util/clientEmail"
 
 type Props = { name: string; clientId: number | null; email: string; selected: boolean; hasLines: boolean; onSelect: (clientId: number | null, name: string, email: string) => void; onChange: (name: string) => void; onEmailChange: (email: string) => void; onReset: () => void }
 
-// Correo del cliente al elegirlo: se pide solo si falta (cliente sin correo registrado o prospecto) y
-// se oculta en cuanto se escribe uno válido; el último paso del pedido muestra a dónde irá y permite
+// Correo opcional del cliente al elegirlo: se ofrece solo si falta (cliente sin correo registrado o
+// prospecto) y se oculta en cuanto se escribe uno válido; el último paso del pedido lo muestra y permite
 // cambiarlo para ese pedido. Si el cliente registrado no tenía correo, este queda en su ficha.
 function QuoteOrderClientEmail({ email, isRegistered, onChange }: Readonly<{ email: string; isRegistered: boolean; onChange: (email: string) => void }>) {
     const { t } = useTranslation()

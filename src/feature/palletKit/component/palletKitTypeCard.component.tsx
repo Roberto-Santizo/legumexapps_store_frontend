@@ -12,13 +12,14 @@ type Props = {
     materials: PalletKitMaterial[]
     candidates: PalletKitMaterial[]
     canEdit: boolean
+    automaticPallet?: boolean
     busy: boolean
     onAdd: (packagingId: number) => void
     onRemove: (material: PalletKitMaterial) => void
 }
 
 // One kit type: its fixed quantity per pallet and its materials (several = the representative chooses one).
-export function PalletKitTypeCard({ type, materials, candidates, canEdit, busy, onAdd, onRemove }: Readonly<Props>) {
+export function PalletKitTypeCard({ type, materials, candidates, canEdit, busy, onAdd, onRemove, automaticPallet }: Readonly<Props>) {
     const { t } = useTranslation()
     const [selected, setSelected] = useState("")
     return <Card className={materials.length ? "" : "border-warning-border bg-warning-bg"}>
@@ -37,7 +38,7 @@ export function PalletKitTypeCard({ type, materials, candidates, canEdit, busy, 
                     className="flex size-11 shrink-0 items-center justify-center rounded-control text-danger transition-colors hover:bg-danger-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:opacity-40"><Trash2 size={18} aria-hidden="true" /></button>}
             </li>)}
         </ul>
-        {materials.length > 1 && <p className="mb-4 text-xs font-medium text-focus">{t("palletKit.chosen")}</p>}
+        {materials.length > 1 && <p className="mb-4 text-xs font-medium text-focus">{t(automaticPallet ? "palletKit.rules.automatic" : "palletKit.chosen")}</p>}
         {canEdit && <div className="flex flex-col gap-2">
             <label htmlFor={`kit-add-${type}`} className="sr-only">{t("palletKit.add")}</label>
             <Select id={`kit-add-${type}`} value={selected} disabled={busy || !candidates.length} onChange={event => setSelected(event.target.value)}>

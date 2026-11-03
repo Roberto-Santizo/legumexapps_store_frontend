@@ -42,7 +42,8 @@ function visibleSubCategories(subCategories: SubCategory[], isAdmin: boolean) {
 export function CatalogQuoteWizard(props: Readonly<Props>) {
     const { t, i18n } = useTranslation()
     const isAdmin = props.mode === "admin"
-    const catalog = useQuery({ queryKey: [isAdmin ? "adminCatalogQuoteDiscovery" : "catalogQuoteDiscovery", i18n.language], queryFn: isAdmin ? discoverAdminCatalogAPI : discoverCatalogAPI })
+    const clientId = props.mode === "admin" ? null : props.order?.clientId ?? null
+    const catalog = useQuery({ queryKey: [isAdmin ? "adminCatalogQuoteDiscovery" : "catalogQuoteDiscovery", i18n.language, clientId], queryFn: () => isAdmin ? discoverAdminCatalogAPI() : discoverCatalogAPI(clientId) })
     const [state, setState] = useState(emptyCatalogSelection)
     const [step, setStep] = useState<Step>("category")
     // Preview (and its signed token) for exactly `input`; confirmation reuses it only while the selection is identical.
@@ -62,7 +63,8 @@ export function CatalogQuoteWizard(props: Readonly<Props>) {
     const heading = useRef<HTMLHeadingElement>(null)
     useEffect(() => { heading.current?.focus({ preventScroll: true }) }, [step])
     useEffect(() => () => { sequence.current++ }, [])
-    const { category, subCategory, configuration, compositionMode, types, effectiveType, materials, groups, input } = resolveCatalogSelection(catalog.data, state)
+    const { category, subCategory, configuration, compositionMode, types, effectiveType, materials, groups, input: selectionInput } = resolveCatalogSelection(catalog.data, state)
+    const input = selectionInput ? { ...selectionInput, ...(clientId != null ? { clientId } : {}) } : null
     const inputKey = input ? JSON.stringify(input) : ""
     const configurationFingerprint = useRef<string | undefined>(undefined)
     useEffect(() => {

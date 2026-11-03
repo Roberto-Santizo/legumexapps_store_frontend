@@ -3,8 +3,8 @@ import { catalogDiscoverySchema, catalogPreviewSchema, catalogConfirmedSchema } 
 import type { CatalogInput } from "../schema/catalogQuote.schema"
 
 // Errors remain rejected: review/confirm must never treat a failed request as success.
-export async function discoverCatalogAPI() {
-    const { data } = await salespersonApi.get("/custom-quotes/configurations")
+export async function discoverCatalogAPI(clientId?: number | null) {
+    const { data } = await salespersonApi.get("/custom-quotes/configurations", { params: clientId ? { clientId } : {} })
     return catalogDiscoverySchema.parse(data.data)
 }
 export async function previewCatalogAPI(input: CatalogInput) {

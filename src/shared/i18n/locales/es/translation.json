@@ -2267,6 +2267,17 @@
       "TARIMA": "1 por pallet",
       "ESQUINERO": "4 por pallet",
       "STRETCH": "93.3 m por pallet"
+    },
+    "rules": {
+      "title": "Tarima por cliente",
+      "hint": "Selecciona la tarima predeterminada y las excepciones por cliente. Se aplica automáticamente a todos sus SKU y productos nuevos que usan el kit. Agrega primero ambas tarimas al kit.",
+      "default": "Tarima predeterminada",
+      "client": "Cliente",
+      "pallet": "Tarima para este cliente",
+      "add": "Agregar excepción",
+      "save": "Guardar reglas de tarima",
+      "remove": "Quitar excepción",
+      "automatic": "La tarima se asigna automáticamente según el cliente."
     }
   },
   "quoteReview": {

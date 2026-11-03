@@ -2267,6 +2267,17 @@
       "TARIMA": "1 per pallet",
       "ESQUINERO": "4 per pallet",
       "STRETCH": "93.3 m per pallet"
+    },
+    "rules": {
+      "title": "Pallet by client",
+      "hint": "Select the default pallet and client exceptions. Applied automatically to all their SKUs and new products using the kit. Add both pallets to the kit first.",
+      "default": "Default pallet",
+      "client": "Client",
+      "pallet": "Pallet for this client",
+      "add": "Add exception",
+      "save": "Save pallet rules",
+      "remove": "Remove exception",
+      "automatic": "The pallet is assigned automatically for the client."
     }
   },
   "quoteReview": {

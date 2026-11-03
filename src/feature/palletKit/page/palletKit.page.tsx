@@ -3,7 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
-import { addPalletKitMaterialAPI, getPalletKitAPI, getPalletKitCandidatesAPI, removePalletKitMaterialAPI } from "../api/palletKit.api"
+import { addPalletKitMaterialAPI, getPalletKitAPI, getPalletKitCandidatesAPI, removePalletKitMaterialAPI, getPalletRuleClientsAPI, savePalletRulesAPI } from "../api/palletKit.api"
+import { PalletKitRules } from "../component/palletKitRules.component"
 import { PalletKitTypeCard } from "../component/palletKitTypeCard.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
 import { Spinner } from "@/shared/component/spinner.component"
@@ -18,13 +19,14 @@ export function PalletKitPage() {
     const canEdit = hasPermission("palletKit:edit")
     const kit = useQuery({ queryKey: ["palletKit"], queryFn: getPalletKitAPI })
     const candidates = useQuery({ queryKey: ["palletKitCandidates"], queryFn: getPalletKitCandidatesAPI, enabled: canEdit })
+    const ruleClients = useQuery({ queryKey: ["palletKitClients"], queryFn: getPalletRuleClientsAPI, enabled: canEdit })
     const [busy, setBusy] = useState(false)
     async function run(work: () => Promise<{ message: string } | undefined>) {
         setBusy(true)
         try {
             const response = await work()
             if (response) toast.success(response.message)
-            await Promise.all(["palletKit", "palletKitCandidates", "catalogQuoteDiscovery", "adminCatalogQuoteDiscovery"].map(key => client.invalidateQueries({ queryKey: [key] })))
+            await Promise.all(["palletKit", "palletKitCandidates", "catalogQuoteDiscovery", "adminCatalogQuoteDiscovery", "quoteProducts", "adminQuoteProducts"].map(key => client.invalidateQueries({ queryKey: [key] })))
         } catch (error) { showErrorToast(error as Error) } finally { setBusy(false) }
     }
     if (kit.isLoading) return <PageContainer><Spinner /></PageContainer>
@@ -39,10 +41,11 @@ export function PalletKitPage() {
             {t(kit.data.complete ? "palletKit.complete" : "palletKit.incomplete")}
         </p>
         <div className="grid gap-5 lg:grid-cols-3">
-            {kit.data.types.map(({ type, materials }) => <PalletKitTypeCard key={type} type={type} materials={materials} canEdit={canEdit} busy={busy}
+            {kit.data.types.map(({ type, materials }) => <PalletKitTypeCard key={type} type={type} materials={materials} automaticPallet={type === "TARIMA" && kit.data.palletRules?.defaultPackagingId != null} canEdit={canEdit} busy={busy}
                 candidates={(candidates.data ?? []).filter(material => material.materialType === type)}
                 onAdd={packagingId => void run(() => addPalletKitMaterialAPI(packagingId))}
                 onRemove={material => void run(() => removePalletKitMaterialAPI(material.id))} />)}
         </div>
+        {canEdit && (ruleClients.isError ? <p role="alert">{t("common.loadError")}</p> : <PalletKitRules key={JSON.stringify(kit.data.palletRules)} kit={kit.data} clients={ruleClients.data ?? []} busy={busy || ruleClients.isLoading} onSave={rules => void run(() => savePalletRulesAPI(rules))} />)}
     </PageContainer>
 }

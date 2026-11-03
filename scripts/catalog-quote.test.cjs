@@ -301,7 +301,7 @@ test("representative responses parse without amounts and drop any that slip thro
     assert.deepEqual(amountKeys(custom.catalogConfirmedSchema.parse({...catalogLine,totalCost:1,id:4,status:"new",createdAt:"2026-10-28T12:00:00Z"})),[])
 })
 
-function wizardHarness(previewAPI, confirmAPI, mode = "customer") {
+function wizardHarness(previewAPI, confirmAPI, mode = "customer", order) {
     let slots=[],cursor=0,confirmed=[],effects=[]
     const timers=new Map();let timerId=0
     const react={__esModule:true,useState:initial=>{ const index=cursor++; if(!(index in slots)) slots[index]=typeof initial==="function"?initial():initial; return [slots[index],value=>{slots[index]=typeof value==="function"?value(slots[index]):value}] },useRef:initial=>{const index=cursor++;if(!(index in slots))slots[index]={current:initial};return slots[index]},useEffect:(effect,deps)=>{const index=cursor++;const prior=slots[index];if(!prior||deps.some((value,i)=>value!==prior.deps[i])){prior?.cleanup?.();slots[index]={deps};effects.push(()=>{slots[index].cleanup=effect()})}}}
@@ -317,7 +317,7 @@ function wizardHarness(previewAPI, confirmAPI, mode = "customer") {
     overrides["./catalogQuoteMixBuilder.component"]={CatalogQuoteMixBuilder:"MixBuilder"}
     overrides.timers={set:(callback)=>{timers.set(++timerId,callback);return timerId},clear:id=>timers.delete(id)}
     const component=loader(overrides)("src/feature/customQuote/component/catalogQuoteWizard.component.tsx").CatalogQuoteWizard
-    function render(){cursor=0;const tree=component(mode === "admin" ? {mode} : {onConfirmed:line=>confirmed.push(line)});const pending=effects;effects=[];pending.forEach(effect=>effect());return tree}
+    function render(){cursor=0;const tree=component(mode === "admin" ? {mode} : {order,onConfirmed:line=>confirmed.push(line)});const pending=effects;effects=[];pending.forEach(effect=>effect());return tree}
     function all(tree){if(!tree||typeof tree!=="object")return [];if(typeof tree.type==="function")return all(tree.type(tree.props));return [tree,...[].concat(tree.props?.children??[]).flat(Infinity).flatMap(all)]}
     function node(type,predicate=()=>true){return all(render()).find(row=>row.type===type&&predicate(row.props))}
     const submitButton=()=>node("Button",p=>p.type==="submit")
@@ -729,4 +729,39 @@ test("API error adapter exposes only status and a textual public message", () =>
     assert.equal(apiErrorResponse({ isAxiosError: true }), undefined)
     assert.deepEqual(apiErrorResponse({ isAxiosError: true, response: { status: 409, data: { message: "Changed", sql: "private" } } }), { status: 409, message: "Changed" })
     assert.deepEqual(apiErrorResponse({ isAxiosError: true, response: { status: 422, data: { message: 123 } } }), { status: 422, message: undefined })
+})
+
+test("new-product preview and confirmation carry the selected client for automatic pallets", async () => {
+    const previews = [], confirms = []
+    const order = { id: "72db466a-e594-48b7-9864-128b4b305b08", clientId: 77, clientName: "HEB" }
+    const h = wizardHarness(async input => { previews.push(input); return previewFixture }, async input => { confirms.push(input); return { ...previewFixture, id: 88 } }, "customer", order)
+    h.goToPackaging()
+    h.flushTimers()
+    await settle()
+    h.submit()
+    await settle()
+    assert.equal(previews.at(-1).clientId, 77)
+    assert.equal(confirms[0].input.clientId, 77)
+    assert.deepEqual(confirms[0].order, order)
+})
+
+test("pallet rules form saves a default and client exception without a SKU setting", () => {
+    let slots = [], cursor = 0
+    const saved = []
+    const React = { useState: initial => { const index = cursor++; if (!(index in slots)) slots[index] = initial; return [slots[index], value => { slots[index] = typeof value === "function" ? value(slots[index]) : value }] } }
+    const Rules = loader({ react: React, "react-i18next": { useTranslation: () => ({ t: key => key }) },
+        "@/shared/component/card.component": { Card: "Card" }, "@/shared/component/select.component": { Select: "Select" }, "@/shared/component/button.component": { Button: "Button" },
+    })("src/feature/palletKit/component/palletKitRules.component.tsx").PalletKitRules
+    const props = { kit: { types: [{ type: "TARIMA", materials: [{ id: 1, displayName: "Taco", code: "A" }, { id: 2, displayName: "10 lb", code: "B" }] }] }, clients: [{ id: 77, name: "HEB" }], busy: false, onSave: rule => saved.push(rule) }
+    function all(tree) { if (!tree || typeof tree !== "object") return []; return [tree, ...[].concat(tree.props?.children ?? []).flat(Infinity).flatMap(all)] }
+    function render() { cursor = 0; return all(Rules(props)) }
+    const select = (id, value) => render().find(n => n.props.id === id).props.onChange({ target: { value } })
+    select("kit-default-pallet", "1")
+    select("kit-rule-client", "77")
+    select("kit-rule-pallet", "2")
+    render().find(n => n.type === "Button" && n.props.children === "palletKit.rules.add").props.onClick()
+    const save = render().find(n => n.type === "Button" && n.props.children === "palletKit.rules.save")
+    assert.equal(save.props.disabled, false)
+    save.props.onClick()
+    assert.deepEqual(saved, [{ defaultPackagingId: 1, overrides: [{ clientId: 77, packagingId: 2 }] }])
 })

@@ -279,14 +279,14 @@ test("management approves only the lines it calculated: a reloaded detail with o
             useMutation: options => { mutations.push(options); return { mutate() {}, isPending: false } },
         },
     })("src/feature/quoteReview/hook/useQuoteReview.ts").useQuoteReview
-    const render = () => { cursor = 0; mutations = []; return useQuoteReview(orderId) }
-    render()
+    function Render() { cursor = 0; mutations = []; return useQuoteReview(orderId) }
+    Render()
     // mutations: [preview, approve, reject, notify, deliver]
     mutations[0].onSuccess({ data: { finalPrice: 10, linesDigest: "a".repeat(64) } }, "0.25")
-    assert.deepEqual(render().preview, { amount: "0.25", pricing: { finalPrice: 10 }, linesDigest: "a".repeat(64) })
+    assert.deepEqual(Render().preview, { amount: "0.25", pricing: { finalPrice: 10 }, linesDigest: "a".repeat(64) })
     await mutations[1].mutationFn({ delivery: "none" })
     assert.equal(approved[0].linesDigest, "a".repeat(64))
     // The representative added a line and the detail reloaded: the old calculation no longer allows approving.
     detail = { linesDigest: "b".repeat(64), review: {} }
-    assert.equal(render().preview, null)
+    assert.equal(Render().preview, null)
 })

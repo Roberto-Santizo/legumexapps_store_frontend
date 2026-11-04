@@ -68,7 +68,7 @@ test("editing keeps items deactivated in their catalog visible and explains them
  const { GenericGroupCard } = load("src/feature/genericPackaging/component/genericGroupCard.component.tsx", { "react-i18next": { useTranslation: () => ({ t, i18n: { language: "es" } }) } })
  const card = group => renderToStaticMarkup(React.createElement(GenericGroupCard, { group, index: 0, catalog, savedNames: saved, onChange: () => {}, onRemove: () => {}, onCreateMaterial: () => {} }))
  assert.match(card(value.groups[0]), /<option value="4" selected="">Etiquetas \(ya no disponible\)<\/option>/)
- assert.match(card(value.groups[1]), /<option value="6" selected="">Bolsa vieja \(ya no disponible\)<\/option>/)
+ assert.match(card(value.groups[1]), /Bolsa vieja \(ya no disponible\)/)
 })
 
 test("new groups are always included and pallet materials take their catalog consumption", () => {
@@ -94,12 +94,13 @@ for (const language of ["es", "en"]) test(`generic group card shows catalog cons
 
 test("tarima, esquinero and stretch (pallet kit types) are never offered inside a configuration", () => {
     const t = (key, params = {}) => { const value = key.split(".").reduce((item, part) => item?.[part], resources.es); return String(value ?? key).replace(/\{\{(\w+)\}\}/g, (_, name) => params[name] ?? "") }
-    const { GenericGroupCard } = load("src/feature/genericPackaging/component/genericGroupCard.component.tsx", { "react-i18next": { useTranslation: () => ({ t, i18n: { language: "es" } }) } })
+    const { GenericGroupCard } = load("src/feature/genericPackaging/component/genericGroupCard.component.tsx", { "@/shared/component/searchableSelect.component": { SearchableSelect: "SearchableSelect" }, "react-i18next": { useTranslation: () => ({ t, i18n: { language: "es" } }) } })
     const material = (id, displayName, materialType) => ({ id, code: `GEN-PAL-${id}`, displayName, displayNameEn: null, packagingRole: "pallet", unitCost: 1, defaultQuantityBasis: "per_box", defaultQuantityValue: "1.00", materialType })
     const catalog = { categories: [], presentations: [], groups: [{ id: 3, displayName: "Caja" }], materials: [material(1, "Caja genérica", "CAJA"), material(2, "Tarima genérica", "TARIMA"), material(4, "Fleje genérico", "OTRO")] }
-    const html = renderToStaticMarkup(React.createElement(GenericGroupCard, { group: { packagingGroupId: 3, level: "pallet", selectionMode: "one", isRequired: true, options: [{ packagingId: 0, quantityBasis: "per_pallet", quantityValue: null }] }, index: 0, catalog, onChange: () => {}, onRemove: () => {}, onCreateMaterial: () => {} }))
-    assert.ok(html.includes("Caja genérica") && html.includes("Fleje genérico"))
-    assert.ok(!html.includes("Tarima genérica"))
+    const tree = GenericGroupCard({ group: { packagingGroupId: 3, level: "pallet", selectionMode: "one", isRequired: true, options: [{ packagingId: 0, quantityBasis: "per_pallet", quantityValue: null }] }, index: 0, catalog, onChange: () => {}, onRemove: () => {}, onCreateMaterial: () => {} })
+    const nodes = node => !node || typeof node !== "object" ? [] : [node, ...[].concat(node.props?.children ?? []).flat(Infinity).flatMap(nodes)]
+    const select = nodes(tree).find(node => node.type === "SearchableSelect")
+    assert.deepEqual(select.props.options.map(option => option.value), [1, 4])
 })
 
 test("configuration details keeps category translations through the API schema and follows the active language", () => {
@@ -125,4 +126,43 @@ test("configuration details keeps category translations through the API schema a
  language = "es"
  assert.deepEqual(nodes(render()).filter(node => node.type === "option").map(node => node.props.children), ["common.selectPlaceholder", "Congelados", "Sin traduccion"])
  assert.equal(changes.length, 0)
+})
+
+
+for (const language of ["es", "en"]) test(`generic material combobox searches both names and code, preserves IDs and catalog consumption (${language})`, () => {
+ const t = (key, params = {}) => String(key.split(".").reduce((item, part) => item?.[part], resources[language]) ?? key).replace(/\{\{(\w+)\}\}/g, (_, name) => params[name] ?? "")
+ const { GenericGroupCard } = load("src/feature/genericPackaging/component/genericGroupCard.component.tsx", {
+  "react-i18next": { useTranslation: () => ({ t, i18n: { resolvedLanguage: language, language } }) },
+  "@/shared/component/searchableSelect.component": { SearchableSelect: "SearchableSelect" },
+ })
+ const catalog = { categories: [], presentations: [], groups: [{ id: 1, displayName: "Options" }], materials: [
+  { id: 11, code: "GEN-PAL-0011", displayName: "Caja térmica", displayNameEn: "Thermal box", packagingRole: "pallet", materialType: "CAJA", defaultQuantityBasis: "per_box", defaultQuantityValue: 1 },
+  { id: 12, code: "GEN-PAL-0012", displayName: "Otra caja", displayNameEn: "Other box", packagingRole: "pallet", materialType: "CAJA", defaultQuantityBasis: "per_box", defaultQuantityValue: 1 },
+  { id: 13, code: "GEN-PAL-0013", displayName: "Fleje", displayNameEn: "Strap", packagingRole: "pallet", materialType: "OTRO", defaultQuantityBasis: "per_pallet", defaultQuantityValue: 2.5 },
+  { id: 14, code: "GEN-IND-0014", displayName: "Bolsa", packagingRole: "unit", materialType: "INDIVIDUAL" },
+ ] }
+ const group = { packagingGroupId: 1, level: "pallet", selectionMode: "one", isRequired: true, options: [
+  { packagingId: 11, quantityBasis: "per_box", quantityValue: 1 },
+  { packagingId: 12, quantityBasis: "per_box", quantityValue: 1 },
+ ] }
+ const changes = []
+ const nodes = node => !node || typeof node !== "object" ? [] : [node, ...[].concat(node.props?.children ?? []).flat(Infinity).flatMap(nodes)]
+ const render = disabled => nodes(GenericGroupCard({ group, index: 2, catalog, disabled, onChange: patch => changes.push(patch), onRemove() {}, onCreateMaterial() {} })).filter(node => node.type === "SearchableSelect")
+ const select = render(false)[0]
+ assert.equal(select.props.inputId, "option-2-0")
+ assert.equal(select.props.isSearchable, true)
+ assert.equal(select.props.isClearable, true)
+ assert.equal(select.props.isDisabled, false)
+ assert.deepEqual(select.props.options.map(option => option.value), [11, 13])
+ assert.equal(select.props.value.value, 11)
+ assert.match(select.props.value.label, language === "en" ? /Thermal box/ : /Caja térmica/)
+ const candidate = { data: select.props.options[0], label: select.props.options[0].label, value: "11" }
+ for (const query of ["gen-pal-0011", "thermal", "termica"]) assert.equal(select.props.filterOption(candidate, query), true)
+ assert.equal(select.props.filterOption(candidate, "nothing matches"), false)
+ assert.equal(changes.length, 0)
+ select.props.onChange(select.props.options.find(option => option.value === 13))
+ assert.deepEqual(changes[0].options, [{ packagingId: 13, quantityBasis: "per_pallet", quantityValue: 2.5 }, group.options[1]])
+ select.props.onChange(null)
+ assert.deepEqual(changes[1].options, [{ packagingId: 0, quantityBasis: "per_pallet", quantityValue: null }, group.options[1]])
+ assert.equal(render(true)[0].props.isDisabled, true)
 })

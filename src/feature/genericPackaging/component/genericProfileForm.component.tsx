@@ -124,7 +124,7 @@ export function GenericProfileForm({ value, onChange, catalog, savedNames, editi
                             <h3 id={`level-${level}`} className="font-semibold text-ink-900">{t(`catalogQuote.ui.levels.${level}`)}</h3>
                             <p className="mb-4 text-sm text-ink-600">{t(`site.quoteRequest.form.wizard.materials.levelHints.${level}`)}</p>
                             <div className="space-y-4">
-                                {entries.map(({ group, index }) => <GenericGroupCard key={index} group={group} index={index} catalog={catalog} savedNames={savedNames}
+                                {entries.map(({ group, index }) => <GenericGroupCard key={index} group={group} index={index} catalog={catalog} savedNames={savedNames} disabled={saving}
                                     onChange={patch => patchGroup(index, patch)}
                                     onRemove={() => set({ groups: value.groups.filter((_, i) => i !== index) })}
                                     onCreateMaterial={() => setMaterialFor({ level, groupIndex: index })} />)}

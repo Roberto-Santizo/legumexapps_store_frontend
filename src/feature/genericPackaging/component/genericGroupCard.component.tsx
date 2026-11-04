@@ -1,4 +1,7 @@
 import { useTranslation } from "react-i18next";
+import { createFilter } from "react-select";
+import { packagingName } from "@/shared/i18n/packagingName";
+import { SearchableSelect, type SearchableSelectOption } from "@/shared/component/searchableSelect.component";
 import { Check, Plus, Trash2 } from "lucide-react";
 import type { GenericAdminOptions, GenericProfileInput } from "../schema/genericPackaging.schema";
 import { GROUP_USAGES, groupUsage, newGenericOption, offeredMaterials, usesCatalogConsumption, withCatalogConsumption, type GroupUsage, type SavedNames } from "../util/genericPackagingForm";
@@ -13,16 +16,20 @@ type Props = {
     index: number;
     catalog: GenericAdminOptions;
     savedNames?: SavedNames;
+    disabled?: boolean;
     onChange: (patch: Partial<Group>) => void;
     onRemove: () => void;
     onCreateMaterial: () => void;
 };
 
+const filterMaterials = createFilter<SearchableSelectOption>({ stringify: option => option.data.searchText ?? option.label });
+
 const iconButton = "flex size-11 shrink-0 items-center justify-center rounded-control text-danger transition-colors hover:bg-danger-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
 
 // One packaging group of a level: which catalog group it is, how the representative uses it and its generic materials.
-export function GenericGroupCard({ group, index, catalog, savedNames, onChange, onRemove, onCreateMaterial }: Readonly<Props>) {
-    const { t } = useTranslation();
+export function GenericGroupCard({ group, index, catalog, savedNames, disabled = false, onChange, onRemove, onCreateMaterial }: Readonly<Props>) {
+    const { t, i18n } = useTranslation();
+    const language = i18n.resolvedLanguage ?? i18n.language;
     const levelMaterials = offeredMaterials(catalog, group.level);
     const groupUnavailable = !!group.packagingGroupId && !catalog.groups.some(row => row.id === group.packagingGroupId);
     const groupName = catalog.groups.find(row => row.id === group.packagingGroupId)?.displayName ?? (savedNames?.groups.get(group.packagingGroupId) || t("genericPackaging.group"));
@@ -51,14 +58,23 @@ export function GenericGroupCard({ group, index, catalog, savedNames, onChange, 
                 const material = catalog.materials.find(row => row.id === option.packagingId);
                 const materialUnavailable = !!option.packagingId && !levelMaterials.some(row => row.id === option.packagingId);
                 const takenElsewhere = new Set(group.options.filter((_, k) => k !== j).map(row => row.packagingId));
+                const materialOptions: SearchableSelectOption[] = levelMaterials.filter(row => !takenElsewhere.has(row.id)).map(row => ({
+                    value: row.id,
+                    label: `${row.code} - ${packagingName(row, language)}`,
+                    searchText: [row.code, row.displayName, row.displayNameEn].filter(Boolean).join(" "),
+                }));
+                if (materialUnavailable) materialOptions.unshift({ value: option.packagingId,
+                    label: t("genericPackaging.form.unavailable", { name: material ? packagingName(material, language) : (savedNames?.materials.get(option.packagingId) || t("genericPackaging.material")) }),
+                });
                 return <li key={j} className="rounded-lg bg-canvas p-3">
                     <div className="grid gap-x-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)_auto] sm:items-start">
                         <FormField label={t("genericPackaging.material")} htmlFor={`option-${index}-${j}`} required>
-                            <Select id={`option-${index}-${j}`} required value={option.packagingId || ""} onChange={event => chooseMaterial(j, Number(event.target.value))}>
-                                <option value="">{t("common.selectPlaceholder")}</option>
-                                {materialUnavailable && <option value={option.packagingId}>{t("genericPackaging.form.unavailable", { name: material?.displayName ?? (savedNames?.materials.get(option.packagingId) || t("genericPackaging.material")) })}</option>}
-                                {levelMaterials.filter(row => !takenElsewhere.has(row.id)).map(row => <option key={row.id} value={row.id}>{row.displayName}</option>)}
-                            </Select>
+                            <SearchableSelect inputId={`option-${index}-${j}`} className="min-w-0" required
+                                options={materialOptions} value={materialOptions.find(row => row.value === option.packagingId) ?? null}
+                                onChange={selected => chooseMaterial(j, selected?.value ?? 0)}
+                                filterOption={filterMaterials} isSearchable isClearable isDisabled={disabled}
+                                styles={{ control: base => ({ ...base, minHeight: "var(--spacing-control)" }) }}
+                                placeholder={t("common.searchPlaceholder")} />
                         </FormField>
                         <div className="min-w-0">
                             {group.level === "intermediate" && <p className="mb-5 text-sm text-ink-600 sm:mt-8">{t("genericPackaging.form.intermediateRule")}</p>}

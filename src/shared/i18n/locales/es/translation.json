@@ -508,6 +508,7 @@
         "transport": "Transporte",
         "adjustment": "Costo adicional por unidad",
         "adjustmentDetail": "{{unitCost}} por unidad × {{count}} unidades · incluido en el total",
+        "materialQuantity": "Cantidad: {{count}}",
         "unitsQuantity": "{{count}} unidades",
         "palletsQuantity": "{{count}} palets",
         "intermediatePackagesQuantity": "{{count}} empaques intermedios",
@@ -1008,13 +1009,13 @@
       "materialType": "Tipo de material",
       "chooseType": "Selecciona el tipo de material",
       "keepExisting": "Conservar consumo actual",
-      "fixedHelp": "Consumo automático: caja según las cajas por pallet de la variante; tarima: 1, esquineros: 4 y stretch: 93.3 metros por pallet. Para stretch, ingresa el costo por metro. No modifica asociaciones existentes. Otro: materiales sin consumo fijo (p. ej. fleje); la cantidad se define en cada SKU.",
+      "fixedHelp": "Caja: 1 por caja; tarima: 1, esquineros: 4 y stretch: 93.3 metros por pallet. El costo del stretch debe ser por metro. Para una etiqueta de caja, elige Otro y configura Por caja y su cantidad. Cada material conserva su propio costo; no cambia asociaciones existentes.",
       "types": {
         "CAJA": "Caja",
         "TARIMA": "Tarima",
         "ESQUINERO": "Esquinero",
         "STRETCH": "Stretch",
-        "OTRO": "Otro (consumo en cada SKU)"
+        "OTRO": "Otro (por caja o por pallet)"
       },
       "basis": "Forma de consumo",
       "quantity": "Cantidad",
@@ -1027,7 +1028,7 @@
       "existing": "Se conserva la regla efectiva de esta asociación.",
       "customize": "Personalizar regla para esta variante",
       "overrideWarning": "Esta excepción cambia únicamente esta asociación y sus costos futuros; no cambia el catálogo.",
-      "unitRule": "1 por unidad"
+      "unitRule": "Cantidad por unidad de producto. Ejemplo: 2 para dos etiquetas por unidad. El total se calcula con los pallets, cajas por pallet y unidades por caja."
     },
     "classifications": {
       "specific": "Específico de cliente",
@@ -1673,6 +1674,7 @@
         "restrictionsText": "Esta cotización es válida únicamente por {{days}} días a partir de su fecha de emisión. Transcurrido este período, los precios pueden variar y deberá solicitarse una nueva cotización.",
         "generatedAt": "Documento generado el {{date}}",
         "packaging": {
+          "quantity": "Cantidad: {{quantity}}",
           "title": "Empaque",
           "unit": "Empaque individual",
           "intermediate": "Empaque interno / master",

@@ -207,3 +207,15 @@ test("public PDF modal rejects empty or whitespace-only names without generating
         assert.equal(h.built.length, 0)
     }
 })
+
+test("administrator breakdown shows effective unit and box label consumption with independent costs", () => {
+    const QuoteResultCard = loadResultCard()
+    const result = { requestedPallets: 5, totalUnits: 4800, boxesPerPallet: 80, totalCost: 232, unitPackagingCost: 192, palletMaterialCost: 40,
+        breakdown: { rawMaterials: [], unitMaterials: [{ packagingId: 1, displayName: "Individual label", optionGroup: null, quantityPerUnit: 2, totalUnits: 4800, unitCost: 0.02, lineTotal: 192 }],
+            palletMaterials: [{ packagingId: 2, displayName: "Box label", optionGroup: null, quantityPerPallet: 160, requestedPallets: 5, unitCost: 0.05, lineTotal: 40 }] } }
+    const before = JSON.stringify(result)
+    const rows = rendered(QuoteResultCard({ result, isPending: false })).filter(node => node.props.quantityLabel?.includes("site.quoteRequest.result.materialQuantity"))
+    assert.ok(rows.some(node => node.props.quantityLabel.includes("9600") && node.props.lineTotal === 192))
+    assert.ok(rows.some(node => node.props.quantityLabel.includes("800") && node.props.lineTotal === 40))
+    assert.equal(JSON.stringify(result), before)
+})

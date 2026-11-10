@@ -56,7 +56,7 @@ export function CreatePackagingPage() {
 
             <Card>
                 <form onSubmit={onSubmit}>
-                    <PackagingForm register={register} errors={errors} packagingRole={watch("packagingRole")} classification={watch("classification")} />
+                    <PackagingForm register={register} errors={errors} packagingRole={watch("packagingRole")} materialType={watch("materialType")} classification={watch("classification")} />
                     <Button type="submit" disabled={createPackagingMutation.isPending}>
                         {createPackagingMutation.isPending ? t("common.saving") : t("common.save")}
                     </Button>

@@ -1,3 +1,4 @@
+import { packagingQuantity } from "../util/quotePackagingQuantity"
 import { packagingName } from "@/shared/i18n/packagingName"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -147,8 +148,8 @@ function QuoteCostBreakdown({
                         <CostRow
                             key={line.packagingId}
                             label={materialLineLabel(line, i18n.language)}
-                            quantityLabel={t("site.quoteRequest.result.unitsQuantity", {
-                                count: line.totalUnits.toLocaleString("es-MX"),
+                            quantityLabel={t("site.quoteRequest.result.materialQuantity", {
+                                count: packagingQuantity(line)?.toLocaleString(i18n.language, { maximumFractionDigits: 6 }) ?? "—",
                             })}
                             lineTotal={line.lineTotal}
                             format={format}
@@ -202,7 +203,7 @@ function QuoteCostBreakdown({
                         <CostRow
                             key={line.packagingId}
                             label={materialLineLabel(line, i18n.language)}
-                            quantityLabel={t("site.quoteRequest.result.palletsQuantity", { count: line.requestedPallets })}
+                            quantityLabel={t("site.quoteRequest.result.materialQuantity", { count: packagingQuantity(line)?.toLocaleString(i18n.language, { maximumFractionDigits: 6 }) ?? "—" })}
                             lineTotal={line.lineTotal}
                             format={format}
                         />

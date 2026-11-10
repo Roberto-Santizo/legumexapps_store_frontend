@@ -93,7 +93,7 @@ export function EditPackagingPage() {
 
                 {packagingQuery.data && (
                     <form onSubmit={onSubmit}>
-                        <PackagingForm editing register={register} errors={errors} packagingRole={watch("packagingRole")} classification={watch("classification")}
+                        <PackagingForm editing register={register} errors={errors} packagingRole={watch("packagingRole")} materialType={watch("materialType")} classification={watch("classification")}
                             currentCode={packagingQuery.data.data.classification === "generic" && watch("packagingRole") === packagingQuery.data.data.packagingRole ? packagingQuery.data.data.code : undefined} />
                         <Button type="submit" disabled={updatePackagingMutation.isPending}>
                             {updatePackagingMutation.isPending ? t("common.saving") : t("common.save")}

@@ -6,7 +6,7 @@ export const createProductVariantUnitMaterialSchema = z.object({
     packagingId: z.number().int().positive(),
     // Requerido: quantityPerUnit * unitCost * totalUnits es la fórmula directa del costo de esta
     // línea; si quedara vacío, el material "costaría" $0 en cada cotización.
-    quantityPerUnit: z.number().positive(),
+    quantityPerUnit: z.number().positive().max(99999999.99).multipleOf(0.01),
     // ID estable del catálogo; null = fila fija. El nombre se obtiene en el backend.
     optionGroupId: z.number().int().positive().nullable(),
     isDefault: z.boolean(),

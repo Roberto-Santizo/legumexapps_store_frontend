@@ -9,6 +9,7 @@ import { Select } from "@/shared/component/select.component"
 
 type PackagingFormProps<T extends UpdatePackagingInput> = {
     register: UseFormRegister<T>
+    materialType?: string
     packagingRole?: string
     classification?: string
     // Code already assigned by the system to a generic material being edited.
@@ -17,7 +18,7 @@ type PackagingFormProps<T extends UpdatePackagingInput> = {
     errors: FieldErrors<T>
 }
 
-export function PackagingForm<T extends UpdatePackagingInput>({ register, errors, packagingRole, classification = "specific", currentCode, editing }: Readonly<PackagingFormProps<T>>) {
+export function PackagingForm<T extends UpdatePackagingInput>({ register, errors, packagingRole, materialType, classification = "specific", currentCode, editing }: Readonly<PackagingFormProps<T>>) {
     const { t } = useTranslation()
 
     const classificationField = (
@@ -61,7 +62,7 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, errors
         <div>
             <PackagingBaseFields register={register} errors={errors} requireEnglish={!editing} leadingField={classificationField} systemCode={systemCode} roleField={roleField} />
             {editing && <label className="mb-4 flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" {...register("isActive" as Path<T>)} />{t("packaging.form.isActive")}</label>}
-            {packagingRole === "pallet" && <PackagingConsumptionFields register={register} errors={errors} preserveExisting={editing} />}
+            {packagingRole === "pallet" && <PackagingConsumptionFields register={register} errors={errors} materialType={materialType} preserveExisting={editing} />}
         </div>
     )
 }

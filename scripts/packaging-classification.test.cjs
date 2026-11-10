@@ -165,3 +165,41 @@ test("the packaging form no longer marks the pallet kit: it is managed in its ow
     assert.equal(tree.some(node => node.props?.id === "palletKitType"), false)
     assert.ok(tree.some(node => node.type === "ConsumptionFields"))
 })
+
+for (const language of ["es", "en"]) test(`OTHER materials expose existing catalog consumption fields (${language})`, () => {
+    const h = harness(language)
+    const { PackagingConsumptionFields } = h.load("src/feature/packaging/component/packagingConsumptionFields.component.tsx")
+    const registered = []
+    const tree = PackagingConsumptionFields({ materialType: "OTRO", register: (name, options) => { registered.push(name); return { name, ...options } }, errors: {} })
+    assert.deepEqual(registered, ["materialType", "defaultQuantityBasis", "defaultQuantityValue"])
+    const basis = nodes(tree).find(node => node.props?.id === "defaultQuantityBasis")
+    assert.deepEqual(nodes(basis).filter(node => node.type === "option").map(node => node.props.value), ["", "per_box", "per_pallet"])
+})
+
+test("effective label quantities match production and PDF snapshots without changing material costs", () => {
+    const h = harness()
+    const { packagingQuantity } = h.load("src/feature/quote/util/quotePackagingQuantity.ts")
+    const { buildPdfPackagingMaterials } = h.load("src/feature/quote/util/quotePdfPackaging.ts")
+    const { productionMaterials } = h.load("src/feature/quote/util/quoteProductionData.ts")
+    const unit = { displayName: "Individual label", quantityPerUnit: 2, totalUnits: 4800, unitCost: 0.02, optionGroup: null }
+    const box = { displayName: "Box label", quantityPerPallet: 160, requestedPallets: 5, unitCost: 0.05, optionGroup: null }
+    const breakdown = { rawMaterials: [], unitMaterials: [unit], palletMaterials: [box] }
+    const before = JSON.stringify(breakdown)
+    assert.equal(packagingQuantity(unit), 9600)
+    assert.equal(packagingQuantity(box), 800)
+    assert.equal(packagingQuantity({}), null)
+    assert.deepEqual(Array.from(buildPdfPackagingMaterials(breakdown), row => row.quantity), [9600, 800])
+    const production = productionMaterials({ totalUnits: 4800, requestedPallets: 5, breakdown })
+    assert.equal(production.unit[0].quantity, 9600)
+    assert.equal(production.pallet[0].quantity, 800)
+    assert.equal(JSON.stringify(breakdown), before)
+    assert.equal(buildPdfPackagingMaterials({}).length, 0)
+})
+
+test("individual label quantities respect the persisted precision", () => {
+    const h = harness()
+    const { createProductVariantUnitMaterialSchema } = h.load("src/feature/product/schema/productVariantUnitMaterial.schema.ts")
+    const input = { productVariantId: 1, packagingId: 2, optionGroupId: null, isDefault: false }
+    for (const quantityPerUnit of [1, 2, 3, 1.25]) assert.equal(createProductVariantUnitMaterialSchema.safeParse({ ...input, quantityPerUnit }).success, true)
+    for (const quantityPerUnit of [0, -1, 1.001, 100000000]) assert.equal(createProductVariantUnitMaterialSchema.safeParse({ ...input, quantityPerUnit }).success, false)
+})

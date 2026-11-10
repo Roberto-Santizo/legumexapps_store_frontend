@@ -38,9 +38,11 @@ export function CreatePackagingMaterialModal({ role, initialDisplayName, onCreat
 
     const {
         register,
+        watch,
         handleSubmit,
         formState: { errors },
     } = useForm<CreatePackagingInput>({
+        shouldUnregister: true,
         resolver: zodResolver(createPackagingSchema),
         defaultValues: { displayName: initialDisplayName, packagingRole: role, classification: "specific" },
     })
@@ -67,7 +69,7 @@ export function CreatePackagingMaterialModal({ role, initialDisplayName, onCreat
 
                 <PackagingBaseFields register={register} errors={errors} idPrefix={`${role}Material-`} />
 
-                {role === "pallet" && <PackagingConsumptionFields register={register} errors={errors} />}
+                {role === "pallet" && <PackagingConsumptionFields register={register} errors={errors} materialType={watch("materialType")} />}
                 <div className="flex gap-3">
                     <Button type="submit" disabled={createMutation.isPending}>
                         {createMutation.isPending ? t("common.saving") : t("common.save")}

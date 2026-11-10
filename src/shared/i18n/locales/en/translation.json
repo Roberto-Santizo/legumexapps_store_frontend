@@ -495,6 +495,7 @@
         "transport": "Transport",
         "adjustment": "Additional cost per unit",
         "adjustmentDetail": "{{unitCost}} per unit × {{count}} units · included in the total",
+        "materialQuantity": "Quantity: {{count}}",
         "unitsQuantity": "{{count}} units",
         "palletsQuantity": "{{count}} pallets",
         "intermediatePackagesQuantity": "{{count}} intermediate packages",
@@ -1008,13 +1009,13 @@
       "materialType": "Material type",
       "chooseType": "Select the material type",
       "keepExisting": "Keep current consumption",
-      "fixedHelp": "Automatic consumption: boxes use the variant's boxes per pallet; pallet: 1, corner protectors: 4 and stretch: 93.3 meters per pallet. Enter stretch cost per meter. Existing associations remain unchanged. Other: materials without fixed consumption (e.g. strapping); the quantity is set on each SKU.",
+      "fixedHelp": "Box: 1 per box; pallet: 1, corners: 4 and stretch: 93.3 metres per pallet. Enter the stretch cost per metre. For a box label, choose Other and configure Per box and its quantity. Each material keeps its own cost; existing associations are unchanged.",
       "types": {
         "CAJA": "Box",
         "TARIMA": "Pallet",
         "ESQUINERO": "Corner protector",
         "STRETCH": "Stretch film",
-        "OTRO": "Other (consumption per SKU)"
+        "OTRO": "Other (per box or per pallet)"
       },
       "basis": "Consumption basis",
       "quantity": "Quantity",
@@ -1027,7 +1028,7 @@
       "existing": "The effective rule of this association is preserved.",
       "customize": "Customize rule for this variant",
       "overrideWarning": "This exception changes only this association and its future costs; it does not change the catalog.",
-      "unitRule": "1 per unit"
+      "unitRule": "Quantity per product unit. Example: 2 for two labels per unit. The total uses pallets, boxes per pallet and units per box."
     },
     "classifications": {
       "specific": "Specific",
@@ -1673,6 +1674,7 @@
         "restrictionsText": "This quote is valid for {{days}} days only from its issue date. After this period prices may change and a new quote must be requested.",
         "generatedAt": "Document generated on {{date}}",
         "packaging": {
+          "quantity": "Quantity: {{quantity}}",
           "title": "Packaging",
           "unit": "Unit packaging",
           "intermediate": "Inner / master packaging",

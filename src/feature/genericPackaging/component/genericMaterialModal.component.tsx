@@ -10,13 +10,13 @@ import { Select } from "@/shared/component/select.component";
 import { Button } from "@/shared/component/button.component";
 import { showErrorToast } from "@/shared/i18n/showErrorToast";
 
-const MATERIAL_TYPES = ["CAJA", "TARIMA", "ESQUINERO", "STRETCH"] as const;
+const MATERIAL_TYPES = ["CAJA", "TARIMA", "ESQUINERO", "STRETCH", "OTRO"] as const;
 
 // Quick creation of a generic material of one level, without leaving the configuration form.
 // Pallet materials ask for their type, so the catalog keeps their consumption (corner boards 4, pallet 1...).
 export function GenericMaterialModal({ level, onCreated, onClose }: Readonly<{ level: GenericLevel; onCreated: (packagingId: number) => void; onClose: () => void }>) {
     const { t } = useTranslation();
-    const [values, setValues] = useState({ displayName: "", displayNameEn: "", unitCost: "", materialType: "" });
+    const [values, setValues] = useState({ displayName: "", displayNameEn: "", unitCost: "", materialType: "", defaultQuantityBasis: "", defaultQuantityValue: "" });
     const [saving, setSaving] = useState(false);
     const set = (name: keyof typeof values) => (event: { target: { value: string } }) => setValues({ ...values, [name]: event.target.value });
     async function submit(event: React.FormEvent) {
@@ -26,7 +26,8 @@ export function GenericMaterialModal({ level, onCreated, onClose }: Readonly<{ l
         setSaving(true);
         try {
             const response = await createGenericMaterial({ displayName: values.displayName, displayNameEn: values.displayNameEn, unitCost: Number(values.unitCost), packagingRole: level, classification: "generic",
-                ...(level === "pallet" ? { materialType: values.materialType } : {}) });
+                ...(level === "pallet" ? { materialType: values.materialType } : {}),
+                ...(level === "pallet" && values.materialType === "OTRO" ? { defaultQuantityBasis: values.defaultQuantityBasis || null, defaultQuantityValue: values.defaultQuantityValue === "" ? null : Number(values.defaultQuantityValue) } : {}) });
             toast.success(response.message);
             onCreated(response.data.id);
         } catch (error) {
@@ -48,6 +49,18 @@ export function GenericMaterialModal({ level, onCreated, onClose }: Readonly<{ l
                         {MATERIAL_TYPES.map(type => <option key={type} value={type}>{t(`packaging.consumption.types.${type}`)}</option>)}
                     </Select>
                 </FormField>
+                {values.materialType === "OTRO" && <>
+                    <FormField label={t("packaging.consumption.basis")} htmlFor="generic-material-basis" required>
+                        <Select id="generic-material-basis" required value={values.defaultQuantityBasis} onChange={set("defaultQuantityBasis")}>
+                            <option value="">{t("common.selectPlaceholder")}</option>
+                            <option value="per_box">{t("packaging.consumption.per_box")}</option>
+                            <option value="per_pallet">{t("packaging.consumption.per_pallet")}</option>
+                        </Select>
+                    </FormField>
+                    <FormField label={t("packaging.consumption.quantity")} htmlFor="generic-material-quantity" required>
+                        <Input id="generic-material-quantity" required type="number" min="0.01" step="0.01" value={values.defaultQuantityValue} onChange={set("defaultQuantityValue")} />
+                    </FormField>
+                </>}
                 <p className="mb-5 text-sm text-ink-600">{t("packaging.consumption.fixedHelp")}</p>
             </>}
             <div className="flex gap-3">

@@ -250,7 +250,6 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                     />
                 </FormField>
 
-                {editingId ? <>
                 <FormField
                     label={t("productVariantUnitMaterial.form.quantityPerUnit")}
                     htmlFor="quantityPerUnit"
@@ -266,7 +265,7 @@ export function ProductVariantUnitMaterialSection({ productId }: Readonly<{ prod
                         {...register("quantityPerUnit", { setValueAs: toOptionalNumber })}
                     />
                 </FormField>
-                </> : <p className="mb-5 text-sm">{t("packaging.consumption.unitRule")}</p>}
+                <p className="mb-5 text-sm text-ink-600">{t("packaging.consumption.unitRule")}</p>
 
                 <div className="mb-5 sm:col-span-2">
                     <Checkbox id="unitMaterialIsOptional" label={t("materialOptionGroup.isOptional")} {...register("isOptional")} />

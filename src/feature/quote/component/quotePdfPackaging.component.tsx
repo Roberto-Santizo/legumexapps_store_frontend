@@ -36,6 +36,7 @@ export function QuotePdfPackaging({ breakdown }: Readonly<{ breakdown: PdfPackag
                 <View style={styles.packagingCardText}>
                     <Text style={styles.packagingMaterialType}>{t(`quote.pdf.document.packaging.${material.kind}`)}</Text>
                     <Text style={styles.packagingMaterialName} hyphenationCallback={word => word.length > 20 ? Array.from(word) : [word]}>{material.name}</Text>
+                    {material.quantity != null && <Text style={styles.packagingMaterialType}>{t("quote.pdf.document.packaging.quantity", { quantity: material.quantity.toLocaleString(i18n.language, { maximumFractionDigits: 6 }) })}</Text>}
                 </View>
             </View>)}
         </View>

@@ -150,3 +150,28 @@ test("renders complete quote PDFs for 1, 2, 3 and 7 materials, including long na
         assert.match(fs.readFileSync(path.join(output, `${name}.pdf`)).subarray(0, 5).toString(), /^%PDF-/)
     }
 })
+
+test("commercial PDF renders effective label quantities in both languages without costs or snapshot changes", async () => {
+    const { load, renderer, i18next } = await setup
+    const { QuotePdfPackaging } = load("src/feature/quote/component/quotePdfPackaging.component.tsx")
+    const { QuotePdfDocument } = load("src/feature/quote/component/quotePdfDocument.component.tsx")
+    const line = mixedOrderFixture()[0]
+    line.breakdown.unitMaterials = [{ displayName: "Individual label", optionGroup: null, quantityPerUnit: 2, totalUnits: 4800, unitCost: 0.02 }]
+    line.breakdown.palletMaterials = [{ displayName: "Box label", optionGroup: null, quantityPerPallet: 160, requestedPallets: 5, unitCost: 0.05 }]
+    line.totalUnits = 4800; line.requestedPallets = 5
+    const before = JSON.stringify(line)
+    const text = node => Array.isArray(node) ? node.map(text).join(" ") : React.isValidElement(node) ? text(node.props.children) : typeof node === "string" || typeof node === "number" ? String(node) : ""
+    try {
+        for (const language of ["es", "en"]) {
+            await i18next.changeLanguage(language)
+            const content = text(QuotePdfPackaging({ breakdown: line.breakdown }))
+            assert.ok(content.includes((9600).toLocaleString(language)))
+            assert.ok(content.includes((800).toLocaleString(language)))
+            assert.ok(content.includes("Individual label") && content.includes("Box label"))
+            assert.ok(!content.includes("0.02") && !content.includes("0.05"))
+            const buffer = await renderer.renderToBuffer(React.createElement(QuotePdfDocument, { lines: [line], clientName: "Label review", quoteDate: new Date("2026-11-09T12:00:00Z"), showCostBreakdown: false }))
+            assert.match(buffer.subarray(0, 5).toString(), /^%PDF-/)
+        }
+    } finally { await i18next.changeLanguage("en") }
+    assert.equal(JSON.stringify(line), before)
+})

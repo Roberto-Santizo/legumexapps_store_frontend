@@ -1009,13 +1009,13 @@
       "materialType": "Material type",
       "chooseType": "Select the material type",
       "keepExisting": "Keep current consumption",
-      "fixedHelp": "Box: 1 per box; pallet: 1, corners: 4 and stretch: 93.3 metres per pallet. Enter the stretch cost per metre. For a box label, choose Other and configure Per box and its quantity. Each material keeps its own cost; existing associations are unchanged.",
+      "fixedHelp": "Box: 1 per box; pallet: 1, corners: 4 and stretch: 93.3 metres per pallet. Enter the stretch cost per metre. For a box label, choose Labels and other materials and configure Per box and its quantity. Each material keeps its own cost; existing associations are unchanged.",
       "types": {
         "CAJA": "Box",
         "TARIMA": "Pallet",
         "ESQUINERO": "Corner protector",
         "STRETCH": "Stretch film",
-        "OTRO": "Other (per box or per pallet)"
+        "OTRO": "Labels and other materials"
       },
       "basis": "Consumption basis",
       "quantity": "Quantity",

@@ -1009,13 +1009,13 @@
       "materialType": "Tipo de material",
       "chooseType": "Selecciona el tipo de material",
       "keepExisting": "Conservar consumo actual",
-      "fixedHelp": "Caja: 1 por caja; tarima: 1, esquineros: 4 y stretch: 93.3 metros por pallet. El costo del stretch debe ser por metro. Para una etiqueta de caja, elige Otro y configura Por caja y su cantidad. Cada material conserva su propio costo; no cambia asociaciones existentes.",
+      "fixedHelp": "Caja: 1 por caja; tarima: 1, esquineros: 4 y stretch: 93.3 metros por pallet. El costo del stretch debe ser por metro. Para una etiqueta de caja, elige Etiquetas y otros materiales y configura Por caja y su cantidad. Cada material conserva su propio costo; no cambia asociaciones existentes.",
       "types": {
         "CAJA": "Caja",
         "TARIMA": "Tarima",
         "ESQUINERO": "Esquinero",
         "STRETCH": "Stretch",
-        "OTRO": "Otro (por caja o por pallet)"
+        "OTRO": "Etiquetas y otros materiales"
       },
       "basis": "Forma de consumo",
       "quantity": "Cantidad",

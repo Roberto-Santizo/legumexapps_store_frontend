@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { updatePackagingSchema } from "@/feature/packaging/schema/packaging.schema"
 import type { PackagingResponse, UpdatePackagingInput } from "@/feature/packaging/schema/packaging.schema"
+import { getPackagingVolumeLimits } from "../schema/packagingVolumePricing.schema"
 import { getPackagingByIdAPI, updatePackagingAPI } from "@/feature/packaging/api/packaging.api"
 import { PackagingForm } from "@/feature/packaging/component/packagingForm.component"
 import { PageContainer } from "@/shared/component/pageContainer.component"
@@ -17,6 +18,7 @@ import { buttonClassName } from "@/shared/utils/buttonClassName"
 
 
 function toFormValues(packaging: PackagingResponse): Partial<UpdatePackagingInput> {
+    const limits = getPackagingVolumeLimits(packaging)
     return {
         // The type is stored: no longer guessed from the consumption.
         materialType: packaging.packagingRole === "pallet" && packaging.materialType !== "INDIVIDUAL" && packaging.materialType !== "INTERMEDIO" ? packaging.materialType : undefined,
@@ -29,6 +31,10 @@ function toFormValues(packaging: PackagingResponse): Partial<UpdatePackagingInpu
         displayNameEn: packaging.displayNameEn ?? "",
         packagingRole: packaging.packagingRole,
         unitCost: packaging.unitCost !== null ? Number(packaging.unitCost) : undefined,
+        lowVolumeMaximumQuantity: limits.low,
+        mediumVolumeMaximumQuantity: limits.medium,
+        mediumVolumeUnitCost: packaging.mediumVolumeUnitCost ?? null,
+        highVolumeUnitCost: packaging.highVolumeUnitCost ?? null,
     }
 }
 
@@ -48,6 +54,7 @@ export function EditPackagingPage() {
     const {
         register,
         watch,
+        setValue,
         handleSubmit,
         reset,
         formState: { errors },
@@ -66,6 +73,7 @@ export function EditPackagingPage() {
         mutationFn: (formData: UpdatePackagingInput) => updatePackagingAPI(packagingId, formData),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["packagings"] })
+            queryClient.invalidateQueries({ queryKey: ["packaging", packagingId] })
             toast.success(data.message)
             navigate("/admin/packagings")
         },
@@ -75,7 +83,15 @@ export function EditPackagingPage() {
     })
 
     const onSubmit = handleSubmit((formData) => {
-        updatePackagingMutation.mutate(formData)
+        updatePackagingMutation.mutate(formData.classification === "generic" ? {
+            ...formData,
+            lowVolumeMaximumQuantity: null,
+            mediumVolumeMaximumQuantity: null,
+            mediumVolumeMinimumQuantity: null,
+            mediumVolumeUnitCost: null,
+            highVolumeMinimumQuantity: null,
+            highVolumeUnitCost: null,
+        } : formData)
     })
 
     return (
@@ -93,7 +109,7 @@ export function EditPackagingPage() {
 
                 {packagingQuery.data && (
                     <form onSubmit={onSubmit}>
-                        <PackagingForm editing register={register} errors={errors} packagingRole={watch("packagingRole")} materialType={watch("materialType")} classification={watch("classification")}
+                        <PackagingForm editing register={register} watch={watch} setValue={setValue} errors={errors} packagingRole={watch("packagingRole")} materialType={watch("materialType")} classification={watch("classification")}
                             currentCode={packagingQuery.data.data.classification === "generic" && watch("packagingRole") === packagingQuery.data.data.packagingRole ? packagingQuery.data.data.code : undefined} />
                         <Button type="submit" disabled={updatePackagingMutation.isPending}>
                             {updatePackagingMutation.isPending ? t("common.saving") : t("common.save")}

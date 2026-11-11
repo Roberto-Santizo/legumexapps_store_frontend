@@ -328,7 +328,11 @@
     "pallet_consumption_invalid": "Specify a consumption basis and a positive quantity with at most two decimal places.",
     "pallet_boxes_required": "The variant must have a valid number of boxes per pallet.",
     "network": "Could not connect to the server. Check your connection and try again.",
-    "timeout": "The request timed out. Please try again."
+    "timeout": "The request timed out. Please try again.",
+    "packaging_volume_pricing_pair": "Complete both the minimum quantity and unit cost for this volume tier, or leave both empty.",
+    "packaging_volume_pricing_specific": "Volume pricing applies only to specific packaging materials. Clear its tiers before making it generic.",
+    "packaging_volume_pricing_order": "The medium-volume limit must be greater than the low-volume limit.",
+    "packaging_volume_pricing_invalid": "Check the volume pricing for material {{code}}: complete each tier, order its minimum quantities, and use valid unit costs."
   },
   "auth": {
     "adminLogin": {
@@ -1039,6 +1043,33 @@
       "status": "Status",
       "active": "Active",
       "inactive": "Inactive"
+    },
+    "volumePricing": {
+      "title": "Volume pricing",
+      "low": "Low volume",
+      "single": "Material cost",
+      "baseHint": "From 5,000",
+      "maximum": "Quantity limit for this range",
+      "above": "Over {{quantity}}",
+      "baseCost": "base cost",
+      "mediumCost": "medium cost",
+      "fallback": "Used the available {{costType}}",
+      "upTo": "Up to {{quantity}}",
+      "editLimit": "Edit limit",
+      "editLimitFor": "Edit limit for {{tier}}",
+      "from": "From {{quantity}}",
+      "editMinimum": "Edit minimum",
+      "editMinimumFor": "Edit minimum quantity for {{tier}}",
+      "done": "Done",
+      "hint": "Each limit includes that quantity. Up to {{low}} uses the base cost; over {{low}} and up to {{medium}} uses the medium-volume cost; over {{medium}} uses the high-volume cost, with no upper limit. You can edit the limits. A missing cost uses the previous available price. Ranges use each material's consumption in each quoted product.",
+      "genericHint": "Generic materials use one cost. Switching a material to generic removes its volume pricing tiers.",
+      "base": "Low volume / base price",
+      "medium": "Medium volume",
+      "high": "High volume",
+      "minimum": "Minimum material quantity",
+      "cost": "Unit cost (USD)",
+      "applied": "{{tier}} · {{quantity}} of material · {{cost}} per unit",
+      "appliedDetails": "{{quantity}} of material · {{cost}} per unit"
     }
   },
   "presentation": {

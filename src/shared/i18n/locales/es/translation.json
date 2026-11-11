@@ -328,7 +328,11 @@
     "pallet_consumption_invalid": "Indique forma de consumo y cantidad positiva con máximo dos decimales.",
     "pallet_boxes_required": "La variante debe tener un número válido de cajas por pallet.",
     "network": "No se pudo conectar con el servidor. Revisá tu conexión e intentá de nuevo.",
-    "timeout": "La solicitud tardó demasiado. Intentá de nuevo."
+    "timeout": "La solicitud tardó demasiado. Intentá de nuevo.",
+    "packaging_volume_pricing_pair": "Completa la cantidad mínima y el costo unitario de este tramo, o deja ambos vacíos.",
+    "packaging_volume_pricing_specific": "Los precios por volumen solo aplican a materiales específicos. Borra sus tramos antes de convertirlo en genérico.",
+    "packaging_volume_pricing_order": "El límite de volumen medio debe superar al límite de volumen bajo.",
+    "packaging_volume_pricing_invalid": "Revisa los precios por volumen del material {{code}}: completa cada tramo, ordena sus cantidades mínimas y usa costos unitarios válidos."
   },
   "auth": {
     "adminLogin": {
@@ -1039,6 +1043,33 @@
       "status": "Estado",
       "active": "Activos",
       "inactive": "Inactivos"
+    },
+    "volumePricing": {
+      "title": "Precios por volumen",
+      "hint": "Cada límite incluye esa cantidad. Hasta {{low}} se usa el costo base; más de {{low}} y hasta {{medium}}, el de volumen medio; más de {{medium}}, el de volumen alto, sin límite superior. Puedes editar los límites. Si falta un costo, se usa el anterior disponible. Los rangos se calculan por material según su consumo en cada producto cotizado.",
+      "low": "Volumen bajo",
+      "single": "Costo del material",
+      "baseHint": "Desde 5,000",
+      "maximum": "Límite de cantidad de este rango",
+      "above": "Más de {{quantity}}",
+      "baseCost": "costo base",
+      "mediumCost": "costo medio",
+      "fallback": "Se usó el {{costType}} disponible",
+      "upTo": "Hasta {{quantity}}",
+      "editLimit": "Editar límite",
+      "editLimitFor": "Editar límite de {{tier}}",
+      "from": "Desde {{quantity}}",
+      "editMinimum": "Editar mínimo",
+      "editMinimumFor": "Editar cantidad mínima de {{tier}}",
+      "done": "Listo",
+      "genericHint": "Los materiales genéricos usan un solo costo. Al convertir un material en genérico se eliminan sus tramos por volumen.",
+      "base": "Volumen bajo / precio base",
+      "medium": "Volumen medio",
+      "high": "Volumen alto",
+      "minimum": "Cantidad mínima de material",
+      "cost": "Costo unitario (USD)",
+      "applied": "{{tier}} · {{quantity}} de material · {{cost}} por unidad",
+      "appliedDetails": "{{quantity}} de material · {{cost}} por unidad"
     }
   },
   "presentation": {

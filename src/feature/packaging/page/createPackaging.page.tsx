@@ -22,6 +22,7 @@ export function CreatePackagingPage() {
     const {
         register,
         watch,
+        setValue,
         handleSubmit,
         formState: { errors },
     } = useForm<CreatePackagingInput>({
@@ -56,7 +57,7 @@ export function CreatePackagingPage() {
 
             <Card>
                 <form onSubmit={onSubmit}>
-                    <PackagingForm register={register} errors={errors} packagingRole={watch("packagingRole")} materialType={watch("materialType")} classification={watch("classification")} />
+                    <PackagingForm register={register} watch={watch} setValue={setValue} errors={errors} packagingRole={watch("packagingRole")} materialType={watch("materialType")} classification={watch("classification")} />
                     <Button type="submit" disabled={createPackagingMutation.isPending}>
                         {createPackagingMutation.isPending ? t("common.saving") : t("common.save")}
                     </Button>

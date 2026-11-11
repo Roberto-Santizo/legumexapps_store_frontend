@@ -137,7 +137,17 @@ const unitMaterialQuantitySchema = z.object({
     totalUnits: z.number(),
 })
 
+const packagingVolumePricingSchema = z.object({
+    tier: z.enum(["base", "medium", "high"]),
+    materialQuantity: z.number().positive(),
+    minimumQuantity: z.number().nonnegative(),
+    maximumQuantity: z.number().positive().nullable().optional(),
+    minimumExclusive: z.boolean().optional(),
+    priceTier: z.enum(["base", "medium", "high"]).optional(),
+})
+
 const unitMaterialLineSchema = unitMaterialQuantitySchema.extend({
+    volumePricing: packagingVolumePricingSchema.optional(),
     unitCost: z.number(),
     lineTotal: z.number(),
 })
@@ -154,6 +164,7 @@ const intermediateMaterialQuantitySchema = z.object({
 })
 
 const intermediateMaterialLineSchema = intermediateMaterialQuantitySchema.extend({
+    volumePricing: packagingVolumePricingSchema.optional(),
     unitCost: z.number(),
     lineTotal: z.number(),
 })
@@ -185,6 +196,7 @@ const palletMaterialQuantitySchema = z.object({
 })
 
 const palletMaterialLineSchema = palletMaterialQuantitySchema.extend({
+    volumePricing: packagingVolumePricingSchema.optional(),
     unitCost: z.number(),
     lineTotal: z.number(),
 })

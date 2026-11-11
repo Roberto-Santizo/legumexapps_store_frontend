@@ -3,7 +3,6 @@ import type { FieldErrors, Path, UseFormRegister } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import type { UpdatePackagingInput } from "../schema/packaging.schema"
 import { RegisteredField } from "@/shared/component/registeredField.component"
-import { toOptionalNumber } from "@/shared/form/toOptionalNumber"
 
 type PackagingBaseFieldsProps<T extends UpdatePackagingInput> = {
     register: UseFormRegister<T>
@@ -11,7 +10,7 @@ type PackagingBaseFieldsProps<T extends UpdatePackagingInput> = {
     // Prefix for the input ids, so a quick-create modal can't collide with a form already on the page.
     idPrefix?: string
     requireEnglish?: boolean
-    // Rendered between the name and the cost (the full form's role select; the quick-create modals fix the role).
+    // The full form offers the role; quick-create modals fix it.
     roleField?: ReactNode
     // Rendered first (the full form's classification, which decides whether a code is asked).
     leadingField?: ReactNode
@@ -19,7 +18,7 @@ type PackagingBaseFieldsProps<T extends UpdatePackagingInput> = {
     systemCode?: ReactNode
 }
 
-// Code, name and unit cost: the fields every packaging needs, shared by PackagingForm and the quick-create modal.
+// Identification fields shared by PackagingForm and the quick-create modal.
 export function PackagingBaseFields<T extends UpdatePackagingInput>({ register, errors, idPrefix = "", roleField, leadingField, systemCode, requireEnglish = true }: Readonly<PackagingBaseFieldsProps<T>>) {
     const { t } = useTranslation()
     const fieldProps = { register, errors, required: true }
@@ -33,14 +32,6 @@ export function PackagingBaseFields<T extends UpdatePackagingInput>({ register, 
                 <RegisteredField register={register} errors={errors} required={requireEnglish} name={"displayNameEn" as Path<T>} id={`${idPrefix}displayNameEn`} label={t("packaging.form.displayNameEn")} inputProps={{ required: requireEnglish, maxLength: 80 }} />
             </div>
             {roleField}
-            <RegisteredField
-                {...fieldProps}
-                name={"unitCost" as Path<T>}
-                id={`${idPrefix}unitCost`}
-                label={t("packaging.form.unitCost")}
-                inputProps={{ type: "number", step: "any" }}
-                registerOptions={{ setValueAs: toOptionalNumber }}
-            />
         </>
     )
 }

@@ -1,6 +1,7 @@
 import { showErrorToast } from "@/shared/i18n/showErrorToast"
 import { PackagingConsumptionFields } from "./packagingConsumptionFields.component"
 import { PackagingBaseFields } from "./packagingBaseFields.component"
+import { PackagingVolumePricingFields } from "./packagingVolumePricingFields.component"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -39,6 +40,7 @@ export function CreatePackagingMaterialModal({ role, initialDisplayName, onCreat
     const {
         register,
         watch,
+        setValue,
         handleSubmit,
         formState: { errors },
     } = useForm<CreatePackagingInput>({
@@ -68,6 +70,7 @@ export function CreatePackagingMaterialModal({ role, initialDisplayName, onCreat
                 <input type="hidden" {...register("classification")} />
 
                 <PackagingBaseFields register={register} errors={errors} idPrefix={`${role}Material-`} />
+                <PackagingVolumePricingFields register={register} watch={watch} setValue={setValue} errors={errors} idPrefix={`${role}Material-`} />
 
                 {role === "pallet" && <PackagingConsumptionFields register={register} errors={errors} materialType={watch("materialType")} />}
                 <div className="flex gap-3">

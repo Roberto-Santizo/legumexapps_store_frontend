@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { baseCatalogSchema } from "@/shared/schema/baseCatalog.schema"
+import { packagingUnitCostSchema, packagingVolumePricingFields, validatePackagingVolumePricing } from "./packagingVolumePricing.schema"
 
 const packagingRoleEnum = z.enum(["unit", "intermediate", "pallet"])
 
@@ -13,7 +14,8 @@ const packagingFields = z.object({
     // Chosen for pallet materials (OTRO = consumption set per SKU); unit and intermediate ones get theirs from the level.
     materialType: z.enum(["CAJA", "TARIMA", "ESQUINERO", "STRETCH", "OTRO"]).optional(),
 
-    unitCost: z.number().nonnegative().max(999999.9999).multipleOf(0.000000000001),
+    unitCost: packagingUnitCostSchema,
+    ...packagingVolumePricingFields,
     defaultQuantityBasis: z.enum(["per_box", "per_pallet"]).nullable().optional(),
     defaultQuantityValue: z.number().positive().max(99999999.99).refine(value => Math.abs(value * 100 - Math.round(value * 100)) < 0.000001).nullable().optional(),
 })
@@ -26,13 +28,18 @@ function validateDefaults(value: { packagingRole: string; defaultQuantityBasis?:
     }
 }
 
-export const createPackagingSchema = packagingFields.extend({ displayNameEn: z.string().trim().min(1).max(80) }).superRefine(validateDefaults)
+const validatePackaging = (value: Parameters<typeof validateDefaults>[0] & Parameters<typeof validatePackagingVolumePricing>[0], ctx: z.RefinementCtx) => {
+    validateDefaults(value, ctx)
+    validatePackagingVolumePricing(value, ctx)
+}
+
+export const createPackagingSchema = packagingFields.extend({ displayNameEn: z.string().trim().min(1).max(80) }).superRefine(validatePackaging)
 export const updatePackagingSchema = packagingFields.partial().extend({
     classification: packagingFields.shape.classification.optional(),
     isActive: z.boolean().optional(),
     packagingRole: packagingFields.shape.packagingRole,
     unitCost: packagingFields.shape.unitCost,
-}).superRefine(validateDefaults)
+}).superRefine(validatePackaging)
 
 export const responsePackagingSchema = baseCatalogSchema.extend({
     code: z.string(),
@@ -41,6 +48,7 @@ export const responsePackagingSchema = baseCatalogSchema.extend({
     packagingRole: packagingRoleEnum,
     classification: z.enum(["specific", "generic"]),
     unitCost: z.coerce.number().nullable(),
+    ...packagingVolumePricingFields,
     defaultQuantityBasis: z.enum(["per_box", "per_pallet"]).nullable().optional(),
     defaultQuantityValue: z.coerce.number().nullable().optional(),
     materialType: z.enum(["INDIVIDUAL", "INTERMEDIO", "CAJA", "TARIMA", "ESQUINERO", "STRETCH", "OTRO"]),

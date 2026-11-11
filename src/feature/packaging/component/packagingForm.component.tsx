@@ -1,6 +1,7 @@
 import { PackagingConsumptionFields } from "./packagingConsumptionFields.component"
 import { PackagingBaseFields } from "./packagingBaseFields.component"
-import type { FieldError, FieldErrors, Path, UseFormRegister } from "react-hook-form"
+import { PackagingVolumePricingFields } from "./packagingVolumePricingFields.component"
+import type { FieldError, FieldErrors, Path, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import type { UpdatePackagingInput } from "@/feature/packaging/schema/packaging.schema"
 import { getFieldErrorMessage } from "@/shared/i18n/getFieldErrorMessage"
@@ -9,6 +10,8 @@ import { Select } from "@/shared/component/select.component"
 
 type PackagingFormProps<T extends UpdatePackagingInput> = {
     register: UseFormRegister<T>
+    watch: UseFormWatch<T>
+    setValue: UseFormSetValue<T>
     materialType?: string
     packagingRole?: string
     classification?: string
@@ -18,7 +21,7 @@ type PackagingFormProps<T extends UpdatePackagingInput> = {
     errors: FieldErrors<T>
 }
 
-export function PackagingForm<T extends UpdatePackagingInput>({ register, errors, packagingRole, materialType, classification = "specific", currentCode, editing }: Readonly<PackagingFormProps<T>>) {
+export function PackagingForm<T extends UpdatePackagingInput>({ register, watch, setValue, errors, packagingRole, materialType, classification = "specific", currentCode, editing }: Readonly<PackagingFormProps<T>>) {
     const { t } = useTranslation()
 
     const classificationField = (
@@ -61,6 +64,7 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, errors
     return (
         <div>
             <PackagingBaseFields register={register} errors={errors} requireEnglish={!editing} leadingField={classificationField} systemCode={systemCode} roleField={roleField} />
+            <PackagingVolumePricingFields register={register} watch={watch} setValue={setValue} errors={errors} classification={classification === "generic" ? "generic" : "specific"} />
             {editing && <label className="mb-4 flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" {...register("isActive" as Path<T>)} />{t("packaging.form.isActive")}</label>}
             {packagingRole === "pallet" && <PackagingConsumptionFields register={register} errors={errors} materialType={materialType} preserveExisting={editing} />}
         </div>

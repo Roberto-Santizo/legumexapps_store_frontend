@@ -7,10 +7,13 @@ import type { QuoteDocumentLine, QuoteLine } from "@/feature/quote/schema/quote.
 import type { QuoteProfitLine } from "@/feature/quote/schema/quoteOrderReview.schema"
 import { hasQuoteAmounts, linePrice } from "@/feature/quote/util/quoteAmounts"
 import { Card } from "@/shared/component/card.component"
+import { Chip } from "@/shared/component/chip.component"
 import { Spinner } from "@/shared/component/spinner.component"
 import { formatCurrency, formatUnitAmount } from "@/shared/format/currency"
 
 type QuoteLineProfit = Pick<QuoteProfitLine, "netPounds" | "profitPerPound" | "profitTotal" | "finalPrice">
+
+const volumeTierTones = { base: "fresh", medium: "frozen", high: "neutral" } as const
 
 type QuoteResultCardProps = {
     // Con montos (admin) o sin ellos (representante: precio pendiente de la revisión gerencial).
@@ -37,14 +40,16 @@ function materialLineLabel(line: { code?: string; displayName: string; displayNa
 function CostRow({
     label,
     quantityLabel,
+    pricingLabel,
     lineTotal,
     format,
-}: Readonly<{ label: string; quantityLabel?: string; lineTotal: number; format: (value: number) => string }>) {
+}: Readonly<{ label: string; quantityLabel?: string; pricingLabel?: ReactNode; lineTotal: number; format: (value: number) => string }>) {
     return (
         <div className="flex items-start justify-between gap-3 py-1.5 text-sm">
             <div>
                 <p className="text-ink-900">{label}</p>
                 {quantityLabel && <p className="text-xs text-ink-600">{quantityLabel}</p>}
+                {pricingLabel && <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-600">{pricingLabel}</div>}
             </div>
             <p className="shrink-0 font-medium text-ink-900">{format(lineTotal)}</p>
         </div>
@@ -88,6 +93,15 @@ function QuoteCostBreakdown({
     const { t, i18n } = useTranslation()
     const format = formatCurrency
     const { breakdown } = result
+    const materialPricingLabel = (line: Pick<QuoteLine["breakdown"]["palletMaterials"][number], "unitCost" | "volumePricing">) => line.volumePricing
+        ? <>
+            <Chip tone={volumeTierTones[line.volumePricing.tier]}>{t(`packaging.volumePricing.${line.volumePricing.tier === "base" ? "low" : line.volumePricing.tier}`)}</Chip>
+            <span>{t("packaging.volumePricing.appliedDetails", {
+                quantity: line.volumePricing.materialQuantity.toLocaleString(i18n.language, { maximumFractionDigits: 2 }),
+                cost: line.unitCost.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 12 }),
+            })}</span>
+            {line.volumePricing.priceTier && line.volumePricing.priceTier !== line.volumePricing.tier && <span>{t("packaging.volumePricing.fallback", { costType: t(`packaging.volumePricing.${line.volumePricing.priceTier === "base" ? "baseCost" : "mediumCost"}`) })}</span>}
+        </> : undefined
 
     return (
         <div className="space-y-4">
@@ -148,6 +162,7 @@ function QuoteCostBreakdown({
                         <CostRow
                             key={line.packagingId}
                             label={materialLineLabel(line, i18n.language)}
+                            pricingLabel={materialPricingLabel(line)}
                             quantityLabel={t("site.quoteRequest.result.materialQuantity", {
                                 count: packagingQuantity(line)?.toLocaleString(i18n.language, { maximumFractionDigits: 6 }) ?? "—",
                             })}
@@ -169,6 +184,7 @@ function QuoteCostBreakdown({
                         <CostRow
                             key={line.packagingId}
                             label={materialLineLabel(line, i18n.language)}
+                            pricingLabel={materialPricingLabel(line)}
                             quantityLabel={t("site.quoteRequest.result.intermediatePackagesQuantity", {
                                 count: line.packagesNeeded.toLocaleString("es-MX"),
                             })}
@@ -203,6 +219,7 @@ function QuoteCostBreakdown({
                         <CostRow
                             key={line.packagingId}
                             label={materialLineLabel(line, i18n.language)}
+                            pricingLabel={materialPricingLabel(line)}
                             quantityLabel={t("site.quoteRequest.result.materialQuantity", { count: packagingQuantity(line)?.toLocaleString(i18n.language, { maximumFractionDigits: 6 }) ?? "—" })}
                             lineTotal={line.lineTotal}
                             format={format}

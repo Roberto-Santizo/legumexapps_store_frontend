@@ -4,6 +4,7 @@ import { Select } from "@/shared/component/select.component"
 import { useTranslation } from "react-i18next"
 import { getPackagingsPaginatedAPI } from "@/feature/packaging/api/packaging.api"
 import type { PackagingResponse } from "@/feature/packaging/schema/packaging.schema"
+import { getPackagingVolumeLimits } from "../schema/packagingVolumePricing.schema"
 import { PaginatedAdminTable } from "@/shared/component/paginatedAdminTable.component"
 import { EditLink } from "@/shared/component/editLink.component"
 import { formatCurrency } from "@/shared/format/currency"
@@ -58,7 +59,19 @@ export function PackagingTable() {
                 {
                     key: "unitCost",
                     header: t("packaging.form.unitCost"),
-                    render: (packaging) => (packaging.unitCost != null ? formatCurrency(Number(packaging.unitCost)) : "-"),
+                    render: (packaging) => <div className="space-y-1">
+                        <span>{packaging.unitCost != null ? formatCurrency(Number(packaging.unitCost)) : "-"}</span>
+                        {packaging.classification === "specific" && <p className="text-xs text-ink-600">
+                            {t("packaging.volumePricing.low")}: {t("packaging.volumePricing.upTo", { quantity: getPackagingVolumeLimits(packaging).low.toLocaleString(i18n.language) })}
+                        </p>}
+                        {packaging.classification === "specific" && (["medium", "high"] as const).map(tier => {
+                            const maximum = getPackagingVolumeLimits(packaging).medium
+                            const cost = packaging[`${tier}VolumeUnitCost`]
+                            return cost != null ? <p key={tier} className="text-xs text-ink-600">
+                                {t(`packaging.volumePricing.${tier}`)}: {t(tier === "medium" ? "packaging.volumePricing.upTo" : "packaging.volumePricing.above", { quantity: maximum.toLocaleString(i18n.language) })} · {cost.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 12 })}
+                            </p> : null
+                        })}
+                    </div>,
                 },
                 {
                     key: "updatedAt",

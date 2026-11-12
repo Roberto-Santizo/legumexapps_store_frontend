@@ -138,12 +138,13 @@ const unitMaterialQuantitySchema = z.object({
 })
 
 const packagingVolumePricingSchema = z.object({
-    tier: z.enum(["base", "medium", "high"]),
+    tier: z.enum(["base", "medium", "high", "fourth"]),
     materialQuantity: z.number().positive(),
     minimumQuantity: z.number().nonnegative(),
     maximumQuantity: z.number().positive().nullable().optional(),
+    referenceMaximumQuantity: z.number().positive().optional(),
     minimumExclusive: z.boolean().optional(),
-    priceTier: z.enum(["base", "medium", "high"]).optional(),
+    priceTier: z.enum(["base", "medium", "high", "fourth"]).optional(),
 })
 
 const unitMaterialLineSchema = unitMaterialQuantitySchema.extend({

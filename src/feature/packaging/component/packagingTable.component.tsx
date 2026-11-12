@@ -64,11 +64,15 @@ export function PackagingTable() {
                         {packaging.classification === "specific" && <p className="text-xs text-ink-600">
                             {t("packaging.volumePricing.low")}: {t("packaging.volumePricing.upTo", { quantity: getPackagingVolumeLimits(packaging).low.toLocaleString(i18n.language) })}
                         </p>}
-                        {packaging.classification === "specific" && (["medium", "high"] as const).map(tier => {
-                            const maximum = getPackagingVolumeLimits(packaging).medium
+                        {packaging.classification === "specific" && (["medium", "high", "fourth"] as const).map(tier => {
+                            const limits = getPackagingVolumeLimits(packaging)
+                            if (tier === "fourth" && limits.high == null) return null
+                            const minimum = tier === "medium" ? limits.low : tier === "high" ? limits.medium : limits.high
+                            const maximum = limits[tier]
                             const cost = packaging[`${tier}VolumeUnitCost`]
                             return cost != null ? <p key={tier} className="text-xs text-ink-600">
-                                {t(`packaging.volumePricing.${tier}`)}: {t(tier === "medium" ? "packaging.volumePricing.upTo" : "packaging.volumePricing.above", { quantity: maximum.toLocaleString(i18n.language) })} · {cost.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 12 })}
+                                {t(`packaging.volumePricing.${tier}`)}: {t(maximum == null ? "packaging.volumePricing.above" : "packaging.volumePricing.range", { quantity: minimum?.toLocaleString(i18n.language), minimum: minimum?.toLocaleString(i18n.language), maximum: maximum?.toLocaleString(i18n.language) })} · {cost.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 12 })}
+                                {tier === "fourth" && <> · {t("packaging.volumePricing.lastTierHint", { quantity: maximum?.toLocaleString(i18n.language) })}</>}
                             </p> : null
                         })}
                     </div>,

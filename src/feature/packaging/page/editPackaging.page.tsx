@@ -35,6 +35,9 @@ function toFormValues(packaging: PackagingResponse): Partial<UpdatePackagingInpu
         mediumVolumeMaximumQuantity: limits.medium,
         mediumVolumeUnitCost: packaging.mediumVolumeUnitCost ?? null,
         highVolumeUnitCost: packaging.highVolumeUnitCost ?? null,
+        highVolumeMaximumQuantity: limits.high,
+        fourthVolumeMaximumQuantity: limits.fourth,
+        fourthVolumeUnitCost: packaging.fourthVolumeUnitCost ?? null,
     }
 }
 
@@ -91,6 +94,9 @@ export function EditPackagingPage() {
             mediumVolumeUnitCost: null,
             highVolumeMinimumQuantity: null,
             highVolumeUnitCost: null,
+            highVolumeMaximumQuantity: null,
+            fourthVolumeMaximumQuantity: null,
+            fourthVolumeUnitCost: null,
         } : formData)
     })
 

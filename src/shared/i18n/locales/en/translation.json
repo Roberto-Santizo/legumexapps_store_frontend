@@ -331,8 +331,8 @@
     "timeout": "The request timed out. Please try again.",
     "packaging_volume_pricing_pair": "Complete both the minimum quantity and unit cost for this volume tier, or leave both empty.",
     "packaging_volume_pricing_specific": "Volume pricing applies only to specific packaging materials. Clear its tiers before making it generic.",
-    "packaging_volume_pricing_order": "The medium-volume limit must be greater than the low-volume limit.",
-    "packaging_volume_pricing_invalid": "Check the volume pricing for material {{code}}: complete each tier, order its minimum quantities, and use valid unit costs."
+    "packaging_volume_pricing_order": "Each limit must exceed the previous tier’s limit.",
+    "packaging_volume_pricing_invalid": "Check the quantity limits and costs for material {{code}}."
   },
   "auth": {
     "adminLogin": {
@@ -1045,14 +1045,14 @@
       "inactive": "Inactive"
     },
     "volumePricing": {
-      "title": "Volume pricing",
-      "low": "Low volume",
+      "title": "Costs by quantity",
+      "low": "Tier 1",
       "single": "Material cost",
       "baseHint": "From 5,000",
       "maximum": "Quantity limit for this range",
       "above": "Over {{quantity}}",
-      "baseCost": "base cost",
-      "mediumCost": "medium cost",
+      "baseCost": "Tier 1 cost",
+      "mediumCost": "Tier 2 cost",
       "fallback": "Used the available {{costType}}",
       "upTo": "Up to {{quantity}}",
       "editLimit": "Edit limit",
@@ -1061,15 +1061,22 @@
       "editMinimum": "Edit minimum",
       "editMinimumFor": "Edit minimum quantity for {{tier}}",
       "done": "Done",
-      "hint": "Each limit includes that quantity. Up to {{low}} uses the base cost; over {{low}} and up to {{medium}} uses the medium-volume cost; over {{medium}} uses the high-volume cost, with no upper limit. You can edit the limits. A missing cost uses the previous available price. Ranges use each material's consumption in each quoted product.",
+      "hint": "Each limit is included. A missing cost uses the previous available price based on each material’s consumption.",
       "genericHint": "Generic materials use one cost. Switching a material to generic removes its volume pricing tiers.",
-      "base": "Low volume / base price",
-      "medium": "Medium volume",
-      "high": "High volume",
+      "base": "Tier 1",
+      "medium": "Tier 2",
+      "high": "Tier 3",
       "minimum": "Minimum material quantity",
       "cost": "Unit cost (USD)",
       "applied": "{{tier}} · {{quantity}} of material · {{cost}} per unit",
-      "appliedDetails": "{{quantity}} of material · {{cost}} per unit"
+      "appliedDetails": "{{quantity}} of material · {{cost}} per unit",
+      "fourth": "Tier 4",
+      "highCost": "Tier 3 cost",
+      "fourthCost": "Tier 4 cost",
+      "range": "Over {{minimum}} to {{maximum}}",
+      "unbounded": "No limit",
+      "lastTierHint": "Over {{quantity}}: this tier still applies.",
+      "configurePrevious": "Set the Tier 3 limit"
     }
   },
   "presentation": {

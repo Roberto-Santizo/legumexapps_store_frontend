@@ -64,7 +64,7 @@ export function PackagingForm<T extends UpdatePackagingInput>({ register, watch,
     return (
         <div>
             <PackagingBaseFields register={register} errors={errors} requireEnglish={!editing} leadingField={classificationField} systemCode={systemCode} roleField={roleField} />
-            <PackagingVolumePricingFields register={register} watch={watch} setValue={setValue} errors={errors} classification={classification === "generic" ? "generic" : "specific"} />
+            <PackagingVolumePricingFields register={register} watch={watch} setValue={setValue} errors={errors} classification={classification === "generic" ? "generic" : "specific"} preserveExisting={editing} />
             {editing && <label className="mb-4 flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" {...register("isActive" as Path<T>)} />{t("packaging.form.isActive")}</label>}
             {packagingRole === "pallet" && <PackagingConsumptionFields register={register} errors={errors} materialType={materialType} preserveExisting={editing} />}
         </div>

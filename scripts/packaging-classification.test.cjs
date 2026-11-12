@@ -97,26 +97,26 @@ for (const language of ["es", "en"]) {
     })
 }
 for (const language of ["es", "en"]) {
-    test(`volume costs share one section with two inclusive upper limits (${language})`, () => {
+    test(`volume costs share one section with four inclusive upper limits (${language})`, () => {
         const h = harness(language)
         const { PackagingVolumePricingFields } = h.load("src/feature/packaging/component/packagingVolumePricingFields.component.tsx")
         const props = { register: name => ({ name }), watch: () => undefined, setValue: () => {}, errors: {}, classification: "specific", idPrefix: "quick-" }
         const tree = PackagingVolumePricingFields(props)
         const fields = nodes(tree).filter(node => node.type === "RegisteredField")
-        assert.deepEqual(fields.map(field => field.props.name), ["unitCost", "mediumVolumeUnitCost", "highVolumeUnitCost"])
+        assert.deepEqual(fields.map(field => field.props.name), ["unitCost", "mediumVolumeUnitCost", "highVolumeUnitCost", "fourthVolumeUnitCost"])
         assert.equal(fields[0].props.required, true)
         assert.equal(fields[0].props.id, "quick-unitCost")
         assert.equal(fields[1].props.registerOptions.setValueAs("0"), 0)
         assert.equal(fields[1].props.registerOptions.setValueAs(""), null)
         const limits = nodes(tree).filter(node => typeof node.type === "function" && node.type.name === "PackagingVolumeLimit")
-        assert.deepEqual(limits.map(node => [node.props.tier, node.props.suggestedMaximum]), [["low", 5000], ["medium", 25000]])
+        assert.deepEqual(limits.map(node => [node.props.tier, node.props.suggestedMaximum]), [["low", 5000], ["medium", 10000], ["high", 15000], ["fourth", 20000]])
         const generic = PackagingVolumePricingFields({ ...props, classification: "generic" })
         assert.deepEqual(nodes(generic).filter(node => node.type === "RegisteredField").map(node => node.props.name), ["unitCost"])
         assert.ok(JSON.stringify(generic).includes(resources[language].packaging.volumePricing.genericHint))
     })
 }
 
-for (const [tier, suggested] of [["low", 5000], ["medium", 25000]]) {
+for (const [tier, suggested] of [["low", 5000], ["medium", 10000], ["high", 15000], ["fourth", 20000]]) {
     test(`${tier} upper limit is editable independently of optional costs and survives closing`, () => {
         const h = harness()
         const { PackagingVolumePricingFields } = h.load("src/feature/packaging/component/packagingVolumePricingFields.component.tsx")
@@ -149,7 +149,7 @@ for (const language of ["es", "en"]) {
     test(`volume help uses edited limits and explains their order (${language})`, () => {
         const h = harness(language)
         const { PackagingVolumePricingFields } = h.load("src/feature/packaging/component/packagingVolumePricingFields.component.tsx")
-        const values = { lowVolumeMaximumQuantity: 6000, mediumVolumeMaximumQuantity: 30000 }
+        const values = { lowVolumeMaximumQuantity: 6000, mediumVolumeMaximumQuantity: 30000, highVolumeMaximumQuantity: 40000, fourthVolumeMaximumQuantity: 50000 }
         const props = { register: name => ({ name }), watch: name => values[name], setValue() {}, errors: {} }
         const tree = PackagingVolumePricingFields(props)
         const content = JSON.stringify(tree)
@@ -226,7 +226,7 @@ test("editing loads existing tiers, preserves zero and explicitly clears tiers w
     assert.equal(resetValues.mediumVolumeUnitCost,0)
     assert.equal(resetValues.highVolumeUnitCost,0.08)
     await nodes(tree).find(node => node.type === "form").props.onSubmit()
-    assert.deepEqual(JSON.parse(JSON.stringify(sent)),{id:1,value:{...values,lowVolumeMaximumQuantity:null,mediumVolumeMaximumQuantity:null,mediumVolumeMinimumQuantity:null,mediumVolumeUnitCost:null,highVolumeMinimumQuantity:null,highVolumeUnitCost:null}})
+    assert.deepEqual(JSON.parse(JSON.stringify(sent)),{id:1,value:{...values,lowVolumeMaximumQuantity:null,mediumVolumeMaximumQuantity:null,mediumVolumeMinimumQuantity:null,mediumVolumeUnitCost:null,highVolumeMinimumQuantity:null,highVolumeUnitCost:null,highVolumeMaximumQuantity:null,fourthVolumeMaximumQuantity:null,fourthVolumeUnitCost:null}})
 })
 
 test("administrative snapshots retain volume pricing while representative schemas and historical lines remain compatible", () => {
@@ -236,7 +236,7 @@ test("administrative snapshots retain volume pricing while representative schema
     const intermediate = { packagingId: 2, displayName: "Intermediate", optionGroup: null, unitCost: 0, lineTotal: 0, unitsPerPackage: 5, totalUnits: 25000, packagesNeeded: 5000,
         volumePricing: { tier: "base", priceTier: "base", materialQuantity: 5000, minimumQuantity: 0, maximumQuantity: 5000, minimumExclusive: true } }
     const pallet = { packagingId: 3, displayName: "Box label", optionGroup: null, unitCost: 0.1, lineTotal: 2500.1, quantityPerPallet: 2500.1, requestedPallets: 10,
-        volumePricing: { tier: "high", priceTier: "medium", materialQuantity: 25001, minimumQuantity: 25000, maximumQuantity: null, minimumExclusive: true } }
+        volumePricing: { tier: "fourth", priceTier: "high", materialQuantity: 25001, minimumQuantity: 15000, maximumQuantity: null, minimumExclusive: true, referenceMaximumQuantity: 20000 } }
     const line = {destinationId:null,productDisplayName:"Product",variantLabel:"SKU",requestedPallets:10,totalUnits:25000,
         rawMaterialCost:0,unitPackagingCost:2500,intermediatePackagingCost:0,palletMaterialCost:0,transportCost:0,totalCost:2500,
         breakdown:{rawMaterials:[],unitMaterials:[unit],intermediateMaterials:[intermediate],palletMaterials:[pallet],transport:{destinationId:null,displayName:"",baseCost:0}}}
@@ -253,7 +253,7 @@ test("administrative snapshots retain volume pricing while representative schema
     assert.equal(JSON.stringify(line), before)
 })
 
-for (const language of ["es", "en"]) test(`administrative breakdown explains price fallback and stays absent from representative views (${language})`, () => {
+for (const language of ["es", "en"]) for (const [tier, priceTier] of [["high", "medium"], ["fourth", "high"]]) test(`administrative ${tier} breakdown explains price fallback and stays absent from representative views (${language})`, () => {
     const h = harness(language)
     const { quoteLineSchema, representativeQuoteLineSchema } = h.load("src/feature/quote/schema/quote.schema.ts")
     const { QuoteResultCard } = h.load("src/feature/quote/component/quoteResultCard.component.tsx")
@@ -262,18 +262,18 @@ for (const language of ["es", "en"]) test(`administrative breakdown explains pri
         rawMaterialCost: 0, unitPackagingCost: 9876, intermediatePackagingCost: 0, palletMaterialCost: 0, transportCost: 0, totalCost: 9876,
         breakdown: { rawMaterials: [], palletMaterials: [], transport: { destinationId: null, displayName: "", baseCost: 0 },
             unitMaterials: [{ packagingId: 1, displayName: "Etiqueta", displayNameEn: "Label", optionGroup: null, quantityPerUnit: 1, totalUnits: 80000, unitCost: 0.123456789012, lineTotal: 9876,
-                volumePricing: { tier: "high", priceTier: "medium", materialQuantity: 80000, minimumQuantity: 25000, maximumQuantity: null, minimumExclusive: true } }] } }
+                volumePricing: { tier, priceTier, referenceMaximumQuantity: 20000, materialQuantity: 80000, minimumQuantity: 25000, maximumQuantity: null, minimumExclusive: true } }] } }
     const markup = render(quoteLineSchema.parse(line))
-    assert.ok(markup.includes(resources[language].packaging.volumePricing.high))
+    assert.ok(markup.includes(resources[language].packaging.volumePricing[tier]))
     assert.ok(markup.includes("$0.123456789012"))
-    assert.ok(markup.includes(resources[language].packaging.volumePricing.fallback.replace("{{costType}}", resources[language].packaging.volumePricing.mediumCost)))
+    assert.ok(markup.includes(resources[language].packaging.volumePricing.fallback.replace("{{costType}}", resources[language].packaging.volumePricing[priceTier + "Cost"])))
     const representative = render(representativeQuoteLineSchema.parse(line))
     assert.ok(representative.includes(resources[language].quote.pendingReview.title))
     assert.doesNotMatch(representative, /\$|0\.123456789012/)
-    assert.ok(!representative.includes(resources[language].packaging.volumePricing.high))
+    assert.ok(!representative.includes(resources[language].packaging.volumePricing[tier]))
     delete line.breakdown.unitMaterials[0].volumePricing
     const historical = render(quoteLineSchema.parse(line))
-    assert.ok(!historical.includes(resources[language].packaging.volumePricing.high))
+    assert.ok(!historical.includes(resources[language].packaging.volumePricing[tier]))
 })
 
 test("effective catalog limits prefer current values over legacy references and ignore the old high minimum", () => {
@@ -403,4 +403,34 @@ test("individual label quantities respect the persisted precision", () => {
     const input = { productVariantId: 1, packagingId: 2, optionGroupId: null, isDefault: false }
     for (const quantityPerUnit of [1, 2, 3, 1.25]) assert.equal(createProductVariantUnitMaterialSchema.safeParse({ ...input, quantityPerUnit }).success, true)
     for (const quantityPerUnit of [0, -1, 1.001, 100000000]) assert.equal(createProductVariantUnitMaterialSchema.safeParse({ ...input, quantityPerUnit }).success, false)
+})
+
+test("fourth tier validates ordered limits, zero costs and numeric response values", () => {
+    const { createPackagingSchema, updatePackagingSchema, responsePackagingSchema } = harness().load("src/feature/packaging/schema/packaging.schema.ts")
+    const base = { code: "FOUR", displayName: "Bag", displayNameEn: "Bag", classification: "specific", packagingRole: "unit", unitCost: 3,
+        lowVolumeMaximumQuantity: 5000, mediumVolumeMaximumQuantity: 10000, highVolumeMaximumQuantity: 15000, fourthVolumeMaximumQuantity: 20000, fourthVolumeUnitCost: 0 }
+    for (const schema of [createPackagingSchema, updatePackagingSchema]) {
+        assert.equal(schema.parse(base).fourthVolumeUnitCost, 0)
+        for (const invalid of [{ highVolumeMaximumQuantity: 10000 }, { fourthVolumeMaximumQuantity: 15000 }, { highVolumeMaximumQuantity: null }, { fourthVolumeUnitCost: -1 }]) {
+            assert.equal(schema.safeParse({ ...base, ...invalid }).success, false)
+        }
+        assert.equal(schema.safeParse({ ...base, classification: "generic" }).success, false)
+    }
+    const response = { ...base, id: 1, materialType: "INDIVIDUAL", isActive: true, createdAt: "2026-11-12", updatedAt: "2026-11-12" }
+    assert.equal(responsePackagingSchema.parse(response).fourthVolumeUnitCost, 0)
+    assert.equal(responsePackagingSchema.safeParse({ ...response, fourthVolumeUnitCost: "0" }).success, false)
+})
+
+for (const language of ["es", "en"]) test("legacy edit keeps its open-ended third tier until an explicit limit is set (" + language + ")", () => {
+    const h = harness(language)
+    const { PackagingVolumePricingFields } = h.load("src/feature/packaging/component/packagingVolumePricingFields.component.tsx")
+    const props = { register: name => ({ name }), watch: () => null, setValue() {}, errors: {}, preserveExisting: true }
+    const tree = PackagingVolumePricingFields(props)
+    const third = nodes(tree).find(node => node.props?.tier === "high")
+    assert.equal(third.props.suggestedMaximum, null)
+    const fourth = nodes(tree).find(node => node.type === "fieldset" && node.props.disabled)
+    assert.ok(fourth)
+    assert.ok(JSON.stringify(fourth).includes(resources[language].packaging.volumePricing.configurePrevious))
+    const editor = quantityEditor(h, h.render(() => third.type(third.props)))
+    assert.ok(JSON.stringify(editor).includes(resources[language].packaging.volumePricing.unbounded))
 })

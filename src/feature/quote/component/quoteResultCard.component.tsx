@@ -13,7 +13,7 @@ import { formatCurrency, formatUnitAmount } from "@/shared/format/currency"
 
 type QuoteLineProfit = Pick<QuoteProfitLine, "netPounds" | "profitPerPound" | "profitTotal" | "finalPrice">
 
-const volumeTierTones = { base: "fresh", medium: "frozen", high: "neutral" } as const
+const volumeTierTones = { base: "fresh", medium: "frozen", high: "neutral", fourth: "neutral" } as const
 
 type QuoteResultCardProps = {
     // Con montos (admin) o sin ellos (representante: precio pendiente de la revisión gerencial).
@@ -100,7 +100,7 @@ function QuoteCostBreakdown({
                 quantity: line.volumePricing.materialQuantity.toLocaleString(i18n.language, { maximumFractionDigits: 2 }),
                 cost: line.unitCost.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 12 }),
             })}</span>
-            {line.volumePricing.priceTier && line.volumePricing.priceTier !== line.volumePricing.tier && <span>{t("packaging.volumePricing.fallback", { costType: t(`packaging.volumePricing.${line.volumePricing.priceTier === "base" ? "baseCost" : "mediumCost"}`) })}</span>}
+            {line.volumePricing.priceTier && line.volumePricing.priceTier !== line.volumePricing.tier && <span>{t("packaging.volumePricing.fallback", { costType: t(`packaging.volumePricing.${line.volumePricing.priceTier}Cost`) })}</span>}
         </> : undefined
 
     return (

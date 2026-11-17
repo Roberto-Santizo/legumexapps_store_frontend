@@ -1,11 +1,10 @@
 import type { ReactNode, SubmitEventHandler } from "react"
 import { LogIn, ShieldAlert } from "lucide-react"
 import { Button } from "@/shared/component/button.component"
-import { useTranslation } from "react-i18next"
+import { LegumexLogoStacked } from "@/shared/component/legumexLogoStacked.component"
 
 type AuthCardProps = {
     headerExtra?: ReactNode
-    brandTitle: string
     brandSubtitle: string
     title: string
     subtitle: string
@@ -21,7 +20,6 @@ type AuthCardProps = {
 
 export function AuthCard({
     headerExtra,
-    brandTitle,
     brandSubtitle,
     title,
     subtitle,
@@ -34,33 +32,27 @@ export function AuthCard({
     insideFooter,
     outsideFooter,
 }: Readonly<AuthCardProps>) {
-    const { t } = useTranslation()
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas p-4">
+        <div className="auth-theme relative flex min-h-screen items-center justify-center overflow-hidden bg-[#e7eee2] p-4">
             <div
                 aria-hidden
-                className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-brand-300/20 blur-3xl"
+                className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-brand-300/40 blur-3xl"
             />
             <div
                 aria-hidden
-                className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-brand-500/20 blur-3xl"
+                className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-brand-500/25 blur-3xl"
             />
 
             <div className="relative w-full max-w-sm">
-                <div className="overflow-hidden rounded-panel border border-line/60 bg-surface shadow-panel">
-                    <div className="relative bg-linear-to-br from-brand-900 to-brand-700 px-6 py-10 text-center">
+                <div className="overflow-hidden rounded-panel border border-brand-300/50 bg-[#f4f6ef] shadow-[0_24px_80px_-32px_rgba(4,78,39,0.3)]">
+                    <div className="relative bg-linear-to-br from-brand-900 via-[#07562e] to-brand-700 px-6 py-7 text-center sm:py-8">
                         <div className="absolute inset-x-0 top-0 h-1 bg-brand-500" />
                         {headerExtra && <div className="absolute right-4 top-4">{headerExtra}</div>}
-                        <img
-                            src={import.meta.env.VITE_IMAGE_LOGO}
-                            alt={t("common.logoAlt")}
-                            className="mx-auto h-20 w-28 object-contain"
-                        />
-                        <p className="font-display text-2xl font-bold tracking-tight text-white">{brandTitle}</p>
-                        <p className="mt-1 text-sm font-medium text-white/70">{brandSubtitle}</p>
+                        <LegumexLogoStacked size="login" className="mx-auto mb-4" />
+                        <p className="text-sm font-semibold text-white/75">{brandSubtitle}</p>
                     </div>
 
-                    <form className="px-6 py-9" onSubmit={onSubmit} autoComplete="on" noValidate>
+                    <form className="bg-[#f4f6ef] px-6 py-9" onSubmit={onSubmit} autoComplete="on" noValidate>
                         <div className="mb-6">
                             <h1 className="text-xl font-semibold text-ink-900">{title}</h1>
                             <p className="text-sm text-ink-600">{subtitle}</p>

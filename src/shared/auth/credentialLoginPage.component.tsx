@@ -20,7 +20,7 @@ const ACCOUNT_LOCKED_STATUS = 423
 type LoginRequest = FieldValues & { password: string }
 
 type CredentialLoginPageProps<TRequest extends LoginRequest, TSession> = {
-    /** Translation namespace with brand/title/labels/placeholders/submit keys (e.g. "auth.adminLogin"). */
+    /** Translation namespace with title/labels/placeholders/submit keys (e.g. "auth.adminLogin"). */
     i18nPrefix: string
     schema: z.ZodType<TRequest, TRequest>
     defaultValues: DefaultValues<TRequest>
@@ -97,7 +97,6 @@ export function CredentialLoginPage<TRequest extends LoginRequest, TSession>({
     return (
         <AuthCard
             headerExtra={headerExtra}
-            brandTitle={t(key("brand"))}
             brandSubtitle={t(key("brandSubtitle"))}
             title={t(key("title"))}
             subtitle={t(key("subtitle"))}

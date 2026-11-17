@@ -55,10 +55,117 @@ function frontend() {
     return { api, calls, load }
 }
 const productApi = "src/feature/product/api/initialProductImport.api.ts"
+const laborApi = "src/feature/rawMaterialTransformation/api/laborImport.api.ts"
 const file = () => new File(["xlsx"], "products.xlsx", { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
 const row = { row: 2, skuCode: "NEW", packagingCode: "MP", materialName: "Box", materialType: "CAJA", level: "pallet", group: null, isDefault: false, quantityBasis: "per_box", consumptionRule: "1 por caja", quantityPerPallet: 198, ruleSource: "legacy", quantity: 1, unitCost: 2, action: "new", previous: null, issues: [], warnings: [] }
 const summary = { products: 1, variants: 1, unit: 0, intermediate: 0, pallet: 1, errors: 0, warnings: 0 }
 const product = { row: 2, productGroup: "G", skuCode: "NEW", displayName: "Product", presentationId: 1, presentation: "Bag", boxesPerPallet: 198, bagsPerBox: 6, unitsPerIntermediatePackage: null }
+
+const laborPreview = { previewHash: "a".repeat(64), summary: { selected: 1, templates: 1, positions: 2, includedPositions: 2, errors: 0 }, issues: [], templates: [{ code: "MOD-LINE", displayName: "Real line", lineCode: "LINE", positions: 2, includedPositions: 2, monthlyCostGtq: 2400, hourlyCostGtq: 13.808219178082 }] }
+
+test("HR workbook download and review preserve file/hash transport and backend-calculated GTQ costs", async () => {
+    const { api, calls, load } = frontend()
+    api.response = new Blob(["xlsx"])
+    await load(laborApi).downloadLaborImportTemplateAPI()
+    assert.equal(calls[0].url, "/labor-templates/bulk-import/template")
+    assert.equal(calls[0].options.responseType, "blob")
+    api.response = { data: laborPreview }
+    const result = await load(laborApi).previewLaborImportAPI(file())
+    assert.equal(result.templates[0].hourlyCostGtq, 13.808219178082)
+    assert.equal(calls[1].url, "/labor-templates/bulk-import/preview")
+    assert.deepEqual([...calls[1].body.keys()], ["file"])
+    api.response = { message: "Imported", data: { created: 1, positions: 2 } }
+    await load(laborApi).confirmLaborImportAPI(file(), laborPreview.previewHash)
+    assert.equal(calls[2].url, "/labor-templates/bulk-import/confirm")
+    assert.equal(calls[2].body.get("previewHash"), laborPreview.previewHash)
+    assert.deepEqual([...calls[2].body.keys()], ["file", "previewHash"])
+})
+
+test("HR import exposes backend sheet, row and field errors without discarding their context", async () => {
+    const { api, load } = frontend()
+    const details = [{ sheet: "Sueldos", row: 17, field: "Salario mensual (GTQ)", message: "Required salary" }]
+    api.post = async () => { throw { isAxiosError: true, response: { data: { message: "No data saved", details } } } }
+    await assert.rejects(load(laborApi).confirmLaborImportAPI(file(), laborPreview.previewHash), error => error.rowErrors === details)
+})
+
+test("changing the HR file clears its reviewed preview; invalid and busy files cannot confirm", () => {
+    const h = componentRenderer()
+    let stateIndex = 0
+    let mutationIndex = 0
+    const states = []
+    const options = []
+    const requests = []
+    const invalidated = []
+    const mutations = Array.from({ length: 3 }, (_, index) => ({ isPending: false, error: null, reset() { this.error = null }, mutate(value) { requests.push({ index, value }) } }))
+    const { LaborImportPanel } = h.load("src/feature/rawMaterialTransformation/component/laborImportPanel.component.tsx", {
+        react: { useState: initial => { const index = stateIndex++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value }] }, useRef: () => ({ current: { value: "previous" } }) },
+        "@tanstack/react-query": { useQueryClient: () => ({ invalidateQueries: query => invalidated.push(query.queryKey) }), useMutation: configuration => { const index = mutationIndex++; options[index] = configuration; return mutations[index] } },
+        "react-i18next": { useTranslation: () => ({ t: key => key }) },
+        "lucide-react": { Download: "svg", FileCheck: "svg", Upload: "svg" },
+        sonner: { toast: { success() {} } },
+        "@/feature/rawMaterialTransformation/api/laborImport.api": { downloadLaborImportTemplateAPI() {}, previewLaborImportAPI() {}, confirmLaborImportAPI() {} },
+        "@/feature/rawMaterialTransformation/util/laborTemplateForm": { formatGtq: value => `Q${value.toFixed(4)}` },
+        "@/shared/api/bulkImport.api": { BulkImportApiError: class extends Error {} },
+        "@/shared/component/bulkImportPanel.component": { CollapsibleImportCard: "import-card" },
+        "@/shared/component/importInstructions.component": { ImportInstructions: "instructions" },
+        "@/shared/component/importFilePicker.component": { ImportFilePicker: "file-picker" },
+        "@/shared/component/button.component": { Button: "button" },
+        "@/shared/component/table.component": { Table: "table", TableBody: "tbody", TableContainer: "table-container", TableHead: "thead", TableRow: "tr", Td: "td", Th: "th" },
+        "@/shared/utils/downloadBlob": { downloadBlob() {} },
+        "@/shared/utils/importFile": { isValidImportFile: value => value.name.endsWith(".xlsx") && value.size > 0 && value.size <= 5 * 1024 * 1024 },
+        "@/shared/i18n/showErrorToast": { showErrorToast() {} },
+    })
+    const render = () => { stateIndex = 0; mutationIndex = 0; return h.render(LaborImportPanel) }
+    const button = (view, key) => view.nodes.find(node => node.type === "button" && [].concat(node.props.children).includes(key))
+    const picker = view => view.nodes.find(node => node.type === "file-picker")
+    const valid = file()
+    picker(render()).props.onFileSelect(valid)
+    button(render(), "laborImport.validate").props.onClick()
+    assert.deepEqual(requests, [{ index: 1, value: valid }])
+    options[1].onSuccess(laborPreview)
+    assert.equal(button(render(), "laborImport.confirm").props.disabled, false)
+    for (const patch of [{ summary: { ...laborPreview.summary, errors: 1 } }, { summary: { ...laborPreview.summary, templates: 0 } }, { issues: [{ sheet: "Sueldos", row: 2, field: "salary", message: "Invalid" }] }]) {
+        options[1].onSuccess({ ...laborPreview, ...patch })
+        assert.equal(button(render(), "laborImport.confirm").props.disabled, true)
+    }
+    options[1].onSuccess(laborPreview)
+    const ready = render()
+    button(ready, "laborImport.confirm").props.onClick()
+    assert.deepEqual(requests[1], { index: 2, value: { file: valid, hash: laborPreview.previewHash } })
+    mutations[2].isPending = true
+    assert.equal(picker(render()).props.disabled, true)
+    mutations[2].isPending = false
+    picker(render()).props.onFileSelect(new File(["x"], "different.xlsx"))
+    assert.ok(!render().nodes.some(node => node.type === "button" && [].concat(node.props.children).includes("laborImport.confirm")))
+    picker(render()).props.onFileSelect(new File(["x"], "wrong.xls"))
+    assert.equal(picker(render()).props.file, null)
+    assert.ok(render().html.includes("laborImport.fileError"))
+    options[2].onSuccess({ message: "Imported" })
+    assert.deepEqual(invalidated, [["laborTemplates"], ["laborLines"]])
+})
+
+test("the labor list offers the HR importer only to users allowed to create labor templates", () => {
+    const h = componentRenderer()
+    let permissions = []
+    const { LaborTemplatesPage } = h.load("src/feature/rawMaterialTransformation/page/laborTemplates.page.tsx", {
+        "react-router-dom": { Link: "a" }, "react-i18next": { useTranslation: () => ({ t: key => key }) },
+        "@/feature/rawMaterialTransformation/api/laborTemplate.api": { getLaborTemplatesAPI() {} },
+        "@/feature/rawMaterialTransformation/util/laborTemplateForm": { formatGtq: value => value },
+        "@/feature/rawMaterialTransformation/component/laborImportPanel.component": { LaborImportPanel: "labor-import" },
+        "@/shared/component/pageContainer.component": { PageContainer: "main" },
+        "@/shared/component/paginatedAdminTable.component": { PaginatedAdminTable: "admin-table" },
+        "@/shared/auth/usePermission": { usePermission: () => ({ hasPermission: permission => permissions.includes(permission) }) },
+        "@/shared/utils/buttonClassName": { buttonClassName: () => "" },
+    })
+    for (const allowed of [[], ["laborTemplates:view"], ["laborTemplates:create"]]) {
+        permissions = allowed
+        assert.equal(h.render(LaborTemplatesPage).nodes.filter(node => node.type === "labor-import").length, allowed.includes("laborTemplates:create") ? 1 : 0)
+    }
+    for (const lang of ["es", "en"]) {
+        const messages = JSON.parse(fs.readFileSync(`src/shared/i18n/locales/${lang}/translation.json`, "utf8")).laborImport
+        for (const key of ["download", "validate", "confirm", "fileError", "confirmHelp"]) assert.ok(messages[key])
+    }
+})
 
 test("validación del archivo conserva extensión, tamaño y límite", () => {
     const { load } = frontend(); const { isValidImportFile } = load("src/shared/utils/importFile.ts")

@@ -114,7 +114,7 @@ test("customer form collapses after selection or completing a prospect name and 
     assert.ok(!render().some(node => node.type === "Select" || node.type === "Field"))
     // The collapsed summary shows who the order is for; only prospects get the "new customer" badge.
     assert.ok(render().some(node => node.props?.children === "Walmart"))
-    assert.ok(!render().some(node => node.props?.children === "quote.clientSelection.prospectBadge"))
+    assert.ok(!render().some(node => node.props?.children === "quote.clientSelection.newClientBadge"))
     render().find(node => node.type === "button").props.onClick()
     assert.ok(render().some(node => node.type === "Select"))
     render().find(node => node.type === "Select").props.onChange({ value: 0, label: "New" })
@@ -123,7 +123,7 @@ test("customer form collapses after selection or completing a prospect name and 
     input.props.onChange({ target: { value: "Prospect" } })
     input.props.onBlur({ target: { value: "Prospect" } })
     assert.ok(!render().some(node => node.type === "Input" || node.type === "Select"))
-    assert.ok(render().some(node => node.props?.children === "quote.clientSelection.prospectBadge"))
+    assert.ok(render().some(node => node.props?.children === "quote.clientSelection.newClientBadge"))
     render().find(node => node.type === "button").props.onClick()
     let prevented = false
     render().find(node => node.type === "Input").props.onKeyDown({ key: "Enter", currentTarget: { value: "Prospect" }, preventDefault: () => { prevented = true } })

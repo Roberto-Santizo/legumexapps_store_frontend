@@ -14,7 +14,7 @@ import { isValidClientEmail } from "../util/clientEmail"
 type Props = { name: string; clientId: number | null; email: string; selected: boolean; hasLines: boolean; onSelect: (clientId: number | null, name: string, email: string) => void; onChange: (name: string) => void; onEmailChange: (email: string) => void; onReset: () => void }
 
 // Correo opcional del cliente al elegirlo: se ofrece solo si falta (cliente sin correo registrado o
-// prospecto) y se oculta en cuanto se escribe uno válido; el último paso del pedido lo muestra y permite
+// cliente nuevo) y se oculta en cuanto se escribe uno válido; el último paso del pedido lo muestra y permite
 // cambiarlo para ese pedido. Si el cliente registrado no tenía correo, este queda en su ficha.
 function QuoteOrderClientEmail({ email, isRegistered, onChange }: Readonly<{ email: string; isRegistered: boolean; onChange: (email: string) => void }>) {
     const { t } = useTranslation()
@@ -42,7 +42,7 @@ export function QuoteOrderClient({ name, clientId, email, selected, hasLines, on
                 <div className="min-w-0">
                     <p className="text-xs font-medium uppercase tracking-wide text-ink-600">{t("quote.clientSelection.currentClient")}</p>
                     <p className="break-words text-lg font-semibold text-ink-900">{name}</p>
-                    {clientId === null && <span className="mt-1 inline-flex rounded-badge border border-line bg-surface px-2 py-0.5 text-xs font-medium text-ink-600">{t("quote.clientSelection.prospectBadge")}</span>}
+                    {clientId === null && <span className="mt-1 inline-flex rounded-badge border border-line bg-surface px-2 py-0.5 text-xs font-medium text-ink-600">{t("quote.clientSelection.newClientBadge")}</span>}
                 </div>
             </div>
             <button type="button" onClick={() => setEditing(true)} className={buttonClassName("secondary", "w-full shrink-0 sm:w-auto")}>

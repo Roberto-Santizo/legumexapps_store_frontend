@@ -32,6 +32,19 @@ const all = tree => !tree || typeof tree !== "object" ? [] : [tree, ...[].concat
 const t = (key, options) => options ? `${key}${JSON.stringify(options)}` : key
 const i18n = { "react-i18next": { useTranslation: () => ({ t }) } }
 
+test("site contact navigation opens the existing contact page and closes the mobile menu", () => {
+    const { SiteNavigation } = loader(i18n)("src/shared/layout/SiteNavigation.tsx")
+    let closed = 0
+    const nodes = all(SiteNavigation({ orientation: "vertical", onLinkClick: () => closed++ }))
+    const contact = nodes.find(node => node.type === "a" && node.props.children === "site.nav.contact")
+    assert.equal(contact.props.href, "https://agroindustrialegumex.com/contact-us/")
+    assert.equal(contact.props.target, "_blank")
+    assert.equal(contact.props.rel, "noopener noreferrer")
+    contact.props.onClick()
+    assert.equal(closed, 1)
+    assert.ok(!nodes.some(node => node.type === "button"))
+})
+
 function stateHarness() {
     const slots = []
     let cursor = 0

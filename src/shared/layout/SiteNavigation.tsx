@@ -1,13 +1,10 @@
 import { useTranslation } from "react-i18next"
-import { scrollToHash } from "@/shared/hook/useLenisScroll"
 
-type SiteNavItem =
-    | { url: string; labelKey: string; external: true }
-    | { scrollTarget: string; labelKey: string; external?: false }
+type SiteNavItem = { url: string; labelKey: string }
 
 const SITE_NAV_ITEMS: SiteNavItem[] = [
-    { url: "https://agroindustrialegumex.com/#nosotros", labelKey: "site.nav.about", external: true },
-    { scrollTarget: "#contacto", labelKey: "site.nav.contact" },
+    { url: "https://agroindustrialegumex.com/#nosotros", labelKey: "site.nav.about" },
+    { url: "https://agroindustrialegumex.com/contact-us/", labelKey: "site.nav.contact" },
 ]
 
 type SiteNavigationOrientation = "horizontal" | "vertical"
@@ -31,32 +28,18 @@ export function SiteNavigation({ orientation = "horizontal", tone = "light", onL
 
     return (
         <nav className={orientation === "horizontal" ? "flex items-center gap-8" : "flex flex-col gap-1"}>
-            {SITE_NAV_ITEMS.map((item) =>
-                item.external ? (
-                    <a
-                        key={item.url}
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={onLinkClick}
-                        className={itemClassName}
-                    >
-                        {t(item.labelKey)}
-                    </a>
-                ) : (
-                    <button
-                        key={item.scrollTarget}
-                        type="button"
-                        onClick={() => {
-                            scrollToHash(item.scrollTarget)
-                            onLinkClick?.()
-                        }}
-                        className={itemClassName}
-                    >
-                        {t(item.labelKey)}
-                    </button>
-                )
-            )}
+            {SITE_NAV_ITEMS.map((item) => (
+                <a
+                    key={item.url}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={onLinkClick}
+                    className={itemClassName}
+                >
+                    {t(item.labelKey)}
+                </a>
+            ))}
         </nav>
     )
 }

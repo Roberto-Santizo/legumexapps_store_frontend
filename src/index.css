@@ -20,6 +20,7 @@
     --color-line: #e3e8e4;
     --color-surface: #ffffff;
     --color-canvas: #f6f8f5;
+    --color-landing-cream: #f7f3ea;
     /* Soft Customize surfaces derived from the existing brand palette. */
     --color-customize-mint: color-mix(in srgb, var(--color-brand-300) 18%, var(--color-surface));
     --color-customize-cream: color-mix(in srgb, var(--color-dorado) 10%, var(--color-surface));
@@ -185,6 +186,25 @@
     --shadow-panel: 0 1px 4px rgb(0 0 0 / 0.2);
 }
 
+/* Login cards keep their light palette even when the saved admin theme is dark. */
+.auth-theme {
+    color-scheme: light;
+    --color-surface: #ffffff;
+    --color-ink-900: var(--color-brand-900);
+    --color-ink-600: #365442;
+    --color-line: #709467;
+    --color-focus: var(--color-brand-700);
+    --color-action-primary: var(--color-brand-900);
+    --color-action-primary-hover: var(--color-brand-700);
+    --color-action-primary-text: #ffffff;
+    --color-danger: #c0362c;
+    --color-danger-border: #eac5be;
+    --color-warning-fg: #80570a;
+    --color-warning-bg: #fff6e3;
+    --color-warning-border: #ead4a3;
+    color: var(--color-ink-900);
+}
+
 body {
     background-color: var(--color-canvas);
     color: var(--color-ink-900);
@@ -237,118 +257,6 @@ body {
     }
 }
 
-/* Public home only: cream and sage surfaces, independent of the admin theme. */
-@theme {
-    --color-landing-cream: #f7f3ea;
-    --color-landing-sage: color-mix(in srgb, var(--color-brand-300) 35%, var(--color-landing-cream));
-}
-
-.landing-theme {
-    color-scheme: light;
-    --color-canvas: var(--color-landing-cream);
-    --color-surface: var(--color-landing-cream);
-    --color-ink-900: var(--color-brand-900);
-    --color-ink-600: #536258;
-    --color-ink-400: #78847b;
-    --color-line: #ded9ce;
-    --color-focus: var(--color-brand-700);
-    --color-action-primary: var(--color-brand-900);
-    --color-action-primary-hover: var(--color-brand-700);
-    --color-action-primary-text: var(--color-landing-cream);
-    --color-danger: #c0362c;
-    --color-success: var(--color-brand-700);
-    overflow-x: clip;
-}
-
-.landing-theme .landing-hero {
-    min-height: max(48rem, 95svh);
-    padding-top: calc(8rem + env(safe-area-inset-top));
-    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
-}
-
-.landing-headline {
-    font-size: clamp(2.25rem, 4.1vw, 4.25rem);
-    line-height: 1.08;
-    text-shadow: none;
-}
-.landing-hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    align-items: center;
-    gap: clamp(2rem, 5vw, 5rem);
-}
-.landing-hero-copy {
-    min-width: 0;
-}
-.landing-fresh-shape {
-    position: absolute;
-    right: -8rem;
-    top: 15%;
-    width: 45%;
-    height: 75%;
-    border-radius: 45% 55% 65% 35%;
-    background: color-mix(in srgb, var(--color-brand-300) 20%, transparent);
-    transform: rotate(-12deg);
-}
-.landing-hero-curve {
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 3.5rem;
-    color: var(--color-landing-sage);
-    pointer-events: none;
-}
-
-.landing-theme .landing-cta-primary {
-    height: 3.25rem;
-    padding-inline: 2rem;
-    border-color: transparent;
-    background: var(--color-brand-900);
-    color: var(--color-landing-cream);
-}
-
-.landing-theme .landing-cta-primary:hover {
-    background: var(--color-brand-700);
-}
-
-.landing-theme .landing-cta-secondary {
-    height: 3.25rem;
-    padding-inline: 2rem;
-    border-color: var(--color-brand-900);
-    background: transparent;
-    color: var(--color-brand-900);
-}
-
-.landing-theme .landing-cta-secondary:hover {
-    background: color-mix(in srgb, var(--color-brand-300) 20%, var(--color-landing-cream));
-    color: var(--color-brand-900);
-}
-
-.landing-theme .landing-cta-primary:focus-visible,
-.landing-theme .landing-cta-secondary:focus-visible {
-    --tw-ring-color: var(--color-brand-700);
-    --tw-ring-offset-color: var(--color-landing-cream);
-}
-
-.landing-theme .site-header {
-    padding-top: env(safe-area-inset-top);
-}
-
-.landing-theme .site-header > div:first-child {
-    gap: 1rem;
-    padding-left: max(1.5rem, env(safe-area-inset-left));
-    padding-right: max(1.5rem, env(safe-area-inset-right));
-}
-
-.landing-theme .landing-header-glass {
-    border-bottom-color: transparent;
-    background: color-mix(in srgb, var(--color-landing-cream) 94%, transparent);
-    backdrop-filter: blur(12px);
-}
-.landing-theme .landing-header-logo {
-    flex-shrink: 0;
-}
 /* Drawn Legumex logo: tone classes set the palette, transitions animate every color change. */
 .legumex-logo {
     --logo-peak: var(--color-brand-900);
@@ -369,27 +277,20 @@ body {
 .legumex-logo--sm .legumex-logo-eyebrow { display: none; }
 .legumex-logo--lg { font-size: 1.15rem; }
 .legumex-logo--light {
-    --logo-peak: var(--color-landing-cream);
-    --logo-peak-back: var(--color-landing-cream);
+    --logo-peak: #f7f3ea;
+    --logo-peak-back: #f7f3ea;
     --logo-field: var(--color-brand-300);
     --logo-leaf: var(--color-brand-500);
-    --logo-name: var(--color-landing-cream);
+    --logo-name: #f7f3ea;
     --logo-eyebrow: var(--color-brand-300);
 }
-/* Dark admin/site pages; the landing page stays light, so it restores the brand palette. */
+/* Keep the brand logo legible in the dark application theme. */
 :where(.dark, [data-theme="dark"]) .legumex-logo--brand {
     --logo-peak: var(--color-brand-300);
     --logo-peak-back: var(--color-brand-300);
     --logo-field: var(--color-brand-500);
     --logo-name: var(--color-ink-900);
     --logo-eyebrow: var(--color-brand-300);
-}
-.landing-theme .legumex-logo--brand {
-    --logo-peak: var(--color-brand-900);
-    --logo-peak-back: var(--color-brand-900);
-    --logo-field: var(--color-brand-700);
-    --logo-name: var(--color-brand-900);
-    --logo-eyebrow: var(--color-brand-700);
 }
 .legumex-logo-mark {
     width: 3.6em;
@@ -475,6 +376,56 @@ a:hover > .legumex-logo .legumex-logo-leaf,
     --stacked-rule: #6f9c78;
     --stacked-tagline: #b9d3bf;
 }
+.legumex-stacked-logo--header .legumex-stacked-logo-mark { width: 70%; }
+.legumex-stacked-logo--header {
+    width: clamp(12rem, 18vw, 15rem);
+}
+.legumex-stacked-logo--login {
+    --stacked-peak: #f7f3ea;
+    --stacked-field: var(--color-brand-300);
+    --stacked-leaf: #8bc53f;
+    --stacked-line: #6f9c78;
+    --stacked-name: #f7f3ea;
+    --stacked-eyebrow: #d7e5d2;
+    --stacked-rule: #8fc79a;
+    --stacked-tagline: #f7f3ea;
+    width: clamp(10.5rem, 52vw, 13rem);
+}
+.legumex-stacked-logo--login .legumex-stacked-logo-mark { width: 72%; }
+.legumex-stacked-logo--login .legumex-stacked-logo-eyebrow {
+    margin-top: 0.3rem;
+    font-size: 0.58rem;
+}
+.legumex-stacked-logo--login .legumex-stacked-logo-name {
+    margin-top: 0.12rem;
+    font-size: 1.85rem;
+}
+.legumex-stacked-logo--login .legumex-stacked-logo-divider { margin-top: 0.22rem; }
+.legumex-stacked-logo--login .legumex-stacked-logo-divider svg { width: 0.58rem; height: 0.58rem; }
+.legumex-stacked-logo--login .legumex-stacked-logo-tagline {
+    margin-top: 0.16rem;
+    font-size: 0.58rem;
+}
+.legumex-stacked-logo--header .legumex-stacked-logo-eyebrow {
+    margin-top: 0.25rem;
+    font-size: clamp(0.6rem, 0.7vw, 0.66rem);
+    letter-spacing: 0.28em;
+}
+.legumex-stacked-logo--header .legumex-stacked-logo-name {
+    margin-top: 0.1rem;
+    font-size: clamp(1.8rem, 2.2vw, 1.95rem);
+    letter-spacing: 0.045em;
+}
+.legumex-stacked-logo--header .legumex-stacked-logo-divider {
+    gap: 0.3rem;
+    margin-top: 0.22rem;
+}
+.legumex-stacked-logo--header .legumex-stacked-logo-divider svg { width: 0.62rem; height: 0.62rem; }
+.legumex-stacked-logo--header .legumex-stacked-logo-tagline {
+    margin-top: 0.16rem;
+    font-size: clamp(0.6rem, 0.7vw, 0.66rem);
+    letter-spacing: 0;
+}
 .legumex-stacked-logo-mark {
     width: 80%;
     height: auto;
@@ -547,167 +498,6 @@ a:hover > .legumex-stacked-logo .legumex-stacked-logo-leaf,
     .legumex-stacked-logo:hover path,
     a:hover > .legumex-stacked-logo path { transform: none; }
 }
-.landing-theme .landing-header-glass > div:first-child button,
-.landing-theme .landing-header-glass > div:first-child a[aria-label] {
-    color: var(--color-brand-900);
-}
-.landing-theme .landing-header-glass button[aria-haspopup="menu"] {
-    border-color: var(--color-line);
-    background: var(--color-landing-cream);
-    color: var(--color-brand-900);
-}
-
-.landing-theme .landing-header-glass nav a,
-.landing-theme .landing-header-glass nav button {
-    color: var(--color-brand-900);
-}
-
-.landing-theme .site-header a[href="/solicitud"]:not([aria-label]) {
-    min-height: 2.75rem;
-    background: var(--color-brand-900);
-    border-color: transparent;
-    color: var(--color-landing-cream);
-    font-weight: 600;
-}
-
-.landing-theme .site-header a[href="/solicitud"]:not([aria-label]):hover {
-    background: var(--color-brand-700);
-}
-
-.landing-theme .site-header button:focus-visible,
-.landing-theme .site-header a:focus-visible {
-    outline: 2px solid var(--color-brand-500);
-    outline-offset: 4px;
-}
-
-.landing-theme .site-header button[aria-haspopup="menu"] {
-    backdrop-filter: blur(8px);
-}
-
-.landing-theme .site-header button[aria-label] {
-    min-height: 2.75rem;
-    min-width: 2.75rem;
-}
-
-.landing-theme .site-header nav a,
-.landing-theme .site-header nav button {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-}
-
-.landing-theme footer {
-    background: var(--color-brand-900);
-}
-
-.landing-theme footer .text-brand-500,
-.landing-theme footer a:hover {
-    color: var(--color-brand-500);
-}
-
-@media (min-width: 640px) {
-    .landing-theme .site-header > div:first-child {
-        padding-left: max(2.5rem, env(safe-area-inset-left));
-        padding-right: max(2.5rem, env(safe-area-inset-right));
-    }
-}
-
-@media (max-width: 639px) {
-    .landing-header-logo .legumex-logo {
-        font-size: 0.78rem;
-    }
-    .landing-theme .site-header a[href="/solicitud"]:not([aria-label]) {
-        padding-inline: 0.75rem;
-        font-size: 0.6875rem;
-    }
-}
-
-@media (max-width: 1023px) {
-    .landing-theme .landing-hero {
-        min-height: auto;
-        padding-top: calc(8rem + env(safe-area-inset-top));
-        padding-bottom: calc(7rem + env(safe-area-inset-bottom));
-    }
-    .landing-hero-grid {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 2.5rem;
-    }
-    .landing-hero-copy {
-        max-width: 38rem;
-    }
-    .landing-headline {
-        font-size: clamp(2.1rem, 6.5vw, 3.8rem);
-    }
-    .landing-fresh-shape {
-        top: 50%;
-        width: 90%;
-        height: 45%;
-    }
-}
-@media (max-width: 639px) {
-    .landing-hero-copy .landing-cta-primary,
-    .landing-hero-copy .landing-cta-secondary {
-        width: 100%;
-    }
-}
-
-/* Continuous cream/sage story from the hero through the public home sections. */
-.landing-about-shape {
-    position: absolute;
-    left: -8rem;
-    top: 5rem;
-    width: 35rem;
-    height: 30rem;
-    border-radius: 60% 40% 45% 55%;
-    transform: rotate(-12deg);
-    background: color-mix(in srgb, var(--color-brand-300) 18%, transparent);
-    pointer-events: none;
-}
-.landing-stat-card:hover {
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-brand-900) 8%, transparent);
-}
-.landing-theme footer form,
-.landing-theme footer input {
-    min-width: 0;
-}
-.landing-theme footer form button {
-    background: var(--color-brand-500);
-    color: var(--color-brand-900);
-    --tw-ring-color: var(--color-brand-300);
-    --tw-ring-offset-color: var(--color-brand-900);
-}
-.landing-theme footer form button:hover {
-    background: var(--color-brand-300);
-}
-.landing-theme footer a:focus-visible {
-    outline: 2px solid var(--color-brand-300);
-    outline-offset: 4px;
-}
-/* Editorial product photography: contained overlaps, transform-only Motion transitions. */
-.landing-product-showcase { position: relative; min-width: 0; height: clamp(27rem, 44vw, 38rem); isolation: isolate; }
-.landing-showcase-stage { position: absolute; inset: 0; overflow: clip; }
-.landing-showcase-image {
-    position: absolute; left: 15%; top: 12%; width: 70%; height: 76%; object-fit: cover;
-    border-radius: 32% 12% 30% 10% / 22% 12% 26% 10%;
-    box-shadow: 0 8px 20px color-mix(in srgb, var(--color-brand-900) 8%, transparent);
-    background: var(--color-brand-300);
-}
-.landing-showcase-image-frozen { border-radius: 12% 30% 10% 26%; }
-.landing-showcase-image-hpp { border-radius: 28% 10% 26% 12%; }
-.landing-showcase-image-healthySnacks { border-radius: 12% 26% 10% 30%; }
-.landing-showcase-orbit {
-    position: absolute; inset: 6% 4% 8%; border: 1px solid color-mix(in srgb, var(--color-brand-500) 22%, transparent);
-    border-radius: 42% 58% 38% 62%; transform: rotate(15deg);
-}
-.landing-showcase-leaf { position: absolute; bottom: 5%; left: 10%; color: var(--color-brand-700); transform: rotate(-20deg); }
-.landing-showcase-pause {
-    position: absolute; right: 5%; bottom: 2%; display: grid; place-items: center; width: 44px; height: 44px;
-    background: color-mix(in srgb, var(--color-brand-300) 20%, var(--color-landing-cream));
-}
-@media (max-width: 1023px) {
-    .landing-product-showcase { width: min(100%, 38rem); justify-self: center; height: clamp(21rem, 65vw, 30rem); }
-}
-
 @keyframes catalog-enter {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { useState } from "react"
+import { Link } from "react-router-dom"
 import { Menu } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { buttonClassName } from "@/shared/utils/buttonClassName"
@@ -10,55 +10,23 @@ import { SiteMobileMenu } from "@/shared/layout/SiteMobileMenu"
 import { LegumexLogo } from "@/shared/component/legumexLogo.component"
 
 
-const CONDENSE_THRESHOLD = 72
-
 export function SiteHeader() {
     const { t } = useTranslation()
-    const { pathname } = useLocation()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const [isScrolled, setIsScrolled] = useState(false)
-
-    const isHome = pathname === "/"
-    const isTransparent = isHome && !isScrolled
-
-    useEffect(() => {
-        if (!isHome) {
-            setIsScrolled(true)
-            return
-        }
-
-        function handleScroll() {
-            const hero = document.querySelector(".landing-hero")
-            setIsScrolled(hero ? hero.getBoundingClientRect().bottom <= CONDENSE_THRESHOLD : window.scrollY > CONDENSE_THRESHOLD)
-        }
-
-        handleScroll()
-        window.addEventListener("scroll", handleScroll, { passive: true })
-        return () => window.removeEventListener("scroll", handleScroll)
-    }, [isHome])
 
     return (
-        <header
-            style={isHome ? { marginBottom: isTransparent ? "-5rem" : "-4rem" } : undefined}
-            className={`site-header sticky top-0 z-40 transition-colors duration-300 ${isTransparent ? "landing-header-glass" : ""} ${
-                isTransparent ? "border-b border-transparent bg-transparent" : "border-b border-line bg-surface shadow-panel"
-            }`}
-        >
-            <SiteContainer
-                className={`flex items-center justify-between gap-6 transition-[height] duration-300 ${
-                    isTransparent ? "h-20" : "h-16"
-                }`}
-            >
-                <Link to="/" aria-label="Legumex" className="landing-header-logo">
-                    <LegumexLogo size={isTransparent ? "lg" : "md"} />
+        <header className="site-header sticky top-0 z-40 border-b border-line bg-surface shadow-panel">
+            <SiteContainer className="flex h-16 items-center justify-between gap-6">
+                <Link to="/" aria-label="Legumex">
+                    <LegumexLogo size="md" />
                 </Link>
 
                 <div className="hidden lg:block">
-                    <SiteNavigation tone={isTransparent ? "dark" : "light"} />
+                    <SiteNavigation tone="light" />
                 </div>
 
                 <div className="hidden lg:block">
-                    <SiteHeaderActions tone={isTransparent ? "dark" : "light"} />
+                    <SiteHeaderActions tone="light" />
                 </div>
 
                 <div className="flex items-center gap-3 lg:hidden">
@@ -69,7 +37,7 @@ export function SiteHeader() {
                         type="button"
                         aria-label={t("site.header.openMenu")}
                         onClick={() => setIsMenuOpen(true)}
-                        className={isTransparent ? "text-white" : "text-ink-900"}
+                        className="text-ink-900"
                     >
                         <Menu size={22} />
                     </button>

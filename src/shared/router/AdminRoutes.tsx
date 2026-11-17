@@ -52,6 +52,10 @@ const EditRawMaterialPage = lazyWithRetry(() =>
 const RawMaterialTransformationListPage = lazyWithRetry(() =>
     import("@/feature/rawMaterialTransformation/page/rawMaterialTransformationList.page").then((module) => ({ default: module.RawMaterialTransformationListPage }))
 )
+const LaborTemplatesPage = lazyWithRetry(() => import("@/feature/rawMaterialTransformation/page/laborTemplates.page").then(module => ({ default: module.LaborTemplatesPage })))
+const EditLaborTemplatePage = lazyWithRetry(() => import("@/feature/rawMaterialTransformation/page/editLaborTemplate.page").then(module => ({ default: module.EditLaborTemplatePage })))
+const LaborTemplateDetailPage = lazyWithRetry(() => import("@/feature/rawMaterialTransformation/page/laborTemplateDetail.page").then(module => ({ default: module.LaborTemplateDetailPage })))
+const LaborLinesPage = lazyWithRetry(() => import("@/feature/rawMaterialTransformation/page/laborLines.page").then(module => ({ default: module.LaborLinesPage })))
 const CreateRawMaterialTransformationPage = lazyWithRetry(() =>
     import("@/feature/rawMaterialTransformation/page/createRawMaterialTransformation.page").then((module) => ({ default: module.CreateRawMaterialTransformationPage }))
 )
@@ -194,12 +198,6 @@ const EditClientPage = lazyWithRetry(() =>
     import("@/feature/client/page/editClient.page").then((module) => ({ default: module.EditClientPage }))
 )
 
-const LeadListPage = lazyWithRetry(() => import("@/feature/lead/page/lead.page").then((module) => ({ default: module.LeadListPage })))
-const EditLeadPage = lazyWithRetry(() => import("@/feature/lead/page/editLead.page").then((module) => ({ default: module.EditLeadPage })))
-
-const SiteImageListPage = lazyWithRetry(() =>
-    import("@/feature/siteImage/page/siteImage.page").then((module) => ({ default: module.SiteImageListPage }))
-)
 
 const JuiceListPage = lazyWithRetry(() => import("@/feature/juice/page/juice.page").then(module => ({ default: module.JuiceListPage })))
 const JuiceEditorPage = lazyWithRetry(() => import("@/feature/juice/page/juiceEditor.page").then(module => ({ default: module.JuiceEditorPage })))
@@ -234,6 +232,11 @@ const routes = [
     { path: "raw-materials/create", component: CreateRawMaterialPage, permission: "rawMaterials:create" },
     { path: "raw-materials/:rawMaterialId/edit", component: EditRawMaterialPage, permission: "rawMaterials:edit" },
     { path: "raw-material-transformations", component: RawMaterialTransformationListPage, permission: "rawMaterialTransformations:view" },
+    { path: "labor-templates", component: LaborTemplatesPage, permission: "laborTemplates:view" },
+    { path: "labor-templates/lines", component: LaborLinesPage, permission: "laborTemplates:view" },
+    { path: "labor-templates/create", component: EditLaborTemplatePage, permission: "laborTemplates:create" },
+    { path: "labor-templates/:templateId", component: LaborTemplateDetailPage, permission: "laborTemplates:view" },
+    { path: "labor-templates/:templateId/edit", component: EditLaborTemplatePage, permission: "laborTemplates:edit" },
     { path: "raw-material-transformations/create", component: CreateRawMaterialTransformationPage, permission: "rawMaterialTransformations:create" },
     { path: "raw-material-transformations/:transformationId", component: RawMaterialTransformationDetailPage, permission: "rawMaterialTransformations:view" },
     { path: "raw-material-transformations/:transformationId/edit", component: EditRawMaterialTransformationPage, permission: "rawMaterialTransformations:edit" },
@@ -276,10 +279,7 @@ const routes = [
     { path: "clients/create", component: CreateClientPage, permission: "clients:create" },
     { path: "clients/:clientId/edit", component: EditClientPage, permission: "clients:edit" },
 
-    { path: "leads", component: LeadListPage, permission: "leads:view" },
-    { path: "leads/:leadId/edit", component: EditLeadPage, permission: "leads:edit" },
 
-    { path: "site-images", component: SiteImageListPage, permission: "siteContent:edit" },
 
     { path: "users", component: UserListPage, permission: "users:view" },
     { path: "users/create", component: CreateUserPage, permission: "users:create" },

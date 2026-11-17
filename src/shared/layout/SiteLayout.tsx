@@ -10,9 +10,11 @@ export function SiteLayout() {
     const { pathname } = useLocation()
     const isHome = pathname === "/"
 
+    if (isHome) return <Outlet />
+
     return (
-        <div className={`flex min-h-screen flex-col bg-canvas ${isHome ? "landing-theme" : ""}`}>
-            {!isHome && <AnnouncementBar />}
+        <div className="flex min-h-screen flex-col bg-canvas">
+            <AnnouncementBar />
             <SiteHeader />
             <main className="flex-1">
                 <Outlet />
